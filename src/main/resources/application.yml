@@ -1,0 +1,21 @@
+server:
+  port: 8080 # 端口号
+spring:
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  application:
+    name: recruiting_website
+  datasource:
+    # 数据库连接信息
+    url: jdbc:mysql://rm-cn-0gx421iil0001blo.rwlb.cn-chengdu.rds.aliyuncs.com:3306/queryx_recweb_dev?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    # SQL语句等日志信息输出在控制台
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
