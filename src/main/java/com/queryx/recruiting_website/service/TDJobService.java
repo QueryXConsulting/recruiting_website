@@ -6,7 +6,6 @@ import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.vo.JobDetailVo;
 import com.queryx.recruiting_website.vo.JobInsertVo;
-import com.queryx.recruiting_website.vo.UserVo;
 
 
 /**

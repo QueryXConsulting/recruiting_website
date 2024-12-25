@@ -11,7 +11,6 @@ import com.queryx.recruiting_website.service.TDUserService;
 import org.springframework.stereotype.Service;
 
 
-
 /**
  * (TDUser)表服务实现类
  *
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("tDUserService")
 public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> implements TDUserService {
+
 
 }
 

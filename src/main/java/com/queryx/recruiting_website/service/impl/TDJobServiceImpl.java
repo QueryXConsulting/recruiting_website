@@ -6,32 +6,21 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDJob;
-import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDJobService;
 import com.queryx.recruiting_website.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.vo.JobDetailVo;
 import com.queryx.recruiting_website.vo.JobInsertVo;
-import com.queryx.recruiting_website.vo.UserVo;
 import jakarta.annotation.Resource;
-
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
-
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 
 
 /**
