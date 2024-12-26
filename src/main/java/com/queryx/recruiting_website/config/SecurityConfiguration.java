@@ -11,6 +11,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,11 +41,18 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(it->it.disable());
-        httpSecurity.authorizeHttpRequests(it->
-                it.requestMatchers("/admin/login","/admin/addAdmin").permitAll()  //设置登录路径所有人都可以访问
-                        .anyRequest().authenticated()
-        );
+        // TODO 暂时注释方便测试
+//        httpSecurity.csrf(it->it.disable());
+//        httpSecurity.authorizeHttpRequests(it->
+//                it.requestMatchers("/admin/login").permitAll()
+//                        .anyRequest().authenticated()
+//        );
+
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll() // 允许所有请求
+                );
 
         return httpSecurity.build();
     }

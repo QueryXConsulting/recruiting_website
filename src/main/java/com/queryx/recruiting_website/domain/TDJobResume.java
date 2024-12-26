@@ -28,6 +28,11 @@ public class TDJobResume {
     private Long resumeId;
 
     /**
+     * 简历名称
+     */
+    private String resumeName;
+
+    /**
      * 简历类型(0代表线上简历,1代表附件简历)
      */
     private String resumeType;

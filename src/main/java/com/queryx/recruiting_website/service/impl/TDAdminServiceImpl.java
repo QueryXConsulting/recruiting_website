@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
@@ -40,15 +41,24 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     private PasswordEncoder passwordEncoder;
     @Resource
     private AuthenticationManager authenticationManager;
+    @Resource
+    private TDAdminMapper tdAdminMapper;
 
     @Override
     public AdminVo addAdmin(AdminVo adminVo) {
-        // 进行非空判断
         if (!StringUtils.hasText(adminVo.getAdminUsername())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
         if (!StringUtils.hasText(adminVo.getAdminPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
+        }
+
+        LambdaQueryWrapper<TDAdmin> tdAdminLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQuery().eq(TDAdmin::getAdminUsername,adminVo.getAdminUsername())
+                .select(TDAdmin::getAdminUsername);
+        String adminUsername = tdAdminMapper.selectOne(tdAdminLambdaQueryWrapper).getAdminUsername();
+        if (adminUsername.equals(adminVo.getAdminUsername())){
+            throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
         }
 
         String password = passwordEncoder.encode(adminVo.getAdminPassword());

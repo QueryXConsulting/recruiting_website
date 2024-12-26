@@ -16,5 +16,8 @@ import com.queryx.recruiting_website.vo.*;
 public interface TDUserService extends IService<TDUser> {
 
 
+    UserCompanyVo selectUserInfo(Long userId, String userRole);
+
+    UserCompanyVo updateUserInfo(UserCompanyVo userCompanyVo);
 }
 
