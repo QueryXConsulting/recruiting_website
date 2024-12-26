@@ -89,7 +89,7 @@ public class TDResume {
     /**
      * 0代表启用,1代表禁用
      */
-    private String jobResumeStatus;
+    private String resumeStatus;
 
 }
 

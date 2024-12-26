@@ -41,7 +41,7 @@ public class QueryImpl implements QueryService {
         // TODO: 待优化，查询简历信息: 1. 简历状态 2. 简历是否删除
         final List<TDResume> tdResumes = resumeMapper.selectList(new Page<>(1, 10),
                 lqw.eq(TDResume::getResumeId, id)
-                        .eq(TDResume::getJobResumeStatus, 0)
+                        .eq(TDResume::getResumeStatus, 0)
                         .eq(TDResume::getResumeReview, 0));
         // 封装简历返回信息
         tdResumes.forEach(tdResume -> BeanUtils.copyProperties(tdResume, resumeVO));

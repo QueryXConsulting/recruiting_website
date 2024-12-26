@@ -2,6 +2,9 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -12,12 +15,10 @@ import lombok.Data;
  */
 @Data
 public class TDInterview {
-
-
-
     /**
      * 面试表id
      */
+    @TableId(value = "interview_id", type = IdType.AUTO)
     private Long interviewId;
     /**
      * 用户id

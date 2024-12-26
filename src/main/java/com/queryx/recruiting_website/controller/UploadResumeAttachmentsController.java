@@ -5,7 +5,10 @@ import com.queryx.recruiting_website.service.UploadResume;
 import com.queryx.recruiting_website.utils.CommonResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,8 +21,8 @@ public class UploadResumeAttachmentsController {
     @Autowired
     private UploadResume uploadResume;
 
-    @PostMapping("/resume/{id}")
-    public CommonResp<Integer> handleResumeUpload(@PathVariable("id") Long userId, @RequestParam("file") MultipartFile file) {
+    @PostMapping("/resume")
+    public CommonResp<Integer> handleResumeUpload(@RequestParam("id") Long userId, @RequestParam("file") MultipartFile file) {
         Integer message = 0;
         try {
             message = uploadResume.handleUploadResume(userId, file);
