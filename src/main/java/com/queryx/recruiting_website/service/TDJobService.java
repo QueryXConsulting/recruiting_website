@@ -26,5 +26,6 @@ public interface TDJobService extends IService<TDJob> {
     JobDetailVo insertJobInfo(JobInsertVo jobInsertVo, Long companyId);
 
 
+    Object deleteJob(Long jobId);
 }
 

@@ -18,9 +18,9 @@ import com.queryx.recruiting_website.vo.JobInsertVo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.stream.Collectors;
-
 
 
 /**
@@ -41,7 +41,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .select("job_id", "job_position", "job_education", "job_experience", "job_time", "job_nature", "job_review", "job_status");
         Page<TDJob> pageVo = new Page<>(page - 1, size);
         IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVo, wrapper);
-        if (jobPage.getRecords().isEmpty()){
+        if (jobPage.getRecords().isEmpty()) {
             return null;
         }
 
@@ -96,6 +96,15 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         if (tdJobMapper.insert(tdJob) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
+        return null;
+    }
+
+    @Override
+    public Object deleteJob(Long jobId) {
+        if (tdJobMapper.deleteById(jobId)<1) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+
         return null;
     }
 

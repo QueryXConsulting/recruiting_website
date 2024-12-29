@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.domain;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -15,6 +17,7 @@ public class TPRoleMenu {
     /**
      * 关联表id
      */
+    @TableId
     private Long roleMenuId;
     /**
      * 菜单ID

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDAdmin;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.exception.SystemException;
@@ -44,18 +45,24 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         if (!StringUtils.hasText(companyInfoVo.getCompanyInfoPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
         }
-        if (!StringUtils.hasText(companyInfoVo.getCompanyInfoUsername())){
+        if (!StringUtils.hasText(companyInfoVo.getCompanyInfoUsername())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
+        }
+
+        LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TDCompanyInfo::getCompanyInfoUsername, companyInfoVo.getCompanyInfoUsername());
+        if (count(queryWrapper) > 0) {
+            throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
         }
 
         TDCompanyInfo tdCompanyInfo = new TDCompanyInfo();
         BeanUtils.copyProperties(companyInfoVo, tdCompanyInfo);
         tdCompanyInfo.setCompanyInfoPassword(passwordEncoder.encode(tdCompanyInfo.getCompanyInfoPassword()));
         UpdateWrapper<TDCompanyInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("company_info_id", companyInfoVo.getCompanyInfoId())
-                .eq("company_info_status", "0")
-                .eq("company_info_review",Common.REVIEW_SUCCESS.getCode());
-        if (!update(tdCompanyInfo,updateWrapper)) {
+        updateWrapper.eq("company_info_id", companyInfoVo.getCompanyInfoId());
+        tdCompanyInfo.setCompanyInfoStatus("1");
+        tdCompanyInfo.setCompanyInfoReview(Common.REVIEW_WAIT.getCode());
+        if (!update(tdCompanyInfo, updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
         return null;

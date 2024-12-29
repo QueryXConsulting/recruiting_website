@@ -6,10 +6,7 @@ import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.utils.CommonResp;
 
-import com.queryx.recruiting_website.vo.CompanyInfoVo;
-import com.queryx.recruiting_website.vo.JobDetailVo;
-import com.queryx.recruiting_website.vo.JobInsertVo;
-import com.queryx.recruiting_website.vo.UserCompanyVo;
+import com.queryx.recruiting_website.vo.*;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,14 +44,22 @@ public class UserCompanyController {
         return CommonResp.success(tdJobService.insertJobInfo(jobInsertVo, companyId));
     }
 
+    @DeleteMapping("/deleteJob/{jobId}")
+    public CommonResp deleteJob(@PathVariable("jobId") Long jobId) {
+        return CommonResp.success(tdJobService.deleteJob(jobId));
+    }
+
+
     @GetMapping("/selectUserInfo")
     public CommonResp selectUserInfo(Long userId, String userRole) {
         return CommonResp.success(tdUserService.selectUserInfo(userId, userRole));
     }
+
     @PostMapping("/updateUserInfo")
-    public CommonResp updateUserInfo( @RequestBody UserCompanyVo userCompanyVo) {
+    public CommonResp updateUserInfo(@RequestBody UserCompanyVo userCompanyVo) {
         return CommonResp.success(tdUserService.updateUserInfo(userCompanyVo));
     }
+
 
     @GetMapping("/selectCompanyInfo/{companyId}")
     public CommonResp selectCompanyInfo(@PathVariable("companyId") Long companyId) {

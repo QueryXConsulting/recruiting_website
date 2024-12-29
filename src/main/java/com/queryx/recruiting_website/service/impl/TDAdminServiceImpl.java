@@ -49,15 +49,14 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         if (!StringUtils.hasText(adminVo.getAdminUsername())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
+
         if (!StringUtils.hasText(adminVo.getAdminPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
         }
 
         LambdaQueryWrapper<TDAdmin> tdAdminLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQuery().eq(TDAdmin::getAdminUsername,adminVo.getAdminUsername())
-                .select(TDAdmin::getAdminUsername);
-        String adminUsername = tdAdminMapper.selectOne(tdAdminLambdaQueryWrapper).getAdminUsername();
-        if (adminUsername.equals(adminVo.getAdminUsername())){
+        tdAdminLambdaQueryWrapper.eq(TDAdmin::getAdminUsername, adminVo.getAdminUsername());
+        if (count(tdAdminLambdaQueryWrapper) > 0) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
         }
 
@@ -81,7 +80,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         // 判断是否验证通过
         if (Objects.isNull(authenticate)) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
         LoginAdmin loginUser = (LoginAdmin) authenticate.getPrincipal();
         // TODO 返回前端凭证(待续)

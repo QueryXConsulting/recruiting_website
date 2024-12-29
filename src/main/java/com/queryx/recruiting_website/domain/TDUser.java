@@ -2,6 +2,8 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -15,6 +17,7 @@ public class TDUser {
     /**
      * 用户id
      */
+    @TableId
     private Long userId;
     /**
      * 简历id

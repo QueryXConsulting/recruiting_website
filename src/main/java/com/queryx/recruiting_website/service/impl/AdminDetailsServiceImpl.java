@@ -4,16 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TDAdmin;
-import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
-import com.queryx.recruiting_website.mapper.TDUserMapper;
 import jakarta.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 
 
@@ -24,10 +21,10 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     private TDAdminMapper adminMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String userPhone) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         LambdaQueryWrapper<TDAdmin> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TDAdmin::getAdminUsername,userPhone).eq(TDAdmin::getAdminStatus, "0");
+        wrapper.eq(TDAdmin::getAdminUsername,username).eq(TDAdmin::getAdminStatus, "0");
         TDAdmin tdAdmin = adminMapper.selectOne(wrapper);
         if(Objects.isNull(tdAdmin)){
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);

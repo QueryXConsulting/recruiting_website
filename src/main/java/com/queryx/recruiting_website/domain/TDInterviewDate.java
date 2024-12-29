@@ -2,6 +2,8 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -18,6 +20,7 @@ public class TDInterviewDate {
     /**
      * 面试时间id
      */
+    @TableId
     private Long interviewDateId;
     /**
      * 公司id
