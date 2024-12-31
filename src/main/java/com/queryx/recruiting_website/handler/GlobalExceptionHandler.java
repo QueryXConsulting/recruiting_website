@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-
-
     @ExceptionHandler(SystemException.class)
     public CommonResp sysExceptionHandler(SystemException e) {
         // 打印异常信息

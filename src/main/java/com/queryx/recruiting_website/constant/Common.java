@@ -5,7 +5,9 @@ public enum Common {
     REVIEW_WAIT("0","待审核"),
     REVIEW_SUCCESS("1","审核通过"),
     STATUS_CLOSE("0","关闭"),
-    STATUS_PUBLISH("1","发布");
+    STATUS_PUBLISH("1","发布"),
+    RESUME_ONLINE("0","线上简历"),
+    RESUME_ATTACHMENTS("1","附件简历");
 
     String code;
     String msg;

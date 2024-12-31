@@ -12,9 +12,9 @@ import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDJobService;
-import com.queryx.recruiting_website.vo.JobCompanyListVo;
-import com.queryx.recruiting_website.vo.JobDetailVo;
-import com.queryx.recruiting_website.vo.JobInsertVo;
+import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
+import com.queryx.recruiting_website.domain.dto.JobDetailDto;
+import com.queryx.recruiting_website.domain.dto.JobInsertDto;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -23,12 +23,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 
-/**
- * (TDJob)表服务实现类
- *
- * @author makejava
- * @since 2024-12-23 13:11:00
- */
+
 @Service("tDJobService")
 public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements TDJobService {
     @Resource
@@ -56,7 +51,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public JobDetailVo selectJobInfo(Long jobId) {
+    public JobDetailDto selectJobInfo(Long jobId) {
         LambdaQueryWrapper<TDJob> jobInfo = new LambdaQueryWrapper<TDJob>().eq(TDJob::getJobId, jobId)
                 .select(TDJob::getJobId, TDJob::getJobArea, TDJob::getJobCategory, TDJob::getJobContact
                         , TDJob::getJobContactsPhone, TDJob::getJobEducation, TDJob::getJobExperience,
@@ -64,15 +59,15 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                         TDJob::getJobSalary, TDJob::getJobTime, TDJob::getJobPosition);
 
         TDJob tdJob = tdJobMapper.selectOne(jobInfo);
-        JobDetailVo jobDetailVo = new JobDetailVo();
-        BeanUtils.copyProperties(tdJob, jobDetailVo);
-        return jobDetailVo;
+        JobDetailDto jobDetailDto = new JobDetailDto();
+        BeanUtils.copyProperties(tdJob, jobDetailDto);
+        return jobDetailDto;
     }
 
     @Override
-    public JobDetailVo updateJob(JobDetailVo jobDetailVo) {
+    public JobDetailDto updateJob(JobDetailDto jobDetailDto) {
         TDJob tdJob = new TDJob();
-        BeanUtils.copyProperties(jobDetailVo, tdJob);
+        BeanUtils.copyProperties(jobDetailDto, tdJob);
         UpdateWrapper<TDJob> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("job_id", tdJob.getJobId())
                 .set("job_review", Common.REVIEW_WAIT.getCode())
@@ -85,9 +80,9 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public JobDetailVo insertJobInfo(JobInsertVo jobInsertVo, Long companyId) {
+    public JobDetailDto insertJobInfo(JobInsertDto jobInsertDto, Long companyId) {
         TDJob tdJob = new TDJob();
-        BeanUtils.copyProperties(jobInsertVo, tdJob);
+        BeanUtils.copyProperties(jobInsertDto, tdJob);
         tdJob.setCompanyId(companyId);
         tdJob.setJobReview(Common.REVIEW_WAIT.getCode());
         tdJob.setJobStatus(Common.STATUS_CLOSE.getCode());

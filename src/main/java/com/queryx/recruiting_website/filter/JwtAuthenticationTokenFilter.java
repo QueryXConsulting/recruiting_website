@@ -1,0 +1,105 @@
+package com.queryx.recruiting_website.filter;
+
+import ch.qos.logback.core.pattern.Converter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.LoginAdmin;
+import com.queryx.recruiting_website.domain.LoginUser;
+import com.queryx.recruiting_website.domain.TDAdmin;
+import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.utils.CommonResp;
+
+import com.queryx.recruiting_website.utils.JwtUtil;
+import com.queryx.recruiting_website.utils.WebUtils;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.*;
+
+import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
+
+@Component
+public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = request.getHeader("token");
+        if (!StringUtils.hasText(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        Claims data = null;
+
+        try {
+            data = JwtUtil.parseJWT(token).getPayload();
+            Date expiration = data.getExpiration();
+            // 校验是否过期
+            if (expiration.before(new Date())) {
+                String result = convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.LOGIN_EXPIRED.getCode(), AppHttpCodeEnum.LOGIN_EXPIRED.getMsg()));
+                WebUtils.renderString(response, result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            String result = convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(), AppHttpCodeEnum.NEED_LOGIN.getMsg()));
+            WebUtils.renderString(response, result);
+        }
+
+
+        LinkedHashMap adminUser = (LinkedHashMap) data.get("AdminUser");
+        if (ObjectUtils.isEmpty(adminUser)) {
+            LinkedHashMap user = (LinkedHashMap) data.get("User");
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                    = new UsernamePasswordAuthenticationToken(getLoginUser(user), null, null);
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        LoginAdmin loginAdmin = getLoginAdmin(adminUser);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                = new UsernamePasswordAuthenticationToken(loginAdmin,  null, loginAdmin.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        filterChain.doFilter(request, response);
+    }
+
+    private LoginAdmin getLoginAdmin(LinkedHashMap adminUser){
+        ObjectMapper objectMapper = new ObjectMapper();
+        LoginAdmin loginAdmin = new LoginAdmin();
+        TDAdmin tdAdmin = objectMapper.convertValue(adminUser.get("tdAdmin"), TDAdmin.class);
+        loginAdmin.setTdAdmin(tdAdmin);
+        loginAdmin.setPermissions((List<String>) adminUser.get("permissions"));
+        return loginAdmin;
+    }
+
+    private LoginUser getLoginUser(LinkedHashMap user){
+        ObjectMapper objectMapper = new ObjectMapper();
+        LoginUser loginUser = new LoginUser();
+        TDUser tdUser = objectMapper.convertValue(user.get("user"), TDUser.class);
+        loginUser.setTdUser(tdUser);
+
+        return loginUser;
+    }
+
+    public String convertCommonRespToJson(CommonResp commonResp) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(commonResp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}

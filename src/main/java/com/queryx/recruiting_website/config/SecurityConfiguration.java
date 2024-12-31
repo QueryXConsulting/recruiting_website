@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.config;
 
+import com.queryx.recruiting_website.filter.JwtAuthenticationTokenFilter;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSessionListener;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +11,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,8 +28,11 @@ import org.springframework.session.security.web.authentication.SpringSessionReme
 
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration {
 
+    @Resource
+    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
@@ -37,23 +44,21 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        // TODO 暂时注释方便测试
-//        httpSecurity.csrf(it->it.disable());
-//        httpSecurity.authorizeHttpRequests(it->
-//                it.requestMatchers("/admin/login").permitAll()
-//                        .anyRequest().authenticated()
-//        );
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.authorizeHttpRequests(it->
+                it.requestMatchers("/admin/login","/user/login","/user/register").anonymous()
+                        // TODO 待修改
+//                        .requestMatchers("/").permitAll()
+                        .anyRequest().authenticated()
+        ).addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
 
-        httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll() // 允许所有请求
-                );
-
+//        httpSecurity
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .anyRequest().permitAll() // 允许所有请求
+//                );
         return httpSecurity.build();
     }
 
