@@ -1,7 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
-import com.queryx.recruiting_website.domain.DeliverResumeDTO;
+import com.queryx.recruiting_website.domain.dto.DeliverResumeDTO;
 import com.queryx.recruiting_website.domain.TDJobResume;
 import com.queryx.recruiting_website.mapper.JobResumeMapper;
 import com.queryx.recruiting_website.service.DeliverService;

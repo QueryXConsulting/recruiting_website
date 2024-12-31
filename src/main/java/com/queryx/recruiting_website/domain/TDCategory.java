@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.domain;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -17,6 +18,7 @@ public class TDCategory {
     /**
      * 分类id
      */
+    @TableId(type = IdType.AUTO)
     private Long categoryId;
     /**
      * 工种名称

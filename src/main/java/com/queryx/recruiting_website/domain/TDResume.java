@@ -1,8 +1,6 @@
 package com.queryx.recruiting_website.domain;
 
-import java.time.LocalDate;
 import java.util.Date;
-import java.io.Serializable;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -21,9 +19,6 @@ import lombok.ToString;
 @ToString
 @TableName("t_d_resume")
 public class TDResume {
-
-
-
     /**
      * 在线简历id
      */

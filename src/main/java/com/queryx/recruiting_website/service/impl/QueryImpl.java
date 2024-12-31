@@ -1,16 +1,19 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.domain.vo.JobVO;
 import com.queryx.recruiting_website.mapper.InterviewMapper;
+import com.queryx.recruiting_website.mapper.JobInfoMapper;
 import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
 import com.queryx.recruiting_website.mapper.ResumeMapper;
 import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.vo.AttachmentsResumeListVO;
-import com.queryx.recruiting_website.vo.InterviewVO;
-import com.queryx.recruiting_website.vo.ResumeVO;
+import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
+import com.queryx.recruiting_website.domain.vo.InterviewVO;
+import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,53 +26,54 @@ import java.util.List;
 @Service
 public class QueryImpl implements QueryService {
 
-
     @Autowired
     private ResumeMapper resumeMapper;
 
     @Autowired
-    private ResumeAttachmentsMapper resumeAttachmentsMapper;
+    private ResumeAttachmentsMapper attachmentsMapper;
 
     @Autowired
     private InterviewMapper interviewMapper;
+
+    @Autowired
+    private JobInfoMapper jobInfoMapper;
 
     @Override
     public ResumeVO getOnlineResume(Long id) {
         // 构建SQL语句，查询简历信息
         final ResumeVO resumeVO = new ResumeVO();
-        LambdaQueryWrapper<TDResume> lqw = new LambdaQueryWrapper<>();
-        // TODO: 待优化，查询简历信息: 1. 简历状态 2. 简历是否删除
-        final List<TDResume> tdResumes = resumeMapper.selectList(new Page<>(1, 10),
-                lqw.eq(TDResume::getResumeId, id)
-                        .eq(TDResume::getResumeStatus, 0)
-                        .eq(TDResume::getResumeReview, 0));
+        final TDResume tdResume = resumeMapper.selectOne(new LambdaQueryWrapper<TDResume>()
+                .eq(TDResume::getResumeId, id)
+                .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
+                .eq(TDResume::getResumeReview, Common.REVIEW_OK));
         // 封装简历返回信息
-        tdResumes.forEach(tdResume -> BeanUtils.copyProperties(tdResume, resumeVO));
-        tdResumes.forEach(tdResume -> System.out.println(tdResume.toString()));
+        BeanUtils.copyProperties(tdResume, resumeVO);
+        if (resumeVO.getResumeId() == null) {
+            return null;
+        }
         return resumeVO;
     }
 
     @Override
-    public List<AttachmentsResumeListVO> getResumeAttachmentList(Long id) {
+    public List<AttachmentsResumeVO> getResumeAttachmentList(Long id) {
+        final AttachmentsResumeVO attachmentsResumeListVO = new AttachmentsResumeVO();
+        final List<AttachmentsResumeVO> list = new ArrayList<>();
         // 构建SQL语句，查询附件简历信息
-        final AttachmentsResumeListVO attachmentsResumeListVO = new AttachmentsResumeListVO();
-        final List<AttachmentsResumeListVO> list =  new ArrayList<>();
-        LambdaQueryWrapper<TDResumeAttachments> lqw = new LambdaQueryWrapper<>();
-        // TODO: 待优化，查询附件简历信息: 1. 附件状态 2. 附件是否删除
-        final List<TDResumeAttachments> resumeList = resumeAttachmentsMapper.selectList(new Page<>(1, 10),
-                lqw.eq(TDResumeAttachments::getUserId, id)
-                        .eq(TDResumeAttachments::getAttachmentsReview, 1)
-                        .eq(TDResumeAttachments::getIsDeleted, 0));
-        // TODO 待优化，判断简历是否存在
-        if (resumeList.isEmpty()) {
-            throw new NullPointerException("附件简历不存在");
-        }
-        // 封装简历返回信息
-        resumeList.forEach(resume -> {
-            BeanUtils.copyProperties(resume, attachmentsResumeListVO);
-            list.add(attachmentsResumeListVO);
-        });
-        return list;
+        attachmentsMapper.selectList(
+                new LambdaQueryWrapper<TDResumeAttachments>().eq(TDResumeAttachments::getUserId, id)
+                        // TODO 查询附件简历列表：目前审核状态为未通过，且未删除
+                        .eq(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_NOT_OK)
+                        .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE),
+                // 消费查询结果集，并封装简历附件信息（该方法一个入参，无返回值）
+                resultContext -> {
+                    if (resultContext == null) {
+                        return;
+                    }
+                    final TDResumeAttachments attachments = resultContext.getResultObject();
+                    BeanUtils.copyProperties(attachments, attachmentsResumeListVO);
+                    list.add(attachmentsResumeListVO);
+                });
+        return list.isEmpty() ? null : list;
     }
 
     @Override
@@ -78,5 +82,26 @@ public class QueryImpl implements QueryService {
         final InterviewVO interviewVO = new InterviewVO();
         interviewMapper.getInterviewsByUserId(id).forEach(data -> BeanUtils.copyProperties(data, interviewVO));
         return interviewVO;
+    }
+
+    @Override
+    public JobVO getJob(Long id) {
+        final TDJob tdJob = jobInfoMapper.selectById(id);
+        if (!isJobExist(tdJob)) {
+            return null;
+        }
+        final JobVO jobVO = new JobVO();
+        BeanUtils.copyProperties(tdJob, jobVO);
+        return jobVO;
+    }
+
+
+    // 招聘信息存在返回true，不存在返回false
+    private boolean isJobExist(TDJob job) {
+        if (job == null) {
+            return false;
+        }
+        return job.getJobStatus().equals(Common.JOB_STATUS_ENABLE_OK) &&
+                job.getJobReview().equals(Common.REVIEW_OK);
     }
 }

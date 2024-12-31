@@ -1,7 +1,8 @@
 package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -18,6 +19,7 @@ public class TPRole {
     /**
      * 角色ID
      */
+    @TableId(type = IdType.AUTO)
     private Long roleId;
     /**
      * 角色名称

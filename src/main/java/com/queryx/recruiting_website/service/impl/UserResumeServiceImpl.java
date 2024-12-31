@@ -1,14 +1,22 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.constant.StorageUnit;
+import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.domain.dto.ResumeDTO;
 import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
-import com.queryx.recruiting_website.service.UploadResume;
+import com.queryx.recruiting_website.mapper.ResumeMapper;
+import com.queryx.recruiting_website.service.UserResumeService;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -20,7 +28,8 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class UploadResumeImpl implements UploadResume {
+@Transactional(rollbackFor = Exception.class)
+public class UserResumeServiceImpl implements UserResumeService {
 
     // TODO 上传附件简历命名规则
     final String prefix = "resume";
@@ -30,10 +39,16 @@ public class UploadResumeImpl implements UploadResume {
     private String filePath;
 
     @Autowired
+    private ResumeMapper resumeMapper;
+
+    @Autowired
+    private ResumeAttachmentsMapper resumeAttachmentsMapper;
+
+    @Autowired
     private SqlSessionFactory sqlSessionFactory;
 
     @Override
-    public Integer handleUploadResume(Long userId, MultipartFile file) throws IOException {
+    public Integer insertResumeAttachment(Long userId, MultipartFile file) throws IOException {
         FileOutputStream fileOutputStream = null;
         try {
             // 创建本地文件 TODO 附件简历命名规则
@@ -51,9 +66,8 @@ public class UploadResumeImpl implements UploadResume {
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
             tdRS.setUploadDate(Date.from(Instant.now()));
             tdRS.setFilePath(resumeFile.getPath());
-            tdRS.setAttachmentsReview("0");
-            tdRS.setIsDeleted("0");
-//            new TDResumeAttachments(null, userId, file.getName(), (int) (file.getSize() / 1024 / 1024), Date.from(Instant.now()), resumeFile.getPath(), "0", "0")
+            tdRS.setAttachmentsReview(Common.REVIEW_OK);
+            tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
             final MybatisBatch<TDResumeAttachments> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, List.of(tdRS));
             final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(ResumeAttachmentsMapper.class);
@@ -64,5 +78,24 @@ public class UploadResumeImpl implements UploadResume {
                 fileOutputStream.close();
             }
         }
+    }
+
+    @Override
+    public Integer deleteResumeAttachment(Long raId) {
+        // TODO 删除附件简历: 文件是否删除？
+        return resumeAttachmentsMapper.update(new LambdaUpdateWrapper<TDResumeAttachments>()
+                .set(TDResumeAttachments::getIsDeleted, Common.DELETE)
+                .set(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
+                .eq(TDResumeAttachments::getResumeAttachmentId, raId));
+    }
+
+    @Override
+//    @Transactional(rollbackFor = Exception.class)
+    public Integer updateResume(ResumeDTO resumeDTO) {
+        TDResume tdResume = new TDResume();
+        BeanUtils.copyProperties(resumeDTO, tdResume);
+        return resumeMapper.update(tdResume, new LambdaUpdateWrapper<TDResume>()
+                .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
+                .eq(TDResume::getResumeId, resumeDTO.getResumeId()));
     }
 }

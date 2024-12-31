@@ -1,4 +1,4 @@
-package com.queryx.recruiting_website.vo;
+package com.queryx.recruiting_website.domain.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;

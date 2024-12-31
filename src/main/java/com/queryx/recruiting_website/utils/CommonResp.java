@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.utils;
 
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import lombok.Data;
 import lombok.ToString;
 
@@ -34,5 +35,19 @@ public class CommonResp<T> {
 
     public CommonResp(T content) {
         this.content = content;
+    }
+
+    public static <T> CommonResp<T> success(T content) {
+        CommonResp<T> resp = new CommonResp<>(content);
+        resp.setCode(AppHttpCodeEnum.SUCCESS.getCode());
+        resp.setMessage(AppHttpCodeEnum.SUCCESS.getMsg());
+        return resp;
+    }
+
+    public static <T> CommonResp<T> fail(AppHttpCodeEnum ahe, T content) {
+        CommonResp<T> resp = new CommonResp<>(content);
+        resp.setCode(ahe.getCode());
+        resp.setMessage(ahe.getMsg());
+        return resp;
     }
 }

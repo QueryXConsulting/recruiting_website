@@ -1,4 +1,4 @@
-package com.queryx.recruiting_website.vo;
+package com.queryx.recruiting_website.domain.vo;
 
 import lombok.Data;
 import lombok.ToString;
@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 @ToString
-public class AttachmentsResumeListVO {
+public class AttachmentsResumeVO {
     private Long resumeAttachmentId;
     /**
      * 用户id

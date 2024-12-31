@@ -1,4 +1,4 @@
-package com.queryx.recruiting_website.domain;
+package com.queryx.recruiting_website.domain.dto;
 
 import lombok.Data;
 import lombok.ToString;

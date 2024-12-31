@@ -1,7 +1,9 @@
 package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
-import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
@@ -18,6 +20,7 @@ public class TPMenu {
     /**
      * 菜单id
      */
+    @TableId(type = IdType.AUTO)
     private Long menuId;
     /**
      * 菜单名称
