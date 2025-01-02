@@ -1,29 +1,30 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.TDJob;
-import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.TDResumeAttachments;
-import com.queryx.recruiting_website.domain.vo.JobVO;
-import com.queryx.recruiting_website.mapper.InterviewMapper;
-import com.queryx.recruiting_website.mapper.JobInfoMapper;
-import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
-import com.queryx.recruiting_website.mapper.ResumeMapper;
-import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
-import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDResume;
+import com.queryx.recruiting_website.domain.vo.JobVO;
+import com.queryx.recruiting_website.domain.vo.ResumeVO;
+import com.queryx.recruiting_website.mapper.ResumeMapper;
+import com.queryx.recruiting_website.service.QueryService;
+import com.queryx.recruiting_website.mapper.JobInfoMapper;
+import com.queryx.recruiting_website.domain.vo.InterviewVO;
+import com.queryx.recruiting_website.mapper.InterviewMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
+import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
+//@Transactional(rollbackFor = Exception.class)
 public class QueryImpl implements QueryService {
 
     @Autowired

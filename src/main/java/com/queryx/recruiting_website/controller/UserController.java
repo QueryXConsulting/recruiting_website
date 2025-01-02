@@ -1,14 +1,14 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.LoginDTO;
-import com.queryx.recruiting_website.domain.dto.RegisterDTO;
-import com.queryx.recruiting_website.service.UserService;
-import com.queryx.recruiting_website.utils.CommonResp;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.utils.CommonResp;
+import com.queryx.recruiting_website.domain.dto.LoginDTO;
+import com.queryx.recruiting_website.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.queryx.recruiting_website.domain.dto.RegisterDTO;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,40 +20,44 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 用户注册
+     *
+     * @param registerDTO 用户注册信息
+     * @return 注册结果
+     */
     @PostMapping("/register")
     public CommonResp<String> register(@RequestBody RegisterDTO registerDTO) {
-        String token = "";
+        AppHttpCodeEnum code;
         try {
-            token = userService.insertUser(registerDTO);
-            // TODO 用户注册：待优化
-            switch (token) {
-                case "1" -> {
-                    return CommonResp.fail(AppHttpCodeEnum.USER_EXIST, null);
-                }
-                case "2" -> {
-                    return CommonResp.fail(AppHttpCodeEnum.PHONE_EXIST, null);
-                }
-                case "3" -> {
-                    return CommonResp.fail(AppHttpCodeEnum.EMAIL_EXIST, null);
-                }
-                case null -> {
-                    return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-                }
-                default -> {
-                    log.info("用户注册成功");
-                    return CommonResp.success(token);
+            code = userService.insertUser(registerDTO);
+            if (code == null) {
+                throw new Exception("注册返回为null");
+            }
+            switch (code) {
+                case USER_EXIST:
+                case EMAIL_EXIST:
+                case PHONE_EXIST:
+                case PHONE_OR_EMAIL_ILLEGAL: {
+                    return CommonResp.fail(code, null);
                 }
             }
         } catch (Exception e) {
             log.error("用户注册失败, {}", e.getMessage());
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
-//        return CommonResp.success(token);
+        return CommonResp.success(null);
     }
 
+    /**
+     * 用户登录
+     *
+     * @param loginDTO 用户登录信息
+     * @return 登录结果
+     */
     @PostMapping("/login")
     public CommonResp<String> login(@RequestBody LoginDTO loginDTO) {
-        String token = "";
+        String token;
         try {
             token = userService.queryUser(loginDTO);
         } catch (Exception e) {
@@ -64,6 +68,11 @@ public class UserController {
         return CommonResp.success(token);
     }
 
+    /**
+     * 用户登出
+     *
+     * @return 登出结果
+     */
     @PostMapping("/logout")
     public CommonResp<String> logout() {
         // TODO 登出功能待实现

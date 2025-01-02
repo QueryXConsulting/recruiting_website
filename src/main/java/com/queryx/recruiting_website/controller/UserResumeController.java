@@ -1,13 +1,13 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.ResumeDTO;
-import com.queryx.recruiting_website.service.UserResumeService;
-import com.queryx.recruiting_website.utils.CommonResp;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.queryx.recruiting_website.utils.CommonResp;
 import org.springframework.web.multipart.MultipartFile;
+import com.queryx.recruiting_website.domain.dto.ResumeDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.service.UserResumeService;
 
 import java.io.IOException;
 
@@ -45,22 +45,24 @@ public class UserResumeController {
     /**
      * 删除用户附件简历
      *
-     * @param raId 简历ID
+     * @param raId 附件简历ID
      * @return 返回删除结果
      */
     @DeleteMapping("/delete")
     public CommonResp<Integer> handleResumeDelete(@RequestParam("id") Long raId) {
-        Integer row = 0;
+        int deletedRows = 0;
         try {
-            row = userManagementService.deleteResumeAttachment(raId);
-            if (row <= 0) {
-                throw new Exception();
+            deletedRows = userManagementService.deleteResumeAttachment(raId);
+            if (deletedRows <= 0) {
+                return CommonResp.fail(AppHttpCodeEnum.DELETE_RESUME_ERROR, deletedRows);
             }
         } catch (Exception e) {
-            return CommonResp.fail(AppHttpCodeEnum.DELETE_RESUME_ERROR, row);
+            log.error("无法删除ID为: {}的简历附件", raId, e);
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, deletedRows);
         }
-        return CommonResp.success(row);
+        return CommonResp.success(deletedRows);
     }
+
 
     /**
      * 更新用户在线简历信息

@@ -43,7 +43,7 @@ public class QueryController {
     }
 
     /**
-     * 查询用户附件简历列表
+     * 查询用户所有简历附件简历
      *
      * @param id 用户id
      * @return 附件简历列表

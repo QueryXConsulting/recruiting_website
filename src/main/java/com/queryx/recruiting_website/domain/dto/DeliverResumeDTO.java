@@ -7,23 +7,15 @@ import lombok.ToString;
 @ToString
 public class DeliverResumeDTO {
 
-    /**
-     * 职位ID
-     */
+    // 职位ID
     private Long jobId;
 
-    /**
-     * 简历ID
-     */
+    // 简历ID
     private Long resumeId;
 
-    /**
-     * 简历类型
-     */
+    // 简历类型
     private String resumeType;
 
-    /**
-     * 简历名称
-     */
+    // 简历名称(默认是用户名称)
     private String resumeName;
 }

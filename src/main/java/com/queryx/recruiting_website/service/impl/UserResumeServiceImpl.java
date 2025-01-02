@@ -1,23 +1,22 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.baomidou.mybatisplus.core.batch.MybatisBatch;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.constant.StorageUnit;
-import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.TDResumeAttachments;
-import com.queryx.recruiting_website.domain.dto.ResumeDTO;
-import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
-import com.queryx.recruiting_website.mapper.ResumeMapper;
-import com.queryx.recruiting_website.service.UserResumeService;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.apache.ibatis.session.SqlSessionFactory;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDResume;
 import org.springframework.web.multipart.MultipartFile;
+import com.baomidou.mybatisplus.core.batch.MybatisBatch;
+import com.queryx.recruiting_website.mapper.ResumeMapper;
+import org.springframework.beans.factory.annotation.Value;
+import com.queryx.recruiting_website.constant.StorageUnit;
+import com.queryx.recruiting_website.domain.dto.ResumeDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.service.UserResumeService;
+import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import org.springframework.transaction.annotation.Transactional;
+import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -90,7 +89,6 @@ public class UserResumeServiceImpl implements UserResumeService {
     }
 
     @Override
-//    @Transactional(rollbackFor = Exception.class)
     public Integer updateResume(ResumeDTO resumeDTO) {
         TDResume tdResume = new TDResume();
         BeanUtils.copyProperties(resumeDTO, tdResume);

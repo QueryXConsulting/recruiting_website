@@ -19,6 +19,12 @@ public class DeliverController {
     @Autowired
     private DeliverService deliverService;
 
+    /**
+     * 简历投递
+     *
+     * @param deliverResumeDTO 简历投递DTO
+     * @return 成功或失败的响应
+     */
     @PostMapping("/resume")
     public CommonResp<Integer> deliverResume(@RequestBody DeliverResumeDTO deliverResumeDTO) {
         try {
