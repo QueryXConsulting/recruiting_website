@@ -5,6 +5,7 @@ import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVo;
 
 
 public interface TDUserService extends IService<TDUser> {
@@ -14,7 +15,7 @@ public interface TDUserService extends IService<TDUser> {
 
     UserCompanyDto updateUserInfo(UserCompanyDto userCompanyDto);
 
-    String login(LoginDTO loginDTO);
+    UserLoginVo login(LoginDTO loginDTO);
 
     UserRegisterDTO register(UserRegisterDTO userRegisterDTO);
 }

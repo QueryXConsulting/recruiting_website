@@ -15,7 +15,7 @@ public class UserRegisterDTO {
     private String userName;
     // 用户密码
     private String userPassword;
-    // 用户密码
+    // 用户手机
     private String userPhone;
     // 用户角色
     private String userRole;

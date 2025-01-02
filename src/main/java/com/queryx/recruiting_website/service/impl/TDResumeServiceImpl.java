@@ -38,7 +38,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     private TDResumeAttachmentsMapper tdResumeAttachmentsMapper;
 
     @Override
-    public List<ResumeListVo> insertJobInfo(Long companyId) {
+    public List<ResumeListVo> selectResumeList(Long companyId) {
         LambdaQueryWrapper<TDJob> jobQueryWrapper = new LambdaQueryWrapper<>();
         jobQueryWrapper.eq(TDJob::getCompanyId, companyId)
                 .eq(TDJob::getJobStatus, Common.STATUS_PUBLISH.getCode())

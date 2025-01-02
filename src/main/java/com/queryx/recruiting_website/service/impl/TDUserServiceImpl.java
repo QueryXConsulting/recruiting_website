@@ -4,18 +4,19 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.LoginAdmin;
-import com.queryx.recruiting_website.domain.LoginUser;
-import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVo;
 import com.queryx.recruiting_website.exception.SystemException;
+import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.utils.JwtUtil;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +42,8 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     private AuthenticationManager authenticationManager;
     @Resource
     private TDResumeMapper resumeMapper;
+    @Resource
+    private TDCompanyInfoMapper companyInfoMapper;
 
     @Override
     public UserCompanyDto selectUserInfo(Long userId, String userRole) {
@@ -66,12 +69,11 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         if (!StringUtils.hasText(userCompanyDto.getUserPhone())) {
             throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
         }
-
-        TDUser tdUser = new TDUser();
+        TDUser tdUser = SecurityUtils.getLoginUser().getTdUser();
         BeanUtils.copyProperties(userCompanyDto, tdUser);
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         UpdateWrapper<TDUser> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("user_id", userCompanyDto.getUserId())
+        updateWrapper.eq("user_id", tdUser.getUserId())
                 .eq("user_status", "0");
         if (!update(tdUser, updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
@@ -80,7 +82,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     }
 
     @Override
-    public String login(LoginDTO loginDTO) {
+    public UserLoginVo login(LoginDTO loginDTO) {
         //  TODO 用户登录：(验证码待实现) 判断用户名登录方式
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                 = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getUserPassword());
@@ -93,11 +95,22 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         if (!loginDTO.getUserRole().equals(loginUser.getTdUser().getUserRole())) {
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
+        LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
+        companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
+                .select(TDCompanyInfo::getCompanyInfoId);
+        TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectOne(companyInfoQuery);
+        Long companyId = null;
+        if (!Objects.isNull(tdCompanyInfo)) {
+            companyId = tdCompanyInfo.getCompanyInfoId();
+        }
+        UserLoginVo userLoginVo = new UserLoginVo();
+        userLoginVo.setCompanyId(companyId);
+//         生成token
         HashMap<String, Object> data = new HashMap<>();
         data.put("User", loginUser);
-
-        // 返回前端凭证
-        return JwtUtil.createJWT(data);
+        userLoginVo.setToken(JwtUtil.createJWT(data));
+//         返回前端凭证
+        return userLoginVo;
     }
 
     @Override
@@ -107,6 +120,14 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
                 .eq(TDUser::getUserStatus, "0");
         if (count(queryWrapper) > 0) {
             throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
+        }
+
+        LambdaQueryWrapper<TDResume> Wrapper = new LambdaQueryWrapper<>();
+        Wrapper.eq(TDResume::getResumeEmail, userRegisterDTO.getResumeEmail())
+                .eq(TDResume::getResumeStatus, "0")
+                .eq(TDResume::getResumeReview, Common.REVIEW_SUCCESS.getCode());
+        if (!Objects.isNull(resumeMapper.selectOne(Wrapper))) {
+            throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
         }
 
         TDUser user = new TDUser();
@@ -123,7 +144,6 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             tdUserMapper.insert(user);
             return null;
         }
-
         // 插入用户
         tdUserMapper.insert(user);
         return null;

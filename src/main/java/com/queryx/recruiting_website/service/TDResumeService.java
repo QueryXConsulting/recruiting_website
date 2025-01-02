@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public interface TDResumeService extends IService<TDResume> {
-    List<ResumeListVo> insertJobInfo(Long companyId);
+    List<ResumeListVo> selectResumeList(Long companyId);
 
     ResumeVo selectResume(SelectResumeDto selectResumeDto);
 }

@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.JobDetailDto;
 import com.queryx.recruiting_website.domain.dto.JobInsertDto;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
@@ -12,6 +13,7 @@ import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.utils.CommonResp;
 
 
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,8 +58,9 @@ public class UserCompanyController {
     }
 
     @GetMapping("/selectUserInfo")
-    public CommonResp selectUserInfo(Long userId, String userRole) {
-        return CommonResp.success(tdUserService.selectUserInfo(userId, userRole));
+    public CommonResp selectUserInfo() {
+        TDUser tdUser = SecurityUtils.getLoginUser().getTdUser();
+        return CommonResp.success(tdUserService.selectUserInfo(tdUser.getUserId(), tdUser.getUserRole()));
     }
 
     @PostMapping("/updateUserInfo")
@@ -78,7 +81,7 @@ public class UserCompanyController {
 
     @GetMapping("/resumeList/{companyId}")
     public CommonResp selectResumeList(@PathVariable("companyId") Long companyId) {
-        return CommonResp.success(tdResumeService.insertJobInfo(companyId));
+        return CommonResp.success(tdResumeService.selectResumeList(companyId));
     }
 
     @PostMapping("/selectResume")

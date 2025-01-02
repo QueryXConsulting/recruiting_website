@@ -12,7 +12,7 @@ public class MenuVo {
     private String component;
     private Date createTime;
     private String icon;
-    private Long id;
+    private Long menuId;
     private String menuName;
     private String menuType;
     private Integer orderNum;

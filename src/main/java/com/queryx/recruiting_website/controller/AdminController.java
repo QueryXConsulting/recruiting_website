@@ -2,9 +2,13 @@ package com.queryx.recruiting_website.controller;
 
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.TPRole;
+import com.queryx.recruiting_website.domain.dto.RoleInfoDto;
+
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.service.TPMenuService;
+import com.queryx.recruiting_website.service.TPRoleService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 
@@ -20,6 +24,8 @@ public class AdminController {
     private TDAdminService tdAdminService;
     @Resource
     private TPMenuService menuService;
+    @Resource
+    private TPRoleService tpRoleService;
 
 
     @PostMapping("/addAdmin")
@@ -45,5 +51,24 @@ public class AdminController {
         return CommonResp.success(menuService.getRouter());
     }
 
+    @GetMapping("/selectRoleList")
+    public CommonResp selectRoleList() {
+        return CommonResp.success(tpRoleService.selectRoleList());
+    }
+
+    @GetMapping("/updateRoleStatus")
+    public CommonResp updateRoleStatus(Long roleId,String roleStatus) {
+        return CommonResp.success(tpRoleService.updateRoleStatus(roleId,roleStatus));
+    }
+
+    @GetMapping("/role/{roleId}")
+    public CommonResp RoleInfo(@PathVariable("roleId") Long roleId){
+        return CommonResp.success(tpRoleService.roleInfo(roleId));
+    }
+
+    @PostMapping("/updateRoleInfo")
+    public CommonResp updateRoleList(@RequestBody RoleInfoDto roleInfoDto) {
+        return CommonResp.success(tpRoleService.updateRoleInfo(roleInfoDto));
+    }
 
 }

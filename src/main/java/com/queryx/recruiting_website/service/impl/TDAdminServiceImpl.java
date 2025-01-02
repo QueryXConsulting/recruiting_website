@@ -19,6 +19,7 @@ import com.queryx.recruiting_website.domain.dto.AdminDto;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.domain.vo.AdminInfoVo;
 import com.queryx.recruiting_website.domain.vo.AdminUserInfoVo;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -95,10 +96,10 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     @Override
     public AdminUserInfoVo getInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        LoginAdmin loginAdmin = (LoginAdmin) authentication.getPrincipal();
+        LoginAdmin loginAdmin = SecurityUtils.getLoginAdmin();
         TDAdmin tdAdmin = loginAdmin.getTdAdmin();
         List<String> perms = selectPermsByRoleId(tdAdmin.getRoleId());
+
         AdminInfoVo adminInfoVo = new AdminInfoVo();
         BeanUtils.copyProperties(tdAdmin, adminInfoVo);
         AdminUserInfoVo adminUserInfoVo = new AdminUserInfoVo();

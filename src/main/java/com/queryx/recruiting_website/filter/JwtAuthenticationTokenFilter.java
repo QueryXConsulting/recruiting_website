@@ -10,6 +10,7 @@ import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.utils.CommonResp;
 
 import com.queryx.recruiting_website.utils.JwtUtil;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import com.queryx.recruiting_website.utils.WebUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -48,12 +49,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             Date expiration = data.getExpiration();
             // 校验是否过期
             if (expiration.before(new Date())) {
-                String result = convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.LOGIN_EXPIRED.getCode(), AppHttpCodeEnum.LOGIN_EXPIRED.getMsg()));
+                String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.LOGIN_EXPIRED.getCode(), AppHttpCodeEnum.LOGIN_EXPIRED.getMsg()));
                 WebUtils.renderString(response, result);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            String result = convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(), AppHttpCodeEnum.NEED_LOGIN.getMsg()));
+            String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(), AppHttpCodeEnum.NEED_LOGIN.getMsg()));
             WebUtils.renderString(response, result);
         }
 
@@ -87,19 +88,11 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private LoginUser getLoginUser(LinkedHashMap user){
         ObjectMapper objectMapper = new ObjectMapper();
         LoginUser loginUser = new LoginUser();
-        TDUser tdUser = objectMapper.convertValue(user.get("user"), TDUser.class);
+        TDUser tdUser = objectMapper.convertValue(user.get("tdUser"), TDUser.class);
         loginUser.setTdUser(tdUser);
 
         return loginUser;
     }
 
-    public String convertCommonRespToJson(CommonResp commonResp) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(commonResp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+
 }

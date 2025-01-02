@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.config;
 
 import com.queryx.recruiting_website.filter.JwtAuthenticationTokenFilter;
+import com.queryx.recruiting_website.handler.security.AccessDeniedHandlerImpl;
+import com.queryx.recruiting_website.handler.security.AuthenticationEntryPointImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSessionListener;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -33,7 +35,10 @@ public class SecurityConfiguration {
 
     @Resource
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
-
+    @Resource
+    private AuthenticationEntryPointImpl authenticationEntryPoint;
+    @Resource
+    private AccessDeniedHandlerImpl accessDeniedHandler;
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
         return config.getAuthenticationManager();
@@ -52,7 +57,11 @@ public class SecurityConfiguration {
                         // TODO 待修改
 //                        .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
-        ).addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
+        ).addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                );
 
 //        httpSecurity
 //                .csrf(AbstractHttpConfigurer::disable)

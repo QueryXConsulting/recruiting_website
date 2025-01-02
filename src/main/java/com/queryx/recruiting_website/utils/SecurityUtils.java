@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.utils;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.LoginUser;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,16 @@ public class SecurityUtils
 
     public static Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    public static String convertCommonRespToJson(CommonResp commonResp) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(commonResp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

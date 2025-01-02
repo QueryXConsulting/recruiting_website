@@ -2,21 +2,19 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.TPRoleMenu;
+import com.queryx.recruiting_website.domain.vo.RoutersVo;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
+import com.queryx.recruiting_website.mapper.TPRoleMenuMapper;
 import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.service.TPRoleMenuService;
 import com.queryx.recruiting_website.domain.vo.MenuVo;
-import com.queryx.recruiting_website.domain.vo.RoutersVo;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,17 +26,31 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     private TPMenuMapper menuMapper;
     @Resource
     private TPRoleMenuService roleMenuService;
+    @Resource
+    private TPRoleMenuMapper roleMenuMapper;
 
     @Override
     public RoutersVo getRouter() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        LoginAdmin loginAdmin = (LoginAdmin) authentication.getPrincipal();
-        Long roleId = loginAdmin.getTdAdmin().getRoleId();
         // menu结果是tree的形式
-        List<TPMenu> menus = selectRouterMenuTreeByRoleId(roleId);
-        // TODO 还未写完(待续)
-
-        return null;
+        List<TPMenu> menus = selectRouterMenuTreeByRoleId(SecurityUtils.getLoginAdmin().getTdAdmin().getRoleId());
+        RoutersVo routersVo = new RoutersVo();
+        List<MenuVo> menuVoList = menus.stream()
+                .map(m -> {
+                    MenuVo menuVo = new MenuVo();
+                    BeanUtils.copyProperties(m, menuVo);
+                    // 子菜单构建
+                    menuVo.setChildren(m.getChildren().stream()
+                            .map(c -> {
+                                MenuVo childMenuVo = new MenuVo();
+                                BeanUtils.copyProperties(c, childMenuVo);
+                                return childMenuVo;
+                            })
+                            .collect(Collectors.toList()));
+                    return menuVo;
+                })
+                .collect(Collectors.toList());
+        routersVo.setMenus(menuVoList);
+        return routersVo;
     }
 
     public List<TPMenu> selectRouterMenuTreeByRoleId(Long roleId) {
@@ -52,7 +64,9 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
         if (roleId.equals(SUPER_ADMIN)) {
             menuList = menuMapper.selectList(wrapper);
         } else {
-            List<TPRoleMenu> menus = roleMenuService.listByIds(Collections.singleton(roleId));
+            LambdaQueryWrapper<TPRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
+            roleMenuWrapper.eq(TPRoleMenu::getRoleId, roleId);
+            List<TPRoleMenu> menus = roleMenuMapper.selectList(roleMenuWrapper);
             List<Long> menuIds = menus.stream().map(TPRoleMenu::getMenuId).collect(Collectors.toList());
             wrapper.in(TPMenu::getMenuId, menuIds);
             menuList = list(wrapper);
