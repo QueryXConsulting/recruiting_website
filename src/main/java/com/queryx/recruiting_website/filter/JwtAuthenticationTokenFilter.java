@@ -28,7 +28,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 
 import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;

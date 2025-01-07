@@ -16,3 +16,10 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     # SQL语句等日志信息输出在控制台
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    # TODO 生产环境下需关闭
+    enabled: true
+

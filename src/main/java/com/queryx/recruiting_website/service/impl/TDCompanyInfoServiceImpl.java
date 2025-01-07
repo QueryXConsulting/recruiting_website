@@ -27,7 +27,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     public CompanyInfoDto selectCompanyInfo(Long companyId) {
         LambdaQueryWrapper<TDCompanyInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(TDCompanyInfo::getCompanyInfoId, companyId)
-                .eq(TDCompanyInfo::getCompanyInfoStatus, "0")
+                .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE.getCode())
                 .eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_SUCCESS.getCode());
         TDCompanyInfo tdCompanyInfo = tdCompanyInfoMapper.selectOne(lambdaQueryWrapper);
         CompanyInfoDto companyInfoDto = new CompanyInfoDto();
@@ -58,7 +58,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         tdCompanyInfo.setCompanyInfoPassword(passwordEncoder.encode(tdCompanyInfo.getCompanyInfoPassword()));
         UpdateWrapper<TDCompanyInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("company_info_id", companyInfoDto.getCompanyInfoId());
-        tdCompanyInfo.setCompanyInfoStatus("1");
+        tdCompanyInfo.setCompanyInfoStatus(Common.STATUS_DISABLE.getCode());
         tdCompanyInfo.setCompanyInfoReview(Common.REVIEW_WAIT.getCode());
         if (!update(tdCompanyInfo, updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);

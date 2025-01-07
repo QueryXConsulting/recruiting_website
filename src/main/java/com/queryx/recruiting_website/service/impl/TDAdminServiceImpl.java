@@ -1,13 +1,19 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TDAdmin;
 
+import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.TPMenu;
+import com.queryx.recruiting_website.domain.vo.AdminVo;
+import com.queryx.recruiting_website.domain.vo.UserVo;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 
@@ -25,7 +31,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -68,7 +73,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         adminDto.setAdminPassword(password);
         TDAdmin tdAdmin = new TDAdmin();
         BeanUtils.copyProperties(adminDto, tdAdmin);
-        tdAdmin.setAdminStatus("0");
+        tdAdmin.setAdminStatus(Common.STATUS_ENABLE.getCode());
         tdAdmin.setAdminCreateTime(new Date());
         if (!save(tdAdmin)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
@@ -109,12 +114,55 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         return adminUserInfoVo;
     }
 
+    @Override
+    public Page<AdminVo> selectAdminList(Integer page, Integer size) {
+        Page<TDAdmin> tdUserPage = tdAdminMapper.selectPage(new Page<>(page, size), null);
+        Page<AdminVo> adminVoPage = new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
+
+        adminVoPage.setRecords(tdUserPage.getRecords().stream().map(user -> {
+            AdminVo adminVo = new AdminVo();
+            BeanUtils.copyProperties(user, adminVo);
+            return adminVo;
+        }).collect(Collectors.toList()));
+
+        return adminVoPage;
+    }
+
+    @Override
+    public AdminVo selectAdminInfo(Long userId) {
+        TDAdmin byId = getById(userId);
+        AdminVo adminVo = new AdminVo();
+        BeanUtils.copyProperties(byId, adminVo);
+        return adminVo;
+    }
+
+    @Override
+    public Object updateAdminInfo(AdminDto adminDto) {
+        TDAdmin tdAdmin = new TDAdmin();
+        BeanUtils.copyProperties(adminDto, tdAdmin);
+        tdAdmin.setAdminPassword(passwordEncoder.encode(tdAdmin.getAdminPassword()));
+        if (!update(tdAdmin, new LambdaUpdateWrapper<TDAdmin>().eq(TDAdmin::getAdminId, tdAdmin.getAdminId()))) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Object deleteAdmin(Long adminId) {
+
+        if (tdAdminMapper.deleteById(adminId) < 1) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+        return null;
+    }
+
     public List<String> selectPermsByRoleId(Long roleId) {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.in(TPMenu::getMenuType, "C", "F");
-        wrapper.eq(TPMenu::getStatus, "0");
+        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE.getCode());
         // 如果是超级管理员返回所有权限
-        if (roleId.equals(SUPER_ADMIN)) {
+        if (roleId.equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
             List<TPMenu> menus = menuMapper.selectList(wrapper);
             List<String> perms = menus.stream().map(TPMenu::getPerms).collect(Collectors.toList());
             return perms;

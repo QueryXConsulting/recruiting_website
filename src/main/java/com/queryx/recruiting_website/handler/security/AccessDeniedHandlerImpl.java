@@ -18,14 +18,14 @@ import java.io.IOException;
 
 @Component
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
-    @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException, ServletException {
 
-        e.printStackTrace();
+
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        accessDeniedException.printStackTrace();
         CommonResp result = CommonResp.fail(AppHttpCodeEnum.NO_OPERATOR_AUTH.getCode(),AppHttpCodeEnum.NO_OPERATOR_AUTH.getMsg());
         // 响应给前端
         WebUtils.renderString(response, SecurityUtils.convertCommonRespToJson(result));
-
     }
 
 

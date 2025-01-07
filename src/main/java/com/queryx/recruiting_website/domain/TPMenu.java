@@ -12,9 +12,6 @@ import lombok.Data;
 @Data
 public class TPMenu {
 
-
-
-
     @TableId
     private Long menuId;
 

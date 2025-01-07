@@ -1,15 +1,22 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
+import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.domain.vo.UserLoginVo;
+import com.queryx.recruiting_website.domain.vo.UserVo;
 import com.queryx.recruiting_website.exception.SystemException;
+import com.queryx.recruiting_website.mapper.TDAdminMapper;
 import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
@@ -30,6 +37,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service("tDUserService")
@@ -44,13 +52,20 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     private TDResumeMapper resumeMapper;
     @Resource
     private TDCompanyInfoMapper companyInfoMapper;
+    @Resource
+    private TDAdminMapper adminMapper;
 
     @Override
     public UserCompanyDto selectUserInfo(Long userId, String userRole) {
         LambdaQueryWrapper<TDUser> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userLambdaQueryWrapper.eq(TDUser::getUserId, userId)
-                .eq(TDUser::getUserRole, userRole)
-                .eq(TDUser::getUserStatus, '0');
+                .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode());
+        if (StringUtils.hasText(userRole)) {
+            userLambdaQueryWrapper.eq(TDUser::getUserRole, userRole)
+                    .eq(TDUser::getUserStatus, Common.STATUS_ENABLE.getCode());
+        }
+
+
         TDUser tdUser = tdUserMapper.selectOne(userLambdaQueryWrapper);
 
         UserCompanyDto userCompanyDto = new UserCompanyDto();
@@ -59,7 +74,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     }
 
     @Override
-    public UserCompanyDto updateUserInfo(UserCompanyDto userCompanyDto) {
+    public UserCompanyDto updateUserCompanyInfo(UserCompanyDto userCompanyDto) {
         if (!StringUtils.hasText(userCompanyDto.getUserName())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
@@ -74,7 +89,8 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         UpdateWrapper<TDUser> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("user_id", tdUser.getUserId())
-                .eq("user_status", "0");
+                .eq("user_status", Common.STATUS_ENABLE.getCode())
+                .eq("del_flag", Common.NOT_DELETED.getCode());
         if (!update(tdUser, updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
@@ -95,16 +111,21 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         if (!loginDTO.getUserRole().equals(loginUser.getTdUser().getUserRole())) {
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
-        LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
-        companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
-                .select(TDCompanyInfo::getCompanyInfoId);
-        TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectOne(companyInfoQuery);
-        Long companyId = null;
-        if (!Objects.isNull(tdCompanyInfo)) {
-            companyId = tdCompanyInfo.getCompanyInfoId();
-        }
+
         UserLoginVo userLoginVo = new UserLoginVo();
-        userLoginVo.setCompanyId(companyId);
+        // 判断是否为公司用户
+        if (loginDTO.getUserRole().equals("1")) {
+            LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
+            companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
+                    .select(TDCompanyInfo::getCompanyInfoId);
+            TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectOne(companyInfoQuery);
+            Long companyId = null;
+            if (!Objects.isNull(tdCompanyInfo)) {
+                companyId = tdCompanyInfo.getCompanyInfoId();
+            }
+            userLoginVo.setCompanyId(companyId);
+        }
+
 //         生成token
         HashMap<String, Object> data = new HashMap<>();
         data.put("User", loginUser);
@@ -117,15 +138,13 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     public UserRegisterDTO register(UserRegisterDTO userRegisterDTO) {
         LambdaQueryWrapper<TDUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDUser::getUserPhone, userRegisterDTO.getUserPhone())
-                .eq(TDUser::getUserStatus, "0");
+                .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode());
         if (count(queryWrapper) > 0) {
             throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
         }
 
         LambdaQueryWrapper<TDResume> Wrapper = new LambdaQueryWrapper<>();
-        Wrapper.eq(TDResume::getResumeEmail, userRegisterDTO.getResumeEmail())
-                .eq(TDResume::getResumeStatus, "0")
-                .eq(TDResume::getResumeReview, Common.REVIEW_SUCCESS.getCode());
+        Wrapper.eq(TDResume::getResumeEmail, userRegisterDTO.getResumeEmail());
         if (!Objects.isNull(resumeMapper.selectOne(Wrapper))) {
             throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
         }
@@ -148,6 +167,76 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         tdUserMapper.insert(user);
         return null;
     }
+
+    @Override
+    public Page<UserVo> selectUserList(Integer page, Integer size) {
+        LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode());
+        Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
+        Page<UserVo> userVoPage = new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
+
+        userVoPage.setRecords(tdUserPage.getRecords().stream().map(user -> {
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user, userVo);
+            return userVo;
+        }).collect(Collectors.toList()));
+
+        return userVoPage;
+
+    }
+
+    @Override
+    public Object updateUserInfo(UserDto userDto) {
+        if (!StringUtils.hasText(userDto.getUserName())) {
+            throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
+        }
+        if (!StringUtils.hasText(userDto.getUserPassword())) {
+            throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
+        }
+        if (!StringUtils.hasText(userDto.getUserPhone())) {
+            throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
+        }
+
+        TDUser tdUser = new TDUser();
+        BeanUtils.copyProperties(userDto, tdUser);
+        tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
+        if (!update(tdUser, new LambdaUpdateWrapper<TDUser>().eq(TDUser::getUserId,
+                userDto.getUserId()).eq(TDUser::getDelFlag,Common.NOT_DELETED.getCode()))) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Object deleteUser(Long userId) {
+        LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(TDUser::getUserId, userId)
+                .set(TDUser::getDelFlag, Common.DELETED.getCode());
+        if (!update(wrapper)) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+        return null;
+    }
+
+    @Override
+    public Object addUser(UserDto userDto) {
+        LambdaQueryWrapper<TDUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
+                .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode());
+        if (count(queryWrapper) > 0) {
+            throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
+        }
+        TDUser tdUser = new TDUser();
+        BeanUtils.copyProperties(userDto, tdUser);
+        tdUser.setUserRegisterTime(new Date());
+        tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
+        if (!save(tdUser)) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+        return null;
+    }
+
 
 }
 

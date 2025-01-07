@@ -9,10 +9,6 @@ import lombok.Data;
 
 @Data
 public class TDAdmin {
-
-
-
-
     @TableId
     private Long adminId;
 

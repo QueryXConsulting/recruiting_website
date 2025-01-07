@@ -3,10 +3,10 @@ package com.queryx.recruiting_website.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.domain.dto.JobDto;
 import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.domain.dto.JobDetailDto;
 import com.queryx.recruiting_website.domain.dto.JobInsertDto;
-
 
 
 public interface TDJobService extends IService<TDJob> {
@@ -22,5 +22,10 @@ public interface TDJobService extends IService<TDJob> {
 
 
     Object deleteJob(Long jobId);
+
+
+    Object addJob(JobDto jobDto);
+
+    Object jobReview(String review, Long jobId);
 }
 

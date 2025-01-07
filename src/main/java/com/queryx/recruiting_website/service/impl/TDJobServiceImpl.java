@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.domain.dto.JobDto;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDJobService;
@@ -23,7 +25,6 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 
-
 @Service("tDJobService")
 public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements TDJobService {
     @Resource
@@ -32,9 +33,11 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     @Override
     public IPage<JobCompanyListVo> selectJobList(Integer page, Integer size, Long companyId) {
         QueryWrapper<TDJob> wrapper = new QueryWrapper<>();
-        wrapper.eq("company_id", companyId)
-                .select("job_id", "job_position", "job_education", "job_experience", "job_time", "job_nature", "job_review", "job_status");
-        Page<TDJob> pageVo = new Page<>(page - 1, size);
+        if (companyId != null) {
+            wrapper.eq("company_id", companyId);
+        }
+        wrapper.select("job_id", "job_position", "job_education", "job_experience", "job_time", "job_nature", "job_review", "job_status");
+        Page<TDJob> pageVo = new Page<>(page, size);
         IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVo, wrapper);
         if (jobPage.getRecords().isEmpty()) {
             return null;
@@ -96,10 +99,36 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
 
     @Override
     public Object deleteJob(Long jobId) {
-        if (tdJobMapper.deleteById(jobId)<1) {
+        if (tdJobMapper.deleteById(jobId) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
 
+        return null;
+    }
+
+    @Override
+    public Object addJob(JobDto jobDto) {
+        TDJob tdJob = new TDJob();
+        BeanUtils.copyProperties(jobDto, tdJob);
+        tdJob.setJobReview(Common.REVIEW_SUCCESS.getCode());
+        tdJob.setJobStatus(Common.STATUS_PUBLISH.getCode());
+        tdJob.setJobTime(new Date());
+
+        if (tdJobMapper.insert(tdJob) < 1) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+        return null;
+    }
+
+    @Override
+    public Object jobReview(String review, Long jobId) {
+        LambdaUpdateWrapper<TDJob> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(TDJob::getJobId, jobId)
+                .set(TDJob::getJobReview, review)
+                .set(TDJob::getJobStatus,Common.STATUS_PUBLISH.getCode());
+        if (!update(updateWrapper)) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
         return null;
     }
 

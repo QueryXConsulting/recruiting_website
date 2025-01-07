@@ -1,0 +1,25 @@
+package com.queryx.recruiting_website.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.queryx.recruiting_website.domain.TDJobNature;
+import com.queryx.recruiting_website.domain.dto.JobNatureDto;
+import com.queryx.recruiting_website.domain.vo.NatureVo;
+
+import java.util.List;
+
+public interface TDJobNatureService extends IService<TDJobNature> {
+
+    List<NatureVo> selectJobNatureList();
+
+    NatureVo selectNatureInfo(Long jobNatureId);
+
+    Object updateJobNatureStatus(Integer status, Long jobNatureId);
+
+    Object updateJobNature(JobNatureDto jobNatureDto);
+
+
+    Object addJobNature(String jobNatureName);
+
+    Object delJobNature(Long jobNatureId);
+}
+

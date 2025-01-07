@@ -27,6 +27,8 @@ public class TDUser {
 
     private String userAvatar;
 
+    private String delFlag;
+
     private Integer userInterviews;
 
     private Date userRegisterTime;

@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.LoginUser;
 import com.queryx.recruiting_website.domain.TDAdmin;
@@ -37,15 +38,21 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LambdaQueryWrapper<TDAdmin> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TDAdmin::getAdminUsername, username).eq(TDAdmin::getAdminStatus, "0");
+        wrapper.eq(TDAdmin::getAdminUsername, username)
+                .eq(TDAdmin::getAdminStatus, Common.STATUS_ENABLE.getCode());
         TDAdmin tdAdmin = adminMapper.selectOne(wrapper);
         if (Objects.isNull(tdAdmin)) {
             TDUser user = null;
             if (username.matches(PHONE)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
-                        .eq(TDUser::getUserPhone, username));
+                        .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE.getCode())
+                        .eq(TDUser::getDelFlag,Common.NOT_DELETED.getCode()));
+
             } else if (username.matches(EMAIL)) {
                 user = userMapper.queryUserByEmail(username);
+            }
+            if (Objects.isNull(user)) {
+                throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
             }
             return new LoginUser(user);
         }

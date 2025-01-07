@@ -75,7 +75,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         if (selectResumeDto.getResumeType().equals(Common.RESUME_ONLINE.getCode())) {
             LambdaQueryWrapper<TDResume> QueryWrapper = new LambdaQueryWrapper<>();
             QueryWrapper.eq(TDResume::getResumeId,selectResumeDto.getResumeId())
-                    .eq(TDResume::getResumeStatus,"0")
+                    .eq(TDResume::getResumeStatus,Common.STATUS_ENABLE.getCode())
                     .eq(TDResume::getResumeReview,Common.REVIEW_SUCCESS.getCode());
             TDResume tdResume = tdResumeMapper.selectOne(QueryWrapper);
             BeanUtils.copyProperties(tdResume, resumeVo);
@@ -84,7 +84,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
         LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TDResumeAttachments::getResumeAttachmentId,selectResumeDto.getResumeId())
-                .eq(TDResumeAttachments::getIsDeleted,"0")
+                .eq(TDResumeAttachments::getIsDeleted,Common.NOT_DELETED.getCode())
                 .eq(TDResumeAttachments::getAttachmentsReview,Common.REVIEW_SUCCESS.getCode());
 
         TDResumeAttachments resume = tdResumeAttachmentsMapper.selectOne(wrapper);

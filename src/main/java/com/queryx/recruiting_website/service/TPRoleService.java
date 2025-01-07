@@ -24,5 +24,9 @@ public interface TPRoleService extends IService<TPRole> {
     String updateRoleStatus(Long roleId,String roleStatus);
 
     RoleVo roleInfo(Long roleId);
+
+    Object addRole(RoleInfoDto roleInfoDto);
+
+    Object delRole(Long roleId);
 }
 

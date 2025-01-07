@@ -1,13 +1,17 @@
-package com.queryx.recruiting_website.domain.dto;
+package com.queryx.recruiting_website.domain.vo;
 
 import lombok.Data;
 
 @Data
-public class AdminDto {
+public class AdminVo {
+
     private Long adminId;
+
     private Long roleId;
+
     private String adminName;
+
     private String adminUsername;
-    private String adminPassword;
-    private String adminAvatar;
+
+    private String adminStatus;
 }

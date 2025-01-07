@@ -33,7 +33,8 @@ public enum AppHttpCodeEnum {
     RESUME_NOT_EXIST(423, "简历不存在"),
     SYSTEM_ERROR(500, "出现错误"),
     LOGIN_EXPIRED(501,"token已过期"),
-    PHONE_NULL(424,"手机号不能为空");
+    PHONE_NULL(424,"手机号不能为空"),
+    SUPER_ADMIN(425,"超级管理员不允许修改");
 
 
     final int code;
