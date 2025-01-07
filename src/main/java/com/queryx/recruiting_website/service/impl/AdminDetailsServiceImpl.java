@@ -3,10 +3,7 @@ package com.queryx.recruiting_website.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.LoginAdmin;
-import com.queryx.recruiting_website.domain.LoginUser;
-import com.queryx.recruiting_website.domain.TDAdmin;
-import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
@@ -18,9 +15,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -46,7 +45,7 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
             if (username.matches(PHONE)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
                         .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE.getCode())
-                        .eq(TDUser::getDelFlag,Common.NOT_DELETED.getCode()));
+                        .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode()));
 
             } else if (username.matches(EMAIL)) {
                 user = userMapper.queryUserByEmail(username);
@@ -57,6 +56,11 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
             return new LoginUser(user);
         }
         // 权限查询并封装
+        if (tdAdmin.getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
+            List<String> perms=new ArrayList<>();
+            perms.add(Common.SUPER_ADMIN.getMsg());
+            return new LoginAdmin(tdAdmin, perms);
+        }
         List<String> perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId());
         return new LoginAdmin(tdAdmin, perms);
     }
