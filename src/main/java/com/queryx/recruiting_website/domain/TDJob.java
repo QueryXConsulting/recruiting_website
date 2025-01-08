@@ -4,7 +4,9 @@ import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * (TDJob)实体类
@@ -13,78 +15,60 @@ import lombok.Data;
  * @since 2024-12-23 12:21:50
  */
 @Data
+@ToString
+@Schema(name = "岗位信息")
 public class TDJob {
 
-
-
-    /**
-     * 岗位id
-     */
     @TableId(type = IdType.AUTO)
+    @Schema(name = "岗位ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long jobId;
-    /**
-     * 关联企业
-     */
+
+    @Schema(name = "公司ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyId;
-    /**
-     * 工作职位名称
-     */
+
+    @Schema(name = "岗位名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobPosition;
-    /**
-     * 工作职位描述
-     */
+
+    @Schema(name = "岗位描述", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobPositionDescribe;
-    /**
-     * 工种分类
-     */
+
+    @Schema(name = "岗位类别", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobCategory;
-    /**
-     * 工作地点
-     */
+
+    @Schema(name = "岗位地点", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobArea;
-    /**
-     * 人数
-     */
+
+    @Schema(name = "招聘人数", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer jobPersonNumber;
-    /**
-     * 工资
-     */
+
+    @Schema(name = "薪资范围", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobSalary;
-    /**
-     * 教育程度
-     */
+
+    @Schema(name = "学历要求", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobEducation;
-    /**
-     * 工作经验
-     */
+
+    @Schema(name = "工作经验", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobExperience;
-    /**
-     * 联系人名称
-     */
+
+    @Schema(name = "联系人名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobContact;
-    /**
-     * 联系人手机号
-     */
+
+    @Schema(name = "联系人电话", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobContactsPhone;
-    /**
-     * 岗位创建时间
-     */
+
+    @Schema(name = "发布时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date jobTime;
-    /**
-     * 岗位浏览量
-     */
+
+    @Schema(name = "浏览量", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer jobView;
-    /**
-     * 工作性质
-     */
+
+    @Schema(name = "岗位性质", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobNature;
-    /**
-     * 0代表待审核,1代表审核通过
-     */
+
+    @Schema(name = "审核状态", description = "0代表待审核,1代表审核通过", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobReview;
-    /**
-     * 0关闭,1代表发布
-     */
+
+    @Schema(name = "启用状态", description = "0代表关闭,1代表启用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobStatus;
 
 }

@@ -34,7 +34,8 @@ public enum AppHttpCodeEnum {
     DELIVER_RESUME_FAIL(421, "投递简历失败"),
     NO_USER(422, "不允许修改该用户"),
     RESUME_NOT_EXIST(423, "简历不存在"),
-    PHONE_OR_EMAIL_ILLEGAL(424, "手机号或邮箱输入不合法");
+    PHONE_OR_EMAIL_ILLEGAL(424, "手机号或邮箱输入不合法"),
+    INTERVIEW_NOT_EXIST(425, "面试不存在");
 
 
     final int code;

@@ -19,7 +19,6 @@ public class DeliverServiceImpl implements DeliverService {
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
 
-
     @Override
     public int insertDeliverResume(DeliverResumeDTO deliverResumeDTO) {
         // 装配数据

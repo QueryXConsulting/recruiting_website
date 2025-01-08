@@ -14,7 +14,7 @@ public class InterviewVO {
     /**
      * 公司id
      */
-    private Long companyId;
+    private Long companyInfoId;
     /**
      * 面试工作名称
      */

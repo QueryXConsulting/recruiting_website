@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 
@@ -13,34 +14,48 @@ import java.util.Date;
  */
 @Data
 @ToString
+@Schema(name = "在线简历DTO")
 public class ResumeDTO {
-    // 在线简历id
+    @Schema(name = "简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resumeId;
-    // 手机号
+
+    @Schema(name = "手机号", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumePhone;
-    // 邮箱
+
+    @Schema(name = "邮箱", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeEmail;
-    // 性别
+
+    @Schema(name = "性别", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeGender;
-    // 出生日期
+
+    @Schema(name = "出生日期", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private Date resumeBirth;
-    // 婚姻状况
+
+    @Schema(name = "婚姻状况", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeMarriage;
-    // 政治背景
+
+    @Schema(name = "政治面貌", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumePolitical;
-    // 毕业院校
+
+    @Schema(name = "毕业院校", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeCollege;
-    // 专业
+
+    @Schema(name = "专业", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeMajor;
-    // 教育程度
+
+    @Schema(name = "学历", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeEducation;
-    // 工作经验
+
+    @Schema(name = "最高学位", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeExperience;
-    // 意向工作
+
+    @Schema(name = "期望职位", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeJob;
-    // 意向工资
+
+    @Schema(name = "期望薪资", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeSalary;
-    // 个人介绍
+
+    @Schema(name = "自我介绍", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeIntroduction;
 
 }

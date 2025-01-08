@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.queryx.recruiting_website.domain.TDInterview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -81,7 +82,11 @@ public class QueryImpl implements QueryService {
     public InterviewVO getInterview(Long id) {
         // 构建SQL语句，查询简历信息
         final InterviewVO interviewVO = new InterviewVO();
-        interviewMapper.getInterviewsByUserId(id).forEach(data -> BeanUtils.copyProperties(data, interviewVO));
+        List<TDInterview> list = interviewMapper.getInterviewsByUserId(id);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        list.forEach(data -> BeanUtils.copyProperties(data, interviewVO));
         return interviewVO;
     }
 

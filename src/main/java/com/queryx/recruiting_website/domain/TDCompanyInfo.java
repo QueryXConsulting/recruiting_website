@@ -4,7 +4,9 @@ import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * (TDCompanyInfo)实体类
@@ -13,54 +15,42 @@ import lombok.Data;
  * @since 2024-12-23 12:21:50
  */
 @Data
+@ToString
+@Schema(name = "企业信息实体类")
 public class TDCompanyInfo {
 
-
-
-    /**
-     * 企业id
-     */
     @TableId(type = IdType.AUTO)
+    @Schema(name = "企业ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyInfoId;
-    /**
-     * 公司用户id
-     */
+
+    @Schema(name = "企业用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
-    /**
-     * 账号
-     */
+
+    @Schema(name = "账号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoUsername;
-    /**
-     * 密码
-     */
+
+    @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoPassword;
-    /**
-     * 公司logo
-     */
+
+    @Schema(name = "公司LOGO", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyLogo;
-    /**
-     * 企业注册时间
-     */
+
+    @Schema(name = "账号注册时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date companyRegisterTime;
-    /**
-     * 企业名
-     */
+
+    @Schema(name = "企业名",implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoName;
-    /**
-     * 公司经营范围
-     */
+
+    @Schema(name = "公司经营范围", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoScope;
-    /**
-     * 公司介绍
-     */
+
+    @Schema(name = "公司介绍", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoProfile;
-    /**
-     * 0代表待审核,1代表审核通过
-     */
+
+    @Schema(name = "审核状态", description = "0代表待审核,1代表审核通过", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoReview;
-    /**
-     * 0代表启用,1代表禁用
-     */
+
+    @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoStatus;
 
 }

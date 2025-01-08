@@ -5,6 +5,7 @@ import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.design.LoginContext;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.domain.vo.LoginVO;
@@ -17,12 +18,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    final String timeZone = "Asia/Shanghai";
 
     @Autowired
     private UserMapper userMapper;
@@ -57,7 +62,7 @@ public class UserServiceImpl implements UserService {
         if (resumes > 0) return AppHttpCodeEnum.EMAIL_EXIST;
         // 复制属性
         user.setResumeId(userResume.getResumeId());
-        user.setUserRegisterTime(Date.from(Instant.now()));
+        user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         BeanUtils.copyProperties(registerDTO, user);
         BeanUtils.copyProperties(registerDTO, userResume);
         // 插入用户
@@ -70,18 +75,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String queryUser(LoginDTO loginDTO) {
-        LoginVO loginVO = new LoginVO();
-        // 判断用户名登录方式 TODO 用户登录：验证码待实现
-        if (loginDTO.getUsername().matches(PHONE)) {
-            TDUser user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
-                    .eq(TDUser::getUserPhone, loginDTO.getUsername())
-                    .eq(TDUser::getUserPassword, loginDTO.getUserPassword())
-                    .eq(TDUser::getUserRole, Common.USER_ROLE_GENERAL)
-            );
-            loginVO.setUserId(user.getUserId());
-            loginVO.setResumeId(user.getResumeId());
-        } else if (loginDTO.getUsername().matches(EMAIL)) {
-            loginVO = userMapper.queryUserByEmail(loginDTO);
+        LoginVO loginVO = LoginContext.executeLogin(userMapper, loginDTO);
+        if (loginVO == null) {
+            return null;
         }
         // 返回JWT
         return JwtUtil.createJWT(Map.of(USER_ID, loginVO.getUserId(), RESUME_ID, loginVO.getResumeId()));

@@ -4,7 +4,9 @@ import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * (TPMenu)实体类
@@ -13,78 +15,61 @@ import lombok.Data;
  * @since 2024-12-23 12:21:50
  */
 @Data
+@ToString
+@Schema(name = "菜单实体类")
 public class TPMenu {
 
 
-
-    /**
-     * 菜单id
-     */
     @TableId(type = IdType.AUTO)
+    @Schema(name = "菜单ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long menuId;
-    /**
-     * 菜单名称
-     */
+
+    @Schema(name = "菜单名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String menuName;
-    /**
-     * 父菜单id
-     */
+
+    @Schema(name = "父菜单ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long parentId;
-    /**
-     * 显示顺序
-     */
+
+    @Schema(name = "显示顺序", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer orderNum;
-    /**
-     * 路由地址
-     */
+
+    @Schema(name = "路由地址", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String path;
-    /**
-     * 组件路径
-     */
+
+    @Schema(name = "组件路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String component;
-    /**
-     * 菜单类型(m目录 c菜单 f按钮)
-     */
+
+    @Schema(name = "菜单类型", description = "m目录 c菜单 f按钮", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String menuType;
-    /**
-     * 菜单状态(0显示 1隐藏)
-     */
+
+    @Schema(name = "菜单状态", description = "0显示 1隐藏", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String visible;
-    /**
-     * 菜单状态(0正常 1停用)
-     */
+
+    @Schema(name = "菜单状态", description = "0正常 1停用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
-    /**
-     * 权限标识
-     */
+
+    @Schema(name = "权限标识", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String perms;
-    /**
-     * 菜单图标
-     */
+
+    @Schema(name = "菜单图标", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String icon;
-    /**
-     * 创建者
-     */
+
+    @Schema(name = "创建者", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long createBy;
-    /**
-     * 创建时间
-     */
+
+    @Schema(name = "创建时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date createTime;
-    /**
-     * 更新者
-     */
+
+    @Schema(name = "更新者", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long updateBy;
-    /**
-     * 更新时间
-     */
+
+    @Schema(name = "更新时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date updateTime;
-    /**
-     * 备注
-     */
+
+    @Schema(name = "备注", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String remark;
-    /**
-     * 删除标志，0表示未删除，1表示已删除
-     */
+
+    @Schema(name = "删除标志", description = "0表示未删除，1表示已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
 
 }

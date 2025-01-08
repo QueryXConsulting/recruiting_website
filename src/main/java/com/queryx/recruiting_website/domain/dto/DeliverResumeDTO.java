@@ -1,21 +1,24 @@
 package com.queryx.recruiting_website.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 
+
 @Data
 @ToString
+@Schema(name = "投递简历DTO")
 public class DeliverResumeDTO {
 
-    // 职位ID
+    @Schema(name = "职位ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
     private Long jobId;
 
-    // 简历ID
+    @Schema(name = "简历ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
     private Long resumeId;
 
-    // 简历类型
+    @Schema(name = "简历类型", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeType;
 
-    // 简历名称(默认是用户名称)
+    @Schema(name = "简历名称", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeName;
 }

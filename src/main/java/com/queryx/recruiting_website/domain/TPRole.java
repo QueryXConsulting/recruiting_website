@@ -3,7 +3,9 @@ package com.queryx.recruiting_website.domain;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * (TPRole)实体类
@@ -12,42 +14,33 @@ import lombok.Data;
  * @since 2024-12-23 12:21:50
  */
 @Data
+@ToString
+@Schema(name = "角色实体类")
 public class TPRole {
 
-
-
-    /**
-     * 角色ID
-     */
     @TableId(type = IdType.AUTO)
+    @Schema(name = "角色ID", implementation = Long.class, requiredMode = Schema.RequiredMode.AUTO)
     private Long roleId;
-    /**
-     * 角色名称
-     */
+
+    @Schema(name = "角色名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String roleName;
-    /**
-     * 显示顺序
-     */
+
+    @Schema(name = "显示顺序", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer roleSort;
-    /**
-     * 角色状态(0正常 1停用)
-     */
+
+    @Schema(name = "启用状态", description = "0代表正常，1代表停用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
-    /**
-     * 0代表未删除,1代表已删除
-     */
+
+    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
-    /**
-     * 创建时间
-     */
+
+    @Schema(name = "创建时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date createTime;
-    /**
-     * 更新者
-     */
+
+    @Schema(name = "更新者", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long updateBy;
-    /**
-     * 更新时间
-     */
+
+    @Schema(name = "更新时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date updateTime;
 
 }

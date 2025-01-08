@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 
@@ -18,72 +19,57 @@ import lombok.ToString;
 @Data
 @ToString
 @TableName("t_d_resume")
+@Schema(name = "在线简历实体类")
 public class TDResume {
-    /**
-     * 在线简历id
-     */
+
     @TableId(value = "resume_id", type = IdType.AUTO)
+    @Schema(name = "在线简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resumeId;
-    /**
-     * 手机号
-     */
+
     @TableField("resume_phone")
+    @Schema(name = "手机号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumePhone;
-    /**
-     * 邮箱
-     */
+
+    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeEmail;
-    /**
-     * 性别
-     */
+
+    @Schema(name = "性别", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeGender;
-    /**
-     * 出生日期
-     */
+
+    @Schema(name = "生日", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date resumeBirth;
-    /**
-     * 婚姻状况
-     */
+
+    @Schema(name = "婚姻情况", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeMarriage;
-    /**
-     * 政治背景
-     */
+
+    @Schema(name = "政治面貌", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumePolitical;
-    /**
-     * 毕业院校
-     */
+
+    @Schema(name = "毕业院校", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeCollege;
-    /**
-     * 专业
-     */
+
+    @Schema(name = "专业", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeMajor;
-    /**
-     * 教育程度
-     */
+
+    @Schema(name = "教育经历", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeEducation;
-    /**
-     * 工作经验
-     */
+
+    @Schema(name = "工作经验", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeExperience;
-    /**
-     * 意向工作
-     */
+
+    @Schema(name = "意向工作", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeJob;
-    /**
-     * 意向工资
-     */
+
+    @Schema(name = "意向薪资", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeSalary;
-    /**
-     * 个人介绍
-     */
+
+    @Schema(name = "个人介绍", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeIntroduction;
-    /**
-     * 0代表待审核,1代表审核通过
-     */
+
+    @Schema(name = "审核状态", description = "0代表待审核,1代表审核通过", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeReview;
-    /**
-     * 0代表启用,1代表禁用
-     */
+
+    @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeStatus;
 
 }

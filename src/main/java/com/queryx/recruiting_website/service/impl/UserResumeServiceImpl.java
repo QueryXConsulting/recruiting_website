@@ -22,7 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -30,11 +31,13 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class UserResumeServiceImpl implements UserResumeService {
 
-    // TODO 上传附件简历命名规则
+    // 上传附件简历命名前缀及后缀
     final String prefix = "resume";
     final String suffix = ".pdf";
 
-    @Value("${file.upload.path}")
+    final String timeZone = "Asia/Shanghai";
+
+    @Value("${file.upload-path}")
     private String filePath;
 
     @Autowired
@@ -63,7 +66,7 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setUserId(userId);
             tdRS.setFileName(file.getOriginalFilename());
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
-            tdRS.setUploadDate(Date.from(Instant.now()));
+            tdRS.setUploadDate(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
             tdRS.setFilePath(resumeFile.getPath());
             tdRS.setAttachmentsReview(Common.REVIEW_OK);
             tdRS.setIsDeleted(Common.NOT_DELETE);

@@ -1,0 +1,47 @@
+file:
+  upload-path: src/main/resources/resume_files/ # 文件上传路径
+
+# 服务器配置
+server:
+  port: 8080 # 端口号
+
+#  swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    packageToScan: com.queryx.recruiting_website.controller
+
+# spring配置
+spring:
+  application:
+    name: recruiting_website
+
+  # 静态资源配置
+  servlet:
+    multipart:
+      enabled: true  # 启用Servlet的多部分文件上传支持
+      max-file-size: 100MB  # 设置单个上传文件的最大允许大小
+      max-request-size: 100MB  # 设置整个多部分请求的最大允许大小
+      file-size-threshold: 0  # 设置文件写入磁盘的大小阈值（0表示文件始终写入磁盘）
+
+  # 数据库配置
+  datasource:
+    # 数据库连接信息
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# MyBatis Plus配置
+mybatis-plus:
+  # 该配置指定了MyBatis框架在类路径下查找所有mapper目录下的XML文件
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    # SQL语句等日志信息输出在控制台
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
