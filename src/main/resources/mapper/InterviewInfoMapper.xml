@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.queryx.recruiting_website.mapper.InterviewMapper">
+
+    <!-- 学生用户登录 -->
+    <select id="getInterviewsByUserId"
+            resultType="com.queryx.recruiting_website.domain.TDInterview">
+        select
+        i.interview_id,
+        i.interview_status,
+        i.interview_job,
+        i.interview_result,
+        i.interview_type,
+        i.interview_date,
+        i.interview_region,
+        u.user_id,
+        c.company_info_id
+        FROM t_d_interview i
+        INNER JOIN
+        t_d_user u ON i.user_id = u.user_id
+        INNER JOIN
+        t_d_company_info c ON i.company_id = c.company_info_id
+        <where>
+            <if test="userId != null">
+                i.user_id = #{userId} AND i.is_deleted = 0
+            </if>
+        </where>
+    </select>
+</mapper>
