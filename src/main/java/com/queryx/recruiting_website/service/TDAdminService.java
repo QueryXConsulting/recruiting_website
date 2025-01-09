@@ -18,7 +18,7 @@ public interface TDAdminService extends IService<TDAdmin> {
 
     AdminUserInfoVo getInfo();
 
-    Page<AdminVo> selectAdminList(Integer page, Integer size);
+    Page<AdminVo> selectAdminList(Integer page, Integer size, String adminName, String adminStatus);
 
     AdminVo selectAdminInfo(Long userId);
 

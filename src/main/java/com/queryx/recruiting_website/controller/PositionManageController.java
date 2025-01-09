@@ -30,8 +30,8 @@ public class PositionManageController {
 
     @GetMapping("/selectJobList")
     @Operation(summary = "职位列表")
-    public CommonResp selectJobList(Integer page,Integer size) {
-        return CommonResp.success(jobService.selectJobList(page,size,null));
+    public CommonResp selectJobList(Integer page, Integer size, Long companyId,String jobName,String jobReview) {
+        return CommonResp.success(jobService.selectJobList(page,size,companyId,jobName,jobReview,null));
     }
 
     @GetMapping("/selectJobInfo/{jobId}")
@@ -70,8 +70,8 @@ public class PositionManageController {
 
     @GetMapping("/selectCategory")
     @Operation(summary = "工种分类列表查询")
-    public CommonResp selectCategoryList(Integer page,Integer size) {
-        return CommonResp.success(categoryService.selectCategoryList(page,size));
+    public CommonResp selectCategoryList(Integer page,Integer size,String categoryName,String status) {
+        return CommonResp.success(categoryService.selectCategoryList(page,size,categoryName,status));
     }
 
     @PutMapping("/updateCategoryStatus/{status}/{categoryId}")

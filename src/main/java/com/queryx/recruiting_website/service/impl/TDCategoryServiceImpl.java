@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -9,13 +8,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCategory;
-import com.queryx.recruiting_website.domain.TDJob;
-import com.queryx.recruiting_website.domain.TDJobNature;
 import com.queryx.recruiting_website.domain.dto.CategoryDto;
 import com.queryx.recruiting_website.domain.vo.CategoryVo;
-import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDCategoryMapper;
 import com.queryx.recruiting_website.service.TDCategoryService;
@@ -24,10 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 
-import java.util.List;
 import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
 
 
 @Service("tDCategoryService")
@@ -37,8 +29,11 @@ public class TDCategoryServiceImpl extends ServiceImpl<TDCategoryMapper, TDCateg
     private TDCategoryMapper tDCategoryMapper;
 
     @Override
-    public IPage<CategoryVo> selectCategoryList(Integer page, Integer size) {
-        Page<TDCategory> tdCategoryPage = tDCategoryMapper.selectPage(new Page<>(page, size), null);
+    public IPage<CategoryVo> selectCategoryList(Integer page, Integer size, String categoryName, String status) {
+        LambdaUpdateWrapper<TDCategory> tdCategoryLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        tdCategoryLambdaUpdateWrapper.like(categoryName != null, TDCategory::getCategoryName, categoryName)
+                .eq(status != null, TDCategory::getCategoryStatus, status);
+        Page<TDCategory> tdCategoryPage = tDCategoryMapper.selectPage(new Page<>(page, size), tdCategoryLambdaUpdateWrapper);
         IPage<CategoryVo> categoryPageVoPage = new Page<>(tdCategoryPage.getCurrent(), tdCategoryPage.getSize(), tdCategoryPage.getTotal());
 
         return categoryPageVoPage.setRecords(tdCategoryPage.getRecords().stream().map(tdCategory -> {

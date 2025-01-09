@@ -7,7 +7,7 @@ public class AdminVo {
 
     private Long adminId;
 
-    private Long roleId;
+    private String roleName;
 
     private String adminName;
 

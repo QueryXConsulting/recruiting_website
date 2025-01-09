@@ -9,10 +9,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.dto.JobDto;
 import com.queryx.recruiting_website.exception.SystemException;
+import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
+import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.service.TDJobService;
 import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.domain.dto.JobDetailDto;
@@ -22,6 +26,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -30,23 +36,36 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     @Resource
     private TDJobMapper tdJobMapper;
 
+    @Resource
+    private TDCompanyInfoService companyInfoService;
+
+
     @Override
-    public IPage<JobCompanyListVo> selectJobList(Integer page, Integer size, Long companyId) {
-        QueryWrapper<TDJob> wrapper = new QueryWrapper<>();
-        if (companyId != null) {
-            wrapper.eq("company_id", companyId);
-        }
-        wrapper.select("job_id", "job_position", "job_education", "job_experience", "job_time", "job_nature", "job_review", "job_status");
+    public IPage<JobCompanyListVo> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status) {
+
+        LambdaQueryWrapper<TDJob> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(jobName != null, TDJob::getJobPosition, jobName)
+                .eq(status != null, TDJob::getJobStatus, status)
+                .eq(jobReview != null, TDJob::getJobReview, jobReview)
+                .eq(companyId != null, TDJob::getCompanyId, companyId);
+
         Page<TDJob> pageVo = new Page<>(page, size);
         IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVo, wrapper);
+
         if (jobPage.getRecords().isEmpty()) {
             return null;
         }
-
+        // 根据公司id进行分组
+        List<Long> companyIds = jobPage.getRecords().stream().map(TDJob::getCompanyId).toList();
+        List<TDCompanyInfo> tdCompanyInfos = companyInfoService.listByIds(companyIds);
+        Map<Long, String> companyNames = tdCompanyInfos.stream()
+                .collect(Collectors.toMap(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName));
+        // 进行类型转换并把每个工作得公司名set
         IPage<JobCompanyListVo> jobCompanyListVoPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
         jobCompanyListVoPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
             JobCompanyListVo jobCompanyListVo = new JobCompanyListVo();
             BeanUtils.copyProperties(tdJob, jobCompanyListVo);
+            jobCompanyListVo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
             return jobCompanyListVo;
         }).collect(Collectors.toList()));
 
@@ -62,8 +81,10 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                         TDJob::getJobSalary, TDJob::getJobTime, TDJob::getJobPosition);
 
         TDJob tdJob = tdJobMapper.selectOne(jobInfo);
+        String companyName = companyInfoService.getById(tdJob.getCompanyId()).getCompanyInfoName();
         JobDetailDto jobDetailDto = new JobDetailDto();
         BeanUtils.copyProperties(tdJob, jobDetailDto);
+        jobDetailDto.setCompanyName(companyName);
         return jobDetailDto;
     }
 
@@ -75,6 +96,9 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         updateWrapper.eq("job_id", tdJob.getJobId())
                 .set("job_review", Common.REVIEW_WAIT.getCode())
                 .set("job_status", Common.STATUS_CLOSE.getCode());
+        if (jobDetailDto.getCompanyId() != null) {
+            updateWrapper.set("company_id", jobDetailDto.getCompanyId());
+        }
 
         if (tdJobMapper.update(tdJob, updateWrapper) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
@@ -125,7 +149,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         LambdaUpdateWrapper<TDJob> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(TDJob::getJobId, jobId)
                 .set(TDJob::getJobReview, review)
-                .set(TDJob::getJobStatus,Common.STATUS_PUBLISH.getCode());
+                .set(TDJob::getJobStatus, Common.STATUS_PUBLISH.getCode());
         if (!update(updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

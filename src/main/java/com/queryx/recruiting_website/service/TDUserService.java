@@ -23,7 +23,7 @@ public interface TDUserService extends IService<TDUser> {
     UserRegisterDTO register(UserRegisterDTO userRegisterDTO);
 
 
-    Page<UserVo> selectUserList(Integer page, Integer seize);
+    Page<UserVo> selectUserList(Integer page, Integer seize, String userName, String userStatus);
 
     Object updateUserInfo(UserDto userDto);
 

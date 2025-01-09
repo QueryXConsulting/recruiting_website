@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Configuration
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -22,18 +23,16 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         // 自定义权限校验
-        log.error("----------------进入权限校验---------------------");
-        // 普通用户应无任何权限则直接返回false
-        if (authentication.getAuthorities().isEmpty()) {
-            return false;
+        log.warn("----------------进入权限校验---------------------");
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof LoginAdmin loginAdmin) {
+            if (loginAdmin.getTdAdmin().getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
+                return true;
+            }
         }
-        // 管理员用户则进行权限校验
-        LoginAdmin loginAdmin = SecurityUtils.getLoginAdmin();
-        if (loginAdmin.getTdAdmin().getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
-            return true;
-        }
-        List<String> permissions = loginAdmin.getPermissions();
-        return permissions.contains(permission);
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals(permission));
     }
 
 

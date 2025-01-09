@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -12,7 +11,6 @@ import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
-import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
 import com.queryx.recruiting_website.domain.vo.UserLoginVo;
 import com.queryx.recruiting_website.domain.vo.UserVo;
 import com.queryx.recruiting_website.exception.SystemException;
@@ -114,7 +112,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
 
         UserLoginVo userLoginVo = new UserLoginVo();
         // 判断是否为公司用户
-        if (loginDTO.getUserRole().equals("1")) {
+        if (loginDTO.getUserRole().equals(Common.COMPANY_USER.getCode())) {
             LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
             companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
                     .select(TDCompanyInfo::getCompanyInfoId);
@@ -153,7 +151,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         user.setUserRegisterTime(Date.from(Instant.now()));
         userRegisterDTO.setUserPassword(passwordEncoder.encode(userRegisterDTO.getUserPassword()));
         BeanUtils.copyProperties(userRegisterDTO, user);
-        if (userRegisterDTO.getUserRole().equals("0")) {
+        if (userRegisterDTO.getUserRole().equals(Common.STUDENT_USER.getCode())) {
             TDResume userResume = new TDResume();
             BeanUtils.copyProperties(userRegisterDTO, userResume);
             // 插入在线简历
@@ -169,9 +167,11 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     }
 
     @Override
-    public Page<UserVo> selectUserList(Integer page, Integer size) {
+    public Page<UserVo> selectUserList(Integer page, Integer size, String userName, String userStatus) {
         LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode());
+        wrapper.eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode())
+                .like(userName != null, TDUser::getUserName, userName)
+                .eq(userStatus != null, TDUser::getUserStatus, userStatus);
         Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
         Page<UserVo> userVoPage = new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
 
@@ -201,7 +201,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         BeanUtils.copyProperties(userDto, tdUser);
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         if (!update(tdUser, new LambdaUpdateWrapper<TDUser>().eq(TDUser::getUserId,
-                userDto.getUserId()).eq(TDUser::getDelFlag,Common.NOT_DELETED.getCode()))) {
+                userDto.getUserId()).eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode()))) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
 

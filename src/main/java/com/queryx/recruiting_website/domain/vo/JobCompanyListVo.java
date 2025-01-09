@@ -8,23 +8,20 @@ public class JobCompanyListVo {
 
     private Long jobId;
 
+    private String companyName;
 
     private String jobPosition;
-
 
     private String jobEducation;
 
     private String jobExperience;
 
-
     private Date jobTime;
-
 
     private String jobNature;
 
     private String jobReview;
 
     private String jobStatus;
-
 
 }

@@ -10,14 +10,14 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TDAdmin;
 
-import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.TPMenu;
+import com.queryx.recruiting_website.domain.TPRole;
 import com.queryx.recruiting_website.domain.vo.AdminVo;
-import com.queryx.recruiting_website.domain.vo.UserVo;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
+import com.queryx.recruiting_website.mapper.TPRoleMapper;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 
@@ -51,7 +51,8 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     private TDAdminMapper tdAdminMapper;
     @Resource
     private TPMenuMapper menuMapper;
-    private static final Long SUPER_ADMIN = 1L;
+    @Resource
+    private TPRoleMapper roleMapper;
 
     @Override
     public AdminDto addAdmin(AdminDto adminDto) {
@@ -115,13 +116,20 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     }
 
     @Override
-    public Page<AdminVo> selectAdminList(Integer page, Integer size) {
-        Page<TDAdmin> tdUserPage = tdAdminMapper.selectPage(new Page<>(page, size), null);
+    public Page<AdminVo> selectAdminList(Integer page, Integer size, String adminName, String adminStatus) {
+        LambdaUpdateWrapper<TDAdmin> tdAdminLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        tdAdminLambdaUpdateWrapper.like(adminName != null, TDAdmin::getAdminName, adminName)
+                .eq(adminStatus != null, TDAdmin::getAdminStatus, adminStatus);
+        Page<TDAdmin> tdUserPage = tdAdminMapper.selectPage(new Page<>(page, size), tdAdminLambdaUpdateWrapper);
         Page<AdminVo> adminVoPage = new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
 
+        List<Long> roleIds = tdUserPage.getRecords().stream().map(TDAdmin::getRoleId).toList();
+        List<TPRole> tpRoles = roleMapper.selectByIds(roleIds);
+        Map<Long, String> roleName = tpRoles.stream().collect(Collectors.toMap(TPRole::getRoleId, TPRole::getRoleName));
         adminVoPage.setRecords(tdUserPage.getRecords().stream().map(user -> {
             AdminVo adminVo = new AdminVo();
             BeanUtils.copyProperties(user, adminVo);
+            adminVo.setRoleName(roleName.get(user.getRoleId()));
             return adminVo;
         }).collect(Collectors.toList()));
 
@@ -131,8 +139,10 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     @Override
     public AdminVo selectAdminInfo(Long userId) {
         TDAdmin byId = getById(userId);
+        TPRole tpRole = roleMapper.selectById(byId.getRoleId());
         AdminVo adminVo = new AdminVo();
         BeanUtils.copyProperties(byId, adminVo);
+        adminVo.setRoleName(tpRole.getRoleName());
         return adminVo;
     }
 

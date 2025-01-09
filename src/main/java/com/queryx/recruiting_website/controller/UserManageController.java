@@ -30,8 +30,8 @@ public class UserManageController {
 
     @GetMapping("/selectAdminList")
     @Operation(summary = "管理员列表")
-    public CommonResp selectAdminList(Integer page, Integer size) {
-        return CommonResp.success(adminService.selectAdminList(page, size));
+    public CommonResp selectAdminList(Integer page, Integer size, String adminName, String adminStatus) {
+        return CommonResp.success(adminService.selectAdminList(page, size, adminName, adminStatus));
     }
 
     @GetMapping("/selectAdminInfo/{adminId}")
@@ -57,18 +57,17 @@ public class UserManageController {
 
     @GetMapping("/selectUserList")
     @Operation(summary = "用户列表")
-    public CommonResp selectUserList(Integer page, Integer size) {
-        return CommonResp.success(userService.selectUserList(page, size));
+    public CommonResp selectUserList(Integer page, Integer size, String userName, String userStatus) {
+        return CommonResp.success(userService.selectUserList(page, size, userName, userStatus));
     }
 
 
     @GetMapping("/selectUserInfo/{userId}")
     @Operation(summary = "用户信息")
     @PreAuthorize("hasPermission(null ,'system:user:query')")
-    public CommonResp selectUserbInfo(@PathVariable("userId") Long userId) {
+    public CommonResp selectUserInfo(@PathVariable("userId") Long userId) {
         return CommonResp.success(userService.selectUserInfo(userId, null));
     }
-
 
 
     @PutMapping("/updateUserInfo")

@@ -10,7 +10,7 @@ import com.queryx.recruiting_website.domain.vo.CategoryVo;
 public interface TDCategoryService extends IService<TDCategory> {
 
 
-    IPage<CategoryVo> selectCategoryList(Integer page, Integer size);
+    IPage<CategoryVo> selectCategoryList(Integer page, Integer size, String categoryName, String status);
 
     Object updateCategory(CategoryDto categoryDto);
 

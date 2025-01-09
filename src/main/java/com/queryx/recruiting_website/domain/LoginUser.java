@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -16,11 +18,30 @@ public class LoginUser implements UserDetails {
 
     private TDUser tdUser;
 
+
+    private List<String> permissions;
+
+    public LoginUser(TDUser tdUser, List<String> permissions) {
+        this.tdUser = tdUser;
+        this.permissions = permissions;
+    }
+
+    // SpringSecurity所需要权限信息
+    private List<GrantedAuthority> authorities;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 普通用户不需要权限
-        return null;
+        if (authorities != null) {
+            return authorities;
+        }
+        // 把permissions中字符串类型的权限信息转换成GrantedAuthority对象存入authorities中
+        authorities = permissions.stream().
+                map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        return authorities;
     }
+
+
 
     @Override
     public String getPassword() {

@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.constant;
 
 public enum Common {
+    COMPANY_USER("4","公司用户"),
+    STUDENT_USER("5","学生用户"),
     SUPER_ADMIN("1","超级管理员"),
     NOT_DELETED("0","未删除"),
     DELETED("1","已删除"),

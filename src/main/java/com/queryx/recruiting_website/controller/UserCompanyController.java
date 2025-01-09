@@ -17,12 +17,14 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @Tag(name = "公司用户模块")
 @RequestMapping("/company")
+@PreAuthorize("hasPermission(null ,'user:company')")
 public class UserCompanyController {
     @Resource
     private TDJobService tdJobService;
@@ -37,8 +39,8 @@ public class UserCompanyController {
 
     @GetMapping("/jobList")
     @Operation(summary = "查看职位列表")
-    public CommonResp selectJobList(Integer page, Integer size, Long companyId) {
-        return CommonResp.success(tdJobService.selectJobList(page, size, companyId));
+    public CommonResp selectJobList(Integer page, Integer size, Long companyId,String jobName,String jobReview,String status) {
+        return CommonResp.success(tdJobService.selectJobList(page, size, companyId,jobName,jobReview,status));
     }
 
 
@@ -96,8 +98,8 @@ public class UserCompanyController {
 
     @GetMapping("/resumeList/{companyId}")
     @Operation(summary = "查询投递的简历列表")
-    public CommonResp selectResumeList(@PathVariable("companyId") Long companyId) {
-        return CommonResp.success(tdResumeService.selectResumeList(companyId));
+    public CommonResp selectResumeList(@PathVariable("companyId") Long companyId,Integer page, Integer size) {
+        return CommonResp.success(tdResumeService.selectResumeList(page,size,companyId));
     }
 
     @PostMapping("/selectResume")

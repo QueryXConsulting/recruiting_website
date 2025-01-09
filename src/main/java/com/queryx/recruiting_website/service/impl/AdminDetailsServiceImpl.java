@@ -53,14 +53,10 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
             if (Objects.isNull(user)) {
                 throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
             }
-            return new LoginUser(user);
+            List<String> perms = menuMapper.selectPermsByRoleId(Long.valueOf(user.getUserRole()));
+            return new LoginUser(user, perms);
         }
         // 权限查询并封装
-        if (tdAdmin.getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
-            List<String> perms=new ArrayList<>();
-            perms.add(Common.SUPER_ADMIN.getMsg());
-            return new LoginAdmin(tdAdmin, perms);
-        }
         List<String> perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId());
         return new LoginAdmin(tdAdmin, perms);
     }

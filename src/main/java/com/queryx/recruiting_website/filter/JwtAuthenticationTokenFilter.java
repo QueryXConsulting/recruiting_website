@@ -61,8 +61,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         LinkedHashMap adminUser = (LinkedHashMap) data.get("AdminUser");
         if (ObjectUtils.isEmpty(adminUser)) {
             LinkedHashMap user = (LinkedHashMap) data.get("User");
+            LoginUser loginUser = getLoginUser(user);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                    = new UsernamePasswordAuthenticationToken(getLoginUser(user), null, null);
+                    = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             filterChain.doFilter(request, response);
             return;
@@ -89,7 +90,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         LoginUser loginUser = new LoginUser();
         TDUser tdUser = objectMapper.convertValue(user.get("tdUser"), TDUser.class);
         loginUser.setTdUser(tdUser);
-
+        loginUser.setPermissions((List<String>) user.get("permissions"));
         return loginUser;
     }
 

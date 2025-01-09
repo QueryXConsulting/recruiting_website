@@ -8,6 +8,10 @@ import java.util.Date;
 public class JobDetailDto {
 
 
+    private Long companyId;
+
+    private String companyName;
+
     private Long jobId;
 
     private String jobPosition;

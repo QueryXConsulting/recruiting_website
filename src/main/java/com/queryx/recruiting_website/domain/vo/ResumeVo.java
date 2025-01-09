@@ -38,7 +38,5 @@ public class ResumeVo {
 
     private String resumeIntroduction;
 
-    private String filePath;
-
 }
 
