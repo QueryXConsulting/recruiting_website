@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
+import java.io.Serializable;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,6 +43,7 @@ public class TPRole {
     private Long updateBy;
 
     @Schema(name = "更新时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
+
     private Date updateTime;
 
 }

@@ -2,6 +2,9 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 
+import java.io.Serializable;
+
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,7 +55,6 @@ public class TDUser {
 
     @Schema(name = "删除标志", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
-
 
 }
 

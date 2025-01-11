@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;

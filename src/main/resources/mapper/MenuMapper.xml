@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.queryx.recruiting_website.mapper.TPMenuMapper">
+
+    <select id="selectPermsByRoleId" resultType="java.lang.String">
+        SELECT DISTINCT m.perms
+        FROM `t_p_role_menu` ur
+                 LEFT JOIN `t_p_menu` m ON m.`menu_id` = ur.`menu_id`
+        WHERE ur.role_id = #{roleId}
+          AND m.`menu_type` IN ('C', 'F')
+          AND m.`status` = 0
+          AND m.`del_flag` = 0
+    </select>
+
+
+</mapper>

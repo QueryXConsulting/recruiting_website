@@ -2,6 +2,8 @@ package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
 
+
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -70,6 +72,7 @@ public class TDResume {
     private String resumeReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+
     private String resumeStatus;
 
 }

@@ -1,5 +1,8 @@
 package com.queryx.recruiting_website.domain.dto;
 
+
+import lombok.Data;
+import lombok.ToString;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;

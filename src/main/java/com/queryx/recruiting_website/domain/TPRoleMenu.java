@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.domain;
 
+
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +27,7 @@ public class TPRoleMenu {
     private Long menuId;
 
     @Schema(name = "角色ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+
     private Long roleId;
 
 }

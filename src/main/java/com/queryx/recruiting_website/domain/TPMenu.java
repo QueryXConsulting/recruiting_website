@@ -72,5 +72,6 @@ public class TPMenu {
     @Schema(name = "删除标志", description = "0表示未删除，1表示已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
 
+
 }
 
