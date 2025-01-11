@@ -7,9 +7,14 @@ public enum AppHttpCodeEnum {
 
 
     SUCCESS(200, "操作成功"),
-    // 错误
+  
+    // 服务端错误
+    SYSTEM_ERROR(500, "出现错误"),
+
+    // 客户端错误
     NEED_LOGIN(401, "需要登录后操作"),
-    USERNAME_EXIST(402, "用户名已存在"),
+    USER_EXIST(402, "用户已存在"),
+
     PHONE_EXIST(403, "手机号已存在"),
     EMAIL_EXIST(404, "邮箱已存在"),
     NO_OPERATOR_AUTH(405, "无权限操作"),
@@ -31,10 +36,15 @@ public enum AppHttpCodeEnum {
     DELIVER_RESUME_FAIL(421, "投递简历失败"),
     NO_USER(422, "不允许修改该用户"),
     RESUME_NOT_EXIST(423, "简历不存在"),
-    SYSTEM_ERROR(500, "出现错误"),
+/*
+
     LOGIN_EXPIRED(501,"token已过期"),
     PHONE_NULL(424,"手机号不能为空"),
     SUPER_ADMIN(425,"超级管理员不允许修改");
+    PHONE_OR_EMAIL_ILLEGAL(424, "手机号或邮箱输入不合法"),
+    INTERVIEW_NOT_EXIST(425, "面试不存在");
+
+*/
 
 
     final int code;
@@ -45,4 +55,6 @@ public enum AppHttpCodeEnum {
         this.msg = errorMessage;
     }
 
+
 }
+

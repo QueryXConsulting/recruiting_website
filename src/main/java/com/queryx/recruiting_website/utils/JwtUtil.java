@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.utils;
 
 import io.jsonwebtoken.*;
+
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -23,8 +25,10 @@ public class JwtUtil {
     public static final Long JWT_TTL = 8 * 60 * 60 * 1000L;// 60 * 60 *1000  一个小时
 
 
+
     // 生成token
     public static <T> String createJWT(Map<String, T> claims) {
+
         //指定加密算法
         SecureDigestAlgorithm<SecretKey, SecretKey> algorithm = Jwts.SIG.HS256;
         //生成JWT的时间
@@ -41,10 +45,11 @@ public class JwtUtil {
 
     // 解析token
     public static Jws<Claims> parseJWT(String token) {
-        //密钥
+      
+        // 密钥实例
         SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         return Jwts.parser()
-                .verifyWith(key)  //设置签名的密钥
+                .verifyWith(key)  // 设置签名的密钥
                 .build()
                 .parseSignedClaims(token);
     }
