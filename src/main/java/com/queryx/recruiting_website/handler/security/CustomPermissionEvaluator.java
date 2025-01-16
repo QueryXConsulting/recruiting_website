@@ -1,19 +1,14 @@
 package com.queryx.recruiting_website.handler.security;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
-import com.queryx.recruiting_website.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
 
 @Configuration
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -26,7 +21,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         log.warn("----------------进入权限校验---------------------");
         Object principal = authentication.getPrincipal();
         if (principal instanceof LoginAdmin loginAdmin) {
-            if (loginAdmin.getTdAdmin().getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
+            if (loginAdmin.getTdAdmin().getRoleId().equals(Common.SUPER_ADMIN)) {
                 return true;
             }
         }
@@ -38,7 +33,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-
         return false;
     }
 }

@@ -1,7 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -11,14 +10,12 @@ import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.TDJob;
-import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.dto.JobDto;
 import com.queryx.recruiting_website.exception.SystemException;
-import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.service.TDJobService;
-import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
+import com.queryx.recruiting_website.domain.vo.JobCompanyListVO;
 import com.queryx.recruiting_website.domain.dto.JobDetailDto;
 import com.queryx.recruiting_website.domain.dto.JobInsertDto;
 import jakarta.annotation.Resource;
@@ -41,7 +38,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
 
 
     @Override
-    public IPage<JobCompanyListVo> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status) {
+    public IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status) {
 
         LambdaQueryWrapper<TDJob> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(jobName != null, TDJob::getJobPosition, jobName)
@@ -49,8 +46,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .eq(jobReview != null, TDJob::getJobReview, jobReview)
                 .eq(companyId != null, TDJob::getCompanyId, companyId);
 
-        Page<TDJob> pageVo = new Page<>(page, size);
-        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVo, wrapper);
+        Page<TDJob> pageVO = new Page<>(page, size);
+        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVO, wrapper);
 
         if (jobPage.getRecords().isEmpty()) {
             return null;
@@ -61,15 +58,15 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         Map<Long, String> companyNames = tdCompanyInfos.stream()
                 .collect(Collectors.toMap(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName));
         // 进行类型转换并把每个工作得公司名set
-        IPage<JobCompanyListVo> jobCompanyListVoPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
-        jobCompanyListVoPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
-            JobCompanyListVo jobCompanyListVo = new JobCompanyListVo();
-            BeanUtils.copyProperties(tdJob, jobCompanyListVo);
-            jobCompanyListVo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
-            return jobCompanyListVo;
+        IPage<JobCompanyListVO> jobCompanyListVOPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
+        jobCompanyListVOPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
+            JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
+            BeanUtils.copyProperties(tdJob, jobCompanyListVO);
+            jobCompanyListVO.setCompanyName(companyNames.get(tdJob.getCompanyId()));
+            return jobCompanyListVO;
         }).collect(Collectors.toList()));
 
-        return jobCompanyListVoPage;
+        return jobCompanyListVOPage;
     }
 
     @Override
@@ -94,8 +91,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         BeanUtils.copyProperties(jobDetailDto, tdJob);
         UpdateWrapper<TDJob> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("job_id", tdJob.getJobId())
-                .set("job_review", Common.REVIEW_WAIT.getCode())
-                .set("job_status", Common.STATUS_CLOSE.getCode());
+                .set("job_review", Common.REVIEW_WAIT)
+                .set("job_status", Common.STATUS_CLOSE);
         if (jobDetailDto.getCompanyId() != null) {
             updateWrapper.set("company_id", jobDetailDto.getCompanyId());
         }
@@ -111,8 +108,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         TDJob tdJob = new TDJob();
         BeanUtils.copyProperties(jobInsertDto, tdJob);
         tdJob.setCompanyId(companyId);
-        tdJob.setJobReview(Common.REVIEW_WAIT.getCode());
-        tdJob.setJobStatus(Common.STATUS_CLOSE.getCode());
+        tdJob.setJobReview(Common.REVIEW_WAIT);
+        tdJob.setJobStatus(Common.STATUS_CLOSE);
         tdJob.setJobTime(new Date());
 
         if (tdJobMapper.insert(tdJob) < 1) {
@@ -134,8 +131,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     public Object addJob(JobDto jobDto) {
         TDJob tdJob = new TDJob();
         BeanUtils.copyProperties(jobDto, tdJob);
-        tdJob.setJobReview(Common.REVIEW_SUCCESS.getCode());
-        tdJob.setJobStatus(Common.STATUS_PUBLISH.getCode());
+        tdJob.setJobReview(Common.REVIEW_OK);
+        tdJob.setJobStatus(Common.STATUS_PUBLISH);
         tdJob.setJobTime(new Date());
 
         if (tdJobMapper.insert(tdJob) < 1) {
@@ -149,7 +146,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         LambdaUpdateWrapper<TDJob> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(TDJob::getJobId, jobId)
                 .set(TDJob::getJobReview, review)
-                .set(TDJob::getJobStatus, Common.STATUS_PUBLISH.getCode());
+                .set(TDJob::getJobStatus, Common.STATUS_PUBLISH);
         if (!update(updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

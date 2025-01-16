@@ -3,7 +3,7 @@ package com.queryx.recruiting_website.domain.vo;
 import lombok.Data;
 
 @Data
-public class UserVo {
+public class UserVO {
     private Long userId;
     private String userName;
     private String userPhone;

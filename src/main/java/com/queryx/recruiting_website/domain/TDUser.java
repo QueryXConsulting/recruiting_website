@@ -1,15 +1,12 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
-import java.io.Serializable;
-
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TDUser)实体类
@@ -22,7 +19,7 @@ import lombok.ToString;
 @Schema(name = "用户信息实体类")
 public class TDUser {
 
-    @TableId(value = "user_id", type = IdType.AUTO)
+   @TableId(value = "user_id", type = IdType.AUTO)
    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
 

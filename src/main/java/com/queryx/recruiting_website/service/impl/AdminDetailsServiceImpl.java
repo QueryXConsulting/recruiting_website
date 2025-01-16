@@ -3,23 +3,22 @@ package com.queryx.recruiting_website.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.LoginAdmin;
+import com.queryx.recruiting_website.domain.LoginUser;
+import com.queryx.recruiting_website.domain.TDAdmin;
+import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
-import com.queryx.recruiting_website.utils.JwtUtil;
 import jakarta.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -38,14 +37,14 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LambdaQueryWrapper<TDAdmin> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TDAdmin::getAdminUsername, username)
-                .eq(TDAdmin::getAdminStatus, Common.STATUS_ENABLE.getCode());
+                .eq(TDAdmin::getAdminStatus, Common.STATUS_ENABLE);
         TDAdmin tdAdmin = adminMapper.selectOne(wrapper);
         if (Objects.isNull(tdAdmin)) {
             TDUser user = null;
             if (username.matches(PHONE)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
-                        .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE.getCode())
-                        .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode()));
+                        .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE)
+                        .eq(TDUser::getDelFlag, Common.NOT_DELETE));
 
             } else if (username.matches(EMAIL)) {
                 user = userMapper.queryUserByEmail(username);

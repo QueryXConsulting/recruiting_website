@@ -26,13 +26,13 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
         CommonResp result = null;
         if (e instanceof BadCredentialsException) {
             result =
-                    CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR.getCode()
-                            , e.getMessage());
+                    CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR
+                            , null);
         } else if (e instanceof InsufficientAuthenticationException) {
-            result =CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(),AppHttpCodeEnum.NEED_LOGIN.getMsg());
+            result =CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN,null);
         }else {
             result=CommonResp
-                    .fail(AppHttpCodeEnum.SYSTEM_ERROR.getCode(),"认证或授权失败");
+                    .fail(AppHttpCodeEnum.NO_OPERATOR_AUTH,null);
         }
         // 响应给前端
         WebUtils.renderString(response, SecurityUtils.convertCommonRespToJson(result));

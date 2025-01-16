@@ -25,7 +25,7 @@ public class ResumeManageController {
         return CommonResp.success(resumeService.selectResumeManage(page, size, userName, resumeReview, resumeStatus, resumeType));
     }
 
-    @GetMapping("/selectResumeInfo")
+    @PostMapping("/selectResumeInfo")
     @Operation(summary = "简历信息")
     @PreAuthorize("hasPermission(null ,'system:resume:query')")
     public CommonResp selectResumeInfo(@RequestBody SelectResumeDto selectResumeDto) {

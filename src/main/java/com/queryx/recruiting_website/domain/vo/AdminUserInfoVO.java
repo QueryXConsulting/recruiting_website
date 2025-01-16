@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AdminUserInfoVo {
+public class AdminUserInfoVO {
    private List<String> permissions;
-   private AdminInfoVo user;
+   private AdminInfoVO user;
 }

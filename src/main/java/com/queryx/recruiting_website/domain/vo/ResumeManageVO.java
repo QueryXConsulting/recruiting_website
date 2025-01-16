@@ -2,10 +2,12 @@ package com.queryx.recruiting_website.domain.vo;
 
 import lombok.Data;
 
+
 @Data
-public class ResumeListVo {
+public class ResumeManageVO {
     private Long resumeId;
-    private String resumeName;
+    private String userName;
     private String resumeType;
-    private String jobPosition;
+    private String resumeReview;
+    private String resumeStatus;
 }

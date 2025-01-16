@@ -11,8 +11,6 @@ import com.queryx.recruiting_website.service.TDJobService;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.utils.CommonResp;
-
-
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

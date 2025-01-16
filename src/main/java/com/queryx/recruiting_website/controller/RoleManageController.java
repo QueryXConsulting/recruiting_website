@@ -9,6 +9,8 @@ import jakarta.annotation.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @Tag(name = "管理员模块下角色管理")
@@ -36,6 +38,7 @@ public class RoleManageController {
         return CommonResp.success(tpRoleService.roleInfo(roleId));
     }
 
+
     @PutMapping("/updateRoleInfo")
     @Operation(summary = "更新角色信息")
     @PreAuthorize("hasPermission(null ,'system:role:edit')")
@@ -43,10 +46,16 @@ public class RoleManageController {
         return CommonResp.success(tpRoleService.updateRoleInfo(roleInfoDto));
     }
 
+    @GetMapping("/selectRoleMenusTree")
+    @Operation(summary = "设置角色表单菜单树")
+    public CommonResp updateRoleList() {
+        return CommonResp.success(tpRoleService.selectRoleMenusTree());
+    }
+
     @DeleteMapping("/delRole/{roleId}")
     @Operation(summary = "删除角色")
     @PreAuthorize("hasPermission(null ,'system:role:remove')")
-    public CommonResp delRole(@PathVariable("roleId") Long roleId) {
+    public CommonResp delRole(@PathVariable("roleId") List<Long> roleId) {
         return CommonResp.success(tpRoleService.delRole(roleId));
     }
 

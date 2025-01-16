@@ -2,15 +2,14 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.design.LoginContext;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.domain.vo.LoginVO;
-import com.queryx.recruiting_website.mapper.ResumeMapper;
-import com.queryx.recruiting_website.mapper.UserMapper;
+import com.queryx.recruiting_website.mapper.TDResumeMapper;
+import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +21,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -30,14 +28,14 @@ public class UserServiceImpl implements UserService {
     final String timeZone = "Asia/Shanghai";
 
     @Autowired
-    private UserMapper userMapper;
+    private TDUserMapper userMapper;
 
     @Autowired
-    private ResumeMapper resumeMapper;
+    private TDResumeMapper resumeMapper;
 
 
-    final String PHONE = "(^1[3-9]\\d{9}$)";
-    final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    public static final String PHONE = "(^1[3-9]\\d{9}$)";
+    public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     //    final boolean  =
     public final String USER_ID = "userId";
     public final String RESUME_ID = "resumeId";

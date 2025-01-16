@@ -1,6 +1,6 @@
 package com.queryx.recruiting_website.domain;
 
-import java.io.Serializable;
+
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

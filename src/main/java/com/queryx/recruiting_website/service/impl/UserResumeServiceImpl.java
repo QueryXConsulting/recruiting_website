@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
+import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -7,7 +9,6 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
 import org.springframework.web.multipart.MultipartFile;
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
-import com.queryx.recruiting_website.mapper.ResumeMapper;
 import org.springframework.beans.factory.annotation.Value;
 import com.queryx.recruiting_website.constant.StorageUnit;
 import com.queryx.recruiting_website.domain.dto.ResumeDTO;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.queryx.recruiting_website.service.UserResumeService;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
 import org.springframework.transaction.annotation.Transactional;
-import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import java.io.File;
@@ -41,10 +41,10 @@ public class UserResumeServiceImpl implements UserResumeService {
     private String filePath;
 
     @Autowired
-    private ResumeMapper resumeMapper;
+    private TDResumeMapper resumeMapper;
 
     @Autowired
-    private ResumeAttachmentsMapper resumeAttachmentsMapper;
+    private TDResumeAttachmentsMapper resumeAttachmentsMapper;
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
@@ -72,7 +72,7 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
             final MybatisBatch<TDResumeAttachments> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, List.of(tdRS));
-            final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(ResumeAttachmentsMapper.class);
+            final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(TDResumeAttachmentsMapper.class);
             // 返回结果
             return mybatisBatch.execute(method.insert()).size();
         } finally {

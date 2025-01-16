@@ -27,8 +27,8 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     public CompanyInfoDto selectCompanyInfo(Long companyId) {
         LambdaQueryWrapper<TDCompanyInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(TDCompanyInfo::getCompanyInfoId, companyId)
-                .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE.getCode())
-                .eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_SUCCESS.getCode());
+                .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE)
+                .eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);
         TDCompanyInfo tdCompanyInfo = tdCompanyInfoMapper.selectOne(lambdaQueryWrapper);
         CompanyInfoDto companyInfoDto = new CompanyInfoDto();
         BeanUtils.copyProperties(tdCompanyInfo, companyInfoDto);
@@ -50,7 +50,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoUsername, companyInfoDto.getCompanyInfoUsername());
         if (count(queryWrapper) > 0) {
-            throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
+            throw new SystemException(AppHttpCodeEnum.USER_EXIST);
         }
 
         TDCompanyInfo tdCompanyInfo = new TDCompanyInfo();
@@ -58,8 +58,8 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         tdCompanyInfo.setCompanyInfoPassword(passwordEncoder.encode(tdCompanyInfo.getCompanyInfoPassword()));
         UpdateWrapper<TDCompanyInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("company_info_id", companyInfoDto.getCompanyInfoId());
-        tdCompanyInfo.setCompanyInfoStatus(Common.STATUS_DISABLE.getCode());
-        tdCompanyInfo.setCompanyInfoReview(Common.REVIEW_WAIT.getCode());
+        tdCompanyInfo.setCompanyInfoStatus(Common.STATUS_DISABLE);
+        tdCompanyInfo.setCompanyInfoReview(Common.REVIEW_WAIT);
         if (!update(tdCompanyInfo, updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

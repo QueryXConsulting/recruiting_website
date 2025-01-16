@@ -4,7 +4,7 @@ import java.util.Date;
 
 
 @Data
-public class JobCompanyListVo {
+public class JobCompanyListVO {
 
     private Long jobId;
 

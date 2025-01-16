@@ -3,7 +3,7 @@ package com.queryx.recruiting_website.domain.vo;
 import lombok.Data;
 
 @Data
-public class MenuListVo {
+public class MenuListVO {
     private String component;
     private String remark;
     private String icon;

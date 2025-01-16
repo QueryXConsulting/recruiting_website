@@ -3,7 +3,7 @@ package com.queryx.recruiting_website.domain.vo;
 import lombok.Data;
 
 @Data
-public class AdminVo {
+public class AdminVO {
 
     private Long adminId;
 
