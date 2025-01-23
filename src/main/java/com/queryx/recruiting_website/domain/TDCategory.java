@@ -26,8 +26,10 @@ public class TDCategory {
     @Schema(name = "工种名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String categoryName;
 
-    @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "工种描述", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String categoryDescription;
 
+    @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String categoryStatus;
 
 }

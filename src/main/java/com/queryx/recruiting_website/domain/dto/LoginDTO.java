@@ -1,8 +1,6 @@
 package com.queryx.recruiting_website.domain.dto;
 
 
-import lombok.Data;
-import lombok.ToString;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -20,9 +18,6 @@ public class LoginDTO {
 
     @Schema(name = "用户密码", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String userPassword;
-
-    @Schema(name = "用户角色", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
-    private String userRole;
 
     @Schema(name = "用户验证码", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String userCaptcha;

@@ -48,7 +48,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -134,10 +133,13 @@ public class UserController {
     @Resource
     private TDUserService tdUserService;
 
+    private static final String PHONE = "(^1[3-9]\\d{9}$)";
+    private static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
     @PostMapping("/login")
     @Operation(summary = "登录功能", description = "公司用户以及学生用户和管理员共同接口")
     public CommonResp login(@RequestBody LoginDTO loginDTO) {
-        if(StringUtils.hasText(loginDTO.getUserRole())){
+        if (loginDTO.getUsername().matches(PHONE)||loginDTO.getUsername().matches(EMAIL)) {
             return CommonResp.success(tdUserService.login(loginDTO));
         }
         AdminLoginDto adminLoginDto=new AdminLoginDto();

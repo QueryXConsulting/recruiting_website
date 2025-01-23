@@ -11,6 +11,7 @@ import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserInfoVO;
 import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.domain.vo.UserVO;
 import com.queryx.recruiting_website.exception.SystemException;
@@ -106,13 +107,10 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
-        if (!loginDTO.getUserRole().equals(loginUser.getTdUser().getUserRole())) {
-            throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
-        }
-
         UserLoginVO userLoginVO = new UserLoginVO();
+
         // 判断是否为公司用户
-        if (loginDTO.getUserRole().equals(Common.COMPANY_USER.toString())) {
+        if (loginUser.getTdUser().getUserRole().equals(Common.COMPANY_USER.toString())) {
             LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
             companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
                     .select(TDCompanyInfo::getCompanyInfoId);
@@ -122,12 +120,15 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
                 companyId = tdCompanyInfo.getCompanyInfoId();
             }
             userLoginVO.setCompanyId(companyId);
-        }
 
-//         生成token
+        }
         HashMap<String, Object> data = new HashMap<>();
+//         生成token
         data.put("User", loginUser);
         userLoginVO.setToken(JwtUtil.createJWT(data));
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
+        userLoginVO.setUserInfoVO(userInfoVO);
 //         返回前端凭证
         return userLoginVO;
     }

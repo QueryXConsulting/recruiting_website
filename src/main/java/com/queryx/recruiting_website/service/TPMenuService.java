@@ -13,7 +13,7 @@ import java.util.List;
 public interface TPMenuService extends IService<TPMenu> {
     RoutersVO getRouter();
 
-    List<MenuListVO> menuList(String status, String menuName);
+    List<MenuListVO> menuList();
 
     Object addMenu(MenuDto menu);
 

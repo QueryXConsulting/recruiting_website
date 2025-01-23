@@ -11,5 +11,7 @@ public interface TDCompanyInfoService extends IService<TDCompanyInfo> {
     CompanyInfoDto selectCompanyInfo(Long companyId);
 
     CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto);
+
+    Object companyList(Integer page, Integer size, String companyReview, String companyStatus, String companyName);
 }
 

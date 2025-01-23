@@ -19,8 +19,6 @@ import lombok.ToString;
 @Schema(name = "工作性质实体类")
 public class TDJobNature {
 
-
-
     @TableId(type = IdType.AUTO)
     @Schema(name = "工作性质ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long natureId;

@@ -10,13 +10,13 @@ import com.queryx.recruiting_website.domain.TPRoleMenu;
 import com.queryx.recruiting_website.domain.dto.MenuDto;
 import com.queryx.recruiting_website.domain.dto.UpdateMenuDto;
 import com.queryx.recruiting_website.domain.vo.MenuListVO;
+import com.queryx.recruiting_website.domain.vo.MenuVO;
 import com.queryx.recruiting_website.domain.vo.RoutersVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
 import com.queryx.recruiting_website.mapper.TPRoleMenuMapper;
 import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.service.TPRoleMenuService;
-import com.queryx.recruiting_website.domain.vo.MenuVO;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -62,18 +62,28 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     }
 
     @Override
-    public List<MenuListVO> menuList(String status, String menuName) {
+    public List<MenuListVO> menuList() {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(menuName != null, TPMenu::getMenuName, menuName)
-                .eq(status != null, TPMenu::getStatus, status)
-                .eq(TPMenu::getDelFlag,Common.NOT_DELETE)
+        wrapper.eq(TPMenu::getDelFlag, Common.NOT_DELETE)
                 .orderByAsc(TPMenu::getParentId, TPMenu::getOrderNum);
-        return list(wrapper).stream().map(menu -> {
-            MenuListVO menuListVO = new MenuListVO();
-            BeanUtils.copyProperties(menu, menuListVO);
-            return menuListVO;
-        }).toList();
+        List<TPMenu> list = list(wrapper);
+
+        return buildMenuTreeVO(list, 0L);
     }
+
+
+    private List<MenuListVO> buildMenuTreeVO(List<TPMenu> menuList, Long parentId) {
+        return menuList.stream()
+                .filter(menu -> menu.getParentId().equals(parentId))
+                .map(menu -> {
+                    MenuListVO menuVO = new MenuListVO();
+                    BeanUtils.copyProperties(menu, menuVO);
+                    menuVO.setChildren(buildMenuTreeVO(menuList, menu.getMenuId()));
+                    return menuVO;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public Object addMenu(MenuDto menu) {
@@ -131,9 +141,10 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     public List<TPMenu> selectRouterMenuTreeByRoleId(Long roleId) {
         List<TPMenu> menuList = null;
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE);
-        wrapper.in(TPMenu::getMenuType, "C", "M");
-        wrapper.orderByAsc(TPMenu::getOrderNum);
+        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE)
+                .eq(TPMenu::getDelFlag, Common.NOT_DELETE)
+                .in(TPMenu::getMenuType, "C", "M")
+                .orderByAsc(TPMenu::getOrderNum);
 
         // 判断是否是超级管理员
         if (roleId.equals(Common.SUPER_ADMIN)) {

@@ -15,14 +15,12 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @Tag(name = "公司用户模块")
 @RequestMapping("/company")
-@PreAuthorize("hasPermission(null ,'user:company')")
 public class UserCompanyController {
     @Resource
     private TDJobService tdJobService;
@@ -36,9 +34,9 @@ public class UserCompanyController {
 
 
     @GetMapping("/jobList")
-    @Operation(summary = "查看职位列表")
-    public CommonResp selectJobList(Integer page, Integer size, Long companyId,String jobName,String jobReview,String status) {
-        return CommonResp.success(tdJobService.selectJobList(page, size, companyId,jobName,jobReview,status));
+    public CommonResp selectJobList(Integer page, Integer size, String companyName,String jobName
+            ,String jobReview,String status,String jobCategory,String jobNature) {
+        return CommonResp.success(tdJobService.selectJobList(page, size, companyName,jobName,jobReview,status,jobCategory,jobNature));
     }
 
 

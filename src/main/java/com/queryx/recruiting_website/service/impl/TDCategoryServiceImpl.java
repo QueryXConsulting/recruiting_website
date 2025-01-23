@@ -17,6 +17,7 @@ import com.queryx.recruiting_website.service.TDCategoryService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 
 import java.util.stream.Collectors;
@@ -31,8 +32,8 @@ public class TDCategoryServiceImpl extends ServiceImpl<TDCategoryMapper, TDCateg
     @Override
     public IPage<CategoryVO> selectCategoryList(Integer page, Integer size, String categoryName, String status) {
         LambdaUpdateWrapper<TDCategory> tdCategoryLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        tdCategoryLambdaUpdateWrapper.like(categoryName != null, TDCategory::getCategoryName, categoryName)
-                .eq(status != null, TDCategory::getCategoryStatus, status);
+        tdCategoryLambdaUpdateWrapper.like(StringUtils.hasText(categoryName), TDCategory::getCategoryName, categoryName)
+                .eq(StringUtils.hasText(status), TDCategory::getCategoryStatus, status);
         Page<TDCategory> tdCategoryPage = tDCategoryMapper.selectPage(new Page<>(page, size), tdCategoryLambdaUpdateWrapper);
         IPage<CategoryVO> categoryPageVOPage = new Page<>(tdCategoryPage.getCurrent(), tdCategoryPage.getSize(), tdCategoryPage.getTotal());
 
@@ -68,9 +69,11 @@ public class TDCategoryServiceImpl extends ServiceImpl<TDCategoryMapper, TDCateg
     }
 
     @Override
-    public Object addCategory(String categoryName) {
+    public Object addCategory(CategoryDto categoryDto) {
         TDCategory tdCategory = new TDCategory();
-        tdCategory.setCategoryName(categoryName);
+        tdCategory.setCategoryDescription(categoryDto.getCategoryDescription());
+        tdCategory.setCategoryStatus(categoryDto.getCategoryStatus());
+        tdCategory.setCategoryName(categoryDto.getCategoryName());
         if (!save(tdCategory)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

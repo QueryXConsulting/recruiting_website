@@ -16,5 +16,7 @@ public interface TDResumeService extends IService<TDResume> {
     Page<ResumeManageVO> selectResumeManage(Integer page, Integer size, String userName, String resumeReview, String resumeStatus, String resumeType);
 
     Object resumeReview(String review, Long resumeId, String resumeType);
+
+
 }
 

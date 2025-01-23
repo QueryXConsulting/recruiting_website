@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
@@ -12,6 +13,7 @@ import com.queryx.recruiting_website.service.TDJobNatureService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -23,8 +25,15 @@ public class TDJobNatureServiceImpl extends ServiceImpl<TDJobNatureMapper, TDJob
     private TDJobNatureMapper jobNatureMapper;
 
     @Override
-    public List<NatureVO> selectJobNatureList() {
-        List<TDJobNature> natureList = list();
+    public List<NatureVO> selectJobNatureList(String status) {
+        LambdaQueryWrapper<TDJobNature> tdJobNatureLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<TDJobNature> natureList;
+        if (StringUtils.hasText(status)) {
+            tdJobNatureLambdaQueryWrapper.eq(TDJobNature::getNatureStatus, status);
+            natureList = list(tdJobNatureLambdaQueryWrapper);
+        } else {
+            natureList = list();
+        }
 
         return natureList.stream().map(nature -> {
             NatureVO natureVO = new NatureVO();
@@ -66,9 +75,10 @@ public class TDJobNatureServiceImpl extends ServiceImpl<TDJobNatureMapper, TDJob
     }
 
     @Override
-    public Object addJobNature(String jobNatureName) {
+    public Object addJobNature(String jobNatureName, String natureStatus) {
         TDJobNature jobNature = new TDJobNature();
         jobNature.setJobNatureName(jobNatureName);
+        jobNature.setNatureStatus(natureStatus);
         if (!save(jobNature)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

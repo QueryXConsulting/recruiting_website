@@ -15,6 +15,7 @@ import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 import com.queryx.recruiting_website.domain.vo.AdminInfoVO;
 import com.queryx.recruiting_website.domain.vo.AdminUserInfoVO;
 import com.queryx.recruiting_website.domain.vo.AdminVO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
@@ -79,7 +80,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     }
 
     @Override
-    public String login(AdminLoginDto adminLoginDto) {
+    public UserLoginVO login(AdminLoginDto adminLoginDto) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                 = new UsernamePasswordAuthenticationToken(adminLoginDto.getUsername(), adminLoginDto.getUserPassword());
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
@@ -90,9 +91,10 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         LoginAdmin loginAdmin = (LoginAdmin) authenticate.getPrincipal();
         HashMap<String, Object> data = new HashMap<>();
         data.put("AdminUser", loginAdmin);
-
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setToken(JwtUtil.createJWT(data));
         // 返回前端凭证
-        return JwtUtil.createJWT(data);
+        return userLoginVO;
     }
 
     @Override

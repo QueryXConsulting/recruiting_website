@@ -3,14 +3,12 @@ package com.queryx.recruiting_website.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.LoginAdmin;
-import com.queryx.recruiting_website.domain.LoginUser;
-import com.queryx.recruiting_website.domain.TDAdmin;
-import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
+import com.queryx.recruiting_website.service.TPMenuService;
 import jakarta.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +26,8 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     private TDAdminMapper adminMapper;
     @Resource
     private TPMenuMapper menuMapper;
+    @Resource
+    private TPMenuService menuService;
     @Resource
     private TDUserMapper userMapper;
     private static final String PHONE = "(^1[3-9]\\d{9}$)";
@@ -55,8 +55,13 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
             List<String> perms = menuMapper.selectPermsByRoleId(Long.valueOf(user.getUserRole()));
             return new LoginUser(user, perms);
         }
-        // 权限查询并封装
-        List<String> perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId());
+        List<String> perms;
+        if (tdAdmin.getRoleId() == '1') {
+            perms = menuService.list().stream().map(TPMenu::getPerms).toList();
+        } else {
+            perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId());
+        }
+
         return new LoginAdmin(tdAdmin, perms);
     }
 

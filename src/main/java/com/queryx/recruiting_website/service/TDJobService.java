@@ -12,7 +12,8 @@ import com.queryx.recruiting_website.domain.dto.JobInsertDto;
 public interface TDJobService extends IService<TDJob> {
 
 
-    IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status);
+    IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName,String jobName
+            ,String jobReview,String status,String jobCategory,String jobNature);
 
     JobDetailDto selectJobInfo(Long jobId);
 

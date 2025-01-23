@@ -1,15 +1,17 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
+import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
-import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,5 +66,14 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
         return null;
+    }
+
+    @Override
+    public Object companyList(Integer page, Integer size, String companyReview, String companyStatus, String companyName) {
+        LambdaUpdateWrapper<TDCompanyInfo> tdCompanyInfoLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        tdCompanyInfoLambdaUpdateWrapper.eq(StringUtils.hasText(companyReview), TDCompanyInfo::getCompanyInfoReview, companyName)
+                .eq(StringUtils.hasText(companyStatus), TDCompanyInfo::getCompanyInfoStatus, companyStatus)
+                .like(StringUtils.hasText(companyName), TDCompanyInfo::getCompanyInfoName, companyName);
+        return tdCompanyInfoMapper.selectPage(new Page<>(page, size), tdCompanyInfoLambdaUpdateWrapper);
     }
 }

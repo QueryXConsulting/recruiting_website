@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TDJobNatureService extends IService<TDJobNature> {
 
-    List<NatureVO> selectJobNatureList();
+    List<NatureVO> selectJobNatureList(String status);
 
     NatureVO selectNatureInfo(Long jobNatureId);
 
@@ -18,7 +18,7 @@ public interface TDJobNatureService extends IService<TDJobNature> {
     Object updateJobNature(JobNatureDto jobNatureDto);
 
 
-    Object addJobNature(String jobNatureName);
+    Object addJobNature(String jobNatureName, String natureStatus);
 
     Object delJobNature(Long jobNatureId);
 }

@@ -16,7 +16,7 @@ public interface TDCategoryService extends IService<TDCategory> {
 
     Object updateCategoryStatus(Integer status, Long categoryId);
 
-    Object addCategory(String categoryName);
+    Object addCategory(CategoryDto categoryName);
 
     Object delCategory(Long categoryId);
 }

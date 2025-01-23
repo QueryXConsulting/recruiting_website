@@ -8,11 +8,9 @@ import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@PreAuthorize("hasPermission(null ,'system:user:list')")
 @Tag(name = "管理员模块下用户相关数据管理")
 @RequestMapping("/admin")
 public class UserManageController {
@@ -23,7 +21,6 @@ public class UserManageController {
 
     @PostMapping("/addAdmin")
     @Operation(summary = "添加管理员")
-    @PreAuthorize("hasPermission(null ,'system:user:add')")
     public CommonResp addAdmin(@RequestBody AdminDto adminDto) {
         return CommonResp.success(adminService.addAdmin(adminDto));
     }
@@ -36,21 +33,18 @@ public class UserManageController {
 
     @GetMapping("/selectAdminInfo/{adminId}")
     @Operation(summary = "管理员信息")
-    @PreAuthorize("hasPermission(null ,'system:user:query')")
     public CommonResp selectAdminInfo(@PathVariable("adminId") Long adminId) {
         return CommonResp.success(adminService.selectAdminInfo(adminId));
     }
 
     @PutMapping("/updateAdminInfo")
     @Operation(summary = "管理员数据更新")
-    @PreAuthorize("hasPermission(null ,'system:user:edit')")
     public CommonResp updateAdminInfo(@RequestBody AdminDto adminDto) {
         return CommonResp.success(adminService.updateAdminInfo(adminDto));
     }
 
     @DeleteMapping("/deleteAdmin/{adminId}")
     @Operation(summary = "管理员账号删除")
-    @PreAuthorize("hasPermission(null ,'system:user:remove')")
     public CommonResp deleteAdmin(@PathVariable("adminId") Long adminId) {
         return CommonResp.success(adminService.deleteAdmin(adminId));
     }
@@ -64,7 +58,6 @@ public class UserManageController {
 
     @GetMapping("/selectUserInfo/{userId}")
     @Operation(summary = "用户信息")
-    @PreAuthorize("hasPermission(null ,'system:user:query')")
     public CommonResp selectUserInfo(@PathVariable("userId") Long userId) {
         return CommonResp.success(userService.selectUserInfo(userId, null));
     }
@@ -72,14 +65,12 @@ public class UserManageController {
 
     @PutMapping("/updateUserInfo")
     @Operation(summary = "用户数据更新")
-    @PreAuthorize("hasPermission(null ,'system:user:edit')")
     public CommonResp updateUserInfo(@RequestBody UserDto userDto) {
         return CommonResp.success(userService.updateUserInfo(userDto));
     }
 
     @PostMapping("/addUser")
     @Operation(summary = "添加用户")
-    @PreAuthorize("hasPermission(null ,'system:user:add')")
     public CommonResp addUser(@RequestBody UserDto userDto) {
         return CommonResp.success(userService.addUser(userDto));
     }
@@ -87,7 +78,6 @@ public class UserManageController {
 
     @DeleteMapping("/deleteUser/{userId}")
     @Operation(summary = "用户账号删除")
-    @PreAuthorize("hasPermission(null ,'system:user:remove')")
     public CommonResp deleteUser(@PathVariable("userId") Long userId) {
         return CommonResp.success(userService.deleteUser(userId));
     }
