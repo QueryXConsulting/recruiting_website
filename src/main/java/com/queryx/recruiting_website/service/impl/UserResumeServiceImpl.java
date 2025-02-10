@@ -37,7 +37,7 @@ public class UserResumeServiceImpl implements UserResumeService {
 
     final String timeZone = "Asia/Shanghai";
 
-    @Value("${file.upload-path}")
+    @Value("${file.upload-path-resume}")
     private String filePath;
 
     @Autowired

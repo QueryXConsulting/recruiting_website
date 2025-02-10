@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,19 +48,29 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
                         .eq(TDUser::getDelFlag, Common.NOT_DELETE));
 
             } else if (username.matches(EMAIL)) {
-                user = userMapper.queryUserByEmail(username);
+                user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
+                        .eq(TDUser::getUserEmail, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE)
+                        .eq(TDUser::getDelFlag, Common.NOT_DELETE));
             }
             if (Objects.isNull(user)) {
                 throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
             }
-            List<String> perms = menuMapper.selectPermsByRoleId(Long.valueOf(user.getUserRole()));
+            List<String> perms = menuMapper.selectPermsByRoleId(Long.valueOf(user.getUserRole()))
+                    .stream()
+                    .filter(StringUtils::hasText)
+                    .toList();
             return new LoginUser(user, perms);
         }
         List<String> perms;
-        if (tdAdmin.getRoleId() == '1') {
-            perms = menuService.list().stream().map(TPMenu::getPerms).toList();
+        if (tdAdmin.getRoleId() == 1) {
+            perms = menuService.list().stream()
+                    .map(TPMenu::getPerms)
+                    .filter(StringUtils::hasText)
+                    .toList();
         } else {
-            perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId());
+            perms = menuMapper.selectPermsByRoleId(tdAdmin.getRoleId()).stream()
+                    .filter(StringUtils::hasText)
+                    .toList();
         }
 
         return new LoginAdmin(tdAdmin, perms);

@@ -64,7 +64,8 @@ public class SecurityConfiguration {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(
                 "/swagger-ui/**",
-                "/v3/**"
+                "/v3/**",
+                "/avatar_files/**"
         );
     }
 
@@ -76,8 +77,9 @@ public class SecurityConfiguration {
                                         // TODO 待修改
 //                        .requestMatchers("/swagger-ui/*","/v3/**").permitAll()
                                         .anyRequest().authenticated()
-                ).addFilterBefore(dynamicSecurityFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                ).addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(dynamicSecurityFilter, UsernamePasswordAuthenticationFilter.class);
+
         // 配置异常处理
         httpSecurity.exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(authenticationEntryPoint)

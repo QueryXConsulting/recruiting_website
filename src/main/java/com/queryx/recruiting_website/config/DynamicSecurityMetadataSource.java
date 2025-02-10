@@ -46,13 +46,16 @@ public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMe
             requestUrl = requestUrl.substring(0, requestUrl.indexOf("?"));
         }
 
+        int count = StringUtils.countOccurrencesOf(requestUrl, "/");
+        if (count > 2) {
+            requestUrl = requestUrl.replaceAll("/[^/]+$", "");
+        }
         for (Map.Entry<String, Collection<ConfigAttribute>> entry : configAttributeMap.entrySet()) {
             String pattern = entry.getKey();
             if (new AntPathMatcher().match(pattern, requestUrl)) {
                 return entry.getValue();
             }
         }
-
         return null;
     }
 

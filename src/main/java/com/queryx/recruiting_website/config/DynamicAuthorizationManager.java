@@ -28,7 +28,9 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         HttpServletRequest request = context.getRequest();
 
         // 获取当前请求所需的权限
-        FilterInvocation fi = new FilterInvocation(request, null, null);
+        String url = request.getRequestURI();
+        String method = request.getMethod();
+        FilterInvocation fi = new FilterInvocation(String.valueOf(request), url, method);
         Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
 
         // 没有配置权限要求，允许访问

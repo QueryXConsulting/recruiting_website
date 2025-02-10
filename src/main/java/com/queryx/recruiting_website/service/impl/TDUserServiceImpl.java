@@ -128,6 +128,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         userLoginVO.setToken(JwtUtil.createJWT(data));
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
+        userInfoVO.setPerms(loginUser.getPermissions());
         userLoginVO.setUserInfoVO(userInfoVO);
 //         返回前端凭证
         return userLoginVO;
@@ -222,11 +223,17 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
 
     @Override
     public Object addUser(UserDto userDto) {
-        LambdaQueryWrapper<TDUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
+        LambdaQueryWrapper<TDUser> phoneQueryWrapper = new LambdaQueryWrapper<>();
+        phoneQueryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
                 .eq(TDUser::getDelFlag, Common.NOT_DELETE);
-        if (count(queryWrapper) > 0) {
+        if (count(phoneQueryWrapper) > 0) {
             throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
+        }
+        LambdaQueryWrapper<TDUser> emailQueryWrapper = new LambdaQueryWrapper<>();
+        emailQueryWrapper.eq(TDUser::getUserEmail, userDto.getUserEmail())
+                .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+        if (count(emailQueryWrapper) > 0) {
+            throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
         }
         TDUser tdUser = new TDUser();
         BeanUtils.copyProperties(userDto, tdUser);

@@ -1,13 +1,12 @@
 package com.queryx.recruiting_website.constant;
 
 
-
-
-
 /**
  * 常量类
  */
 public class Common {
+    // 空文件
+    public static final String FILE_EMPTY = "empty.txt";
     // 启用
     public static final String STATUS_ENABLE = "0";
     // 禁用
@@ -38,7 +37,6 @@ public class Common {
 
 
     public static final Long SUPER_ADMIN = 1L;
-
 
 
     public static final Long PARENT_MENU = 1L;

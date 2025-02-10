@@ -19,9 +19,12 @@ import java.util.Date;
 @Schema(name = "用户信息实体类")
 public class TDUser {
 
-   @TableId(value = "user_id", type = IdType.AUTO)
-   @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @TableId(value = "user_id", type = IdType.AUTO)
+    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
+
+    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String userEmail;
 
     @Schema(name = "在线简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resumeId;

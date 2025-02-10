@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -43,13 +44,18 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
             RequestAuthorizationContext context = new RequestAuthorizationContext(request);
 
             // 权限检查
-           authorizationManager.check(
+            AuthorizationDecision check = authorizationManager.check(
                     () -> authentication,
                     context
             );
-
-            // 通过权限检查，继续处理请求
-            chain.doFilter(request, response);
+            if (check.isGranted()) {
+                chain.doFilter(request, response);
+            } else {
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("{\"code\":403,\"message\":\"没有访问权限\"}");
+            }
 
         } catch (AccessDeniedException e) {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -71,7 +77,8 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 "/user/login",
                 "/admin/menuList",
                 "/admin/selectRoleMenusTree",
-                "/admin/role"
+                "/admin/role",
+                "/avatar_files/**"
         );
 
         String path = request.getRequestURI();

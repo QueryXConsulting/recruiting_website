@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.alibaba.fastjson2.JSON;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.JobDetailDto;
 import com.queryx.recruiting_website.domain.dto.JobInsertDto;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -38,9 +40,6 @@ public class UserCompanyController {
             ,String jobReview,String status,String jobCategory,String jobNature) {
         return CommonResp.success(tdJobService.selectJobList(page, size, companyName,jobName,jobReview,status,jobCategory,jobNature));
     }
-
-
-
 
     @GetMapping("/jobInfo/{jobId}")
     @Operation(summary = "查看职位信息")
@@ -86,10 +85,13 @@ public class UserCompanyController {
         return CommonResp.success(tdCompanyInfoService.selectCompanyInfo(companyId));
     }
 
-    @PutMapping("/updateCompanyInfo")
+    @PostMapping("/updateCompanyInfo")
     @Operation(summary = "更新公司信息")
-    public CommonResp updateCompanyInfo(@RequestBody CompanyInfoDto companyInfoDto) {
-        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDto));
+    public CommonResp updateCompanyInfo(
+            @RequestParam(value = "dtoJson") String jsonDto,
+            @RequestParam(value = "applyFiles") MultipartFile applyFiles) {
+        CompanyInfoDto companyInfoDto = JSON.parseObject(jsonDto,CompanyInfoDto.class);
+        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDto,applyFiles));
     }
 
     @GetMapping("/resumeList/{companyId}")

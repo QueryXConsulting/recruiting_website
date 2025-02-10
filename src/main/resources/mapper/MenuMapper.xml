@@ -7,7 +7,7 @@
         FROM `t_p_role_menu` ur
                  LEFT JOIN `t_p_menu` m ON m.`menu_id` = ur.`menu_id`
         WHERE ur.role_id = #{roleId}
-          AND m.`menu_type` IN ('C', 'F')
+          AND m.`menu_type` IN ('C', 'F' ,'U')
           AND m.`status` = 0
           AND m.`del_flag` = 0
     </select>

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -103,7 +104,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         List<TDUser> users = userMapper.selectList(userLambdaQueryWrapper);
         if (resumeType.equals(Common.RESUME_ONLINE)) {
             // 查找在线简历
-            List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).toList();
+            List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).filter(Objects::nonNull).toList();
             Map<Long, String> resumeIDMap = users.stream().collect(Collectors.toMap(TDUser::getResumeId, TDUser::getUserName));
 
             LambdaQueryWrapper<TDResume> lambdaQueryWrapper = new LambdaQueryWrapper<>();
