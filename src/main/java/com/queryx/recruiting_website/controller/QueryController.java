@@ -7,9 +7,9 @@ import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
 import com.queryx.recruiting_website.domain.vo.InterviewVO;
 import com.queryx.recruiting_website.domain.vo.ResumeVO;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,19 +32,17 @@ public class QueryController {
     /**
      * 查询用户在线简历
      *
-     * @param id 简历id
      * @return 在线简历信息
      */
-    @Operation(summary = "查询用户在线简历", parameters = {
-            @Parameter(name = "id", description = "简历id", schema = @Schema(implementation = Long.class), required = true)
-    }, responses = {
+    @Operation(summary = "查询用户在线简历", responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "423", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/resume/online")
-    public CommonResp<ResumeVO> queryOnlineResume(@RequestParam("id") Long id) {
+    public CommonResp<ResumeVO> queryOnlineResume() {
         ResumeVO resp;
+        final Long id = SecurityUtils.getLoginUser().getTdUser().getResumeId();
         try {
             resp = queryUserInfo.getOnlineResume(id);
             if (resp == null) {
@@ -61,20 +59,18 @@ public class QueryController {
     /**
      * 查询用户所有附件简历
      *
-     * @param id 用户id
      * @return 附件简历列表
      * TODO: 附件简历列表查询：上传数量限制
      */
-    @Operation(summary = "查询用户所有附件简历", parameters = {
-            @Parameter(name = "id", description = "用户id", schema = @Schema(implementation = Long.class), required = true)
-    }, responses = {
+    @Operation(summary = "查询用户所有附件简历", responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "423", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/resume/attachments")
-    public CommonResp<List<AttachmentsResumeVO>> queryResumeAttachments(@RequestParam("id") Long id) {
+    public CommonResp<List<AttachmentsResumeVO>> queryResumeAttachments() {
         List<AttachmentsResumeVO> resp = null;
+        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
         try {
             resp = queryUserInfo.getResumeAttachmentList(id);
             if (resp == null) {
@@ -90,19 +86,17 @@ public class QueryController {
     /**
      * 查询用户面试信息
      *
-     * @param id 用户id
      * @return 面试信息
      */
-    @Operation(summary = "查询用户面试信息", parameters = {
-            @Parameter(name = "id", description = "用户id", schema = @Schema(implementation = Long.class), required = true)
-    }, responses = {
+    @Operation(summary = "查询用户面试信息", responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "425", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/interview")
-    public CommonResp<InterviewVO> queryReviewResume(@RequestParam("id") Long id) {
+    public CommonResp<InterviewVO> queryReviewResume() {
         InterviewVO resp;
+        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
         try {
             resp = queryUserInfo.getInterview(id);
             if (resp == null) {

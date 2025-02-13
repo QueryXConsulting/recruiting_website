@@ -2,11 +2,9 @@ package com.queryx.recruiting_website.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 
 @Data
-@ToString
 @Schema(name = "投递简历DTO")
 public class DeliverResumeDTO {
 

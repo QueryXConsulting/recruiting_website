@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.TDCategory;
-import com.queryx.recruiting_website.domain.dto.CategoryDto;
-import com.queryx.recruiting_website.domain.vo.CategoryVo;
+import com.queryx.recruiting_website.domain.dto.CategoryDTO;
+import com.queryx.recruiting_website.domain.vo.CategoryVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDCategoryMapper;
 import com.queryx.recruiting_website.service.TDCategoryService;
@@ -29,26 +29,26 @@ public class TDCategoryServiceImpl extends ServiceImpl<TDCategoryMapper, TDCateg
     private TDCategoryMapper tDCategoryMapper;
 
     @Override
-    public IPage<CategoryVo> selectCategoryList(Integer page, Integer size, String categoryName, String status) {
+    public IPage<CategoryVO> selectCategoryList(Integer page, Integer size, String categoryName, String status) {
         LambdaUpdateWrapper<TDCategory> tdCategoryLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         tdCategoryLambdaUpdateWrapper.like(categoryName != null, TDCategory::getCategoryName, categoryName)
                 .eq(status != null, TDCategory::getCategoryStatus, status);
         Page<TDCategory> tdCategoryPage = tDCategoryMapper.selectPage(new Page<>(page, size), tdCategoryLambdaUpdateWrapper);
-        IPage<CategoryVo> categoryPageVoPage = new Page<>(tdCategoryPage.getCurrent(), tdCategoryPage.getSize(), tdCategoryPage.getTotal());
+        IPage<CategoryVO> categoryPageVOPage = new Page<>(tdCategoryPage.getCurrent(), tdCategoryPage.getSize(), tdCategoryPage.getTotal());
 
-        return categoryPageVoPage.setRecords(tdCategoryPage.getRecords().stream().map(tdCategory -> {
-            CategoryVo categoryVoList = new CategoryVo();
-            BeanUtils.copyProperties(tdCategory, categoryVoList);
-            return categoryVoList;
+        return categoryPageVOPage.setRecords(tdCategoryPage.getRecords().stream().map(tdCategory -> {
+            CategoryVO categoryVOList = new CategoryVO();
+            BeanUtils.copyProperties(tdCategory, categoryVOList);
+            return categoryVOList;
         }).collect(Collectors.toList()));
     }
 
     @Override
-    public Object updateCategory(CategoryDto categoryDto) {
+    public Object updateCategory(CategoryDTO categoryDTO) {
         TDCategory tdCategory = new TDCategory();
-        BeanUtils.copyProperties(categoryDto, tdCategory);
+        BeanUtils.copyProperties(categoryDTO, tdCategory);
         UpdateWrapper<TDCategory> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("category_id", categoryDto.getCategoryId());
+        updateWrapper.eq("category_id", categoryDTO.getCategoryId());
 
         if (tDCategoryMapper.update(tdCategory, updateWrapper) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);

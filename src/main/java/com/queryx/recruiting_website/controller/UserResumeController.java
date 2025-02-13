@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,12 +31,10 @@ public class UserResumeController {
     /**
      * 上传附件简历
      *
-     * @param userId 用户ID
      * @param file   上传的文件
      * @return 返回上传结果
      */
     @Operation(summary = "上传附件简历", parameters = {
-            @Parameter(name = "id", description = "用户ID", schema = @Schema(implementation = Long.class), required = true),
             @Parameter(name = "file", description = "上传的文件", schema = @Schema(implementation = MultipartFile.class), required = true)
     },
     responses = {
@@ -44,8 +43,9 @@ public class UserResumeController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PostMapping("/upload")
-    public CommonResp<Integer> handleResumeUpload(@RequestParam("id") Long userId, @RequestParam("file") MultipartFile file) {
+    public CommonResp<Integer> handleResumeUpload(@RequestParam("file") MultipartFile file) {
         Integer message = 0;
+        final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
         try {
             message = userManagementService.insertResumeAttachment(userId, file);
             if (message <= 0) return CommonResp.fail(AppHttpCodeEnum.FILE_UPLOAD_ERROR, message);
@@ -76,6 +76,7 @@ public class UserResumeController {
         try {
             deletedRows = userManagementService.deleteResumeAttachment(raId);
             if (deletedRows <= 0) {
+                log.error("删除简历失败，简历ID为：{}", raId);
                 return CommonResp.fail(AppHttpCodeEnum.DELETE_RESUME_ERROR, deletedRows);
             }
         } catch (Exception e) {

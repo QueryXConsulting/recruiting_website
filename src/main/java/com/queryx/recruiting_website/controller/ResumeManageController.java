@@ -1,7 +1,10 @@
 package com.queryx.recruiting_website.controller;
 
 
-import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.dto.SelectResumeDTO;
+import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,21 +25,25 @@ public class ResumeManageController {
     @GetMapping("/selectResumeList")
     @Operation(summary = "简历列表")
     public CommonResp selectResumeList(Integer page, Integer size, String userName, String resumeReview, String resumeStatus, String resumeType) {
-        return CommonResp.success(resumeService.selectResumeManage(page, size, userName, resumeReview, resumeStatus, resumeType));
+        Page<ResumeManageVO> voPage = resumeService.selectResumeManage(page, size, userName, resumeReview, resumeStatus, resumeType);
+        if (voPage == null){
+            return CommonResp.fail(AppHttpCodeEnum.USERNAME_NOT_EXIST, null);
+        }
+        return CommonResp.success(voPage);
     }
 
-    @GetMapping("/selectResumeInfo")
+    @PostMapping("/selectResumeInfo")
     @Operation(summary = "简历信息")
     @PreAuthorize("hasPermission(null ,'system:resume:query')")
-    public CommonResp selectResumeInfo(@RequestBody SelectResumeDto selectResumeDto) {
-        return CommonResp.success(resumeService.selectResume(selectResumeDto));
+    public CommonResp selectResumeInfo(@RequestBody SelectResumeDTO selectResumeDTO) {
+        return CommonResp.success(resumeService.selectResume(selectResumeDTO));
     }
 
 
     @GetMapping("/resumeReview/{review}/{resumeId}/{resumeType}")
     @Operation(summary = "简历审核")
-    public CommonResp resumeReview(@PathVariable("review") String review,@PathVariable("resumeId") Long resumeId,@PathVariable("resumeType") String resumeType) {
-        return CommonResp.success(resumeService.resumeReview(review,resumeId,resumeType));
+    public CommonResp resumeReview(@PathVariable("review") String review, @PathVariable("resumeId") Long resumeId, @PathVariable("resumeType") String resumeType) {
+        return CommonResp.success(resumeService.resumeReview(review, resumeId, resumeType));
     }
 
 

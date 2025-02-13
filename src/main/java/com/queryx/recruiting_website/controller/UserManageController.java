@@ -1,7 +1,7 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.domain.dto.AdminDto;
-import com.queryx.recruiting_website.domain.dto.UserDto;
+import com.queryx.recruiting_website.domain.dto.AdminDTO;
+import com.queryx.recruiting_website.domain.dto.UserDTO;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.utils.CommonResp;
@@ -24,8 +24,8 @@ public class UserManageController {
     @PostMapping("/addAdmin")
     @Operation(summary = "添加管理员")
     @PreAuthorize("hasPermission(null ,'system:user:add')")
-    public CommonResp addAdmin(@RequestBody AdminDto adminDto) {
-        return CommonResp.success(adminService.addAdmin(adminDto));
+    public CommonResp addAdmin(@RequestBody AdminDTO adminDTO) {
+        return CommonResp.success(adminService.addAdmin(adminDTO));
     }
 
     @GetMapping("/selectAdminList")
@@ -44,8 +44,8 @@ public class UserManageController {
     @PutMapping("/updateAdminInfo")
     @Operation(summary = "管理员数据更新")
     @PreAuthorize("hasPermission(null ,'system:user:edit')")
-    public CommonResp updateAdminInfo(@RequestBody AdminDto adminDto) {
-        return CommonResp.success(adminService.updateAdminInfo(adminDto));
+    public CommonResp updateAdminInfo(@RequestBody AdminDTO adminDTO) {
+        return CommonResp.success(adminService.updateAdminInfo(adminDTO));
     }
 
     @DeleteMapping("/deleteAdmin/{adminId}")
@@ -73,15 +73,15 @@ public class UserManageController {
     @PutMapping("/updateUserInfo")
     @Operation(summary = "用户数据更新")
     @PreAuthorize("hasPermission(null ,'system:user:edit')")
-    public CommonResp updateUserInfo(@RequestBody UserDto userDto) {
-        return CommonResp.success(userService.updateUserInfo(userDto));
+    public CommonResp updateUserInfo(@RequestBody UserDTO userDTO) {
+        return CommonResp.success(userService.updateUserInfo(userDTO));
     }
 
     @PostMapping("/addUser")
     @Operation(summary = "添加用户")
     @PreAuthorize("hasPermission(null ,'system:user:add')")
-    public CommonResp addUser(@RequestBody UserDto userDto) {
-        return CommonResp.success(userService.addUser(userDto));
+    public CommonResp addUser(@RequestBody UserDTO userDTO) {
+        return CommonResp.success(userService.addUser(userDTO));
     }
 
 

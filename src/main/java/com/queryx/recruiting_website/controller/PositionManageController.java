@@ -2,10 +2,10 @@ package com.queryx.recruiting_website.controller;
 
 import com.queryx.recruiting_website.domain.LoginUser;
 import com.queryx.recruiting_website.domain.TDCategory;
-import com.queryx.recruiting_website.domain.dto.CategoryDto;
-import com.queryx.recruiting_website.domain.dto.JobDetailDto;
-import com.queryx.recruiting_website.domain.dto.JobDto;
-import com.queryx.recruiting_website.domain.dto.JobNatureDto;
+import com.queryx.recruiting_website.domain.dto.CategoryDTO;
+import com.queryx.recruiting_website.domain.dto.JobDetailDTO;
+import com.queryx.recruiting_website.domain.dto.JobDTO;
+import com.queryx.recruiting_website.domain.dto.JobNatureDTO;
 import com.queryx.recruiting_website.service.TDCategoryService;
 import com.queryx.recruiting_website.service.TDJobNatureService;
 import com.queryx.recruiting_website.service.TDJobService;
@@ -44,10 +44,11 @@ public class PositionManageController {
     @PutMapping("/updateJobInfo")
     @Operation(summary = "职位更新")
     @PreAuthorize("hasPermission(null ,'system:job:edit')")
-    public CommonResp updateJobInfo(@RequestBody JobDetailDto jobDetailDto) {
+    public CommonResp updateJobInfo(@RequestBody JobDetailDTO jobDetailDTO) {
 
-        return CommonResp.success(jobService.updateJob(jobDetailDto));
+        return CommonResp.success(jobService.updateJob(jobDetailDTO));
     }
+
     @DeleteMapping("/deleteJob/{jobId}")
     @Operation(summary = "职位删除")
     @PreAuthorize("hasPermission(null ,'system:job:remove')")
@@ -64,8 +65,8 @@ public class PositionManageController {
     @PostMapping("/addJob")
     @Operation(summary = "添加工作")
     @PreAuthorize("hasPermission(null ,'system:job:add')")
-    public CommonResp addJob(@RequestBody JobDto jobDto) {
-        return CommonResp.success(jobService.addJob(jobDto));
+    public CommonResp addJob(@RequestBody JobDTO jobDTO) {
+        return CommonResp.success(jobService.addJob(jobDTO));
     }
 
     @GetMapping("/selectCategory")
@@ -83,8 +84,8 @@ public class PositionManageController {
     @PostMapping("/updateCategory")
     @Operation(summary = "工种数据更新")
     @PreAuthorize("hasPermission(null ,'system:category:edit')")
-    public CommonResp updateCategory(@RequestBody CategoryDto categoryDto) {
-        return CommonResp.success(categoryService.updateCategory(categoryDto));
+    public CommonResp updateCategory(@RequestBody CategoryDTO categoryDTO) {
+        return CommonResp.success(categoryService.updateCategory(categoryDTO));
     }
 
     @GetMapping("/addCategory")
@@ -124,8 +125,8 @@ public class PositionManageController {
     @PutMapping("/updateJobNature")
     @Operation(summary = "求职类型数据更新")
     @PreAuthorize("hasPermission(null ,'system:jobType:edit')")
-    public CommonResp updateJobNature(@RequestBody JobNatureDto jobNatureDto) {
-        return CommonResp.success(jobNatureService.updateJobNature(jobNatureDto));
+    public CommonResp updateJobNature(@RequestBody JobNatureDTO jobNatureDTO) {
+        return CommonResp.success(jobNatureService.updateJobNature(jobNatureDTO));
     }
 
     @GetMapping("/addJobNature")

@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * (TDCompanyInfo)实体类
@@ -17,7 +17,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @Schema(name = "企业信息实体类")
 public class TDCompanyInfo {
 
@@ -28,7 +27,7 @@ public class TDCompanyInfo {
     @Schema(name = "企业用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
 
-    @Schema(name = "账号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoUsername;
 
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)

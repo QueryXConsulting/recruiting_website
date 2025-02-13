@@ -6,9 +6,9 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class MenuVo {
+public class MenuVO {
 
-    private List<MenuVo> children;
+    private List<MenuVO> children;
     private String component;
     private Date createTime;
     private String icon;

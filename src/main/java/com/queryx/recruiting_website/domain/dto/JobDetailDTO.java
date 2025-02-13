@@ -2,10 +2,17 @@ package com.queryx.recruiting_website.domain.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
-public class JobInsertDto {
+public class JobDetailDTO {
 
 
+    private Long companyId;
+
+    private String companyName;
+
+    private Long jobId;
 
     private String jobPosition;
 
@@ -27,7 +34,10 @@ public class JobInsertDto {
 
     private String jobContactsPhone;
 
+    private Date jobTime;
 
     private String jobNature;
+
+    private String jobReview;
 
 }

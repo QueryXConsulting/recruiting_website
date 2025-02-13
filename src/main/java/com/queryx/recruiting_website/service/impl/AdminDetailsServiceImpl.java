@@ -38,14 +38,14 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LambdaQueryWrapper<TDAdmin> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TDAdmin::getAdminUsername, username)
-                .eq(TDAdmin::getAdminStatus, Common.STATUS_ENABLE.getCode());
+                .eq(TDAdmin::getAdminStatus, Common.STATUS_ENABLE);
         TDAdmin tdAdmin = adminMapper.selectOne(wrapper);
         if (Objects.isNull(tdAdmin)) {
             TDUser user = null;
             if (username.matches(PHONE)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()
-                        .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE.getCode())
-                        .eq(TDUser::getDelFlag, Common.NOT_DELETED.getCode()));
+                        .eq(TDUser::getUserPhone, username).eq(TDUser::getUserStatus, Common.STATUS_ENABLE)
+                        .eq(TDUser::getDelFlag, Common.NOT_DELETE));
 
             } else if (username.matches(EMAIL)) {
                 user = userMapper.queryUserByEmail(username);

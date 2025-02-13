@@ -1,9 +1,13 @@
 
 file:
-  upload-path: src/main/resources/resume_files/ # 文件上传路径
+  upload-path-resume: D:\maven\resume_files # TODO 文件上传路径 生产环境下需要修改
+  upload-path-avatar: D:/maven/avatar_files/
+
+
 
 # 服务器配置
 server:
+  address: 127.0.0.1 # TODO ip地址 后面生产环境需修改以及公司图片等的域名拼接 现在暂时使用ip+port
   port: 8080 # 端口号
 
 #  swagger配置
@@ -18,6 +22,10 @@ springdoc:
 
 # spring配置
 spring:
+  web:
+    resources:
+      static-locations:
+      - "file:D:/maven/"   # 生产环境需要进行修改该参数
   application:
     name: recruiting_website
 
@@ -25,7 +33,7 @@ spring:
   servlet:
     multipart:
       enabled: true  # 启用Servlet的多部分文件上传支持
-      max-file-size: 100MB  # 设置单个上传文件的最大允许大小
+      max-file-size: 2MB  # 设置单个上传文件的最大允许大小
       max-request-size: 100MB  # 设置整个多部分请求的最大允许大小
       file-size-threshold: 0  # 设置文件写入磁盘的大小阈值（0表示文件始终写入磁盘）
 

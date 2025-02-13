@@ -12,15 +12,15 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.domain.TPMenu;
-import com.queryx.recruiting_website.domain.dto.JobDto;
+import com.queryx.recruiting_website.domain.dto.JobDTO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.service.TDJobService;
-import com.queryx.recruiting_website.domain.vo.JobCompanyListVo;
-import com.queryx.recruiting_website.domain.dto.JobDetailDto;
-import com.queryx.recruiting_website.domain.dto.JobInsertDto;
+import com.queryx.recruiting_website.domain.vo.JobCompanyListVO;
+import com.queryx.recruiting_website.domain.dto.JobDetailDTO;
+import com.queryx.recruiting_website.domain.dto.JobInsertDTO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
 
 
     @Override
-    public IPage<JobCompanyListVo> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status) {
+    public IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, Long companyId, String jobName, String jobReview, String status) {
 
         LambdaQueryWrapper<TDJob> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(jobName != null, TDJob::getJobPosition, jobName)
@@ -49,8 +49,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .eq(jobReview != null, TDJob::getJobReview, jobReview)
                 .eq(companyId != null, TDJob::getCompanyId, companyId);
 
-        Page<TDJob> pageVo = new Page<>(page, size);
-        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVo, wrapper);
+        Page<TDJob> pageVO = new Page<>(page, size);
+        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVO, wrapper);
 
         if (jobPage.getRecords().isEmpty()) {
             return null;
@@ -61,19 +61,19 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         Map<Long, String> companyNames = tdCompanyInfos.stream()
                 .collect(Collectors.toMap(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName));
         // 进行类型转换并把每个工作得公司名set
-        IPage<JobCompanyListVo> jobCompanyListVoPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
-        jobCompanyListVoPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
-            JobCompanyListVo jobCompanyListVo = new JobCompanyListVo();
-            BeanUtils.copyProperties(tdJob, jobCompanyListVo);
-            jobCompanyListVo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
-            return jobCompanyListVo;
+        IPage<JobCompanyListVO> jobCompanyListVOPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
+        jobCompanyListVOPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
+            JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
+            BeanUtils.copyProperties(tdJob, jobCompanyListVO);
+            jobCompanyListVO.setCompanyName(companyNames.get(tdJob.getCompanyId()));
+            return jobCompanyListVO;
         }).collect(Collectors.toList()));
 
-        return jobCompanyListVoPage;
+        return jobCompanyListVOPage;
     }
 
     @Override
-    public JobDetailDto selectJobInfo(Long jobId) {
+    public JobDetailDTO selectJobInfo(Long jobId) {
         LambdaQueryWrapper<TDJob> jobInfo = new LambdaQueryWrapper<TDJob>().eq(TDJob::getJobId, jobId)
                 .select(TDJob::getJobId, TDJob::getJobArea, TDJob::getJobCategory, TDJob::getJobContact
                         , TDJob::getJobContactsPhone, TDJob::getJobEducation, TDJob::getJobExperience,
@@ -82,22 +82,22 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
 
         TDJob tdJob = tdJobMapper.selectOne(jobInfo);
         String companyName = companyInfoService.getById(tdJob.getCompanyId()).getCompanyInfoName();
-        JobDetailDto jobDetailDto = new JobDetailDto();
-        BeanUtils.copyProperties(tdJob, jobDetailDto);
-        jobDetailDto.setCompanyName(companyName);
-        return jobDetailDto;
+        JobDetailDTO jobDetailDTO = new JobDetailDTO();
+        BeanUtils.copyProperties(tdJob, jobDetailDTO);
+        jobDetailDTO.setCompanyName(companyName);
+        return jobDetailDTO;
     }
 
     @Override
-    public JobDetailDto updateJob(JobDetailDto jobDetailDto) {
+    public JobDetailDTO updateJob(JobDetailDTO jobDetailDTO) {
         TDJob tdJob = new TDJob();
-        BeanUtils.copyProperties(jobDetailDto, tdJob);
+        BeanUtils.copyProperties(jobDetailDTO, tdJob);
         UpdateWrapper<TDJob> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("job_id", tdJob.getJobId())
-                .set("job_review", Common.REVIEW_WAIT.getCode())
-                .set("job_status", Common.STATUS_CLOSE.getCode());
-        if (jobDetailDto.getCompanyId() != null) {
-            updateWrapper.set("company_id", jobDetailDto.getCompanyId());
+                .set("job_review", Common.REVIEW_WAIT)
+                .set("job_status", Common.STATUS_CLOSE);
+        if (jobDetailDTO.getCompanyId() != null) {
+            updateWrapper.set("company_id", jobDetailDTO.getCompanyId());
         }
 
         if (tdJobMapper.update(tdJob, updateWrapper) < 1) {
@@ -107,12 +107,12 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public JobDetailDto insertJobInfo(JobInsertDto jobInsertDto, Long companyId) {
+    public JobDetailDTO insertJobInfo(JobInsertDTO jobInsertDTO, Long companyId) {
         TDJob tdJob = new TDJob();
-        BeanUtils.copyProperties(jobInsertDto, tdJob);
+        BeanUtils.copyProperties(jobInsertDTO, tdJob);
         tdJob.setCompanyId(companyId);
-        tdJob.setJobReview(Common.REVIEW_WAIT.getCode());
-        tdJob.setJobStatus(Common.STATUS_CLOSE.getCode());
+        tdJob.setJobReview(Common.REVIEW_WAIT);
+        tdJob.setJobStatus(Common.STATUS_CLOSE);
         tdJob.setJobTime(new Date());
 
         if (tdJobMapper.insert(tdJob) < 1) {
@@ -131,11 +131,11 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public Object addJob(JobDto jobDto) {
+    public Object addJob(JobDTO jobDTO) {
         TDJob tdJob = new TDJob();
-        BeanUtils.copyProperties(jobDto, tdJob);
-        tdJob.setJobReview(Common.REVIEW_SUCCESS.getCode());
-        tdJob.setJobStatus(Common.STATUS_PUBLISH.getCode());
+        BeanUtils.copyProperties(jobDTO, tdJob);
+        tdJob.setJobReview(Common.REVIEW_OK);
+        tdJob.setJobStatus(Common.STATUS_PUBLISH);
         tdJob.setJobTime(new Date());
 
         if (tdJobMapper.insert(tdJob) < 1) {
@@ -149,7 +149,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         LambdaUpdateWrapper<TDJob> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(TDJob::getJobId, jobId)
                 .set(TDJob::getJobReview, review)
-                .set(TDJob::getJobStatus, Common.STATUS_PUBLISH.getCode());
+                .set(TDJob::getJobStatus, Common.STATUS_PUBLISH);
         if (!update(updateWrapper)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

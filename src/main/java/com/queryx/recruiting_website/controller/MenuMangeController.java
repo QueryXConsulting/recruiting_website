@@ -1,8 +1,8 @@
 package com.queryx.recruiting_website.controller;
 
 
-import com.queryx.recruiting_website.domain.dto.MenuDto;
-import com.queryx.recruiting_website.domain.dto.UpdateMenuDto;
+import com.queryx.recruiting_website.domain.dto.MenuDTO;
+import com.queryx.recruiting_website.domain.dto.UpdateMenuDTO;
 import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,7 @@ public class MenuMangeController {
     @PostMapping("/addMenu")
     @Operation(summary = "增加菜单")
     @PreAuthorize("hasPermission(null ,'system:menu:add')")
-    public CommonResp addMenu(@RequestBody MenuDto menu) {
+    public CommonResp addMenu(@RequestBody MenuDTO menu) {
         return CommonResp.success(menuService.addMenu(menu));
     }
 
@@ -43,7 +43,7 @@ public class MenuMangeController {
     @PutMapping("/updateMenu")
     @Operation(summary = "菜单数据更新")
     @PreAuthorize("hasPermission(null ,'system:menu:edit')")
-    public CommonResp updateMenu(@RequestBody UpdateMenuDto menu) {
+    public CommonResp updateMenu(@RequestBody UpdateMenuDTO menu) {
         return CommonResp.success(menuService.updateMenu(menu));
     }
 

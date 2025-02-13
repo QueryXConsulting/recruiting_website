@@ -5,14 +5,13 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.vo.LoginVO;
-import com.queryx.recruiting_website.mapper.UserMapper;
+import com.queryx.recruiting_website.mapper.TDUserMapper;
 
-import java.util.Objects;
 
 public class PhoneLoginStrategy implements LoginStrategy {
 
     @Override
-    public LoginVO login(UserMapper userMapper, LoginDTO loginDTO) {
+    public LoginVO login(TDUserMapper userMapper, LoginDTO loginDTO) {
         LoginVO loginVO = new LoginVO();
         // TODO 手机号登录: 验证码待实现
         TDUser user = userMapper.selectOne(new LambdaQueryWrapper<TDUser>()

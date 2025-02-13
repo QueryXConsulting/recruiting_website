@@ -8,6 +8,7 @@ import com.queryx.recruiting_website.utils.WebUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -17,22 +18,20 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
 
-        e.printStackTrace();
-        CommonResp result = null;
+        log.error("认证或授权失败", e);
+        CommonResp<?> result = null;
         if (e instanceof BadCredentialsException) {
-            result =
-                    CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR.getCode()
-                            , e.getMessage());
+            result = CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR, e.getMessage());
         } else if (e instanceof InsufficientAuthenticationException) {
-            result =CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(),AppHttpCodeEnum.NEED_LOGIN.getMsg());
-        }else {
-            result=CommonResp
-                    .fail(AppHttpCodeEnum.SYSTEM_ERROR.getCode(),"认证或授权失败");
+            result = CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN, e.getMessage());
+        } else {
+            result = CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, "认证或授权失败");
         }
         // 响应给前端
         WebUtils.renderString(response, SecurityUtils.convertCommonRespToJson(result));

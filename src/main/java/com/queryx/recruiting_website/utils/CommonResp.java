@@ -4,10 +4,8 @@ package com.queryx.recruiting_website.utils;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 @Data
-@ToString
 @Schema(name = "响应返回数据对象")
 public class CommonResp<T> {
 

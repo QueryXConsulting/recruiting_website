@@ -1,12 +1,11 @@
 package com.queryx.recruiting_website.domain.vo;
 
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Date;
 
 @Data
-@ToString
 public class AttachmentsResumeVO {
     private Long resumeAttachmentId;
     /**

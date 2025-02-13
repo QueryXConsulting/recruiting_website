@@ -2,21 +2,19 @@ package com.queryx.recruiting_website.domain.design;
 
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.vo.LoginVO;
-import com.queryx.recruiting_website.mapper.UserMapper;
+import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.service.impl.UserServiceImpl;
 
 public class LoginContext {
     private LoginStrategy loginStrategy;
 
-    final static String PHONE = "(^1[3-9]\\d{9}$)";
-    final static String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
-
-    public static LoginVO executeLogin(UserMapper mapper, LoginDTO dto) {
+    public static LoginVO executeLogin(TDUserMapper mapper, LoginDTO dto) {
         LoginContext context = new LoginContext();
-        if (dto.getUsername().matches(PHONE)) {
+        if (dto.getUsername().matches(UserServiceImpl.PHONE)) {
             context.loginStrategy = new PhoneLoginStrategy();
         }
-        else if (dto.getUsername().matches(EMAIL)) {
+        else if (dto.getUsername().matches(UserServiceImpl.EMAIL)) {
             context.loginStrategy = new EmailLoginStrategy();
         } else {
             return null;

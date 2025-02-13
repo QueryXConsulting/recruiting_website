@@ -5,14 +5,9 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class JobDetailDto {
-
+public class JobDTO {
 
     private Long companyId;
-
-    private String companyName;
-
-    private Long jobId;
 
     private String jobPosition;
 
@@ -34,10 +29,5 @@ public class JobDetailDto {
 
     private String jobContactsPhone;
 
-    private Date jobTime;
-
     private String jobNature;
-
-    private String jobReview;
-
 }

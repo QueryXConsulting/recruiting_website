@@ -1,12 +1,13 @@
 package com.queryx.recruiting_website.domain;
 
 import java.util.Date;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.queryx.recruiting_website.domain.vo.MenuVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * (TPMenu)实体类
@@ -15,7 +16,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @Schema(name = "菜单实体类")
 public class TPMenu {
 
@@ -72,6 +72,7 @@ public class TPMenu {
     @Schema(name = "删除标志", description = "0表示未删除，1表示已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
 
-
+    @Schema(name = "子菜单",description = "不存在的字段，用以getRouter接口下存储字段", implementation = List.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<MenuVO> children;
 }
 

@@ -3,10 +3,7 @@ package com.queryx.recruiting_website.domain.dto;
 import lombok.Data;
 
 @Data
-public class UpdateMenuDto {
-
-    private Long menuId;
-
+public class MenuDTO {
     private String menuName;
 
     private Long parentId;

@@ -1,11 +1,7 @@
 package com.queryx.recruiting_website.controller;
 
 import com.queryx.recruiting_website.domain.TDUser;
-import com.queryx.recruiting_website.domain.dto.JobDetailDto;
-import com.queryx.recruiting_website.domain.dto.JobInsertDto;
-import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
-import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
-import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
+import com.queryx.recruiting_website.domain.dto.*;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.service.TDJobService;
 import com.queryx.recruiting_website.service.TDResumeService;
@@ -54,14 +50,14 @@ public class UserCompanyController {
 
     @PutMapping("/updateJob")
     @Operation(summary = "更新职位信息")
-    public CommonResp updateJob(@RequestBody JobDetailDto jobDetailDto) {
-        return CommonResp.success(tdJobService.updateJob(jobDetailDto));
+    public CommonResp updateJob(@RequestBody JobDetailDTO jobDetailDTO) {
+        return CommonResp.success(tdJobService.updateJob(jobDetailDTO));
     }
 
     @PostMapping("/publishJob/{companyId}")
     @Operation(summary = "发布职位")
-    public CommonResp insertJobInfo(@RequestBody JobInsertDto jobInsertDto, @PathVariable("companyId") Long companyId) {
-        return CommonResp.success(tdJobService.insertJobInfo(jobInsertDto, companyId));
+    public CommonResp insertJobInfo(@RequestBody JobInsertDTO jobInsertDTO, @PathVariable("companyId") Long companyId) {
+        return CommonResp.success(tdJobService.insertJobInfo(jobInsertDTO, companyId));
     }
 
     @DeleteMapping("/deleteJob/{jobId}")
@@ -79,8 +75,8 @@ public class UserCompanyController {
 
     @PutMapping("/updateUserInfo")
     @Operation(summary = "更新个人信息")
-    public CommonResp updateUserInfo(@RequestBody UserCompanyDto userCompanyDto) {
-        return CommonResp.success(tdUserService.updateUserCompanyInfo(userCompanyDto));
+    public CommonResp updateUserInfo(@RequestBody UserCompanyDTO userCompanyDTO) {
+        return CommonResp.success(tdUserService.updateUserCompanyInfo(userCompanyDTO));
     }
 
 
@@ -92,8 +88,8 @@ public class UserCompanyController {
 
     @PutMapping("/updateCompanyInfo")
     @Operation(summary = "更新公司信息")
-    public CommonResp updateCompanyInfo(@RequestBody CompanyInfoDto companyInfoDto) {
-        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDto));
+    public CommonResp updateCompanyInfo(@RequestBody UserRegisterDTO.CompanyInfoDTO companyInfoDTO) {
+        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDTO));
     }
 
     @GetMapping("/resumeList/{companyId}")
@@ -104,7 +100,7 @@ public class UserCompanyController {
 
     @PostMapping("/selectResume")
     @Operation(summary = "查看简历")
-    public CommonResp selectResume(@RequestBody SelectResumeDto selectResumeDto) {
-        return CommonResp.success(tdResumeService.selectResume(selectResumeDto));
+    public CommonResp selectResume(@RequestBody SelectResumeDTO selectResumeDTO) {
+        return CommonResp.success(tdResumeService.selectResume(selectResumeDTO));
     }
 }

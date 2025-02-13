@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -26,7 +27,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         log.warn("----------------进入权限校验---------------------");
         Object principal = authentication.getPrincipal();
         if (principal instanceof LoginAdmin loginAdmin) {
-            if (loginAdmin.getTdAdmin().getRoleId().equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
+            if (Common.SUPER_ADMIN.equals(loginAdmin.getTdAdmin().getRoleId())) {
                 return true;
             }
         }

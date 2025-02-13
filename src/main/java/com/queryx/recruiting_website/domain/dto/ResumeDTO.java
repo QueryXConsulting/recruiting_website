@@ -2,7 +2,7 @@ package com.queryx.recruiting_website.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Date;
 
@@ -13,7 +13,6 @@ import java.util.Date;
  * @since 2024-12-30 14:57:55
  */
 @Data
-@ToString
 @Schema(name = "在线简历DTO")
 public class ResumeDTO {
     @Schema(name = "简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)

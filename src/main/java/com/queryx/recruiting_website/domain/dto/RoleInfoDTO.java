@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class RoleInfoDto {
+public class RoleInfoDTO {
     private Long roleId;
 
     private String roleName;

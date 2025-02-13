@@ -1,6 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.domain.dto.RoleInfoDto;
+import com.queryx.recruiting_website.domain.dto.RoleInfoDTO;
 import com.queryx.recruiting_website.service.TPRoleService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,8 +39,8 @@ public class RoleManageController {
     @PutMapping("/updateRoleInfo")
     @Operation(summary = "更新角色信息")
     @PreAuthorize("hasPermission(null ,'system:role:edit')")
-    public CommonResp updateRoleList(@RequestBody RoleInfoDto roleInfoDto) {
-        return CommonResp.success(tpRoleService.updateRoleInfo(roleInfoDto));
+    public CommonResp updateRoleList(@RequestBody RoleInfoDTO roleInfoDTO) {
+        return CommonResp.success(tpRoleService.updateRoleInfo(roleInfoDTO));
     }
 
     @DeleteMapping("/delRole/{roleId}")
@@ -53,8 +53,8 @@ public class RoleManageController {
     @PostMapping("/addRole")
     @Operation(summary = "添加角色")
     @PreAuthorize("hasPermission(null ,'system:role:add')")
-    public CommonResp addRole(@RequestBody RoleInfoDto roleInfoDto) {
-        return CommonResp.success(tpRoleService.addRole(roleInfoDto));
+    public CommonResp addRole(@RequestBody RoleInfoDTO roleInfoDTO) {
+        return CommonResp.success(tpRoleService.addRole(roleInfoDTO));
     }
 
 }
