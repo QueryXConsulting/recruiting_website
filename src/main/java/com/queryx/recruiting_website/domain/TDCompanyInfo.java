@@ -23,9 +23,6 @@ public class TDCompanyInfo {
     @Schema(name = "企业ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyInfoId;
 
-    @Schema(name = "企业用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long userId;
-
     @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoUsername;
 
@@ -51,8 +48,13 @@ public class TDCompanyInfo {
     private String companyInfoReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-
     private String companyInfoStatus;
+
+    @Schema(name = "公司资质文件路径", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String enterpriseFile;
+
+    @Schema(name = "公司资质审核", description = "0代表待审核,1代表审核通过,2打回修改", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String enterpriseReview;
 
 }
 

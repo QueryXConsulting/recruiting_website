@@ -11,5 +11,6 @@ public class RoleMenuVO {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long menuId;
     private String menuName;
+    private String menuType;
     List<RoleMenuVO> children;
 }

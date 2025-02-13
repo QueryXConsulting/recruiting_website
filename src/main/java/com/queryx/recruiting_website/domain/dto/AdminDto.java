@@ -10,4 +10,5 @@ public class AdminDto {
     private String adminUsername;
     private String adminPassword;
     private String adminAvatar;
+    private String adminStatus;
 }

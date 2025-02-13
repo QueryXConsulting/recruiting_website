@@ -11,6 +11,7 @@ public class RoleListVO {
     private Long roleId;
     private String roleName;
     private String status;
+    private String roleType;
     private Integer roleSort;
     private Date createTime;
 }

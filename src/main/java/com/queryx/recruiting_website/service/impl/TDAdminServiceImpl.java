@@ -166,7 +166,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     public List<String> selectPermsByRoleId(Long roleId) {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(TPMenu::getMenuType, "C", "F");
+        wrapper.in(TPMenu::getMenuType, "F","U");
         wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE);
         // 如果是超级管理员返回所有权限
         if (roleId.equals(Common.SUPER_ADMIN)) {

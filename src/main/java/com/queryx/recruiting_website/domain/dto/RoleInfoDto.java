@@ -14,5 +14,7 @@ public class RoleInfoDto {
 
     private String status;
 
+    private String roleType;
+
     private List<Long> menuIds;
 }

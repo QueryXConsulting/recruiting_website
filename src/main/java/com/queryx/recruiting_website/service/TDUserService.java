@@ -30,5 +30,7 @@ public interface TDUserService extends IService<TDUser> {
     Object deleteUser(Long userId);
 
     Object addUser(UserDto userDto);
+
+    Object selectUserCompanyList(Integer page, Integer size, String userName);
 }
 

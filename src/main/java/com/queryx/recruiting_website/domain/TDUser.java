@@ -23,6 +23,9 @@ public class TDUser {
     @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
 
+    @Schema(name = "公司id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long companyInfoId;
+
     @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userEmail;
 
@@ -38,7 +41,7 @@ public class TDUser {
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userPassword;
 
-    @Schema(name = "用户角色", description = "0代表学生用户,1代表公司用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "用户角色", description = "5代表学生用户,4代表公司用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userRole;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)

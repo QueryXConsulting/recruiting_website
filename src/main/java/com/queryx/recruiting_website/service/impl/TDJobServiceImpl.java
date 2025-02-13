@@ -17,6 +17,7 @@ import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDJobMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.service.TDJobService;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,6 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     @Override
     public IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName,
                                                  String jobName, String jobReview, String status, String jobCategory, String jobNature) {
-
         List<Long> targetCompanyIds = null;
         if (StringUtils.hasText(companyName)) {
             LambdaQueryWrapper<TDCompanyInfo> companyQueryWrapper = new LambdaQueryWrapper<>();
@@ -125,10 +125,10 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public JobDetailDto insertJobInfo(JobInsertDto jobInsertDto, Long companyId) {
+    public JobDetailDto insertJobInfo(JobInsertDto jobInsertDto) {
         TDJob tdJob = new TDJob();
         BeanUtils.copyProperties(jobInsertDto, tdJob);
-        tdJob.setCompanyId(companyId);
+        tdJob.setCompanyId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
         tdJob.setJobReview(Common.REVIEW_WAIT);
         tdJob.setJobStatus(Common.STATUS_CLOSE);
         tdJob.setJobTime(new Date());
@@ -174,6 +174,25 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
         return null;
+    }
+
+    @Override
+    public Object selectCompanyJobList(Integer page, Integer size, String jobName, String jobReview, String jobCategory) {
+        Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
+        LambdaQueryWrapper<TDJob> tdJobLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        tdJobLambdaQueryWrapper.eq(TDJob::getCompanyId, companyInfoId)
+                .like(StringUtils.hasText(jobName), TDJob::getJobPosition, jobName)
+                .eq(StringUtils.hasText(jobReview), TDJob::getJobReview, jobReview)
+                .eq(TDJob::getDelFlag, Common.NOT_DELETE)
+                .like(StringUtils.hasText(jobCategory), TDJob::getJobCategory, jobCategory);
+        Page<TDJob> tdJobPage = tdJobMapper.selectPage(new Page<>(page, size), tdJobLambdaQueryWrapper);
+        Page<JobCompanyListVO> jobCompanyListVOPage = new Page<>(tdJobPage.getCurrent(), tdJobPage.getSize(), tdJobPage.getTotal());
+        jobCompanyListVOPage.setRecords(tdJobPage.getRecords().stream().map(job -> {
+            JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
+            BeanUtils.copyProperties(job, jobCompanyListVO);
+            return jobCompanyListVO;
+        }).toList());
+        return jobCompanyListVOPage;
     }
 
 

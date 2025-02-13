@@ -63,6 +63,7 @@ public class UserController {
     private UserService userService;
     @Resource
     private TDAdminService tdAdminService;
+
     /**
      * 用户注册
      *
@@ -139,11 +140,11 @@ public class UserController {
     @PostMapping("/login")
     @Operation(summary = "登录功能", description = "公司用户以及学生用户和管理员共同接口")
     public CommonResp login(@RequestBody LoginDTO loginDTO) {
-        if (loginDTO.getUsername().matches(PHONE)||loginDTO.getUsername().matches(EMAIL)) {
+        if (loginDTO.getUsername().matches(PHONE) || loginDTO.getUsername().matches(EMAIL)) {
             return CommonResp.success(tdUserService.login(loginDTO));
         }
-        AdminLoginDto adminLoginDto=new AdminLoginDto();
-        BeanUtils.copyProperties(loginDTO,adminLoginDto);
+        AdminLoginDto adminLoginDto = new AdminLoginDto();
+        BeanUtils.copyProperties(loginDTO, adminLoginDto);
         return CommonResp.success(tdAdminService.login(adminLoginDto));
     }
 

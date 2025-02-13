@@ -16,7 +16,6 @@ public class JobCompanyListVO {
 
     private String jobSalary;
 
-
     private String jobCategory;
 
     private String jobPosition;
@@ -38,5 +37,7 @@ public class JobCompanyListVO {
     private String jobPositionDescribe;
 
     private String jobArea;
+
+    private Integer jobPersonNumber;
 
 }

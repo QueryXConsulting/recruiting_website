@@ -69,6 +69,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 = new UsernamePasswordAuthenticationToken(loginAdmin,  null, loginAdmin.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         filterChain.doFilter(request, response);
+
     }
 
     private LoginAdmin getLoginAdmin(LinkedHashMap adminUser){

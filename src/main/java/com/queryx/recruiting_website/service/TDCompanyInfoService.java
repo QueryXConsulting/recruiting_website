@@ -5,16 +5,22 @@ import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 
 public interface TDCompanyInfoService extends IService<TDCompanyInfo> {
 
     CompanyInfoDto selectCompanyInfo(Long companyId);
 
-    CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles);
+    CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles, List<MultipartFile> pdfFiles);
 
 
     Object selectCompanyInfoList(Integer page, Integer size, String companyStatus, String companyReview, String companyName);
 
     Object deleteCompany(Long companyId);
+
+    Map<String, byte[]> getEnterpriseFiles(Long companyId) throws IOException;
 }
 

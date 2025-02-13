@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 public class JobInsertDto {
 
-
-
     private String jobPosition;
 
     private String jobPositionDescribe;

@@ -23,6 +23,10 @@ public class TPRole {
     @Schema(name = "角色ID", implementation = Long.class, requiredMode = Schema.RequiredMode.AUTO)
     private Long roleId;
 
+
+    @Schema(name = "角色类型", implementation = String.class, requiredMode = Schema.RequiredMode.AUTO)
+    private String roleType;
+
     @Schema(name = "角色名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String roleName;
 

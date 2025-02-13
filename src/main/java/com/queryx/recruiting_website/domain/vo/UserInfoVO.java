@@ -6,9 +6,10 @@ import java.util.List;
 
 @Data
 public class UserInfoVO {
+    private Long companyInfoId;
     private String userName;
     private String userRole;
     private String userAvatar;
     private Integer userInterviews;
-    private List<String> perms;
+    private List<String> permissions;
 }

@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
-import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoVO;
 import com.queryx.recruiting_website.exception.SystemException;
@@ -24,7 +23,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +44,8 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     private String port;
     @Value("${server.address}")
     private String ip;
+    @Value("${file.upload-path-enterpriseFile}")
+    private String enterpriseFilePath;
 
 
     @Override
@@ -57,28 +61,62 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     }
 
     @Override
-    public CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles) {
-        // TODO 公司资质附件功能上传(待续)
+    public CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles, List<MultipartFile> pdfFiles) {
+        StringBuilder enterpriseFiles = new StringBuilder();
         TDCompanyInfo tdCompanyInfo = new TDCompanyInfo();
         BeanUtils.copyProperties(companyInfoDto, tdCompanyInfo);
         if (StringUtils.hasText(companyInfoDto.getCompanyInfoPassword())) {
             tdCompanyInfo.setCompanyInfoPassword(passwordEncoder.encode(tdCompanyInfo.getCompanyInfoPassword()));
         }
 
-
         UpdateWrapper<TDCompanyInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("company_info_id", companyInfoDto.getCompanyInfoId());
         tdCompanyInfo.setCompanyInfoStatus(companyInfoDto.getCompanyInfoStatus());
         tdCompanyInfo.setCompanyInfoReview(companyInfoDto.getCompanyInfoReview());
-
-        if (!applyFiles.getOriginalFilename().equals(Common.FILE_EMPTY)) {
-            String fileName = applyFiles.getOriginalFilename();
-            long currentTimeMillis = System.currentTimeMillis();
-            if (!isAllowedFileType(getFileExtension(fileName))) {
-                throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+        if (companyInfoDto.getEnterpriseReview() != null) {
+            tdCompanyInfo.setEnterpriseReview(companyInfoDto.getEnterpriseReview());
+        }
+        try {
+            if (pdfFiles != null) {
+                long currentTimeMillis = System.currentTimeMillis();
+                for (MultipartFile pdf : pdfFiles) {
+                    String fileName = pdf.getOriginalFilename();
+                    if (!isAllowedFileType(getFileExtension(fileName))) {
+                        throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+                    }
+                    File uploadDir = new File(enterpriseFilePath);
+                    File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
+                    if (!destFile.getParentFile().exists()) {
+                        destFile.getParentFile().mkdirs();
+                    }
+                    pdf.transferTo(destFile);
+                    if (enterpriseFiles.length() > 0) {
+                        enterpriseFiles.append(",");
+                    }
+                    enterpriseFiles.append("/enterprise_files/").append(currentTimeMillis).append("_").append(fileName);
+                }
+                // 删除旧的图片
+                String oldCompanyLogoURL = getById(companyInfoDto.getCompanyInfoId()).getEnterpriseFile();
+                String[] fileUrls = oldCompanyLogoURL.split(",");
+                for (String fileUrl : fileUrls) {
+                    if (fileUrl != null && !fileUrl.trim().isEmpty()) {
+                        int lastIndex = fileUrl.lastIndexOf('/');
+                        String fileName = fileUrl.substring(lastIndex + 1);
+                        File oldFile = new File(enterpriseFilePath + fileName);
+                        if (oldFile.exists()) {
+                            oldFile.delete();
+                        }
+                    }
+                }
+                tdCompanyInfo.setEnterpriseFile(String.valueOf(enterpriseFiles));
             }
 
-            try {
+            if (applyFiles != null) {
+                String fileName = applyFiles.getOriginalFilename();
+                long currentTimeMillis = System.currentTimeMillis();
+                if (!isAllowedFileType(getFileExtension(fileName))) {
+                    throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+                }
                 File uploadDir = new File(uploadPath);
                 File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
                 if (!destFile.getParentFile().exists()) {
@@ -94,16 +132,17 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
                 if (oldFile.exists()) {
                     oldFile.delete();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new SystemException(AppHttpCodeEnum.FILE_UPLOAD_ERROR);
             }
+            
+            if (!update(tdCompanyInfo, updateWrapper)) {
+                throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new SystemException(AppHttpCodeEnum.FILE_UPLOAD_ERROR);
         }
 
-        if (!update(tdCompanyInfo, updateWrapper)) {
-            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
-        }
-        return null;
     }
 
     private String getFileExtension(String fileName) {
@@ -118,8 +157,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     }
 
     private boolean isAllowedFileType(String fileExtension) {
-        String[] allowedExtensions = {"jpg", "png"};
-        for (String ext : allowedExtensions) {
+        for (String ext : Common.FILE_TYPE) {
             if (ext.equals(fileExtension)) {
                 return true;
             }
@@ -139,14 +177,16 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             return null;
         }
         Page<CompanyInfoVO> companyInfoVOPage = new Page<>(tdCompanyInfoPage.getCurrent(), tdCompanyInfoPage.getSize(), tdCompanyInfoPage.getTotal());
-        List<Long> userIds = tdCompanyInfoPage.getRecords().stream().map(TDCompanyInfo::getUserId).distinct().toList();
-        List<TDUser> users = userMapper.selectByIds(userIds);
-
         List<CompanyInfoVO> companyInfoVOList = tdCompanyInfoPage.getRecords().stream().map(tdCompanyInfo -> {
             CompanyInfoVO companyInfoVO = new CompanyInfoVO();
             BeanUtils.copyProperties(tdCompanyInfo, companyInfoVO);
-            users.stream().filter(u -> u.getUserId().equals(tdCompanyInfo.getUserId())).findFirst()
-                    .ifPresent(user -> companyInfoVO.setUserName(user.getUserName()));
+//            String enterpriseFile = tdCompanyInfo.getEnterpriseFile();
+//            if (StringUtils.hasText(enterpriseFile)) {
+//                List<String> urls = Arrays.stream(enterpriseFile.split(","))
+//                        .map(url -> "http://" + ip + ":" + port + url)
+//                        .collect(Collectors.toList());
+//                companyInfoVO.setEnterpriseFiles(urls);
+//            }
             companyInfoVO.setCompanyLogo("http://" + ip + ":" + port + tdCompanyInfo.getCompanyLogo());
             return companyInfoVO;
         }).collect(Collectors.toList());
@@ -159,5 +199,33 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     public Object deleteCompany(Long companyId) {
         tdCompanyInfoMapper.deleteById(companyId);
         return null;
+    }
+
+    @Override
+    public Map<String, byte[]> getEnterpriseFiles(Long companyId) {
+        TDCompanyInfo companyInfo = getById(companyId);
+        List<String> enterpriseFiles = Arrays.stream(companyInfo.getEnterpriseFile().split(",")).toList();
+        if (enterpriseFiles.isEmpty()) {
+            return null;
+        }
+        Map<String, byte[]> map = new HashMap<>();
+        enterpriseFiles.forEach(enterpriseFile -> {
+            int lastIndex = enterpriseFile.lastIndexOf('/');
+            String fileName = enterpriseFile.substring(lastIndex + 1);
+            Path filePath = Paths.get(enterpriseFilePath, fileName);
+            File file = filePath.toFile();
+
+            if (!file.exists()) {
+                throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+            }
+            try {
+                byte[] fileContent = Files.readAllBytes(filePath);
+                map.put(fileName, fileContent);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return map;
     }
 }

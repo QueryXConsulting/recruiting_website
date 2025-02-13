@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.TPRoleMenu;
 import com.queryx.recruiting_website.domain.dto.MenuDto;
@@ -39,9 +40,16 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
 
     @Override
     public RoutersVO getRouter() {
-        // menu结果是tree的形式
-        List<TPMenu> menus = selectRouterMenuTreeByRoleId(SecurityUtils.getLoginAdmin().getTdAdmin().getRoleId());
+        Object principal = SecurityUtils.getAuthentication().getPrincipal();
         RoutersVO routersVO = new RoutersVO();
+        Long roleId;
+        if (principal instanceof LoginAdmin) {
+            roleId = SecurityUtils.getLoginAdmin().getTdAdmin().getRoleId();
+        } else {
+            roleId = Long.valueOf(SecurityUtils.getLoginUser().getTdUser().getUserRole());
+        }
+        // menu结果是tree的形式
+        List<TPMenu> menus = selectRouterMenuTreeByRoleId(roleId);
         List<MenuVO> menuVOList = menus.stream()
                 .map(m -> {
                     MenuVO menuVO = new MenuVO();
@@ -56,7 +64,7 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
                             .collect(Collectors.toList()));
                     return menuVO;
                 })
-                .collect(Collectors.toList());
+                .toList();
         routersVO.setMenus(menuVOList);
         return routersVO;
     }
@@ -126,11 +134,6 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
 
     @Override
     public Object delMenu(Long menuId) {
-        TPMenu menu = getById(menuId);
-        if ((menu.getParentId().equals(Common.ROOT_MENU) || menu.getParentId().equals(Common.PARENT_MENU))) {
-            throw new SystemException(AppHttpCodeEnum.NO_UPDATE);
-        }
-
         LambdaUpdateWrapper<TPMenu> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(TPMenu::getMenuId, menuId)
                 .set(TPMenu::getDelFlag, Common.DELETE);
@@ -143,7 +146,7 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE)
                 .eq(TPMenu::getDelFlag, Common.NOT_DELETE)
-                .in(TPMenu::getMenuType, "C", "M")
+                .in(TPMenu::getMenuType, "C", "M", "U")
                 .orderByAsc(TPMenu::getOrderNum);
 
         // 判断是否是超级管理员

@@ -12,14 +12,14 @@ import com.queryx.recruiting_website.domain.dto.JobInsertDto;
 public interface TDJobService extends IService<TDJob> {
 
 
-    IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName,String jobName
-            ,String jobReview,String status,String jobCategory,String jobNature);
+    IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName, String jobName
+            , String jobReview, String status, String jobCategory, String jobNature);
 
     JobDetailDto selectJobInfo(Long jobId);
 
     JobDetailDto updateJob(JobDetailDto jobDetailDto);
 
-    JobDetailDto insertJobInfo(JobInsertDto jobInsertDto, Long companyId);
+    JobDetailDto insertJobInfo(JobInsertDto jobInsertDto);
 
 
     Object deleteJob(Long jobId);
@@ -28,5 +28,7 @@ public interface TDJobService extends IService<TDJob> {
     Object addJob(JobDto jobDto);
 
     Object jobReview(String review, Long jobId);
+
+    Object selectCompanyJobList(Integer page, Integer size, String jobName, String jobReview, String jobCategory);
 }
 

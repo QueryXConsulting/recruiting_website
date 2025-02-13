@@ -11,6 +11,7 @@ import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserCompanyVO;
 import com.queryx.recruiting_website.domain.vo.UserInfoVO;
 import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.domain.vo.UserVO;
@@ -108,27 +109,13 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         UserLoginVO userLoginVO = new UserLoginVO();
-
-        // 判断是否为公司用户
-        if (loginUser.getTdUser().getUserRole().equals(Common.COMPANY_USER.toString())) {
-            LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
-            companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
-                    .select(TDCompanyInfo::getCompanyInfoId);
-            TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectOne(companyInfoQuery);
-            Long companyId = null;
-            if (!Objects.isNull(tdCompanyInfo)) {
-                companyId = tdCompanyInfo.getCompanyInfoId();
-            }
-            userLoginVO.setCompanyId(companyId);
-
-        }
         HashMap<String, Object> data = new HashMap<>();
 //         生成token
         data.put("User", loginUser);
         userLoginVO.setToken(JwtUtil.createJWT(data));
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
-        userInfoVO.setPerms(loginUser.getPermissions());
+        userInfoVO.setPermissions(loginUser.getPermissions());
         userLoginVO.setUserInfoVO(userInfoVO);
 //         返回前端凭证
         return userLoginVO;
@@ -245,7 +232,23 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         return null;
     }
 
+    @Override
+    public Object selectUserCompanyList(Integer page, Integer size, String userName) {
+        Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
+        LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(TDUser::getCompanyInfoId,companyInfoId)
+                .like(StringUtils.hasText(userName),TDUser::getUserName,userName);
 
+        Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
+        Page<UserCompanyVO> userCompanyVOPage =
+                new Page<>(tdUserPage.getCurrent(),tdUserPage.getSize(),tdUserPage.getTotal());
+        userCompanyVOPage.setRecords(tdUserPage.getRecords().stream().map(user->{
+            UserCompanyVO userCompanyVO = new UserCompanyVO();
+            BeanUtils.copyProperties(user,userCompanyVO);
+            return userCompanyVO;
+        }).toList());
+        return userCompanyVOPage;
+    }
 }
 
 

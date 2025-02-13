@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class CompanyInfoDto {
@@ -44,5 +45,11 @@ public class CompanyInfoDto {
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String CompanyInfoStatus;
+
+    @Schema(name = "公司资质", description = "文件路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> enterpriseFile;
+
+    @Schema(name = "公司资质审核", description = "0代表待审核,1代表审核通过,2打回修改", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String enterpriseReview;
 
 }

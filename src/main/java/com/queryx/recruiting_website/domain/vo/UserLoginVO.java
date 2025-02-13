@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class UserLoginVO {
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long companyId;
     private String token;
     private UserInfoVO userInfoVO;
 }
