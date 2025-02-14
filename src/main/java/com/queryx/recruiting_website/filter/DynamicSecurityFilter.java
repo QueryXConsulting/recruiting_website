@@ -7,14 +7,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,9 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
 
     @Resource
     private DynamicAuthorizationManager authorizationManager;
+
+    @Resource
+    private AccessDeniedHandler accessDeniedHandler;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -51,20 +55,13 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
             if (check.isGranted()) {
                 chain.doFilter(request, response);
             } else {
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                response.setCharacterEncoding("UTF-8");
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("{\"code\":403,\"message\":\"没有访问权限\"}");
+                accessDeniedHandler.handle(request, response, new AccessDeniedException("权限不足"));
             }
 
-        } catch (AccessDeniedException e) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("{\"code\":403,\"message\":\"没有访问权限\"}");
-        } catch (Exception e) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"code\":500,\"message\":\"服务器内部错误\"}");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
         }
     }
 

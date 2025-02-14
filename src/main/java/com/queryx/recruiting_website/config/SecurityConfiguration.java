@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -78,7 +79,7 @@ public class SecurityConfiguration {
 //                        .requestMatchers("/swagger-ui/*","/v3/**").permitAll()
                                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(dynamicSecurityFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class);
 
         // 配置异常处理
         httpSecurity.exceptionHandling(exceptions -> exceptions
