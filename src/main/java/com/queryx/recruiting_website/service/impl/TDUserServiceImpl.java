@@ -7,8 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.LoginUser;
+import com.queryx.recruiting_website.domain.TDResume;
+import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.TPRole;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
+import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
 import com.queryx.recruiting_website.domain.vo.UserCompanyVO;
@@ -16,27 +20,26 @@ import com.queryx.recruiting_website.domain.vo.UserInfoVO;
 import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.domain.vo.UserVO;
 import com.queryx.recruiting_website.exception.SystemException;
-import com.queryx.recruiting_website.mapper.TDAdminMapper;
-import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
-import com.queryx.recruiting_website.mapper.TDResumeMapper;
-import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDUserService;
-import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.utils.TokenStorage;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -54,6 +57,16 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     private TDCompanyInfoMapper companyInfoMapper;
     @Resource
     private TDAdminMapper adminMapper;
+    @Resource
+    private TPRoleMapper roleMapper;
+    @Resource
+    private TPRoleMapper tpRoleMapper;
+    @Value("${file.upload-path-avatar}")
+    private String uploadPath;
+    @Value("${server.port}")
+    private String port;
+    @Value("${server.address}")
+    private String ip;
 
     @Override
     public UserCompanyDto selectUserInfo(Long userId, String userRole) {
@@ -65,25 +78,17 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
                     .eq(TDUser::getUserStatus, Common.STATUS_ENABLE);
         }
 
-
         TDUser tdUser = tdUserMapper.selectOne(userLambdaQueryWrapper);
-
         UserCompanyDto userCompanyDto = new UserCompanyDto();
         BeanUtils.copyProperties(tdUser, userCompanyDto);
+        TPRole tpRole = roleMapper.selectById(tdUser.getUserRole());
+        userCompanyDto.setUserRole(tpRole.getRoleName());
+        userCompanyDto.setUserAvatar(Common.getImgURL() + tdUser.getUserAvatar());
         return userCompanyDto;
     }
 
     @Override
     public UserCompanyDto updateUserCompanyInfo(UserCompanyDto userCompanyDto) {
-        if (!StringUtils.hasText(userCompanyDto.getUserName())) {
-            throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
-        }
-        if (!StringUtils.hasText(userCompanyDto.getUserPassword())) {
-            throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
-        }
-        if (!StringUtils.hasText(userCompanyDto.getUserPhone())) {
-            throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
-        }
         TDUser tdUser = SecurityUtils.getLoginUser().getTdUser();
         BeanUtils.copyProperties(userCompanyDto, tdUser);
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
@@ -109,14 +114,22 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         UserLoginVO userLoginVO = new UserLoginVO();
-        HashMap<String, Object> data = new HashMap<>();
 //         生成token
-        data.put("User", loginUser);
-        userLoginVO.setToken(JwtUtil.createJWT(data));
+        String jwt = JwtUtil.createJWT(loginUser.getTdUser().getUserId());
+        userLoginVO.setToken(jwt);
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
         userInfoVO.setPermissions(loginUser.getPermissions());
+        userInfoVO.setUserAvatar(Common.getImgURL() + loginUser.getTdUser().getUserAvatar());
         userLoginVO.setUserInfoVO(userInfoVO);
+        TokenStorage.addToken(jwt, loginUser);
+        // 更新登录标志
+        if (loginUser.getTdUser().getIsFirstLogin().equals("0")) {
+            LambdaUpdateWrapper<TDUser> tdUserLambdaQueryWrapper = new LambdaUpdateWrapper<>();
+            tdUserLambdaQueryWrapper.eq(TDUser::getUserId, loginUser.getTdUser().getUserId());
+            tdUserLambdaQueryWrapper.set(TDUser::getIsFirstLogin, 1);
+            update(tdUserLambdaQueryWrapper);
+        }
 //         返回前端凭证
         return userLoginVO;
     }
@@ -176,15 +189,6 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
 
     @Override
     public Object updateUserInfo(UserDto userDto) {
-        if (!StringUtils.hasText(userDto.getUserName())) {
-            throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
-        }
-        if (!StringUtils.hasText(userDto.getUserPassword())) {
-            throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
-        }
-        if (!StringUtils.hasText(userDto.getUserPhone())) {
-            throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
-        }
 
         TDUser tdUser = new TDUser();
         BeanUtils.copyProperties(userDto, tdUser);
@@ -236,18 +240,124 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     public Object selectUserCompanyList(Integer page, Integer size, String userName) {
         Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
         LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(TDUser::getCompanyInfoId,companyInfoId)
-                .like(StringUtils.hasText(userName),TDUser::getUserName,userName);
+        wrapper.eq(TDUser::getCompanyInfoId, companyInfoId)
+                .like(StringUtils.hasText(userName), TDUser::getUserName, userName)
+                .eq(TDUser::getDelFlag, Common.NOT_DELETE);
 
         Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
         Page<UserCompanyVO> userCompanyVOPage =
-                new Page<>(tdUserPage.getCurrent(),tdUserPage.getSize(),tdUserPage.getTotal());
-        userCompanyVOPage.setRecords(tdUserPage.getRecords().stream().map(user->{
+                new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
+        List<Long> roleIds = tdUserPage.getRecords().stream().map(TDUser::getUserRole).map(Long::valueOf).toList();
+        Map<Long, String> tpRoles = tpRoleMapper.selectByIds(roleIds).stream().collect(Collectors.toMap(TPRole::getRoleId, TPRole::getRoleName));
+        userCompanyVOPage.setRecords(tdUserPage.getRecords().stream().map(user -> {
             UserCompanyVO userCompanyVO = new UserCompanyVO();
-            BeanUtils.copyProperties(user,userCompanyVO);
+            BeanUtils.copyProperties(user, userCompanyVO);
+            userCompanyVO.setUserRole(tpRoles.get(Long.valueOf(user.getUserRole())));
+            userCompanyVO.setUserAvatar(Common.getImgURL() + user.getUserAvatar());
             return userCompanyVO;
         }).toList());
         return userCompanyVOPage;
+    }
+
+    @Override
+    public Object updateUserCompany(UserDto userDto, MultipartFile userAvatar) throws IOException {
+        if (userDto.getUserId() == null) {
+            userDto.setUserId(SecurityUtils.getLoginUser().getTdUser().getUserId());
+        }
+        String userEmail = userDto.getUserEmail();
+        String userPhone = userDto.getUserPhone();
+        if (StringUtils.hasText(userPhone)) {
+            LambdaQueryWrapper<TDUser> phoneQueryWrapper = new LambdaQueryWrapper<>();
+            phoneQueryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
+                    .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+            if (count(phoneQueryWrapper) > 0) {
+                throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
+            }
+        }
+        if (StringUtils.hasText(userEmail)) {
+            LambdaQueryWrapper<TDUser> emailQueryWrapper = new LambdaQueryWrapper<>();
+            emailQueryWrapper.eq(TDUser::getUserEmail, userDto.getUserEmail())
+                    .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+            if (count(emailQueryWrapper) > 0) {
+                throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
+            }
+        }
+
+        TDUser tdUser = new TDUser();
+        BeanUtils.copyProperties(userDto, tdUser);
+        LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(TDUser::getUserId, tdUser.getUserId());
+        if (userDto.getUserPassword() != null) {
+            tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
+        }
+        if (userAvatar != null) {
+            String fileName = userAvatar.getOriginalFilename();
+            long currentTimeMillis = System.currentTimeMillis();
+            if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
+                throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+            }
+            File uploadDir = new File(uploadPath);
+            File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
+            if (!destFile.getParentFile().exists()) {
+                destFile.getParentFile().mkdirs();
+            }
+            userAvatar.transferTo(destFile);
+            tdUser.setUserAvatar("/avatar_files/" + currentTimeMillis + "_" + fileName);
+            // 删除旧的图片
+            String oldCompanyLogoURL = getById(tdUser.getUserId()).getUserAvatar();
+            int lastIndex = oldCompanyLogoURL.lastIndexOf('/');
+            String file = oldCompanyLogoURL.substring(lastIndex + 1);
+            File oldFile = new File(uploadPath + file);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+        }
+
+        tdUserMapper.update(tdUser, wrapper);
+        return null;
+    }
+
+    @Override
+    public Object addUserCompany(UserDto userDto, MultipartFile userAvatar) throws IOException {
+        String userEmail = userDto.getUserEmail();
+        String userPhone = userDto.getUserPhone();
+        if (StringUtils.hasText(userPhone)) {
+            LambdaQueryWrapper<TDUser> phoneQueryWrapper = new LambdaQueryWrapper<>();
+            phoneQueryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
+                    .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+            if (count(phoneQueryWrapper) > 0) {
+                throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
+            }
+        }
+        if (StringUtils.hasText(userEmail)) {
+            LambdaQueryWrapper<TDUser> emailQueryWrapper = new LambdaQueryWrapper<>();
+            emailQueryWrapper.eq(TDUser::getUserEmail, userDto.getUserEmail())
+                    .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+            if (count(emailQueryWrapper) > 0) {
+                throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
+            }
+        }
+
+        TDUser tdUser = new TDUser();
+        BeanUtils.copyProperties(userDto, tdUser);
+        if (userAvatar != null) {
+            String fileName = userAvatar.getOriginalFilename();
+            long currentTimeMillis = System.currentTimeMillis();
+            if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
+                throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
+            }
+            File uploadDir = new File(uploadPath);
+            File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
+            if (!destFile.getParentFile().exists()) {
+                destFile.getParentFile().mkdirs();
+            }
+            userAvatar.transferTo(destFile);
+            tdUser.setUserAvatar("/avatar_files/" + currentTimeMillis + "_" + fileName);
+        }
+        tdUser.setCompanyInfoId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
+        tdUser.setUserRegisterTime(new Date());
+        save(tdUser);
+        return null;
     }
 }
 

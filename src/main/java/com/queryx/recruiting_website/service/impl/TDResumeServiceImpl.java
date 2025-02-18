@@ -4,19 +4,31 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.TDJobResume;
+import com.queryx.recruiting_website.domain.TDResume;
+import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
+import com.queryx.recruiting_website.domain.vo.ResumeListVO;
 import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
+import com.queryx.recruiting_website.domain.vo.ResumeVO;
+import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDResumeService;
-import com.queryx.recruiting_website.domain.vo.ResumeListVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,60 +49,58 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     private TDResumeAttachmentsMapper tdResumeAttachmentsMapper;
     @Resource
     private TDUserMapper userMapper;
+    @Value("${file.upload-path-resume}")
+    private String resumePath;
 
 
     @Override
-    public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long companyId) {
-        LambdaQueryWrapper<TDJob> jobQueryWrapper = new LambdaQueryWrapper<>();
-        jobQueryWrapper.eq(TDJob::getCompanyId, companyId)
-                .eq(TDJob::getJobReview, Common.REVIEW_OK);
-        List<TDJob> tdJobs = tdJobMapper.selectList(jobQueryWrapper);
-
-        if (tdJobs.isEmpty()) {
-            return null;
-        }
-
-        List<Long> jobIdLst = tdJobs.stream().map(TDJob::getJobId).toList();
+    public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long jobId, String resumeType, String resumeName) {
         LambdaQueryWrapper<TDJobResume> jobResumeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        jobResumeLambdaQueryWrapper.in(TDJobResume::getJobId, jobIdLst);
+        jobResumeLambdaQueryWrapper.eq(TDJobResume::getJobId, jobId)
+                .eq(StringUtils.hasText(resumeType), TDJobResume::getResumeType, resumeType)
+                .like(StringUtils.hasText(resumeName), TDJobResume::getResumeName, resumeName);
 
         Page<TDJobResume> tdJobResumes = tdJobResumeMapper.selectPage(new Page<>(page, size), jobResumeLambdaQueryWrapper);
         if (tdJobResumes.getRecords().isEmpty()) {
             return null;
         }
         Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
-        resumeListVOPage.setRecords(tdJobResumes.getRecords().stream()
-                .flatMap(tdJobResume -> tdJobs.stream()
-                        .filter(tdJob -> tdJobResume.getJobId().equals(tdJob.getJobId()))
-                        .map(tdJob -> {
-                            ResumeListVO resumeListVO = new ResumeListVO();
-                            resumeListVO.setResumeId(tdJobResume.getResumeId());
-                            resumeListVO.setResumeName(tdJobResume.getResumeName());
-                            resumeListVO.setResumeType(tdJobResume.getResumeType());
-                            resumeListVO.setJobPosition(tdJob.getJobPosition());
-                            return resumeListVO;
-                        })).toList());
-
+        resumeListVOPage.setRecords(tdJobResumes.getRecords().stream().map(tdJobResume -> {
+            ResumeListVO resumeListVO = new ResumeListVO();
+            resumeListVO.setResumeId(tdJobResume.getResumeId());
+            resumeListVO.setResumeName(tdJobResume.getResumeName());
+            resumeListVO.setResumeType(tdJobResume.getResumeType());
+            return resumeListVO;
+        }).toList());
 
         return resumeListVOPage;
     }
 
     @Override
     public Object selectResume(SelectResumeDto selectResumeDto) {
-
         if (selectResumeDto.getResumeType().equals(Common.RESUME_ONLINE)) {
             ResumeVO resumeVO = new ResumeVO();
             TDResume tdResume = tdResumeMapper.selectById(selectResumeDto.getResumeId());
             BeanUtils.copyProperties(tdResume, resumeVO);
             return resumeVO;
         }
-
         LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TDResumeAttachments::getResumeAttachmentId, selectResumeDto.getResumeId())
                 .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE);
-
         TDResumeAttachments resume = tdResumeAttachmentsMapper.selectOne(wrapper);
-        return resume.getFilePath();
+        try {
+            String filePath = resume.getFilePath();
+            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+            Path path = Paths.get(resumePath, fileName);
+            File file = path.toFile();
+            if (!file.exists()) {
+                throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+            }
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -161,8 +171,6 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         tdResumeAttachmentsMapper.update(updateWrapper);
         return null;
     }
-
-
 
 
 }

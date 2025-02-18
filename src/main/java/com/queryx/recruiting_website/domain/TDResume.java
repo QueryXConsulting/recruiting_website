@@ -1,9 +1,5 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
-
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -11,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TDResume)实体类
@@ -72,8 +70,24 @@ public class TDResume {
     private String resumeReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-
     private String resumeStatus;
 
+    @Schema(name = "项目经验", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeProject;
+
+    @Schema(name = "姓名", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeName;
+
+    @Schema(name = "在校时间", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Date resumeEducationDate;
+
+    @Schema(name = "专业排名", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeMajorRank;
+
+    @Schema(name = "专业技能", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeSkills;
+
+    @Schema(name = "工作经历", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeEmploymentHistory;
 }
 

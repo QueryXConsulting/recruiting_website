@@ -13,6 +13,7 @@ import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,12 +60,21 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         TDCompanyInfo tdCompanyInfo = tdCompanyInfoMapper.selectOne(lambdaQueryWrapper);
         CompanyInfoDto companyInfoDto = new CompanyInfoDto();
         BeanUtils.copyProperties(tdCompanyInfo, companyInfoDto);
-        companyInfoDto.setCompanyLogo("http://" + ip + ":" + port + companyInfoDto.getCompanyLogo());
+        companyInfoDto.setCompanyLogo(Common.getImgURL() + companyInfoDto.getCompanyLogo());
         return companyInfoDto;
     }
 
     @Override
     public CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles, List<MultipartFile> pdfFiles) {
+        String companyInfoUsername = companyInfoDto.getCompanyInfoUsername();
+        if (StringUtils.hasText(companyInfoUsername)) {
+            LambdaQueryWrapper<TDCompanyInfo> QueryWrapper = new LambdaQueryWrapper<>();
+            QueryWrapper.eq(TDCompanyInfo::getCompanyInfoUsername, companyInfoUsername);
+            if (count(QueryWrapper) > 0) {
+                throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
+            }
+        }
+
         StringBuilder enterpriseFiles = new StringBuilder();
         TDCompanyInfo tdCompanyInfo = new TDCompanyInfo();
         BeanUtils.copyProperties(companyInfoDto, tdCompanyInfo);
@@ -81,7 +94,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
                 long currentTimeMillis = System.currentTimeMillis();
                 for (MultipartFile pdf : pdfFiles) {
                     String fileName = pdf.getOriginalFilename();
-                    if (!isAllowedFileType(getFileExtension(fileName))) {
+                    if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
                         throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
                     }
                     File uploadDir = new File(enterpriseFilePath);
@@ -114,7 +127,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             if (applyFiles != null) {
                 String fileName = applyFiles.getOriginalFilename();
                 long currentTimeMillis = System.currentTimeMillis();
-                if (!isAllowedFileType(getFileExtension(fileName))) {
+                if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
                     throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
                 }
                 File uploadDir = new File(uploadPath);
@@ -133,10 +146,9 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
                     oldFile.delete();
                 }
             }
-            
-            if (!update(tdCompanyInfo, updateWrapper)) {
-                throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
-            }
+
+           update(tdCompanyInfo, updateWrapper);
+
             return null;
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,25 +157,6 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 
     }
 
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "";
-        }
-        String[] parts = fileName.split("\\.");
-        if (parts.length > 1) {
-            return parts[parts.length - 1].toLowerCase(); // 返回扩展名并转为小写
-        }
-        return "";
-    }
-
-    private boolean isAllowedFileType(String fileExtension) {
-        for (String ext : Common.FILE_TYPE) {
-            if (ext.equals(fileExtension)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public Object selectCompanyInfoList(Integer page, Integer size, String companyStatus, String companyReview, String companyName) {
@@ -187,7 +180,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 //                        .collect(Collectors.toList());
 //                companyInfoVO.setEnterpriseFiles(urls);
 //            }
-            companyInfoVO.setCompanyLogo("http://" + ip + ":" + port + tdCompanyInfo.getCompanyLogo());
+            companyInfoVO.setCompanyLogo(Common.getImgURL() + tdCompanyInfo.getCompanyLogo());
             return companyInfoVO;
         }).collect(Collectors.toList());
 

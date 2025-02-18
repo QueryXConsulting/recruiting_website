@@ -149,21 +149,6 @@ public class UserController {
     }
 
 
-    /**
-     * 用户登出
-     *
-     * @return 登出结果
-     */
-    @Operation(summary = "用户登出", description = "用户登出待实现", parameters = {
-            @Parameter(name = "token", description = "用户登录token", required = true)
-    }, responses = {
-            @ApiResponse(responseCode = "200", description = "登出成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
-    @PostMapping("/logout")
-    public CommonResp<String> logout() {
-        // TODO 登出功能待实现
-        log.info("logout");
-        return null;
-    }
+
 }
 

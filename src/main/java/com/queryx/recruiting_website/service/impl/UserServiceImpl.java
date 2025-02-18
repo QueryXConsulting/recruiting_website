@@ -12,6 +12,7 @@ import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
 import com.queryx.recruiting_website.utils.JwtUtil;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -78,6 +78,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         // 返回JWT
-        return JwtUtil.createJWT(Map.of(USER_ID, loginVO.getUserId(), RESUME_ID, loginVO.getResumeId()));
+        return JwtUtil.createJWT(SecurityUtils.getLoginUser().getTdUser().getUserId());
     }
 }

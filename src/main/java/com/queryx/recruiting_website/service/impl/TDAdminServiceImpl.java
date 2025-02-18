@@ -23,6 +23,7 @@ import com.queryx.recruiting_website.mapper.TPRoleMapper;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.utils.TokenStorage;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -89,10 +90,10 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
         LoginAdmin loginAdmin = (LoginAdmin) authenticate.getPrincipal();
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("AdminUser", loginAdmin);
         UserLoginVO userLoginVO = new UserLoginVO();
-        userLoginVO.setToken(JwtUtil.createJWT(data));
+        String jwt = JwtUtil.createJWT(loginAdmin.getTdAdmin().getAdminId());
+        userLoginVO.setToken(jwt);
+        TokenStorage.addToken(jwt, loginAdmin);
         // 返回前端凭证
         return userLoginVO;
     }
@@ -108,7 +109,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         AdminUserInfoVO adminUserInfoVO = new AdminUserInfoVO();
         adminUserInfoVO.setPermissions(perms);
         adminUserInfoVO.setUser(adminInfoVO);
-
+        adminInfoVO.setAdminAvatar(Common.getImgURL() + loginAdmin.getTdAdmin().getAdminAvatar());
         return adminUserInfoVO;
     }
 
@@ -166,7 +167,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     public List<String> selectPermsByRoleId(Long roleId) {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(TPMenu::getMenuType, "F","U");
+        wrapper.in(TPMenu::getMenuType, "F", "U");
         wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE);
         // 如果是超级管理员返回所有权限
         if (roleId.equals(Common.SUPER_ADMIN)) {

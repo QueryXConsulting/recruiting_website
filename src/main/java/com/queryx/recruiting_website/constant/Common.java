@@ -1,13 +1,31 @@
 package com.queryx.recruiting_website.constant;
 
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * 常量类
  */
+@Component
 public class Common {
+
+    private static String port;
+    private static String ip;
+
+    @Value("${server.port}")
+    public void setPort(String serverPort) {
+        Common.port = serverPort;
+    }
+
+    @Value("${server.address}")
+    public void setIp(String serverIp) {
+        Common.ip = serverIp;
+    }
+
     public static final String ENTERPRISEREVIEW_ENABLE = "1";
     // 启用
     public static final String STATUS_ENABLE = "0";
@@ -62,5 +80,8 @@ public class Common {
 
     public static final String RESUME_ATTACHMENTS = "1";
 
+    public static String getImgURL(){
+        return "http://" + ip + ":" + port;
+    }
 
 }
