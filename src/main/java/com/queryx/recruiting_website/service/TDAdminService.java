@@ -5,22 +5,23 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.queryx.recruiting_website.domain.TDAdmin;
 import com.queryx.recruiting_website.domain.dto.AdminDto;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
-import com.queryx.recruiting_website.domain.vo.AdminUserInfoVo;
-import com.queryx.recruiting_website.domain.vo.AdminVo;
+import com.queryx.recruiting_website.domain.vo.AdminUserInfoVO;
+import com.queryx.recruiting_website.domain.vo.AdminVO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 
 
 public interface TDAdminService extends IService<TDAdmin> {
 
     AdminDto addAdmin(AdminDto adminDto);
 
-    String login(AdminLoginDto adminLoginDto);
+    UserLoginVO login(AdminLoginDto adminLoginDto);
 
 
-    AdminUserInfoVo getInfo();
+    AdminUserInfoVO getInfo();
 
-    Page<AdminVo> selectAdminList(Integer page, Integer size, String adminName, String adminStatus);
+    Page<AdminVO> selectAdminList(Integer page, Integer size, String adminName, String adminStatus);
 
-    AdminVo selectAdminInfo(Long userId);
+    AdminVO selectAdminInfo(Long userId);
 
     Object updateAdminInfo(AdminDto adminDto);
 

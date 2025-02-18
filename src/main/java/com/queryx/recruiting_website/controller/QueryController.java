@@ -9,7 +9,6 @@ import com.queryx.recruiting_website.domain.vo.InterviewVO;
 import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -105,10 +104,6 @@ public class QueryController {
         InterviewVO resp;
         try {
             resp = queryUserInfo.getInterview(id);
-            if (resp == null) {
-                log.error("用户面试信息不存在，id={}", id);
-                return CommonResp.fail(AppHttpCodeEnum.INTERVIEW_NOT_EXIST, null);
-            }
         } catch (Exception e) {
             log.error("用户面试信息查询失败，{}", e.getMessage());
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);

@@ -1,13 +1,12 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-import java.io.Serializable;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TPRole)实体类
@@ -23,6 +22,10 @@ public class TPRole {
     @TableId(type = IdType.AUTO)
     @Schema(name = "角色ID", implementation = Long.class, requiredMode = Schema.RequiredMode.AUTO)
     private Long roleId;
+
+
+    @Schema(name = "角色类型", implementation = String.class, requiredMode = Schema.RequiredMode.AUTO)
+    private String roleType;
 
     @Schema(name = "角色名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String roleName;

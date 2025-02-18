@@ -1,14 +1,12 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
-import java.io.Serializable;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TDCompanyInfo)实体类
@@ -25,10 +23,7 @@ public class TDCompanyInfo {
     @Schema(name = "企业ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyInfoId;
 
-    @Schema(name = "企业用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long userId;
-
-    @Schema(name = "账号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoUsername;
 
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -53,8 +48,13 @@ public class TDCompanyInfo {
     private String companyInfoReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-
     private String companyInfoStatus;
+
+    @Schema(name = "公司资质文件路径", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String enterpriseFile;
+
+    @Schema(name = "公司资质审核", description = "0代表待审核,1代表审核通过,2打回修改", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String enterpriseReview;
 
 }
 

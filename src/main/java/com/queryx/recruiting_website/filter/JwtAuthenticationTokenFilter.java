@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.filter;
 
-import ch.qos.logback.core.pattern.Converter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.LoginAdmin;
@@ -8,19 +7,15 @@ import com.queryx.recruiting_website.domain.LoginUser;
 import com.queryx.recruiting_website.domain.TDAdmin;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.utils.CommonResp;
-
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import com.queryx.recruiting_website.utils.WebUtils;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -28,9 +23,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.*;
-
-import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
@@ -48,12 +43,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             Date expiration = data.getExpiration();
             // 校验是否过期
             if (expiration.before(new Date())) {
-                String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.LOGIN_EXPIRED.getCode(), AppHttpCodeEnum.LOGIN_EXPIRED.getMsg()));
+                String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.LOGIN_EXPIRED, null));
                 WebUtils.renderString(response, result);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN.getCode(), AppHttpCodeEnum.NEED_LOGIN.getMsg()));
+            String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN,null));
             WebUtils.renderString(response, result);
         }
 
@@ -74,6 +69,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 = new UsernamePasswordAuthenticationToken(loginAdmin,  null, loginAdmin.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         filterChain.doFilter(request, response);
+
     }
 
     private LoginAdmin getLoginAdmin(LinkedHashMap adminUser){

@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RoutersVo {
-    private List<MenuVo> menus;
+public class RoutersVO {
+    private List<MenuVO> menus;
 }

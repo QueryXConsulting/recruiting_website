@@ -30,21 +30,26 @@ public class UserController {
 }
 */
 
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
+import com.queryx.recruiting_website.domain.dto.LoginDTO;
+import com.queryx.recruiting_website.domain.dto.RegisterDTO;
+import com.queryx.recruiting_website.service.TDAdminService;
+import com.queryx.recruiting_website.service.TDUserService;
+import com.queryx.recruiting_website.service.UserService;
+import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import com.queryx.recruiting_website.utils.CommonResp;
-import com.queryx.recruiting_website.domain.dto.LoginDTO;
-import com.queryx.recruiting_website.service.UserService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.queryx.recruiting_website.domain.dto.RegisterDTO;
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,6 +61,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Resource
+    private TDAdminService tdAdminService;
 
     /**
      * 用户注册
@@ -97,34 +104,50 @@ public class UserController {
         return CommonResp.success(null);
     }
 
-    /**
-     * 用户登录
-     *
-     * @param loginDTO 用户登录信息
-     * @return 登录结果
-     */
-    @Operation(summary = "用户登录", parameters = {
-            @Parameter(name = "loginDTO", description = "用户登录信息", schema = @Schema(implementation = LoginDTO.class), required = true)
-    }, responses = {
-            @ApiResponse(responseCode = "200", description = "登录成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "414", description = "用户名或密码错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
+//    /**
+//     * 用户登录
+//     *
+//     * @param loginDTO 用户登录信息
+//     * @return 登录结果
+//     */
+//    @Operation(summary = "用户登录", parameters = {
+//            @Parameter(name = "loginDTO", description = "用户登录信息", schema = @Schema(implementation = LoginDTO.class), required = true)
+//    }, responses = {
+//            @ApiResponse(responseCode = "200", description = "登录成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+//            @ApiResponse(responseCode = "414", description = "用户名或密码错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+//            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+//    })
+//    @PostMapping("/login")
+//    public CommonResp<String> login(@RequestBody LoginDTO loginDTO) {
+//        String token;
+//
+//            token = userService.queryUser(loginDTO);
+//            if (token == null) {
+//                return CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR, null);
+//            }
+//
+//        log.info("用户登录成功");
+//        return CommonResp.success(token);
+//    }
+
+
+    @Resource
+    private TDUserService tdUserService;
+
+    private static final String PHONE = "(^1[3-9]\\d{9}$)";
+    private static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
     @PostMapping("/login")
-    public CommonResp<String> login(@RequestBody LoginDTO loginDTO) {
-        String token;
-        try {
-            token = userService.queryUser(loginDTO);
-            if (token == null) {
-                return CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR, null);
-            }
-        } catch (Exception e) {
-            log.error("用户登录失败, 用户输入信息: {}, 错误信息: {}", loginDTO, e.getMessage());
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+    @Operation(summary = "登录功能", description = "公司用户以及学生用户和管理员共同接口")
+    public CommonResp login(@RequestBody LoginDTO loginDTO) {
+        if (loginDTO.getUsername().matches(PHONE) || loginDTO.getUsername().matches(EMAIL)) {
+            return CommonResp.success(tdUserService.login(loginDTO));
         }
-        log.info("用户登录成功");
-        return CommonResp.success(token);
+        AdminLoginDto adminLoginDto = new AdminLoginDto();
+        BeanUtils.copyProperties(loginDTO, adminLoginDto);
+        return CommonResp.success(tdAdminService.login(adminLoginDto));
     }
+
 
     /**
      * 用户登出

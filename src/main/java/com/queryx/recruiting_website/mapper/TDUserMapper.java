@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface TDUserMapper extends BaseMapper<TDUser> {
 
-
     TDUser queryUserByEmail(String username);
+
 }
 

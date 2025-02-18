@@ -1,10 +1,10 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import org.springframework.stereotype.Service;
 import org.apache.ibatis.session.SqlSessionFactory;
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import com.queryx.recruiting_website.domain.TDJobResume;
-import com.queryx.recruiting_website.mapper.JobResumeMapper;
 import com.queryx.recruiting_website.service.DeliverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +29,7 @@ public class DeliverServiceImpl implements DeliverService {
         tdJobResume.setResumeName(deliverResumeDTO.getResumeName());
         // 数据入库
         final MybatisBatch<TDJobResume> batch = new MybatisBatch<>(sqlSessionFactory, List.of(tdJobResume));
-        final MybatisBatch.Method<TDJobResume> method = new MybatisBatch.Method<>(JobResumeMapper.class);
+        final MybatisBatch.Method<TDJobResume> method = new MybatisBatch.Method<>(TDJobResumeMapper.class);
         return batch.execute(method.insert()).size();
     }
 }

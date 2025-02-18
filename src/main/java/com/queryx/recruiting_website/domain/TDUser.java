@@ -1,15 +1,12 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
-import java.io.Serializable;
-
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TDUser)实体类
@@ -23,8 +20,14 @@ import lombok.ToString;
 public class TDUser {
 
     @TableId(value = "user_id", type = IdType.AUTO)
-   @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
+
+    @Schema(name = "公司id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long companyInfoId;
+
+    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String userEmail;
 
     @Schema(name = "在线简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resumeId;
@@ -38,7 +41,7 @@ public class TDUser {
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userPassword;
 
-    @Schema(name = "用户角色", description = "0代表学生用户,1代表公司用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "用户角色", description = "5代表学生用户,4代表公司用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userRole;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)

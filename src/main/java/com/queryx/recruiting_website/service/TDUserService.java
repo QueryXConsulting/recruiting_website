@@ -7,8 +7,8 @@ import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
-import com.queryx.recruiting_website.domain.vo.UserLoginVo;
-import com.queryx.recruiting_website.domain.vo.UserVo;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
+import com.queryx.recruiting_website.domain.vo.UserVO;
 
 
 public interface TDUserService extends IService<TDUser> {
@@ -18,17 +18,19 @@ public interface TDUserService extends IService<TDUser> {
 
     UserCompanyDto updateUserCompanyInfo(UserCompanyDto userCompanyDto);
 
-    UserLoginVo login(LoginDTO loginDTO);
+    UserLoginVO login(LoginDTO loginDTO);
 
     UserRegisterDTO register(UserRegisterDTO userRegisterDTO);
 
 
-    Page<UserVo> selectUserList(Integer page, Integer seize, String userName, String userStatus);
+    Page<UserVO> selectUserList(Integer page, Integer seize, String userName, String userStatus);
 
     Object updateUserInfo(UserDto userDto);
 
     Object deleteUser(Long userId);
 
     Object addUser(UserDto userDto);
+
+    Object selectUserCompanyList(Integer page, Integer size, String userName);
 }
 

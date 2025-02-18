@@ -7,11 +7,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
-import com.queryx.recruiting_website.domain.vo.ResumeManageVo;
+import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDResumeService;
-import com.queryx.recruiting_website.domain.vo.ResumeListVo;
-import com.queryx.recruiting_website.domain.vo.ResumeVo;
+import com.queryx.recruiting_website.domain.vo.ResumeListVO;
+import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -39,10 +40,10 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
 
     @Override
-    public Page<ResumeListVo> selectResumeList(Integer page, Integer size, Long companyId) {
+    public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long companyId) {
         LambdaQueryWrapper<TDJob> jobQueryWrapper = new LambdaQueryWrapper<>();
         jobQueryWrapper.eq(TDJob::getCompanyId, companyId)
-                .eq(TDJob::getJobReview, Common.REVIEW_SUCCESS.getCode());
+                .eq(TDJob::getJobReview, Common.REVIEW_OK);
         List<TDJob> tdJobs = tdJobMapper.selectList(jobQueryWrapper);
 
         if (tdJobs.isEmpty()) {
@@ -57,53 +58,53 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         if (tdJobResumes.getRecords().isEmpty()) {
             return null;
         }
-        Page<ResumeListVo> resumeListVoPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
-        resumeListVoPage.setRecords(tdJobResumes.getRecords().stream()
+        Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
+        resumeListVOPage.setRecords(tdJobResumes.getRecords().stream()
                 .flatMap(tdJobResume -> tdJobs.stream()
                         .filter(tdJob -> tdJobResume.getJobId().equals(tdJob.getJobId()))
                         .map(tdJob -> {
-                            ResumeListVo resumeListVo = new ResumeListVo();
-                            resumeListVo.setResumeId(tdJobResume.getResumeId());
-                            resumeListVo.setResumeName(tdJobResume.getResumeName());
-                            resumeListVo.setResumeType(tdJobResume.getResumeType());
-                            resumeListVo.setJobPosition(tdJob.getJobPosition());
-                            return resumeListVo;
+                            ResumeListVO resumeListVO = new ResumeListVO();
+                            resumeListVO.setResumeId(tdJobResume.getResumeId());
+                            resumeListVO.setResumeName(tdJobResume.getResumeName());
+                            resumeListVO.setResumeType(tdJobResume.getResumeType());
+                            resumeListVO.setJobPosition(tdJob.getJobPosition());
+                            return resumeListVO;
                         })).toList());
 
 
-        return resumeListVoPage;
+        return resumeListVOPage;
     }
 
     @Override
     public Object selectResume(SelectResumeDto selectResumeDto) {
 
-        if (selectResumeDto.getResumeType().equals(Common.RESUME_ONLINE.getCode())) {
-            ResumeVo resumeVo = new ResumeVo();
+        if (selectResumeDto.getResumeType().equals(Common.RESUME_ONLINE)) {
+            ResumeVO resumeVO = new ResumeVO();
             TDResume tdResume = tdResumeMapper.selectById(selectResumeDto.getResumeId());
-            BeanUtils.copyProperties(tdResume, resumeVo);
-            return resumeVo;
+            BeanUtils.copyProperties(tdResume, resumeVO);
+            return resumeVO;
         }
 
         LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TDResumeAttachments::getResumeAttachmentId, selectResumeDto.getResumeId())
-                .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETED.getCode());
+                .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE);
 
         TDResumeAttachments resume = tdResumeAttachmentsMapper.selectOne(wrapper);
         return resume.getFilePath();
     }
 
     @Override
-    public Page<ResumeManageVo> selectResumeManage(Integer page, Integer size, String userName, String resumeReview
+    public Page<ResumeManageVO> selectResumeManage(Integer page, Integer size, String userName, String resumeReview
             , String status, String resumeType) {
 
         LambdaQueryWrapper<TDUser> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userLambdaQueryWrapper.like(userName != null, TDUser::getUserName, userName)
-                .eq(TDUser::getUserRole, Common.STUDENT_USER.getCode());
+                .eq(TDUser::getUserRole, Common.STUDENT_USER);
 
         List<TDUser> users = userMapper.selectList(userLambdaQueryWrapper);
-        if (resumeType.equals(Common.RESUME_ONLINE.getCode())) {
+        if (resumeType.equals(Common.RESUME_ONLINE)) {
             // 查找在线简历
-            List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).toList();
+            List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).filter(Objects::nonNull).toList();
             Map<Long, String> resumeIDMap = users.stream().collect(Collectors.toMap(TDUser::getResumeId, TDUser::getUserName));
 
             LambdaQueryWrapper<TDResume> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -111,15 +112,15 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                     .eq(resumeReview != null, TDResume::getResumeReview, resumeReview)
                     .eq(status != null, TDResume::getResumeStatus, status);
             Page<TDResume> onlineResumes = tdResumeMapper.selectPage(new Page<>(page, size), lambdaQueryWrapper);
-            Page<ResumeManageVo> resumeManageVoPage = new Page<>(onlineResumes.getCurrent(), onlineResumes.getSize(), onlineResumes.getTotal());
-            resumeManageVoPage.setRecords(onlineResumes.getRecords().stream().map(tdResume -> {
-                ResumeManageVo resumeManageVo = new ResumeManageVo();
-                BeanUtils.copyProperties(tdResume, resumeManageVo);
-                resumeManageVo.setUserName(resumeIDMap.get(resumeManageVo.getResumeId()));
-                resumeManageVo.setResumeType(Common.RESUME_ONLINE.getCode());
-                return resumeManageVo;
+            Page<ResumeManageVO> resumeManageVOPage = new Page<>(onlineResumes.getCurrent(), onlineResumes.getSize(), onlineResumes.getTotal());
+            resumeManageVOPage.setRecords(onlineResumes.getRecords().stream().map(tdResume -> {
+                ResumeManageVO resumeManageVO = new ResumeManageVO();
+                BeanUtils.copyProperties(tdResume, resumeManageVO);
+                resumeManageVO.setUserName(resumeIDMap.get(resumeManageVO.getResumeId()));
+                resumeManageVO.setResumeType(Common.RESUME_ONLINE);
+                return resumeManageVO;
             }).toList());
-            return resumeManageVoPage;
+            return resumeManageVOPage;
         }
 
         // 查找附件简历
@@ -128,25 +129,25 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         LambdaQueryWrapper<TDResumeAttachments> attachmentsWrapper = new LambdaQueryWrapper<>();
         attachmentsWrapper.in(TDResumeAttachments::getUserId, userIds)
                 .eq(resumeReview != null, TDResumeAttachments::getAttachmentsReview, resumeReview)
-                .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETED.getCode());
+                .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE);
         Page<TDResumeAttachments> attachments = tdResumeAttachmentsMapper.selectPage(new Page<>(page, size), attachmentsWrapper);
-        Page<ResumeManageVo> attachmentVos = new Page<>(attachments.getCurrent(), attachments.getSize(), attachments.getTotal());
-        attachmentVos.setRecords(attachments.getRecords().stream().map(attachment -> {
-            ResumeManageVo resumeManageVo = new ResumeManageVo();
-            resumeManageVo.setResumeId(attachment.getResumeAttachmentId());
-            resumeManageVo.setResumeReview(attachment.getAttachmentsReview());
-            resumeManageVo.setUserName(usersNameMap.get(attachment.getUserId()));
-            resumeManageVo.setResumeType(Common.RESUME_ATTACHMENTS.getCode());
-            return resumeManageVo;
+        Page<ResumeManageVO> attachmentVOs = new Page<>(attachments.getCurrent(), attachments.getSize(), attachments.getTotal());
+        attachmentVOs.setRecords(attachments.getRecords().stream().map(attachment -> {
+            ResumeManageVO resumeManageVO = new ResumeManageVO();
+            resumeManageVO.setResumeId(attachment.getResumeAttachmentId());
+            resumeManageVO.setResumeReview(attachment.getAttachmentsReview());
+            resumeManageVO.setUserName(usersNameMap.get(attachment.getUserId()));
+            resumeManageVO.setResumeType(Common.RESUME_ATTACHMENTS);
+            return resumeManageVO;
         }).toList());
 
-        return attachmentVos;
+        return attachmentVOs;
 
     }
 
     @Override
     public Object resumeReview(String review, Long resumeId, String resumeType) {
-        if (resumeType.equals(Common.RESUME_ONLINE.getCode())) {
+        if (resumeType.equals(Common.RESUME_ONLINE)) {
             LambdaUpdateWrapper<TDResume> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(TDResume::getResumeId, resumeId)
                     .set(TDResume::getResumeReview, review);
@@ -160,6 +161,8 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         tdResumeAttachmentsMapper.update(updateWrapper);
         return null;
     }
+
+
 
 
 }

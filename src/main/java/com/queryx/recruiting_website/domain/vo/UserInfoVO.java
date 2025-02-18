@@ -2,12 +2,14 @@ package com.queryx.recruiting_website.domain.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class UserVo {
-    private Long userId;
+public class UserInfoVO {
+    private Long companyInfoId;
     private String userName;
-    private String userPhone;
     private String userRole;
-    private String userStatus;
+    private String userAvatar;
     private Integer userInterviews;
+    private List<String> permissions;
 }

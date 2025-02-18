@@ -1,19 +1,19 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.TDCategory;
 import com.queryx.recruiting_website.domain.TDJobNature;
 import com.queryx.recruiting_website.domain.dto.JobNatureDto;
-import com.queryx.recruiting_website.domain.vo.NatureVo;
+import com.queryx.recruiting_website.domain.vo.NatureVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDJobNatureMapper;
 import com.queryx.recruiting_website.service.TDJobNatureService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,22 +25,29 @@ public class TDJobNatureServiceImpl extends ServiceImpl<TDJobNatureMapper, TDJob
     private TDJobNatureMapper jobNatureMapper;
 
     @Override
-    public List<NatureVo> selectJobNatureList() {
-        List<TDJobNature> natureList = list();
+    public List<NatureVO> selectJobNatureList(String status) {
+        LambdaQueryWrapper<TDJobNature> tdJobNatureLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<TDJobNature> natureList;
+        if (StringUtils.hasText(status)) {
+            tdJobNatureLambdaQueryWrapper.eq(TDJobNature::getNatureStatus, status);
+            natureList = list(tdJobNatureLambdaQueryWrapper);
+        } else {
+            natureList = list();
+        }
 
         return natureList.stream().map(nature -> {
-            NatureVo natureVo = new NatureVo();
-            BeanUtils.copyProperties(nature, natureVo);
-            return natureVo;
+            NatureVO natureVO = new NatureVO();
+            BeanUtils.copyProperties(nature, natureVO);
+            return natureVO;
         }).toList();
     }
 
     @Override
-    public NatureVo selectNatureInfo(Long jobNatureId) {
+    public NatureVO selectNatureInfo(Long jobNatureId) {
         TDJobNature byId = getById(jobNatureId);
-        NatureVo natureVo = new NatureVo();
-        BeanUtils.copyProperties(byId, natureVo);
-        return natureVo;
+        NatureVO natureVO = new NatureVO();
+        BeanUtils.copyProperties(byId, natureVO);
+        return natureVO;
     }
 
     @Override
@@ -68,9 +75,10 @@ public class TDJobNatureServiceImpl extends ServiceImpl<TDJobNatureMapper, TDJob
     }
 
     @Override
-    public Object addJobNature(String jobNatureName) {
+    public Object addJobNature(String jobNatureName, String natureStatus) {
         TDJobNature jobNature = new TDJobNature();
         jobNature.setJobNatureName(jobNatureName);
+        jobNature.setNatureStatus(natureStatus);
         if (!save(jobNature)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

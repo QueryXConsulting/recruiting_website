@@ -5,24 +5,24 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.TPRoleMenu;
 import com.queryx.recruiting_website.domain.dto.MenuDto;
 import com.queryx.recruiting_website.domain.dto.UpdateMenuDto;
-import com.queryx.recruiting_website.domain.vo.MenuListVo;
-import com.queryx.recruiting_website.domain.vo.RoutersVo;
+import com.queryx.recruiting_website.domain.vo.MenuListVO;
+import com.queryx.recruiting_website.domain.vo.MenuVO;
+import com.queryx.recruiting_website.domain.vo.RoutersVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
 import com.queryx.recruiting_website.mapper.TPRoleMenuMapper;
 import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.service.TPRoleMenuService;
-import com.queryx.recruiting_website.domain.vo.MenuVo;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,42 +39,59 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     private TPRoleMenuMapper roleMenuMapper;
 
     @Override
-    public RoutersVo getRouter() {
+    public RoutersVO getRouter() {
+        Object principal = SecurityUtils.getAuthentication().getPrincipal();
+        RoutersVO routersVO = new RoutersVO();
+        Long roleId;
+        if (principal instanceof LoginAdmin) {
+            roleId = SecurityUtils.getLoginAdmin().getTdAdmin().getRoleId();
+        } else {
+            roleId = Long.valueOf(SecurityUtils.getLoginUser().getTdUser().getUserRole());
+        }
         // menu结果是tree的形式
-        List<TPMenu> menus = selectRouterMenuTreeByRoleId(SecurityUtils.getLoginAdmin().getTdAdmin().getRoleId());
-        RoutersVo routersVo = new RoutersVo();
-        List<MenuVo> menuVoList = menus.stream()
+        List<TPMenu> menus = selectRouterMenuTreeByRoleId(roleId);
+        List<MenuVO> menuVOList = menus.stream()
                 .map(m -> {
-                    MenuVo menuVo = new MenuVo();
-                    BeanUtils.copyProperties(m, menuVo);
+                    MenuVO menuVO = new MenuVO();
+                    BeanUtils.copyProperties(m, menuVO);
                     // 子菜单构建
-                    menuVo.setChildren(m.getChildren().stream()
+                    menuVO.setChildren(m.getChildren().stream()
                             .map(c -> {
-                                MenuVo childMenuVo = new MenuVo();
-                                BeanUtils.copyProperties(c, childMenuVo);
-                                return childMenuVo;
+                                MenuVO childMenuVO = new MenuVO();
+                                BeanUtils.copyProperties(c, childMenuVO);
+                                return childMenuVO;
                             })
                             .collect(Collectors.toList()));
-                    return menuVo;
+                    return menuVO;
                 })
-                .collect(Collectors.toList());
-        routersVo.setMenus(menuVoList);
-        return routersVo;
+                .toList();
+        routersVO.setMenus(menuVOList);
+        return routersVO;
     }
 
     @Override
-    public List<MenuListVo> menuList(String status, String menuName) {
+    public List<MenuListVO> menuList() {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(menuName != null, TPMenu::getMenuName, menuName)
-                .eq(status != null, TPMenu::getStatus, status)
-                .eq(TPMenu::getDelFlag,Common.NOT_DELETED.getCode())
+        wrapper.eq(TPMenu::getDelFlag, Common.NOT_DELETE)
                 .orderByAsc(TPMenu::getParentId, TPMenu::getOrderNum);
-        return list(wrapper).stream().map(menu -> {
-            MenuListVo menuListVo = new MenuListVo();
-            BeanUtils.copyProperties(menu, menuListVo);
-            return menuListVo;
-        }).toList();
+        List<TPMenu> list = list(wrapper);
+
+        return buildMenuTreeVO(list, 0L);
     }
+
+
+    private List<MenuListVO> buildMenuTreeVO(List<TPMenu> menuList, Long parentId) {
+        return menuList.stream()
+                .filter(menu -> menu.getParentId().equals(parentId))
+                .map(menu -> {
+                    MenuListVO menuVO = new MenuListVO();
+                    BeanUtils.copyProperties(menu, menuVO);
+                    menuVO.setChildren(buildMenuTreeVO(menuList, menu.getMenuId()));
+                    return menuVO;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public Object addMenu(MenuDto menu) {
@@ -89,15 +106,15 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     }
 
     @Override
-    public MenuListVo menuInfo(Long menuId) {
+    public MenuListVO menuInfo(Long menuId) {
 
         TPMenu menu = getById(menuId);
-        if ((menu.getParentId().equals(Long.valueOf(Common.ROOT_MENU.getCode())) || menu.getParentId().equals(Long.valueOf(Common.PARENT_MENU.getCode())))) {
+        if ((menu.getParentId().equals(Common.ROOT_MENU) || menu.getParentId().equals(Long.valueOf(Common.PARENT_MENU)))) {
             throw new SystemException(AppHttpCodeEnum.NO_UPDATE);
         }
-        MenuListVo menuListVo = new MenuListVo();
-        BeanUtils.copyProperties(menu, menuListVo);
-        return menuListVo;
+        MenuListVO menuListVO = new MenuListVO();
+        BeanUtils.copyProperties(menu, menuListVO);
+        return menuListVO;
     }
 
     @Override
@@ -117,14 +134,9 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
 
     @Override
     public Object delMenu(Long menuId) {
-        TPMenu menu = getById(menuId);
-        if ((menu.getParentId().equals(Long.valueOf(Common.ROOT_MENU.getCode())) || menu.getParentId().equals(Long.valueOf(Common.PARENT_MENU.getCode())))) {
-            throw new SystemException(AppHttpCodeEnum.NO_UPDATE);
-        }
-
         LambdaUpdateWrapper<TPMenu> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(TPMenu::getMenuId, menuId)
-                .set(TPMenu::getDelFlag, Common.DELETED.getCode());
+                .set(TPMenu::getDelFlag, Common.DELETE);
         menuMapper.update(null, wrapper);
         return null;
     }
@@ -132,12 +144,13 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
     public List<TPMenu> selectRouterMenuTreeByRoleId(Long roleId) {
         List<TPMenu> menuList = null;
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE.getCode());
-        wrapper.in(TPMenu::getMenuType, "C", "M");
-        wrapper.orderByAsc(TPMenu::getOrderNum);
+        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE)
+                .eq(TPMenu::getDelFlag, Common.NOT_DELETE)
+                .in(TPMenu::getMenuType, "C", "M", "U")
+                .orderByAsc(TPMenu::getOrderNum);
 
         // 判断是否是超级管理员
-        if (roleId.equals(Long.valueOf(Common.SUPER_ADMIN.getCode()))) {
+        if (roleId.equals(Common.SUPER_ADMIN)) {
             menuList = menuMapper.selectList(wrapper);
         } else {
             LambdaQueryWrapper<TPRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
@@ -160,14 +173,14 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
                 .collect(Collectors.toList());
     }
 
-    private List<MenuVo> getChildren(TPMenu menu, List<TPMenu> menuList) {
+    private List<MenuVO> getChildren(TPMenu menu, List<TPMenu> menuList) {
         return menuList.stream()
                 .filter(m -> m.getParentId().equals(menu.getMenuId()))
                 .map(m -> {
-                    MenuVo menuVo = new MenuVo();
-                    BeanUtils.copyProperties(m, menuVo);
-                    menuVo.setChildren(getChildren(m, menuList)); // 递归获取子菜单
-                    return menuVo;
+                    MenuVO menuVO = new MenuVO();
+                    BeanUtils.copyProperties(m, menuVO);
+                    menuVO.setChildren(getChildren(m, menuList)); // 递归获取子菜单
+                    return menuVO;
                 })
                 .collect(Collectors.toList());
     }

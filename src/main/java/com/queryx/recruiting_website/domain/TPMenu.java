@@ -1,12 +1,15 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.queryx.recruiting_website.domain.vo.MenuVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * (TPMenu)实体类
@@ -72,6 +75,9 @@ public class TPMenu {
     @Schema(name = "删除标志", description = "0表示未删除，1表示已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
 
+    @TableField(exist = false)
+    @Schema(name = "菜单子树", description = "不存在的字段,用于getRouter接口下存储子树", implementation = List.class)
+    private List<MenuVO> children;
 
 }
 
