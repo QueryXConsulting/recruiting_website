@@ -1,9 +1,6 @@
 package com.queryx.recruiting_website.service;
 
-import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
-import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.domain.vo.JobVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
+import com.queryx.recruiting_website.domain.vo.*;
 
 import java.util.List;
 
@@ -35,4 +32,13 @@ public interface QueryService {
      * @return 职位信息
      */
     JobVO getJob(Long id);
+
+    /**
+     * 查询职位列表
+     * @param keyword 关键字
+     * @param page 页码
+     * @param pageSize 页大小
+     * @return 职位列表
+     */
+    List<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize);
 }

@@ -40,13 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -127,20 +125,24 @@ public class UserController {
     }
 
     /**
-     * 用户登出
+     * 用户头像上传
      *
-     * @return 登出结果
+     * @return 上传结果
      */
-    @Operation(summary = "用户登出", description = "用户登出待实现", parameters = {
-            @Parameter(name = "token", description = "用户登录token", required = true)
+    @Operation(summary = "用户头像上传", description = "用户头像上传未测试", parameters = {
+            @Parameter(name = "userId", description = "用户id", required = true),
+            @Parameter(name = "image", description = "头像图片", required = true)
     }, responses = {
-            @ApiResponse(responseCode = "200", description = "登出成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @PostMapping("/logout")
-    public CommonResp<String> logout() {
-        // TODO 登出功能待实现
-        log.info("logout");
-        return null;
+    @PostMapping("/uploadAvatar")
+    public CommonResp<String> uploadAvatar(@RequestParam("userId") String userId, @RequestParam("image") MultipartFile image) {
+        // 校验参数
+        if (userId == null && image == null) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+        }
+        // 上传头像
+        return userService.uploadAvatar(userId, image);
     }
 }
 

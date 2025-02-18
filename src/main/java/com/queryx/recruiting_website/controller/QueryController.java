@@ -1,12 +1,9 @@
 package com.queryx.recruiting_website.controller;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.vo.JobVO;
-import com.queryx.recruiting_website.service.impl.QueryImpl;
+import com.queryx.recruiting_website.domain.vo.*;
+import com.queryx.recruiting_website.service.QueryService;
 import com.queryx.recruiting_website.utils.CommonResp;
-import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
-import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,7 +24,7 @@ import java.util.List;
 public class QueryController {
 
     @Autowired
-    private QueryImpl queryUserInfo;
+    private QueryService queryUserInfo;
 
     /**
      * 查询用户在线简历
@@ -123,7 +120,7 @@ public class QueryController {
             @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("jobs")
+    @GetMapping("job")
     public CommonResp<JobVO> queryJob(@RequestParam("id") Long id) {
         JobVO resp;
         try {
@@ -137,5 +134,18 @@ public class QueryController {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
         return CommonResp.success(resp);
+    }
+
+
+    @GetMapping("/jobs")
+    public CommonResp<List<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
+        // 校验参数
+        if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
+        if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
+        // 查询岗位列表
+        List<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        // 校验结果
+        if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
+        return CommonResp.success(jobList);
     }
 }

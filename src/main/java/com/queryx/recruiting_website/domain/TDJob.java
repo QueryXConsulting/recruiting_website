@@ -70,5 +70,8 @@ public class TDJob {
     @Schema(name = "启用状态", description = "0代表关闭,1代表启用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobStatus;
 
+    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String jobDelete;
+
 }
 

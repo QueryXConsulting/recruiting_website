@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.design.LoginContext;
@@ -11,18 +12,25 @@ import com.queryx.recruiting_website.domain.vo.LoginVO;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
+import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     final String timeZone = "Asia/Shanghai";
+
+    @Value("${file.upload-path-avatar}")
+    private String uploadPathAvatar;
 
     @Autowired
     private TDUserMapper userMapper;
@@ -81,5 +89,38 @@ public class UserServiceImpl implements UserService {
         }
         // 返回JWT
         return JwtUtil.createJWT(Map.of(USER_ID, loginVO.getUserId(), RESUME_ID, loginVO.getResumeId()));
+    }
+
+    @Override // TODO 未测试
+    public CommonResp<String> uploadAvatar(String userId, MultipartFile image) {
+        // 查询用户是否存在头像
+        TDUser user = userMapper.selectById(userId);
+        // 非法用户
+        if (Common.DELETE.equals(user.getDelFlag()) && Common.STATUS_DISABLE.equals(user.getUserStatus())) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        }
+        // 有 -> 删除
+        if (user.getUserAvatar() != null || user.getUserAvatar().trim().isEmpty()) {
+            File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
+            if (!(oldFile.exists() && oldFile.delete())) {
+                return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
+            }
+        }
+        // 保存头像图片
+        String fileName = image.getOriginalFilename();
+        String newFileName = System.currentTimeMillis() + "_" + fileName;
+        File file = new File(uploadPathAvatar + newFileName);
+        try {
+            image.transferTo(file);
+            if (!file.exists()) {
+                return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
+            }
+            // 更新数据库
+            user.setUserAvatar(newFileName);
+            userMapper.updateById(user);
+        } catch (Exception e) {
+            return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
+        }
+        return CommonResp.success(null);
     }
 }
