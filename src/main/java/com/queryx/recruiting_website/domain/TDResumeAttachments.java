@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+
 
 /**
  * (TDResumeAttachments)实体类
@@ -19,7 +19,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(name = "附件简历实体类")

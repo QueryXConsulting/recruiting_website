@@ -15,6 +15,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
@@ -47,8 +49,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 WebUtils.renderString(response, result);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN,null));
+            log.error("token解析失败", e);
+            String result = SecurityUtils.convertCommonRespToJson(CommonResp.fail(AppHttpCodeEnum.NEED_LOGIN, null));
             WebUtils.renderString(response, result);
         }
 
@@ -72,7 +74,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     }
 
-    private LoginAdmin getLoginAdmin(LinkedHashMap adminUser){
+    private LoginAdmin getLoginAdmin(LinkedHashMap adminUser) {
         ObjectMapper objectMapper = new ObjectMapper();
         LoginAdmin loginAdmin = new LoginAdmin();
         TDAdmin tdAdmin = objectMapper.convertValue(adminUser.get("tdAdmin"), TDAdmin.class);
@@ -81,7 +83,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         return loginAdmin;
     }
 
-    private LoginUser getLoginUser(LinkedHashMap user){
+    private LoginUser getLoginUser(LinkedHashMap user) {
         ObjectMapper objectMapper = new ObjectMapper();
         LoginUser loginUser = new LoginUser();
         TDUser tdUser = objectMapper.convertValue(user.get("tdUser"), TDUser.class);

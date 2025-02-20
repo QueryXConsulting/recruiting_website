@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * (TDJobResume)实体类
@@ -16,7 +16,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @TableName("t_d_job_resume")
 @Schema(name = "投递简历实体类")
 public class TDJobResume {

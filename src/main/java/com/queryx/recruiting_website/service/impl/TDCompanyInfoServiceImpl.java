@@ -133,7 +133,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
                     oldFile.delete();
                 }
             }
-            
+
             if (!update(tdCompanyInfo, updateWrapper)) {
                 throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
             }

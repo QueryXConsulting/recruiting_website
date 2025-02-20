@@ -3,12 +3,11 @@ package com.queryx.recruiting_website.domain.vo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Date;
 
 @Data
-@ToString
 public class AttachmentsResumeVO {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long resumeAttachmentId;

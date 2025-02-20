@@ -44,6 +44,7 @@ public class PositionManageController {
 
         return CommonResp.success(jobService.updateJob(jobDetailDto));
     }
+
     @DeleteMapping("/deleteJob/{jobId}")
     @Operation(summary = "职位删除")
     public CommonResp deleteJob(@PathVariable("jobId") Long jobId) {

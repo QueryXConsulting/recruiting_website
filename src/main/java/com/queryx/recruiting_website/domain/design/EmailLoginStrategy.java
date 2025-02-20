@@ -11,9 +11,9 @@ public class EmailLoginStrategy implements LoginStrategy {
     @Override
     public LoginVO login(TDUserMapper userMapper, LoginDTO loginDTO) {
         // TODO 邮箱登录：验证码待实现
-        TDUser tdUser = userMapper.queryUserByEmail(loginDTO.getUsername());
+        TDUser user = userMapper.queryUserByEmail(loginDTO.getUsername());
         LoginVO loginVO = new LoginVO();
-        BeanUtils.copyProperties(tdUser,loginVO);
+        BeanUtils.copyProperties(user, loginVO);
         return loginVO;
     }
 }

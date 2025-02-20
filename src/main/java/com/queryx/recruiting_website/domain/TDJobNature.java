@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * (TDJobNature)实体类
@@ -15,7 +14,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @Schema(name = "工作性质实体类")
 public class TDJobNature {
 

@@ -1,35 +1,5 @@
 package com.queryx.recruiting_website.controller;
 
-/* dev_qjq
-import com.queryx.recruiting_website.domain.dto.LoginDTO;
-import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
-import com.queryx.recruiting_website.service.TDUserService;
-import com.queryx.recruiting_website.utils.CommonResp;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/user")
-@Tag(name = "用户模块")
-public class UserController {
-   @Resource
-   private TDUserService tdUserService;
-
-    @PostMapping("/login")
-    @Operation(summary = "登录功能", description = "公司用户以及学生用户公用")
-    public CommonResp login(@RequestBody LoginDTO loginDTO) {
-        return CommonResp.success(tdUserService.login(loginDTO));
-    }
-    @PostMapping("/register")
-    @Operation(summary = "注册功能", description = "公司用户以及学生用户公用")
-    public CommonResp register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        return CommonResp.success(tdUserService.register(userRegisterDTO));
-    }
-}
-*/
-
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
@@ -47,11 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -104,33 +72,6 @@ public class UserController {
         return CommonResp.success(null);
     }
 
-//    /**
-//     * 用户登录
-//     *
-//     * @param loginDTO 用户登录信息
-//     * @return 登录结果
-//     */
-//    @Operation(summary = "用户登录", parameters = {
-//            @Parameter(name = "loginDTO", description = "用户登录信息", schema = @Schema(implementation = LoginDTO.class), required = true)
-//    }, responses = {
-//            @ApiResponse(responseCode = "200", description = "登录成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-//            @ApiResponse(responseCode = "414", description = "用户名或密码错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-//            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-//    })
-//    @PostMapping("/login")
-//    public CommonResp<String> login(@RequestBody LoginDTO loginDTO) {
-//        String token;
-//
-//            token = userService.queryUser(loginDTO);
-//            if (token == null) {
-//                return CommonResp.fail(AppHttpCodeEnum.LOGIN_ERROR, null);
-//            }
-//
-//        log.info("用户登录成功");
-//        return CommonResp.success(token);
-//    }
-
-
     @Resource
     private TDUserService tdUserService;
 
@@ -150,20 +91,25 @@ public class UserController {
 
 
     /**
-     * 用户登出
+     * 用户头像上传
      *
-     * @return 登出结果
+     * @return 上传结果
      */
-    @Operation(summary = "用户登出", description = "用户登出待实现", parameters = {
-            @Parameter(name = "token", description = "用户登录token", required = true)
+    @Operation(summary = "用户头像上传", description = "用户头像上传未测试", parameters = {
+            @Parameter(name = "userId", description = "用户id", required = true),
+            @Parameter(name = "image", description = "头像图片", required = true)
     }, responses = {
-            @ApiResponse(responseCode = "200", description = "登出成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺失参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @PostMapping("/logout")
-    public CommonResp<String> logout() {
-        // TODO 登出功能待实现
-        log.info("logout");
-        return null;
+    @PostMapping("/uploadAvatar")
+    public CommonResp<String> uploadAvatar(@RequestParam("userId") String userId, @RequestParam("image") MultipartFile image) {
+        // 校验参数
+        if (userId == null && image == null) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+        }
+        // 上传头像
+        return userService.uploadAvatar(userId, image);
     }
 }
 

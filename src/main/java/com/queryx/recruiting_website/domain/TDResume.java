@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * (TDResume)实体类
@@ -19,7 +19,6 @@ import lombok.ToString;
  * @since 2024-12-23 12:21:50
  */
 @Data
-@ToString
 @TableName("t_d_resume")
 @Schema(name = "在线简历实体类")
 public class TDResume {
@@ -72,8 +71,8 @@ public class TDResume {
     private String resumeReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-
     private String resumeStatus;
+
 
 }
 
