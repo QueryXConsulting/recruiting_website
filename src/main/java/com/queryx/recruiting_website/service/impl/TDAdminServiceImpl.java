@@ -4,27 +4,24 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.TDAdmin;
-
 import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.TPRole;
+import com.queryx.recruiting_website.domain.dto.AdminDto;
+import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
+import com.queryx.recruiting_website.domain.vo.AdminInfoVO;
+import com.queryx.recruiting_website.domain.vo.AdminUserInfoVO;
 import com.queryx.recruiting_website.domain.vo.AdminVO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TDAdminMapper;
-
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
 import com.queryx.recruiting_website.mapper.TPRoleMapper;
 import com.queryx.recruiting_website.service.TDAdminService;
-import com.queryx.recruiting_website.domain.dto.AdminLoginDTO;
-
-import com.queryx.recruiting_website.domain.dto.AdminDTO;
 import com.queryx.recruiting_website.utils.JwtUtil;
-import com.queryx.recruiting_website.domain.vo.AdminInfoVO;
-import com.queryx.recruiting_website.domain.vo.AdminUserInfoVO;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -55,25 +51,25 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     private TPRoleMapper roleMapper;
 
     @Override
-    public AdminDTO addAdmin(AdminDTO adminDTO) {
-        if (!StringUtils.hasText(adminDTO.getAdminUsername())) {
+    public AdminDto addAdmin(AdminDto adminDto) {
+        if (!StringUtils.hasText(adminDto.getAdminUsername())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
 
-        if (!StringUtils.hasText(adminDTO.getAdminPassword())) {
+        if (!StringUtils.hasText(adminDto.getAdminPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
         }
 
         LambdaQueryWrapper<TDAdmin> tdAdminLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        tdAdminLambdaQueryWrapper.eq(TDAdmin::getAdminUsername, adminDTO.getAdminUsername());
+        tdAdminLambdaQueryWrapper.eq(TDAdmin::getAdminUsername, adminDto.getAdminUsername());
         if (count(tdAdminLambdaQueryWrapper) > 0) {
-            throw new SystemException(AppHttpCodeEnum.USERNAME_EXIST);
+            throw new SystemException(AppHttpCodeEnum.USER_EXIST);
         }
 
-        String password = passwordEncoder.encode(adminDTO.getAdminPassword());
-        adminDTO.setAdminPassword(password);
+        String password = passwordEncoder.encode(adminDto.getAdminPassword());
+        adminDto.setAdminPassword(password);
         TDAdmin tdAdmin = new TDAdmin();
-        BeanUtils.copyProperties(adminDTO, tdAdmin);
+        BeanUtils.copyProperties(adminDto, tdAdmin);
         tdAdmin.setAdminStatus(Common.STATUS_ENABLE);
         tdAdmin.setAdminCreateTime(new Date());
         if (!save(tdAdmin)) {
@@ -84,9 +80,9 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     }
 
     @Override
-    public String login(AdminLoginDTO adminLoginDTO) {
+    public UserLoginVO login(AdminLoginDto adminLoginDto) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(adminLoginDTO.getAdminUsername(), adminLoginDTO.getAdminPassword());
+                = new UsernamePasswordAuthenticationToken(adminLoginDto.getUsername(), adminLoginDto.getUserPassword());
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         // 判断是否验证通过
         if (Objects.isNull(authenticate)) {
@@ -95,9 +91,10 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         LoginAdmin loginAdmin = (LoginAdmin) authenticate.getPrincipal();
         HashMap<String, Object> data = new HashMap<>();
         data.put("AdminUser", loginAdmin);
-
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setToken(JwtUtil.createJWT(data));
         // 返回前端凭证
-        return JwtUtil.createJWT(data);
+        return userLoginVO;
     }
 
     @Override
@@ -147,9 +144,9 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     }
 
     @Override
-    public Object updateAdminInfo(AdminDTO adminDTO) {
+    public Object updateAdminInfo(AdminDto adminDto) {
         TDAdmin tdAdmin = new TDAdmin();
-        BeanUtils.copyProperties(adminDTO, tdAdmin);
+        BeanUtils.copyProperties(adminDto, tdAdmin);
         tdAdmin.setAdminPassword(passwordEncoder.encode(tdAdmin.getAdminPassword()));
         if (!update(tdAdmin, new LambdaUpdateWrapper<TDAdmin>().eq(TDAdmin::getAdminId, tdAdmin.getAdminId()))) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
@@ -169,12 +166,13 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     public List<String> selectPermsByRoleId(Long roleId) {
         LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(TPMenu::getMenuType, "C", "F");
+        wrapper.in(TPMenu::getMenuType, "F","U");
         wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE);
         // 如果是超级管理员返回所有权限
         if (roleId.equals(Common.SUPER_ADMIN)) {
             List<TPMenu> menus = menuMapper.selectList(wrapper);
-            return menus.stream().map(TPMenu::getPerms).collect(Collectors.toList());
+            List<String> perms = menus.stream().map(TPMenu::getPerms).collect(Collectors.toList());
+            return perms;
         }
 
         return menuMapper.selectPermsByRoleId(roleId);

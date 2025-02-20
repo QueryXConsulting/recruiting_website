@@ -9,8 +9,10 @@ import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
-import com.queryx.recruiting_website.domain.dto.UserDTO;
+import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserCompanyVO;
+import com.queryx.recruiting_website.domain.vo.UserInfoVO;
 import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.domain.vo.UserVO;
 import com.queryx.recruiting_website.exception.SystemException;
@@ -19,7 +21,7 @@ import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.TDUserService;
-import com.queryx.recruiting_website.domain.dto.UserCompanyDTO;
+import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
@@ -54,7 +56,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     private TDAdminMapper adminMapper;
 
     @Override
-    public UserCompanyDTO selectUserInfo(Long userId, String userRole) {
+    public UserCompanyDto selectUserInfo(Long userId, String userRole) {
         LambdaQueryWrapper<TDUser> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userLambdaQueryWrapper.eq(TDUser::getUserId, userId)
                 .eq(TDUser::getDelFlag, Common.NOT_DELETE);
@@ -66,24 +68,24 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
 
         TDUser tdUser = tdUserMapper.selectOne(userLambdaQueryWrapper);
 
-        UserCompanyDTO userCompanyDTO = new UserCompanyDTO();
-        BeanUtils.copyProperties(tdUser, userCompanyDTO);
-        return userCompanyDTO;
+        UserCompanyDto userCompanyDto = new UserCompanyDto();
+        BeanUtils.copyProperties(tdUser, userCompanyDto);
+        return userCompanyDto;
     }
 
     @Override
-    public UserCompanyDTO updateUserCompanyInfo(UserCompanyDTO userCompanyDTO) {
-        if (!StringUtils.hasText(userCompanyDTO.getUserName())) {
+    public UserCompanyDto updateUserCompanyInfo(UserCompanyDto userCompanyDto) {
+        if (!StringUtils.hasText(userCompanyDto.getUserName())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
-        if (!StringUtils.hasText(userCompanyDTO.getUserPassword())) {
+        if (!StringUtils.hasText(userCompanyDto.getUserPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
         }
-        if (!StringUtils.hasText(userCompanyDTO.getUserPhone())) {
+        if (!StringUtils.hasText(userCompanyDto.getUserPhone())) {
             throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
         }
         TDUser tdUser = SecurityUtils.getLoginUser().getTdUser();
-        BeanUtils.copyProperties(userCompanyDTO, tdUser);
+        BeanUtils.copyProperties(userCompanyDto, tdUser);
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         UpdateWrapper<TDUser> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("user_id", tdUser.getUserId())
@@ -106,28 +108,15 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
-        if (!loginDTO.getUserRole().equals(loginUser.getTdUser().getUserRole())) {
-            throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
-        }
-
         UserLoginVO userLoginVO = new UserLoginVO();
-        // 判断是否为公司用户
-        if (loginDTO.getUserRole().equals(Common.COMPANY_USER)) {
-            LambdaQueryWrapper<TDCompanyInfo> companyInfoQuery = new LambdaQueryWrapper<>();
-            companyInfoQuery.eq(TDCompanyInfo::getUserId, loginUser.getTdUser().getUserId())
-                    .select(TDCompanyInfo::getCompanyInfoId);
-            TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectOne(companyInfoQuery);
-            Long companyId = null;
-            if (!Objects.isNull(tdCompanyInfo)) {
-                companyId = tdCompanyInfo.getCompanyInfoId();
-            }
-            userLoginVO.setCompanyId(companyId);
-        }
-
-//         生成token
         HashMap<String, Object> data = new HashMap<>();
+//         生成token
         data.put("User", loginUser);
         userLoginVO.setToken(JwtUtil.createJWT(data));
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
+        userInfoVO.setPermissions(loginUser.getPermissions());
+        userLoginVO.setUserInfoVO(userInfoVO);
 //         返回前端凭证
         return userLoginVO;
     }
@@ -186,22 +175,22 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     }
 
     @Override
-    public Object updateUserInfo(UserDTO userDTO) {
-        if (!StringUtils.hasText(userDTO.getUserName())) {
+    public Object updateUserInfo(UserDto userDto) {
+        if (!StringUtils.hasText(userDto.getUserName())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
-        if (!StringUtils.hasText(userDTO.getUserPassword())) {
+        if (!StringUtils.hasText(userDto.getUserPassword())) {
             throw new SystemException(AppHttpCodeEnum.PASSWORD_NOT_NULL);
         }
-        if (!StringUtils.hasText(userDTO.getUserPhone())) {
+        if (!StringUtils.hasText(userDto.getUserPhone())) {
             throw new SystemException(AppHttpCodeEnum.PHONE_NULL);
         }
 
         TDUser tdUser = new TDUser();
-        BeanUtils.copyProperties(userDTO, tdUser);
+        BeanUtils.copyProperties(userDto, tdUser);
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         if (!update(tdUser, new LambdaUpdateWrapper<TDUser>().eq(TDUser::getUserId,
-                userDTO.getUserId()).eq(TDUser::getDelFlag, Common.NOT_DELETE))) {
+                userDto.getUserId()).eq(TDUser::getDelFlag, Common.NOT_DELETE))) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
 
@@ -220,15 +209,21 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     }
 
     @Override
-    public Object addUser(UserDTO userDTO) {
-        LambdaQueryWrapper<TDUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TDUser::getUserPhone, userDTO.getUserPhone())
+    public Object addUser(UserDto userDto) {
+        LambdaQueryWrapper<TDUser> phoneQueryWrapper = new LambdaQueryWrapper<>();
+        phoneQueryWrapper.eq(TDUser::getUserPhone, userDto.getUserPhone())
                 .eq(TDUser::getDelFlag, Common.NOT_DELETE);
-        if (count(queryWrapper) > 0) {
+        if (count(phoneQueryWrapper) > 0) {
             throw new SystemException(AppHttpCodeEnum.PHONE_EXIST);
         }
+        LambdaQueryWrapper<TDUser> emailQueryWrapper = new LambdaQueryWrapper<>();
+        emailQueryWrapper.eq(TDUser::getUserEmail, userDto.getUserEmail())
+                .eq(TDUser::getDelFlag, Common.NOT_DELETE);
+        if (count(emailQueryWrapper) > 0) {
+            throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
+        }
         TDUser tdUser = new TDUser();
-        BeanUtils.copyProperties(userDTO, tdUser);
+        BeanUtils.copyProperties(userDto, tdUser);
         tdUser.setUserRegisterTime(new Date());
         tdUser.setUserPassword(passwordEncoder.encode(tdUser.getUserPassword()));
         if (!save(tdUser)) {
@@ -237,7 +232,23 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         return null;
     }
 
+    @Override
+    public Object selectUserCompanyList(Integer page, Integer size, String userName) {
+        Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
+        LambdaUpdateWrapper<TDUser> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(TDUser::getCompanyInfoId,companyInfoId)
+                .like(StringUtils.hasText(userName),TDUser::getUserName,userName);
 
+        Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
+        Page<UserCompanyVO> userCompanyVOPage =
+                new Page<>(tdUserPage.getCurrent(),tdUserPage.getSize(),tdUserPage.getTotal());
+        userCompanyVOPage.setRecords(tdUserPage.getRecords().stream().map(user->{
+            UserCompanyVO userCompanyVO = new UserCompanyVO();
+            BeanUtils.copyProperties(user,userCompanyVO);
+            return userCompanyVO;
+        }).toList());
+        return userCompanyVOPage;
+    }
 }
 
 

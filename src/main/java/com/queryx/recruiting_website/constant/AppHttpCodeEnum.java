@@ -9,7 +9,7 @@ public enum AppHttpCodeEnum {
     SUCCESS(200, "操作成功"),
 
     // 服务端错误
-    SYSTEM_ERROR(500, "出现错误"),
+    SYSTEM_ERROR(512, "出现错误"),
 
     // 客户端错误
     NEED_LOGIN(450, "需要登录后操作"),
@@ -34,7 +34,8 @@ public enum AppHttpCodeEnum {
     DELETE_RESUME_ERROR(469, "删除简历失败"),
     DELIVER_RESUME_FAIL(470, "投递简历失败"),
     NO_USER(471, "不允许修改该用户"),
-    RESUME_NOT_EXIST(472, "在线简历不存在"),
+    RESUME_NOT_EXIST(472, "简历不存在"),
+
     LOGIN_EXPIRED(473, "token已过期"),
     PHONE_NULL(474, "手机号不能为空"),
     SUPER_ADMIN(475, "超级管理员不允许修改"),
@@ -48,7 +49,6 @@ public enum AppHttpCodeEnum {
     AVATAR_DELETE_ERROR(483, "头像删除失败"),
     AVATAR_UPLOAD_ERROR(484, "头像上传失败");
 
-
     final int code;
     final String msg;
 
@@ -58,5 +58,5 @@ public enum AppHttpCodeEnum {
     }
 
 
-}
+    }
 

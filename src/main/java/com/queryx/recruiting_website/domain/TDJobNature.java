@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.domain;
 
-import java.io.Serializable;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -17,8 +16,6 @@ import lombok.Data;
 @Data
 @Schema(name = "工作性质实体类")
 public class TDJobNature {
-
-
 
     @TableId(type = IdType.AUTO)
     @Schema(name = "工作性质ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)

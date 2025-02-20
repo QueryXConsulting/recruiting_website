@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.domain.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.util.Date;
@@ -7,11 +9,12 @@ import java.util.Date;
 @Data
 public class JobDetailDTO {
 
-
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long companyId;
 
     private String companyName;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long jobId;
 
     private String jobPosition;
@@ -40,4 +43,5 @@ public class JobDetailDTO {
 
     private String jobReview;
 
+    private String jobStatus;
 }

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
-import com.queryx.recruiting_website.domain.dto.SelectResumeDTO;
+import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
 import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDResumeService;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -77,17 +76,17 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     }
 
     @Override
-    public Object selectResume(SelectResumeDTO selectResumeDTO) {
+    public Object selectResume(SelectResumeDto selectResumeDto) {
 
-        if (Common.RESUME_ONLINE.equals(selectResumeDTO.getResumeType())) {
+        if (selectResumeDto.getResumeType().equals(Common.RESUME_ONLINE)) {
             ResumeVO resumeVO = new ResumeVO();
-            TDResume tdResume = tdResumeMapper.selectById(selectResumeDTO.getResumeId());
+            TDResume tdResume = tdResumeMapper.selectById(selectResumeDto.getResumeId());
             BeanUtils.copyProperties(tdResume, resumeVO);
             return resumeVO;
         }
 
         LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TDResumeAttachments::getResumeAttachmentId, selectResumeDTO.getResumeId())
+        wrapper.eq(TDResumeAttachments::getResumeAttachmentId, selectResumeDto.getResumeId())
                 .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE);
 
         TDResumeAttachments resume = tdResumeAttachmentsMapper.selectOne(wrapper);
@@ -103,9 +102,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                 .eq(TDUser::getUserRole, Common.STUDENT_USER);
 
         List<TDUser> users = userMapper.selectList(userLambdaQueryWrapper);
-        if (users == null || users.isEmpty()) return null;
-
-        if (Common.RESUME_ONLINE.equals(resumeType)) {
+        if (resumeType.equals(Common.RESUME_ONLINE)) {
             // 查找在线简历
             List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).filter(Objects::nonNull).toList();
             Map<Long, String> resumeIDMap = users.stream().collect(Collectors.toMap(TDUser::getResumeId, TDUser::getUserName));
@@ -141,7 +138,6 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
             resumeManageVO.setResumeReview(attachment.getAttachmentsReview());
             resumeManageVO.setUserName(usersNameMap.get(attachment.getUserId()));
             resumeManageVO.setResumeType(Common.RESUME_ATTACHMENTS);
-            resumeManageVO.setResumeStatus(attachment.getAttachmentsReview());
             return resumeManageVO;
         }).toList());
 
@@ -165,6 +161,8 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         tdResumeAttachmentsMapper.update(updateWrapper);
         return null;
     }
+
+
 
 
 }

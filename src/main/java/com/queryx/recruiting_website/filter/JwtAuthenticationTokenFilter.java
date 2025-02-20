@@ -7,7 +7,6 @@ import com.queryx.recruiting_website.domain.LoginUser;
 import com.queryx.recruiting_website.domain.TDAdmin;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.utils.CommonResp;
-
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import com.queryx.recruiting_website.utils.WebUtils;
@@ -16,8 +15,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -25,9 +24,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 
-@Slf4j
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
@@ -67,9 +67,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         LoginAdmin loginAdmin = getLoginAdmin(adminUser);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(loginAdmin, null, loginAdmin.getAuthorities());
+                = new UsernamePasswordAuthenticationToken(loginAdmin,  null, loginAdmin.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         filterChain.doFilter(request, response);
+
     }
 
     private LoginAdmin getLoginAdmin(LinkedHashMap adminUser) {

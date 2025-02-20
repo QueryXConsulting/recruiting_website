@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.domain.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,8 +15,10 @@ import java.util.Date;
 @Data
 public class JobVO {
     // 岗位id
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long jobId;
     // 关联企业
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long companyId;
     // 工作职位名称
     private String jobPosition;

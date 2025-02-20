@@ -6,4 +6,5 @@ import lombok.Data;
 public class JobNatureDTO {
     private Long natureId;
     private String jobNatureName;
+    private String natureStatus;
 }

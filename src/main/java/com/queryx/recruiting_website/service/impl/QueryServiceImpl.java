@@ -1,15 +1,22 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.queryx.recruiting_website.domain.*;
-import com.queryx.recruiting_website.domain.vo.*;
-import com.queryx.recruiting_website.mapper.*;
+import com.queryx.recruiting_website.domain.TDInterview;
+import com.queryx.recruiting_website.mapper.TDJobMapper;
+import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
+import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDResume;
+import com.queryx.recruiting_website.domain.vo.JobVO;
+import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.service.QueryService;
+import com.queryx.recruiting_website.domain.vo.InterviewVO;
+import com.queryx.recruiting_website.mapper.InterviewMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.ArrayList;
@@ -24,13 +31,13 @@ public class QueryServiceImpl implements QueryService {
     private TDResumeMapper resumeMapper;
 
     @Autowired
-    private ResumeAttachmentsMapper attachmentsMapper;
+    private TDResumeAttachmentsMapper attachmentsMapper;
 
     @Autowired
     private InterviewMapper interviewMapper;
 
     @Autowired
-    private JobInfoMapper jobInfoMapper;
+    private TDJobMapper jobInfoMapper;
 
     @Autowired
     private TDCompanyInfoMapper companyInfoMapper;

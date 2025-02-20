@@ -10,13 +10,11 @@ import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin")
 @Tag(name = "管理员模块下简历管理")
-@PreAuthorize("hasPermission(null ,'system:resume:list')")
 public class ResumeManageController {
 
     @Resource
@@ -25,18 +23,13 @@ public class ResumeManageController {
     @GetMapping("/selectResumeList")
     @Operation(summary = "简历列表")
     public CommonResp selectResumeList(Integer page, Integer size, String userName, String resumeReview, String resumeStatus, String resumeType) {
-        Page<ResumeManageVO> voPage = resumeService.selectResumeManage(page, size, userName, resumeReview, resumeStatus, resumeType);
-        if (voPage == null){
-            return CommonResp.fail(AppHttpCodeEnum.USERNAME_NOT_EXIST, null);
-        }
-        return CommonResp.success(voPage);
+        return CommonResp.success(resumeService.selectResumeManage(page, size, userName, resumeReview, resumeStatus, resumeType));
     }
 
     @PostMapping("/selectResumeInfo")
     @Operation(summary = "简历信息")
-    @PreAuthorize("hasPermission(null ,'system:resume:query')")
-    public CommonResp selectResumeInfo(@RequestBody SelectResumeDTO selectResumeDTO) {
-        return CommonResp.success(resumeService.selectResume(selectResumeDTO));
+    public CommonResp selectResumeInfo(@RequestBody SelectResumeDto selectResumeDto) {
+        return CommonResp.success(resumeService.selectResume(selectResumeDto));
     }
 
 

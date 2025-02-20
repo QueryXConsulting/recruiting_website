@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class ResumeListVO {
+public class RoleMenuVO {
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long resumeId;
-    private String resumeName;
-    private String resumeType;
-    private String jobPosition;
+    private Long menuId;
+    private String menuName;
+    private String menuType;
+    List<RoleMenuVO> children;
 }

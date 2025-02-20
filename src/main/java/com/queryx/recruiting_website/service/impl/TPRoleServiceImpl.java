@@ -6,9 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.*;
-import com.queryx.recruiting_website.domain.dto.RoleInfoDTO;
+import com.queryx.recruiting_website.domain.TPMenu;
+import com.queryx.recruiting_website.domain.TPRole;
+import com.queryx.recruiting_website.domain.TPRoleMenu;
+import com.queryx.recruiting_website.domain.dto.RoleInfoDto;
 import com.queryx.recruiting_website.domain.vo.RoleListVO;
+import com.queryx.recruiting_website.domain.vo.RoleMenuVO;
 import com.queryx.recruiting_website.domain.vo.RoleVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.TPMenuMapper;
@@ -19,10 +22,12 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> implements TPRoleService {
@@ -36,7 +41,8 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
 
     @Override
     public List<RoleListVO> selectRoleList() {
-        List<TPRole> roleList = list();
+        List<TPRole> roleList = list( new LambdaUpdateWrapper<TPRole>()
+                .eq(TPRole::getDelFlag,Common.NOT_DELETE));
         roleList.sort(Comparator.comparing(TPRole::getRoleSort));
         return roleList.stream().map(r -> {
             RoleListVO roleListVO = new RoleListVO();
@@ -46,25 +52,25 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
     }
 
     @Override
-    public RoleInfoDTO updateRoleInfo(RoleInfoDTO roleInfoDTO) {
-        if (roleInfoDTO.getRoleId().equals(Common.SUPER_ADMIN)){
+    public RoleInfoDto updateRoleInfo(RoleInfoDto roleInfoDto) {
+        if (roleInfoDto.getRoleId().equals(Common.SUPER_ADMIN)) {
             throw new SystemException(AppHttpCodeEnum.SUPER_ADMIN);
         }
         TPRole tpRole = new TPRole();
-        BeanUtils.copyProperties(roleInfoDTO, tpRole);
+        BeanUtils.copyProperties(roleInfoDto, tpRole);
         UpdateWrapper<TPRole> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("role_id", roleInfoDTO.getRoleId());
+        updateWrapper.eq("role_id", roleInfoDto.getRoleId());
         tpRole.setUpdateBy(SecurityUtils.getLoginAdmin().getTdAdmin().getAdminId());
         tpRole.setUpdateTime(new Date());
         roleMapper.update(tpRole, updateWrapper);
 
         LambdaUpdateWrapper<TPRoleMenu> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(TPRoleMenu::getRoleId, roleInfoDTO.getRoleId());
+        wrapper.eq(TPRoleMenu::getRoleId, roleInfoDto.getRoleId());
         roleMenuMapper.delete(wrapper);
 
-        roleInfoDTO.getMenuId().forEach(menuId -> {
+        roleInfoDto.getMenuIds().forEach(menuId -> {
             TPRoleMenu tpRoleMenu = new TPRoleMenu();
-            tpRoleMenu.setRoleId(roleInfoDTO.getRoleId());
+            tpRoleMenu.setRoleId(roleInfoDto.getRoleId());
             tpRoleMenu.setMenuId(menuId);
             roleMenuMapper.
                     insert(tpRoleMenu);
@@ -74,7 +80,7 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
 
     @Override
     public String updateRoleStatus(Long roleId, String roleStatus) {
-        if (roleId.equals(Common.SUPER_ADMIN)){
+        if (roleId.equals(Common.SUPER_ADMIN)) {
             throw new SystemException(AppHttpCodeEnum.SUPER_ADMIN);
         }
 
@@ -91,28 +97,56 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
         RoleVO roleVO = new RoleVO();
         TPRole role = getById(roleId);
         BeanUtils.copyProperties(role, roleVO);
-        LambdaQueryWrapper<TPRoleMenu> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TPRoleMenu::getRoleId, roleId);
 
-        List<TPRoleMenu> tpRoleMenus = roleMenuMapper.selectList(queryWrapper);
-        List<Long> menuIdList = tpRoleMenus.stream().map(TPRoleMenu::getMenuId).toList();
-        List<String> menuNames = menuMapper.selectByIds(menuIdList).stream().map(TPMenu::getMenuName).toList();
-        roleVO.setMenuName(menuNames);
+        if (roleId.equals(Common.SUPER_ADMIN)) {
+            List<TPMenu> tpMenus = menuMapper.selectList(null);
+            roleVO.setMenusListId(tpMenus.stream().map(TPMenu::getMenuId).toList());
+            return roleVO;
+        }
+        LambdaQueryWrapper<TPRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
+        roleMenuWrapper.eq(!ObjectUtils.isEmpty(roleId), TPRoleMenu::getRoleId, roleId);
+        List<TPRoleMenu> menus = roleMenuMapper.selectList(roleMenuWrapper);
+        List<Long> menuIds = menus.stream().map(TPRoleMenu::getMenuId).toList();
+        roleVO.setMenusListId(menuIds);
         return roleVO;
     }
 
     @Override
-    public Object addRole(RoleInfoDTO roleInfoDTO) {
+    public List<RoleMenuVO> selectRoleMenusTree() {
+        LambdaQueryWrapper<TPMenu> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(TPMenu::getStatus, Common.STATUS_ENABLE);
+        wrapper.eq(TPMenu::getDelFlag,Common.NOT_DELETE);
+        wrapper.orderByAsc(TPMenu::getOrderNum);
+
+        return buildMenuTreeVO(menuMapper.selectList(wrapper), 0L);
+    }
+
+
+    private List<RoleMenuVO> buildMenuTreeVO(List<TPMenu> menuList, Long parentId) {
+        return menuList.stream()
+                .filter(menu -> menu.getParentId().equals(parentId))
+                .map(menu -> {
+                    RoleMenuVO roleMenuVO = new RoleMenuVO();
+                    BeanUtils.copyProperties(menu, roleMenuVO);
+                    roleMenuVO.setChildren(buildMenuTreeVO(menuList, menu.getMenuId()));
+                    return roleMenuVO;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Object addRole(RoleInfoDto roleInfoDto) {
         TPRole tpRole = new TPRole();
-        BeanUtils.copyProperties(roleInfoDTO, tpRole);
+        BeanUtils.copyProperties(roleInfoDto, tpRole);
         tpRole.setCreateTime(new Date());
         tpRole.setStatus(Common.STATUS_ENABLE);
         tpRole.setCreateTime(new Date());
         save(tpRole);
-        roleInfoDTO.setRoleId(tpRole.getRoleId());
-        roleInfoDTO.getMenuId().forEach(menuId -> {
+        roleInfoDto.setRoleId(tpRole.getRoleId());
+        roleInfoDto.getMenuIds().forEach(menuId -> {
             TPRoleMenu tpRoleMenu = new TPRoleMenu();
-            tpRoleMenu.setRoleId(roleInfoDTO.getRoleId());
+            tpRoleMenu.setRoleId(roleInfoDto.getRoleId());
             tpRoleMenu.setMenuId(menuId);
             roleMenuMapper.
                     insert(tpRoleMenu);
@@ -121,14 +155,14 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
     }
 
     @Override
-    public Object delRole(Long roleId) {
-        if (roleId.equals(Common.SUPER_ADMIN)){
+    public Object delRole(List<Long> roleId) {
+        if (roleId.contains(Common.SUPER_ADMIN)) {
             throw new SystemException(AppHttpCodeEnum.SUPER_ADMIN);
         }
         LambdaUpdateWrapper<TPRole> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(TPRole::getRoleId,roleId)
-                .set(TPRole::getDelFlag,Common.DELETE);
-        update(null,updateWrapper);
+        updateWrapper.in(TPRole::getRoleId, roleId)
+                .set(TPRole::getDelFlag, Common.DELETE);
+        update(null, updateWrapper);
 
         return null;
     }

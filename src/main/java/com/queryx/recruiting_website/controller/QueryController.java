@@ -96,10 +96,6 @@ public class QueryController {
         final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
         try {
             resp = queryUserInfo.getInterview(id);
-            if (resp == null) {
-                log.error("用户面试信息不存在，id={}", id);
-                return CommonResp.fail(AppHttpCodeEnum.INTERVIEW_NOT_EXIST, null);
-            }
         } catch (Exception e) {
             log.error("用户面试信息查询失败，{}", e.getMessage());
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);

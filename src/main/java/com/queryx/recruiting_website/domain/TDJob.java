@@ -1,12 +1,12 @@
 package com.queryx.recruiting_website.domain;
 
-import java.util.Date;
-
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * (TDJob)实体类
@@ -15,6 +15,7 @@ import lombok.Data;
  * @since 2024-12-23 12:21:50
  */
 @Data
+@ToString
 @Schema(name = "岗位信息")
 public class TDJob {
 
@@ -52,8 +53,6 @@ public class TDJob {
     @Schema(name = "联系人名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobContact;
 
-    @Schema(name = "联系人电话", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String jobContactsPhone;
 
     @Schema(name = "发布时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date jobTime;
@@ -70,8 +69,8 @@ public class TDJob {
     @Schema(name = "启用状态", description = "0代表关闭,1代表启用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String jobStatus;
 
-    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String jobDelete;
 
+    @Schema(name = "标志", description = "删除标志，0表示未删除，1表示已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String delFlag;
 }
 
