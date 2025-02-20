@@ -1,6 +1,9 @@
 package com.queryx.recruiting_website.config;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.queryx.recruiting_website.domain.TDCompanyInfo;
+import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.ConfigAttribute;
@@ -22,6 +25,8 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
 
     @Resource
     private DynamicSecurityMetadataSource securityMetadataSource;
+    @Resource
+    private TDCompanyInfoMapper companyInfoMapper;
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
@@ -29,6 +34,15 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
 
         // 获取当前请求所需的权限
         String url = request.getRequestURI();
+        int i = url.lastIndexOf("/");
+        String substring = url.substring(0,i);
+        if (url.startsWith("/company") && !url.equals("/company/updateCompanyInfo")&&!substring.equals("/company/selectCompanyInfo")) {
+            TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectById(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
+            if (!(tdCompanyInfo.getEnterpriseReview().equals("1") && tdCompanyInfo.getCompanyInfoReview().equals("1"))) {
+                return new AuthorizationDecision(false);
+            }
+        }
+
         String method = request.getMethod();
         FilterInvocation fi = new FilterInvocation(String.valueOf(request), url, method);
         Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
@@ -47,16 +61,15 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         }
 
 
-
         // 获取用户所拥有的权限
         Set<String> userPermissions = auth.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toSet());
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
 
         // 判断是否有所需权限
         boolean hasPermission = attributes.stream()
-            .map(ConfigAttribute::getAttribute)
-            .anyMatch(userPermissions::contains);
+                .map(ConfigAttribute::getAttribute)
+                .anyMatch(userPermissions::contains);
 
         return new AuthorizationDecision(hasPermission);
     }

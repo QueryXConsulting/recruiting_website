@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.LoginUser;
-import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.TDUser;
-import com.queryx.recruiting_website.domain.TPRole;
+import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
 import com.queryx.recruiting_website.domain.dto.UserDto;
@@ -123,6 +120,11 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         userInfoVO.setUserAvatar(Common.getImgURL() + loginUser.getTdUser().getUserAvatar());
         userLoginVO.setUserInfoVO(userInfoVO);
         TokenStorage.addToken(jwt, loginUser);
+        if (!loginUser.getTdUser().getUserRole().equals(Common.STUDENT_USER.toString())) {
+            TDCompanyInfo tdCompanyInfo = companyInfoMapper.selectById(loginUser.getTdUser().getCompanyInfoId());
+            userInfoVO.setEnterpriseReview(tdCompanyInfo.getEnterpriseReview());
+            userInfoVO.setCompanyInfoReview(tdCompanyInfo.getCompanyInfoReview());
+        }
         // 更新登录标志
         if (loginUser.getTdUser().getIsFirstLogin().equals("0")) {
             LambdaUpdateWrapper<TDUser> tdUserLambdaQueryWrapper = new LambdaUpdateWrapper<>();

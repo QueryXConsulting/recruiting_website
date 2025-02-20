@@ -18,6 +18,7 @@ public class MenuListVO {
     private String menuType;
     private Integer orderNum;
     private Date createTime;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long parentId;
     private String path;
     private String perms;

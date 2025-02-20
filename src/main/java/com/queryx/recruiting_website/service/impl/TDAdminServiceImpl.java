@@ -100,6 +100,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     @Override
     public AdminUserInfoVO getInfo() {
+
         LoginAdmin loginAdmin = SecurityUtils.getLoginAdmin();
         TDAdmin tdAdmin = loginAdmin.getTdAdmin();
         List<String> perms = selectPermsByRoleId(tdAdmin.getRoleId());

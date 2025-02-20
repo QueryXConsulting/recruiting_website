@@ -43,7 +43,6 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
         }
 
         try {
-
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             RequestAuthorizationContext context = new RequestAuthorizationContext(request);
 
