@@ -3,7 +3,9 @@ package com.queryx.recruiting_website.domain.dto;
 import lombok.Data;
 
 @Data
-public class JobInsertDTO {
+public class JobDto {
+
+    private Long companyId;
 
     private String jobPosition;
 
@@ -23,9 +25,6 @@ public class JobInsertDTO {
 
     private String jobContact;
 
-    private String jobContactsPhone;
-
 
     private String jobNature;
-
 }

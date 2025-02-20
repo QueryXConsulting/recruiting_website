@@ -3,7 +3,7 @@ package com.queryx.recruiting_website.domain.dto;
 import lombok.Data;
 
 @Data
-public class AdminDTO {
+public class AdminDto {
     private Long adminId;
     private Long roleId;
     private String adminName;

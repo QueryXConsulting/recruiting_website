@@ -1,10 +1,7 @@
 package com.queryx.recruiting_website.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.SelectResumeDTO;
-import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
+import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;

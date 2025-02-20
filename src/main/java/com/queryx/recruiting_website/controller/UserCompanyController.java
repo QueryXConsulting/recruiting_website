@@ -87,7 +87,7 @@ public class UserCompanyController {
 
     @PutMapping("/updateUserInfo")
     @Operation(summary = "更新个人信息")
-    public CommonResp updateUserInfo(@RequestBody UserCompanyDTO userCompanyDTO) {
+    public CommonResp updateUserInfo(@RequestBody UserCompanyDto userCompanyDTO) {
         return CommonResp.success(tdUserService.updateUserCompanyInfo(userCompanyDTO));
     }
 

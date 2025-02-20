@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RoleInfoDTO {
+public class RoleInfoDto {
     private Long roleId;
 
     private String roleName;

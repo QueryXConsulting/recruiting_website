@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.queryx.recruiting_website.service.UserResumeService;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
 import org.springframework.transaction.annotation.Transactional;
-import com.queryx.recruiting_website.mapper.ResumeAttachmentsMapper;
+import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class UserResumeServiceImpl implements UserResumeService {
     private TDResumeMapper resumeMapper;
 
     @Autowired
-    private ResumeAttachmentsMapper resumeAttachmentsMapper;
+    private TDResumeAttachmentsMapper TDResumeAttachmentsMapper;
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
@@ -72,7 +72,7 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
             final MybatisBatch<TDResumeAttachments> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, List.of(tdRS));
-            final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(ResumeAttachmentsMapper.class);
+            final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(TDResumeAttachmentsMapper.class);
             // 返回结果
             return mybatisBatch.execute(method.insert()).size();
         } finally {
@@ -85,7 +85,7 @@ public class UserResumeServiceImpl implements UserResumeService {
     @Override
     public Integer deleteResumeAttachment(Long raId) {
         // 获取附件信息
-        TDResumeAttachments resumeAttachment = resumeAttachmentsMapper.selectById(raId);
+        TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectById(raId);
 
         if (resumeAttachment == null) {
             return 0;
@@ -97,7 +97,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         File file = new File(filePath);
         if (file.exists() && file.delete()) {
             // 再删除数据库字段
-            return resumeAttachmentsMapper.delete(new LambdaUpdateWrapper<TDResumeAttachments>()
+            return TDResumeAttachmentsMapper.delete(new LambdaUpdateWrapper<TDResumeAttachments>()
                     .set(TDResumeAttachments::getIsDeleted, Common.DELETE)
                     .set(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
                     .eq(TDResumeAttachments::getResumeAttachmentId, raId));

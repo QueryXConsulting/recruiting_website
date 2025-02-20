@@ -17,6 +17,6 @@ public class DeliverResumeDTO {
     @Schema(name = "简历类型", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeType;
 
-    @Schema(name = "简历名称", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    @Schema(name = "简历名称", description = "默认为用户名称", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeName;
 }

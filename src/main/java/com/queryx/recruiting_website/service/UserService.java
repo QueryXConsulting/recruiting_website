@@ -16,14 +16,6 @@ public interface UserService {
     AppHttpCodeEnum insertUser(RegisterDTO registerDTO);
 
     /**
-     * 用户登录
-     *
-     * @param loginDTO 用户登录信息
-     * @return token
-     */
-    String queryUser(LoginDTO loginDTO);
-
-    /**
      * 用户更新信息
      *
      * @param userId 用户id

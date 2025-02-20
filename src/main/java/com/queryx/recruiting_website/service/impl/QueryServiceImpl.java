@@ -1,22 +1,18 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.domain.TDInterview;
-import com.queryx.recruiting_website.mapper.TDJobMapper;
-import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
-import com.queryx.recruiting_website.mapper.TDResumeMapper;
+import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.domain.vo.*;
+import com.queryx.recruiting_website.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.vo.JobVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.mapper.InterviewMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
-import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.ArrayList;
@@ -109,7 +105,7 @@ public class QueryServiceImpl implements QueryService {
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(TDJob::getJobPosition, keyword);
         queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
-        queryWrapper.eq(TDJob::getJobDelete, Common.NOT_DELETE);
+        queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
         // 构建分页对象
         Page<TDJob> jobPage = new Page<>(page, pageSize);

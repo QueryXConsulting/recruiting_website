@@ -42,7 +42,7 @@ public class PositionManageController {
     @Operation(summary = "职位更新")
     public CommonResp updateJobInfo(@RequestBody JobDetailDto jobDetailDto) {
 
-        return CommonResp.success(jobService.updateJob(jobDetailDTO));
+        return CommonResp.success(jobService.updateJob(jobDetailDto));
     }
 
     @DeleteMapping("/deleteJob/{jobId}")

@@ -71,8 +71,8 @@ public class TDResume {
     private String resumeReview;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-
     private String resumeStatus;
+
 
 }
 

@@ -81,16 +81,6 @@ public class UserServiceImpl implements UserService {
         return AppHttpCodeEnum.SUCCESS;
     }
 
-    @Override
-    public String queryUser(LoginDTO loginDTO) {
-        LoginVO loginVO = LoginContext.executeLogin(userMapper, loginDTO);
-        if (loginVO == null) {
-            return null;
-        }
-        // 返回JWT
-        return JwtUtil.createJWT(Map.of(USER_ID, loginVO.getUserId(), RESUME_ID, loginVO.getResumeId()));
-    }
-
     @Override // TODO 未测试
     public CommonResp<String> uploadAvatar(String userId, MultipartFile image) {
         // 查询用户是否存在头像

@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class JobDetailDTO {
+public class JobDetailDto {
 
     @JsonSerialize(using = ToStringSerializer.class)
     private Long companyId;

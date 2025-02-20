@@ -3,7 +3,7 @@ package com.queryx.recruiting_website.domain.dto;
 import lombok.Data;
 
 @Data
-public class UserCompanyDTO {
+public class UserCompanyDto {
     private String resumeId;
 
     private String userName;

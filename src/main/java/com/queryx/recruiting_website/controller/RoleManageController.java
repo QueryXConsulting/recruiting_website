@@ -1,6 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.domain.dto.RoleInfoDTO;
+import com.queryx.recruiting_website.domain.dto.RoleInfoDto;
 import com.queryx.recruiting_website.service.TPRoleService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;

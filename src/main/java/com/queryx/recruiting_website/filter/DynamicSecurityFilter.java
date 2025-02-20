@@ -72,6 +72,7 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 "/admin/getRouters",
                 "/admin/getInfo",
                 "/user/login",
+                "/user/register",
                 "/admin/menuList",
                 "/admin/selectRoleMenusTree",
                 "/admin/role",
