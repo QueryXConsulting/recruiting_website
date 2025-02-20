@@ -157,7 +157,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
     @Override
     public Object resumeReview(String review, Long resumeId, String resumeType) {
-        if (resumeType.equals(Common.RESUME_ONLINE)) {
+        if (Common.RESUME_ONLINE.equals(resumeType)) {
             LambdaUpdateWrapper<TDResume> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(TDResume::getResumeId, resumeId)
                     .set(TDResume::getResumeReview, review);

@@ -155,7 +155,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         user.setUserRegisterTime(Date.from(Instant.now()));
         userRegisterDTO.setUserPassword(passwordEncoder.encode(userRegisterDTO.getUserPassword()));
         BeanUtils.copyProperties(userRegisterDTO, user);
-        if (userRegisterDTO.getUserRole().equals(Common.STUDENT_USER.toString())) {
+        if (Common.STUDENT_USER.equals(userRegisterDTO.getUserRole())) {
             TDResume userResume = new TDResume();
             BeanUtils.copyProperties(userRegisterDTO, userResume);
             // 插入在线简历

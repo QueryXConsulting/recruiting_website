@@ -1,7 +1,7 @@
 package com.queryx.recruiting_website.domain.dto;
 
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Date;
 
@@ -9,7 +9,6 @@ import java.util.Date;
  * 用户注册数据传输对象
  */
 @Data
-@ToString
 public class UserRegisterDTO {
     // 用户真实姓名
     private String userName;
@@ -49,5 +48,22 @@ public class UserRegisterDTO {
     private String resumeIntroduction;
 
 
+    @Data
+    public static class CompanyInfoDTO {
 
+        private Long companyInfoId;
+
+        private String companyInfoUsername;
+
+        private String companyInfoPassword;
+
+        private String companyLogo;
+
+        private String companyInfoName;
+
+        private String companyInfoScope;
+
+        private String companyInfoProfile;
+
+    }
 }

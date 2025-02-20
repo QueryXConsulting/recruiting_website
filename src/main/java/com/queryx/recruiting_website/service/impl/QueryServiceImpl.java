@@ -1,23 +1,18 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.domain.TDInterview;
-import com.queryx.recruiting_website.mapper.TDJobMapper;
-import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
-import com.queryx.recruiting_website.mapper.TDResumeMapper;
+import com.queryx.recruiting_website.domain.TDJob;
+import com.queryx.recruiting_website.domain.vo.*;
+import com.queryx.recruiting_website.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.vo.JobVO;
-import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.mapper.InterviewMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
-import com.queryx.recruiting_website.domain.vo.AttachmentsResumeVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.ArrayList;
@@ -26,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Service
 //@Transactional(rollbackFor = Exception.class)
-public class QueryImpl implements QueryService {
+public class QueryServiceImpl implements QueryService {
 
     @Autowired
     private TDResumeMapper resumeMapper;
@@ -39,6 +34,9 @@ public class QueryImpl implements QueryService {
 
     @Autowired
     private TDJobMapper jobInfoMapper;
+
+    @Autowired
+    private TDCompanyInfoMapper companyInfoMapper;
 
     @Override
     public ResumeVO getOnlineResume(Long id) {
@@ -99,6 +97,29 @@ public class QueryImpl implements QueryService {
         final JobVO jobVO = new JobVO();
         BeanUtils.copyProperties(tdJob, jobVO);
         return jobVO;
+    }
+
+    @Override // TODO 未测试
+    public List<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize) {
+        // 构建SQL语句，查询招聘信息
+        LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(TDJob::getJobPosition, keyword);
+        queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
+        queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
+        queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
+        // 构建分页对象
+        Page<TDJob> jobPage = new Page<>(page, pageSize);
+        List<TDJob> records = jobInfoMapper.selectPage(jobPage, queryWrapper).getRecords();
+        if (records == null || records.isEmpty()) return null;
+        List<JobCompanyListVO> list = new ArrayList<>();
+        for (TDJob job : records) {
+            String companyName = companyInfoMapper.selectById(job.getCompanyId()).getCompanyInfoName();
+            JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
+            BeanUtils.copyProperties(job, jobCompanyListVO);
+            jobCompanyListVO.setCompanyName(companyName);
+            list.add(jobCompanyListVO);
+        }
+        return list;
     }
 
 

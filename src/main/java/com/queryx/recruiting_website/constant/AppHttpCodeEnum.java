@@ -40,8 +40,14 @@ public enum AppHttpCodeEnum {
     PHONE_NULL(474, "手机号不能为空"),
     SUPER_ADMIN(475, "超级管理员不允许修改"),
     PHONE_OR_EMAIL_ILLEGAL(476, "手机号或邮箱输入不合法"),
-    INTERVIEW_NOT_EXIST(477, "面试不存在");
-
+    INTERVIEW_NOT_EXIST(477, "面试不存在"),
+    USERNAME_EXIST(478, "用户名已存在"),
+    USERNAME_NOT_EXIST(479, "用户名不存在"),
+    KEYWORD_NOT_NULL(480, "关键字不能为空"),
+    PAGINATION_NOT_NULL(481, "分页不能为空"),
+    MISSING_PARAMETERS(482, "缺少参数"),
+    AVATAR_DELETE_ERROR(483, "头像删除失败"),
+    AVATAR_UPLOAD_ERROR(484, "头像上传失败");
 
     final int code;
     final String msg;

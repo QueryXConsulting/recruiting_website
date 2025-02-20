@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Date;
 
@@ -15,7 +15,6 @@ import java.util.Date;
  * @since 2024-12-23 12:21:49
  */
 @Data
-@ToString
 @Schema(description = "管理员实体类")
 public class TDAdmin {
 

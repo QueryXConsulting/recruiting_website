@@ -9,7 +9,6 @@ import lombok.ToString;
  * 用户登录数据传输对象
  */
 @Data
-@ToString
 @Schema(name = "用户登录DTO")
 public class LoginDTO {
 

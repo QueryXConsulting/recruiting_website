@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.service.impl;
 
-import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.queryx.recruiting_website.service.UserResumeService;
 import com.queryx.recruiting_website.domain.TDResumeAttachments;
 import org.springframework.transaction.annotation.Transactional;
+import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class UserResumeServiceImpl implements UserResumeService {
     private TDResumeMapper resumeMapper;
 
     @Autowired
-    private TDResumeAttachmentsMapper resumeAttachmentsMapper;
+    private TDResumeAttachmentsMapper TDResumeAttachmentsMapper;
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
@@ -84,12 +84,28 @@ public class UserResumeServiceImpl implements UserResumeService {
 
     @Override
     public Integer deleteResumeAttachment(Long raId) {
-        // TODO 删除附件简历: 文件是否删除？
-        return resumeAttachmentsMapper.update(new LambdaUpdateWrapper<TDResumeAttachments>()
-                .set(TDResumeAttachments::getIsDeleted, Common.DELETE)
-                .set(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
-                .eq(TDResumeAttachments::getResumeAttachmentId, raId));
+        // 获取附件信息
+        TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectById(raId);
+
+        if (resumeAttachment == null) {
+            return 0;
+        }
+        // 获取文件路径
+        String filePath = resumeAttachment.getFilePath();
+
+        // 删除本地文件
+        File file = new File(filePath);
+        if (file.exists() && file.delete()) {
+            // 再删除数据库字段
+            return TDResumeAttachmentsMapper.delete(new LambdaUpdateWrapper<TDResumeAttachments>()
+                    .set(TDResumeAttachments::getIsDeleted, Common.DELETE)
+                    .set(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
+                    .eq(TDResumeAttachments::getResumeAttachmentId, raId));
+        } else {
+            return 0;
+        }
     }
+
 
     @Override
     public Integer updateResume(ResumeDTO resumeDTO) {
