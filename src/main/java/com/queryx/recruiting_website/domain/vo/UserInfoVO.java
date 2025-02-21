@@ -11,5 +11,8 @@ public class UserInfoVO {
     private String userRole;
     private String userAvatar;
     private Integer userInterviews;
+    private String isFirstLogin;
+    private String enterpriseReview;
+    private String companyInfoReview;
     private List<String> permissions;
 }

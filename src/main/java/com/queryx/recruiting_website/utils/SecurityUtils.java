@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.utils;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.LoginUser;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,26 @@ public class SecurityUtils
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        String[] parts = fileName.split("\\.");
+        if (parts.length > 1) {
+            return parts[parts.length - 1].toLowerCase(); // 返回扩展名并转为小写
+        }
+        return "";
+    }
+
+    public static boolean isAllowedFileType(String fileExtension) {
+        for (String ext : Common.FILE_TYPE) {
+            if (ext.equals(fileExtension)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

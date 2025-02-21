@@ -4,6 +4,7 @@ import com.queryx.recruiting_website.filter.DynamicSecurityFilter;
 import com.queryx.recruiting_website.filter.JwtAuthenticationTokenFilter;
 import com.queryx.recruiting_website.handler.security.AccessDeniedHandlerImpl;
 import com.queryx.recruiting_website.handler.security.AuthenticationEntryPointImpl;
+import com.queryx.recruiting_website.handler.security.LogoutHandlerImpl;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -36,9 +38,10 @@ public class SecurityConfiguration {
     private AuthenticationEntryPointImpl authenticationEntryPoint;
     @Resource
     private AccessDeniedHandlerImpl accessDeniedHandler;
-
     @Resource
     private DynamicSecurityFilter dynamicSecurityFilter;
+    @Resource
+    private LogoutHandlerImpl logoutHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -72,20 +75,29 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-        httpSecurity.authorizeHttpRequests(it ->
-                                it.requestMatchers("/admin/login", "/user/login", "/user/register").anonymous()
-                                        // TODO 待修改
-//                        .requestMatchers("/swagger-ui/*","/v3/**").permitAll()
-                                        .anyRequest().authenticated()
-                ).addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class);
 
-        // 配置异常处理
-        httpSecurity.exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
-        ).cors(withDefaults()); // 跨域使用默认配置
+        httpSecurity.csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .securityContext(AbstractHttpConfigurer::disable)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(it ->
+                        // TODO 待配置其他路径
+                        it.requestMatchers("/user/login", "/user/register", "/user/logout").permitAll()
+                                .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class)
+                .logout(it -> it.logoutUrl("/user/logout")
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"code\":200,\"message\":\"注销成功\"}");
+                        })
+                        .permitAll())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
+                .cors(withDefaults());
 
 
 //        httpSecurity

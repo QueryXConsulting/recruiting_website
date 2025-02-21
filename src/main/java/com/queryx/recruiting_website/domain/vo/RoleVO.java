@@ -15,6 +15,6 @@ public class RoleVO {
 
     private Integer roleSort;
 
-    private List<Long> menusListId;
+    private List<String> menusListId;
 
 }

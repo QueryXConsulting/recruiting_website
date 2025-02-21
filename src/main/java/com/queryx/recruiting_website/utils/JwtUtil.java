@@ -1,17 +1,15 @@
 package com.queryx.recruiting_website.utils;
 
-import io.jsonwebtoken.*;
-
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -27,7 +25,7 @@ public class JwtUtil {
 
 
     // 生成token
-    public static <T> String createJWT(Map<String, T> claims) {
+    public static <T> String createJWT(Long claims) {
 
         //指定加密算法
         SecureDigestAlgorithm<SecretKey, SecretKey> algorithm = Jwts.SIG.HS256;
@@ -35,17 +33,19 @@ public class JwtUtil {
         long expMillis = System.currentTimeMillis() + JWT_TTL;
         Date exp = new Date(expMillis);
         SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        Map<String, Long> map = new HashMap<>();
+        map.put("userId",claims);
         return Jwts.builder()
                 .signWith(key, algorithm) //设置签名使用的签名算法和签名使用的秘钥
                 .expiration(exp) // 截止时间
-                .claims(claims) //设置自定义负载信息
+                .claims(map) //设置自定义负载信息
                 .compact();
     }
 
 
     // 解析token
     public static Jws<Claims> parseJWT(String token) {
-      
+
         // 密钥实例
         SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         return Jwts.parser()

@@ -2,10 +2,7 @@ package com.queryx.recruiting_website.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.queryx.recruiting_website.domain.TDUser;
-import com.queryx.recruiting_website.domain.dto.JobDetailDto;
-import com.queryx.recruiting_website.domain.dto.JobInsertDto;
-import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
-import com.queryx.recruiting_website.domain.dto.UserCompanyDto;
+import com.queryx.recruiting_website.domain.dto.*;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.service.*;
 import com.queryx.recruiting_website.utils.CommonResp;
@@ -16,6 +13,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -33,6 +31,10 @@ public class UserCompanyController {
     private TDCompanyInfoService tdCompanyInfoService;
     @Resource
     private TDCategoryService categoryService;
+    @Resource
+    private TPRoleService tpRoleService;
+
+
 
 
     @GetMapping("/selectCategory")
@@ -41,11 +43,37 @@ public class UserCompanyController {
         return CommonResp.success(categoryService.selectCategoryList(1,100,categoryName,"0"));
     }
 
+    @PostMapping("/updateUserCompany")
+    @Operation(summary = "公司员工修改")
+    public CommonResp updateUserCompany(@RequestParam(value = "dtoJson") String jsonDto,@RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
+        UserDto userDto = JSON.parseObject(jsonDto, UserDto.class);
+        return CommonResp.success(tdUserService.updateUserCompany(userDto,userAvatar));
+    }
+
+    @PostMapping("/addUserCompany")
+    @Operation(summary = "新增公司员工")
+    public CommonResp addUserCompany(@RequestParam(value = "dtoJson") String jsonDto,@RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
+        UserDto userDto = JSON.parseObject(jsonDto, UserDto.class);
+        return CommonResp.success(tdUserService.addUserCompany(userDto,userAvatar));
+    }
+
+    @DeleteMapping("/delUserCompany/{userId}")
+    @Operation(summary = "删除公司员工")
+    public CommonResp delUserCompany(@PathVariable("userId") Long userId) {
+        return CommonResp.success(tdUserService.deleteUser(userId));
+    }
+
     @GetMapping("/jobList")
     @Operation(summary = "公司工作列表查询")
     public CommonResp selectJobList(Integer page, Integer size,String jobName
             ,String jobReview,String jobCategory) {
         return CommonResp.success(tdJobService.selectCompanyJobList(page, size,jobName,jobReview,jobCategory));
+    }
+
+    @GetMapping("/companyRole")
+    @Operation(summary = "公司角色列表")
+    public CommonResp selectRoleList() {
+        return CommonResp.success(tpRoleService.selectRoleList());
     }
 
     @GetMapping("/userCompanyList")
@@ -109,10 +137,10 @@ public class UserCompanyController {
     }
 
 
-    @GetMapping("/resumeList/{companyId}")
+    @GetMapping("/resumeList/{jobId}")
     @Operation(summary = "查询投递的简历列表")
-    public CommonResp selectResumeList(@PathVariable("companyId") Long companyId,Integer page, Integer size) {
-        return CommonResp.success(tdResumeService.selectResumeList(page,size,companyId));
+    public CommonResp selectResumeList(@PathVariable("jobId") Long jobId,Integer page, Integer size,String resumeType,String resumeName) {
+        return CommonResp.success(tdResumeService.selectResumeList(page,size,jobId,resumeType,resumeName));
     }
 
     @PostMapping("/selectResume")

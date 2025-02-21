@@ -55,7 +55,6 @@ public class UserManageController {
         return CommonResp.success(userService.selectUserList(page, size, userName, userStatus));
     }
 
-
     @GetMapping("/selectUserInfo/{userId}")
     @Operation(summary = "用户信息")
     public CommonResp selectUserInfo(@PathVariable("userId") Long userId) {

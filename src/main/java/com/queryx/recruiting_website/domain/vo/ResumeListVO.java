@@ -10,5 +10,4 @@ public class ResumeListVO {
     private Long resumeId;
     private String resumeName;
     private String resumeType;
-    private String jobPosition;
 }

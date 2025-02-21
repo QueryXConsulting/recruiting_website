@@ -2,7 +2,6 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.design.LoginContext;
@@ -12,25 +11,21 @@ import com.queryx.recruiting_website.domain.vo.LoginVO;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
-import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.JwtUtil;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     final String timeZone = "Asia/Shanghai";
-
-    @Value("${file.upload-path-avatar}")
-    private String uploadPathAvatar;
 
     @Autowired
     private TDUserMapper userMapper;
@@ -41,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     public static final String PHONE = "(^1[3-9]\\d{9}$)";
     public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-
+    //    final boolean  =
     public final String USER_ID = "userId";
     public final String RESUME_ID = "resumeId";
 
@@ -60,17 +55,12 @@ public class UserServiceImpl implements UserService {
                 .eq(TDUser::getUserPhone, registerDTO.getResumePhone()));
         Long resumes = resumeMapper.selectCount(new LambdaQueryWrapper<TDResume>()
                 .eq(TDResume::getResumeEmail, registerDTO.getResumeEmail()));
-        // 检查查询结果
-        final Long defaultCount = 0L;
-        users = Objects.requireNonNullElse(users, defaultCount);
-        resumes = Objects.requireNonNullElse(resumes, defaultCount);
-
         if (users > 0 && resumes > 0) return AppHttpCodeEnum.USER_EXIST;
         if (users > 0) return AppHttpCodeEnum.PHONE_EXIST;
         if (resumes > 0) return AppHttpCodeEnum.EMAIL_EXIST;
         // 复制属性
         user.setResumeId(userResume.getResumeId());
-        user.setUserRegisterTime(Calendar.getInstance(Locale.CHINA).getTime());
+        user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         BeanUtils.copyProperties(registerDTO, user);
         BeanUtils.copyProperties(registerDTO, userResume);
         // 插入用户
@@ -81,36 +71,13 @@ public class UserServiceImpl implements UserService {
         return AppHttpCodeEnum.SUCCESS;
     }
 
-    @Override // TODO 未测试
-    public CommonResp<String> uploadAvatar(String userId, MultipartFile image) {
-        // 查询用户是否存在头像
-        TDUser user = userMapper.selectById(userId);
-        // 非法用户
-        if (Common.DELETE.equals(user.getDelFlag()) && Common.STATUS_DISABLE.equals(user.getUserStatus())) {
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+    @Override
+    public String queryUser(LoginDTO loginDTO) {
+        LoginVO loginVO = LoginContext.executeLogin(userMapper, loginDTO);
+        if (loginVO == null) {
+            return null;
         }
-        // 有 -> 删除
-        if (user.getUserAvatar() != null || user.getUserAvatar().trim().isEmpty()) {
-            File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
-            if (!(oldFile.exists() && oldFile.delete())) {
-                return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
-            }
-        }
-        // 保存头像图片
-        String fileName = image.getOriginalFilename();
-        String newFileName = System.currentTimeMillis() + "_" + fileName;
-        File file = new File(uploadPathAvatar + newFileName);
-        try {
-            image.transferTo(file);
-            if (!file.exists()) {
-                return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
-            }
-            // 更新数据库
-            user.setUserAvatar(newFileName);
-            userMapper.updateById(user);
-        } catch (Exception e) {
-            return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
-        }
-        return CommonResp.success(null);
+        // 返回JWT
+        return JwtUtil.createJWT(SecurityUtils.getLoginUser().getTdUser().getUserId());
     }
 }

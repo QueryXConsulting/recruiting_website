@@ -41,7 +41,7 @@ public class TDUser {
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userPassword;
 
-    @Schema(name = "用户角色", description = "5代表学生用户,4代表公司用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "用户角色", description = "5代表学生用户", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userRole;
 
     @Schema(name = "启用状态", description = "0代表启用,1代表禁用", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -58,6 +58,9 @@ public class TDUser {
 
     @Schema(name = "删除标志", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String delFlag;
+
+    @Schema(name = "首次登录标志",description = "0代表还未登录过,1代表已经登录过",implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String isFirstLogin;
 
 }
 

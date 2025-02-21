@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.LoginUser;
 import com.queryx.recruiting_website.domain.TPMenu;
 import com.queryx.recruiting_website.domain.TPRole;
 import com.queryx.recruiting_website.domain.TPRoleMenu;
@@ -41,8 +42,12 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
 
     @Override
     public List<RoleListVO> selectRoleList() {
+        Object principal = SecurityUtils.getAuthentication().getPrincipal();
         List<TPRole> roleList = list( new LambdaUpdateWrapper<TPRole>()
-                .eq(TPRole::getDelFlag,Common.NOT_DELETE));
+                .eq(TPRole::getDelFlag,Common.NOT_DELETE)
+                .eq(principal instanceof LoginUser,TPRole::getStatus,Common.STATUS_ENABLE)
+                .eq(principal instanceof LoginUser,TPRole::getRoleType,'0')
+        );
         roleList.sort(Comparator.comparing(TPRole::getRoleSort));
         return roleList.stream().map(r -> {
             RoleListVO roleListVO = new RoleListVO();
@@ -100,14 +105,17 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
 
         if (roleId.equals(Common.SUPER_ADMIN)) {
             List<TPMenu> tpMenus = menuMapper.selectList(null);
-            roleVO.setMenusListId(tpMenus.stream().map(TPMenu::getMenuId).toList());
+            roleVO.setMenusListId(tpMenus.stream().map(TPMenu::getMenuId).map(String::valueOf).toList());
             return roleVO;
         }
         LambdaQueryWrapper<TPRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
         roleMenuWrapper.eq(!ObjectUtils.isEmpty(roleId), TPRoleMenu::getRoleId, roleId);
         List<TPRoleMenu> menus = roleMenuMapper.selectList(roleMenuWrapper);
-        List<Long> menuIds = menus.stream().map(TPRoleMenu::getMenuId).toList();
-        roleVO.setMenusListId(menuIds);
+        List<String> menuIdStrings = menus.stream()
+                .map(TPRoleMenu::getMenuId)
+                .map(String::valueOf)
+                .toList();
+        roleVO.setMenusListId(menuIdStrings);
         return roleVO;
     }
 

@@ -62,4 +62,32 @@ public class ResumeVO {
      * 个人介绍
      */
     private String resumeIntroduction;
+
+    // 项目经验
+    private String resumeProject;
+
+    /**
+     * 姓名
+     */
+    private String resumeName;
+
+    /**
+     * 在校时间
+     */
+    private Date resumeEducationDate;
+
+    /**
+     * 专业排名
+     */
+    private String resumeMajorRank;
+
+    /**
+     * 专业技能
+     */
+    private String resumeSkills;
+
+    /**
+     * 工作经历
+     */
+    private String resumeEmploymentHistory;
 }
