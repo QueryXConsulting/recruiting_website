@@ -57,6 +57,9 @@ public class RegisterDTO {
     @Schema(name = "工作职位", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeJob;
 
+    @Schema(name = "专业技能", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeSkills;
+
     @Schema(name = "期望薪资", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeSalary;
 

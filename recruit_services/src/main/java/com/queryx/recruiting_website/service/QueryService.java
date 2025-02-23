@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.domain.vo.*;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -13,7 +15,7 @@ public interface QueryService {
      */
     ResumeVO getOnlineResume(Long id);
     /**
-     * 查询在线简历信息
+     * 查询用户所有附件简历
      * @param id 用户id
      * @return 简历信息
      */
@@ -40,5 +42,5 @@ public interface QueryService {
      * @param pageSize 页大小
      * @return 职位列表
      */
-    List<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize);
+    Page<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize);
 }

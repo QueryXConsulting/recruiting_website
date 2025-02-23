@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.service.QueryService;
@@ -134,12 +135,12 @@ public class QueryController {
 
 
     @GetMapping("/jobs")
-    public CommonResp<List<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
+    public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        List<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        Page<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);

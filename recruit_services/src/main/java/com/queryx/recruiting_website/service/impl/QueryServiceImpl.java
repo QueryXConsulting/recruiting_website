@@ -46,6 +46,7 @@ public class QueryServiceImpl implements QueryService {
                 .eq(TDResume::getResumeId, id)
                 .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
                 .eq(TDResume::getResumeReview, Common.REVIEW_OK));
+        if (tdResume == null) { return null; }
         // 封装简历返回信息
         BeanUtils.copyProperties(tdResume, resumeVO);
         if (resumeVO.getResumeId() == null) {
@@ -100,7 +101,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override // TODO 未测试
-    public List<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize) {
+    public Page<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(TDJob::getJobPosition, keyword);
@@ -108,18 +109,18 @@ public class QueryServiceImpl implements QueryService {
         queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
         // 构建分页对象
-        Page<TDJob> jobPage = new Page<>(page, pageSize);
-        List<TDJob> records = jobInfoMapper.selectPage(jobPage, queryWrapper).getRecords();
-        if (records == null || records.isEmpty()) return null;
+        Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
+        if (jobPage == null) return null;
+        Page<JobCompanyListVO> resPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
         List<JobCompanyListVO> list = new ArrayList<>();
-        for (TDJob job : records) {
-            String companyName = companyInfoMapper.selectById(job.getCompanyId()).getCompanyInfoName();
+        for (TDJob record : jobPage.getRecords()) {
+            String companyName = companyInfoMapper.selectById(record.getCompanyId()).getCompanyInfoName();
             JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
-            BeanUtils.copyProperties(job, jobCompanyListVO);
+            BeanUtils.copyProperties(record, jobCompanyListVO);
             jobCompanyListVO.setCompanyName(companyName);
             list.add(jobCompanyListVO);
         }
-        return list;
+        return resPage.setRecords(list);
     }
 
 
