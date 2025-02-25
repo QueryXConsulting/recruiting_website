@@ -18,6 +18,9 @@ public class ResumeDTO {
     @Schema(name = "简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long resumeId;
 
+    @Schema(name = "姓名", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeName;
+
     @Schema(name = "手机号", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumePhone;
 
@@ -56,6 +59,18 @@ public class ResumeDTO {
 
     @Schema(name = "自我介绍", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeIntroduction;
+
+    @Schema(name = "项目经验", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeProject;
+
+    @Schema(name = "在校时间", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeEducationDate;
+
+    @Schema(name = "专业技能", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeSkills;
+
+    @Schema(name = "工作经历", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    private String resumeEmploymentHistory;
 
 }
 

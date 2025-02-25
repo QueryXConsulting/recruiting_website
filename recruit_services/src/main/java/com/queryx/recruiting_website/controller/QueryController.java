@@ -28,6 +28,23 @@ public class QueryController {
     private QueryService queryUserInfo;
 
     /**
+     * 查询用户所有简历
+     *
+     * @return 简历列表
+     */
+    @Operation(summary = "查询用户所有简历", responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "485", description = "用户不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "472", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @GetMapping("/resume/all")
+    public CommonResp<AllResumeVO> queryAllResume() {
+        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
+        return queryUserInfo.getAllResume(id);
+    }
+
+    /**
      * 查询用户在线简历
      *
      * @return 在线简历信息
@@ -133,7 +150,23 @@ public class QueryController {
         return CommonResp.success(resp);
     }
 
-
+    /**
+     * 查询招聘岗位列表
+     *
+     * @param keyword 关键字
+     * @param page    页码
+     * @param pageSize 页大小
+     * @return 招聘岗位列表
+     */
+    @Operation(summary = "查询招聘岗位列表", parameters = {
+            @Parameter(name = "keyword", description = "关键字", schema = @Schema(implementation = String.class), required = true),
+            @Parameter(name = "page", description = "页码", schema = @Schema(implementation = Integer.class), required = true),
+            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
     @GetMapping("/jobs")
     public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
         // 校验参数

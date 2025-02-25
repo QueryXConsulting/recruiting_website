@@ -36,5 +36,8 @@ public class TDJobResume {
     @Schema(name = "简历名称", description = "默认是用户名", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeName;
 
+    @Schema(name = "简历投递状态", description = "1(已查看) 2(待面试) 0:用户端(已投递), 公司端(待查看)", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeStatus;
+
 }
 

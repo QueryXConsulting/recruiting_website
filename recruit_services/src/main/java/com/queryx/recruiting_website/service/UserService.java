@@ -22,5 +22,5 @@ public interface UserService {
      * @param image  用户头像
      * @return 更新结果
      */
-    CommonResp<String> uploadAvatar(String userId, MultipartFile image);
+    CommonResp<String> uploadAvatar(Long userId, MultipartFile image);
 }

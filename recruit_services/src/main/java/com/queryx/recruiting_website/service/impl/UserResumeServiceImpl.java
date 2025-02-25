@@ -82,7 +82,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         }
     }
 
-    @Override
+    @Override // TODO 应该先查询用户是否有附件简历，如果有附件简历，再通过附件简历ID查询并删除附件简历
     public Integer deleteResumeAttachment(Long raId) {
         // 获取附件信息
         TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectById(raId);

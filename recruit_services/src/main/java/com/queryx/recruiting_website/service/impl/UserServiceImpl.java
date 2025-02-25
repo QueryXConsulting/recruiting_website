@@ -80,8 +80,9 @@ public class UserServiceImpl implements UserService {
         return AppHttpCodeEnum.SUCCESS;
     }
 
+
     @Override // TODO 未测试
-    public CommonResp<String> uploadAvatar(String userId, MultipartFile image) {
+    public CommonResp<String> uploadAvatar(Long userId, MultipartFile image) {
         // 查询用户是否存在头像
         TDUser user = userMapper.selectById(userId);
         // 判断非法用户
@@ -113,7 +114,7 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
         }
-        return CommonResp.success(null);
+        return CommonResp.success(newFileName);
     }
 
 }
