@@ -33,6 +33,8 @@ public class UserCompanyController {
     private TDCategoryService categoryService;
     @Resource
     private TPRoleService tpRoleService;
+    @Resource
+    private TDInterviewDateService tdInterviewDateService;
 
 
     @GetMapping("/selectCategory")
@@ -158,6 +160,17 @@ public class UserCompanyController {
     public CommonResp updateResumeStatus(@PathVariable("resumeStatus") String resumeStatus, @PathVariable("resumeId") Long resumeId
             , @PathVariable("jobId") Long jobId, @PathVariable("resumeDelete") String resumeDelete) {
         return CommonResp.success(tdResumeService.updateResumeStatus(resumeStatus, resumeId, jobId, resumeDelete));
+    }
+
+    @PostMapping("/addInterviewDate")
+    @Operation(summary = "面试时间设置")
+    public CommonResp addInterviewDate(@RequestBody AddInterviewDto addInterviewDto) {
+        return CommonResp.success(tdInterviewDateService.addInterviewDate(addInterviewDto));
+    }
+    @GetMapping("/selectInterviewDate")
+    @Operation(summary = "面试时间查询")
+    public CommonResp addInterviewDate() {
+        return CommonResp.success(tdInterviewDateService.selectInterviewDate());
     }
 
 }

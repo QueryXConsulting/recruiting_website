@@ -6,10 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.TDJobResume;
-import com.queryx.recruiting_website.domain.TDResume;
-import com.queryx.recruiting_website.domain.TDResumeAttachments;
-import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.dto.AddInterviewDto;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
 import com.queryx.recruiting_website.domain.vo.ResumeListVO;
 import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
@@ -186,6 +184,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
         return null;
     }
+
 
 
 }
