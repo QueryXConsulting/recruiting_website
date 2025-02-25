@@ -4,19 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
-import com.queryx.recruiting_website.domain.design.LoginContext;
-import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
-import com.queryx.recruiting_website.domain.vo.LoginVO;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
-import com.queryx.recruiting_website.utils.JwtUtil;
-import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.utils.CommonResp;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -72,12 +69,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String queryUser(LoginDTO loginDTO) {
-        LoginVO loginVO = LoginContext.executeLogin(userMapper, loginDTO);
-        if (loginVO == null) {
-            return null;
-        }
-        // 返回JWT
-        return JwtUtil.createJWT(SecurityUtils.getLoginUser().getTdUser().getUserId());
+    public CommonResp<String> uploadAvatar(String userId, MultipartFile image) {
+        return null;
     }
+
+
 }

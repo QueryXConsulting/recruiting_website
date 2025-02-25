@@ -35,26 +35,24 @@ public class UserCompanyController {
     private TPRoleService tpRoleService;
 
 
-
-
     @GetMapping("/selectCategory")
     @Operation(summary = "工种分类列表查询")
     public CommonResp selectCategoryList(String categoryName) {
-        return CommonResp.success(categoryService.selectCategoryList(1,100,categoryName,"0"));
+        return CommonResp.success(categoryService.selectCategoryList(1, 100, categoryName, "0"));
     }
 
     @PostMapping("/updateUserCompany")
     @Operation(summary = "公司员工修改")
-    public CommonResp updateUserCompany(@RequestParam(value = "dtoJson") String jsonDto,@RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
+    public CommonResp updateUserCompany(@RequestParam(value = "dtoJson") String jsonDto, @RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
         UserDto userDto = JSON.parseObject(jsonDto, UserDto.class);
-        return CommonResp.success(tdUserService.updateUserCompany(userDto,userAvatar));
+        return CommonResp.success(tdUserService.updateUserCompany(userDto, userAvatar));
     }
 
     @PostMapping("/addUserCompany")
     @Operation(summary = "新增公司员工")
-    public CommonResp addUserCompany(@RequestParam(value = "dtoJson") String jsonDto,@RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
+    public CommonResp addUserCompany(@RequestParam(value = "dtoJson") String jsonDto, @RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
         UserDto userDto = JSON.parseObject(jsonDto, UserDto.class);
-        return CommonResp.success(tdUserService.addUserCompany(userDto,userAvatar));
+        return CommonResp.success(tdUserService.addUserCompany(userDto, userAvatar));
     }
 
     @DeleteMapping("/delUserCompany/{userId}")
@@ -65,9 +63,9 @@ public class UserCompanyController {
 
     @GetMapping("/jobList")
     @Operation(summary = "公司工作列表查询")
-    public CommonResp selectJobList(Integer page, Integer size,String jobName
-            ,String jobReview,String jobCategory) {
-        return CommonResp.success(tdJobService.selectCompanyJobList(page, size,jobName,jobReview,jobCategory));
+    public CommonResp selectJobList(Integer page, Integer size, String jobName
+            , String jobReview, String jobCategory) {
+        return CommonResp.success(tdJobService.selectCompanyJobList(page, size, jobName, jobReview, jobCategory));
     }
 
     @GetMapping("/companyRole")
@@ -78,8 +76,8 @@ public class UserCompanyController {
 
     @GetMapping("/userCompanyList")
     @Operation(summary = "公司员工列表查询")
-    public CommonResp selectUserCompanyList(Integer page, Integer size,String userName) {
-        return CommonResp.success(tdUserService.selectUserCompanyList(page, size,userName));
+    public CommonResp selectUserCompanyList(Integer page, Integer size, String userName) {
+        return CommonResp.success(tdUserService.selectUserCompanyList(page, size, userName));
     }
 
     @GetMapping("/jobInfo/{jobId}")
@@ -132,15 +130,15 @@ public class UserCompanyController {
             @RequestParam(value = "dtoJson") String jsonDto,
             @RequestParam(value = "applyFiles", required = false) MultipartFile applyFiles,
             @RequestParam(value = "pdfFiles", required = false) List<MultipartFile> pdfFiles) {
-        CompanyInfoDto companyInfoDto = JSON.parseObject(jsonDto,CompanyInfoDto.class);
-        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDto,applyFiles, pdfFiles));
+        CompanyInfoDto companyInfoDto = JSON.parseObject(jsonDto, CompanyInfoDto.class);
+        return CommonResp.success(tdCompanyInfoService.updateCompanyInfo(companyInfoDto, applyFiles, pdfFiles));
     }
 
 
     @GetMapping("/resumeList/{jobId}")
     @Operation(summary = "查询投递的简历列表")
-    public CommonResp selectResumeList(@PathVariable("jobId") Long jobId,Integer page, Integer size,String resumeType,String resumeName) {
-        return CommonResp.success(tdResumeService.selectResumeList(page,size,jobId,resumeType,resumeName));
+    public CommonResp selectResumeList(@PathVariable("jobId") Long jobId, Integer page, Integer size, String resumeType, String resumeName, String resumeStatus) {
+        return CommonResp.success(tdResumeService.selectResumeList(page, size, jobId, resumeType, resumeName, resumeStatus));
     }
 
     @PostMapping("/selectResume")
@@ -148,4 +146,18 @@ public class UserCompanyController {
     public CommonResp selectResume(@RequestBody SelectResumeDto selectResumeDto) {
         return CommonResp.success(tdResumeService.selectResume(selectResumeDto));
     }
+
+    @PostMapping("/registerCompany")
+    @Operation(summary = "公司注册")
+    public CommonResp registerCompany(@RequestBody RegisterCompanyDto registerCompanyDto) {
+        return CommonResp.success(tdCompanyInfoService.registerCompany(registerCompanyDto));
+    }
+
+    @PostMapping("/updateResumeStatus/{resumeStatus}/{resumeId}/{jobId}/{resumeDelete}")
+    @Operation(summary = "修改简历投递状态")
+    public CommonResp updateResumeStatus(@PathVariable("resumeStatus") String resumeStatus, @PathVariable("resumeId") Long resumeId
+            , @PathVariable("jobId") Long jobId, @PathVariable("resumeDelete") String resumeDelete) {
+        return CommonResp.success(tdResumeService.updateResumeStatus(resumeStatus, resumeId, jobId, resumeDelete));
+    }
+
 }

@@ -9,7 +9,7 @@ import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 
 
 public interface TDResumeService extends IService<TDResume> {
-    Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long companyId, String resumeType, String resumeName);
+    Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long companyId, String resumeType, String resumeName, String resumeStatus);
 
     Object selectResume(SelectResumeDto selectResumeDto);
 
@@ -18,5 +18,6 @@ public interface TDResumeService extends IService<TDResume> {
     Object resumeReview(String review, Long resumeId, String resumeType);
 
 
+    Object updateResumeStatus(String resumeStatus, Long resumeId, Long jobId, String resumeDelete);
 }
 

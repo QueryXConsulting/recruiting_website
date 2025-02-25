@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
+import com.queryx.recruiting_website.domain.dto.RegisterCompanyDto;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,5 +23,7 @@ public interface TDCompanyInfoService extends IService<TDCompanyInfo> {
     Object deleteCompany(Long companyId);
 
     Map<String, byte[]> getEnterpriseFiles(Long companyId) throws IOException;
+
+    Object registerCompany(RegisterCompanyDto registerCompanyDto);
 }
 

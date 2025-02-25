@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.domain.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
@@ -10,4 +11,6 @@ public class ResumeListVO {
     private Long resumeId;
     private String resumeName;
     private String resumeType;
+    private String resumeStatus;
+    private String resumeDelete;
 }

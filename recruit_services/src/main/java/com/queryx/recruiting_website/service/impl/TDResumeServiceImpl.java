@@ -54,10 +54,11 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
 
     @Override
-    public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long jobId, String resumeType, String resumeName) {
+    public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long jobId, String resumeType, String resumeName, String resumeStatus) {
         LambdaQueryWrapper<TDJobResume> jobResumeLambdaQueryWrapper = new LambdaQueryWrapper<>();
         jobResumeLambdaQueryWrapper.eq(TDJobResume::getJobId, jobId)
                 .eq(StringUtils.hasText(resumeType), TDJobResume::getResumeType, resumeType)
+                .eq(StringUtils.hasText(resumeStatus), TDJobResume::getResumeStatus, resumeStatus)
                 .like(StringUtils.hasText(resumeName), TDJobResume::getResumeName, resumeName);
 
         Page<TDJobResume> tdJobResumes = tdJobResumeMapper.selectPage(new Page<>(page, size), jobResumeLambdaQueryWrapper);
@@ -65,13 +66,16 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
             return null;
         }
         Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
-        resumeListVOPage.setRecords(tdJobResumes.getRecords().stream().map(tdJobResume -> {
+        List<ResumeListVO> resumeListVOS = tdJobResumes.getRecords().stream().map(tdJobResume -> {
             ResumeListVO resumeListVO = new ResumeListVO();
             resumeListVO.setResumeId(tdJobResume.getResumeId());
             resumeListVO.setResumeName(tdJobResume.getResumeName());
             resumeListVO.setResumeType(tdJobResume.getResumeType());
+            resumeListVO.setResumeStatus(tdJobResume.getResumeStatus());
+            resumeListVO.setResumeDelete(tdJobResume.getResumeDelete());
             return resumeListVO;
-        }).toList());
+        }).toList();
+        resumeListVOPage.setRecords(resumeListVOS);
 
         return resumeListVOPage;
     }
@@ -169,6 +173,17 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         updateWrapper.eq(TDResumeAttachments::getResumeAttachmentId, resumeId)
                 .set(TDResumeAttachments::getAttachmentsReview, review);
         tdResumeAttachmentsMapper.update(updateWrapper);
+        return null;
+    }
+
+    @Override
+    public Object updateResumeStatus(String resumeStatus, Long resumeId, Long jobId, String resumeDelete) {
+        LambdaUpdateWrapper<TDJobResume> tdResumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        tdResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId, jobId)
+                .eq(TDJobResume::getResumeId, resumeId)
+                .set(StringUtils.hasText(resumeStatus)&&!resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
+                .set(StringUtils.hasText(resumeDelete), TDJobResume::getResumeDelete, resumeDelete);
+        tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
         return null;
     }
 
