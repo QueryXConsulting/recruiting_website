@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 
@@ -35,6 +36,8 @@ public class UserCompanyController {
     private TPRoleService tpRoleService;
     @Resource
     private TDInterviewDateService tdInterviewDateService;
+    @Resource
+    private InterviewService interviewService;
 
 
     @GetMapping("/selectCategory")
@@ -171,6 +174,36 @@ public class UserCompanyController {
     @Operation(summary = "面试时间查询")
     public CommonResp addInterviewDate() {
         return CommonResp.success(tdInterviewDateService.selectInterviewDate());
+    }
+
+    @DeleteMapping("/deleteInterviewDate/{interviewDateId}")
+    @Operation(summary = "面试时间删除")
+    public CommonResp deleteInterviewDate(@PathVariable("interviewDateId") Long interviewDateId) {
+        return CommonResp.success(tdInterviewDateService.deleteInterviewDate(interviewDateId));
+    }
+
+    @PostMapping("/sendInterview")
+    @Operation(summary = "发起邀约")
+    public CommonResp sendInterview(@RequestBody SendInterviewDto sendInterviewDto) {
+        return CommonResp.success(interviewService.sendInterviewDto(sendInterviewDto));
+    }
+
+    @GetMapping("/selectInterviewList")
+    @Operation(summary = "查询面试列表")
+    public CommonResp selectInterviewList(Integer page,Integer size,Long jobId) {
+        return CommonResp.success(interviewService.selectInterviewList(page,size,jobId));
+    }
+
+    @PutMapping("/updateInterviewList")
+    @Operation(summary = "更新面试数据")
+    public CommonResp updateInterviewList(@RequestBody UpdateInterviewDto updateInterviewDto) {
+        return CommonResp.success(interviewService.updateInterview(updateInterviewDto));
+    }
+
+    @GetMapping("/offerList")
+    @Operation(summary = "offer列表")
+    public CommonResp offerList(Integer page,Integer size) {
+        return CommonResp.success(interviewService.offerList(page,size));
     }
 
 }

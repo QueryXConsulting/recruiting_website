@@ -42,5 +42,8 @@ public class TDJobResume {
     @Schema(name = "简历通过状态", description = "为0时则代表不合适", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeDelete;
 
+    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long userId;
+
 }
 

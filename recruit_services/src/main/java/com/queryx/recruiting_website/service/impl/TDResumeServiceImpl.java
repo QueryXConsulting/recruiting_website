@@ -15,10 +15,12 @@ import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDResumeService;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -49,6 +51,8 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     private TDUserMapper userMapper;
     @Value("${file.upload-path-resume}")
     private String resumePath;
+    @Resource
+    private InterviewMapper interviewMapper;
 
 
     @Override
@@ -64,16 +68,27 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
             return null;
         }
         Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
+
+        LambdaQueryWrapper<TDInterview> tdInterviewLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<Long> userIds = tdJobResumes.getRecords().stream().map(TDJobResume::getUserId).toList();
+        tdInterviewLambdaQueryWrapper.eq(TDInterview::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
+                .eq(TDInterview::getJobId,jobId)
+                .eq(TDInterview::getIsDeleted,Common.NOT_DELETE)
+                .in(TDInterview::getUserId,userIds);
+
+        Map<Long, String> interviewMap = interviewMapper.selectList(tdInterviewLambdaQueryWrapper)
+                .stream().collect(Collectors.toMap(TDInterview::getUserId, TDInterview::getInterviewStatus));
         List<ResumeListVO> resumeListVOS = tdJobResumes.getRecords().stream().map(tdJobResume -> {
             ResumeListVO resumeListVO = new ResumeListVO();
-            resumeListVO.setResumeId(tdJobResume.getResumeId());
-            resumeListVO.setResumeName(tdJobResume.getResumeName());
-            resumeListVO.setResumeType(tdJobResume.getResumeType());
-            resumeListVO.setResumeStatus(tdJobResume.getResumeStatus());
-            resumeListVO.setResumeDelete(tdJobResume.getResumeDelete());
+            BeanUtils.copyProperties(tdJobResume,resumeListVO);
+            String InterviewStatus = interviewMap.get(tdJobResume.getUserId());
+            if (StringUtils.hasText(InterviewStatus)){
+                resumeListVO.setInterviewStatus(InterviewStatus);
+            }
             return resumeListVO;
         }).toList();
         resumeListVOPage.setRecords(resumeListVOS);
+
 
         return resumeListVOPage;
     }

@@ -11,7 +11,7 @@ public interface InterviewService extends IService<TDInterview> {
 
     Object sendInterviewDto(SendInterviewDto sendInterviewDto);
 
-    Object selectInterviewList(Integer page, Integer size);
+    Object selectInterviewList(Integer page, Integer size, Long jobId);
 
     Object updateInterview(UpdateInterviewDto updateInterviewDto);
 

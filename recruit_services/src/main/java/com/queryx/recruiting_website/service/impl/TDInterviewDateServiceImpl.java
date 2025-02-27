@@ -38,4 +38,10 @@ public class TDInterviewDateServiceImpl extends ServiceImpl<TDInterviewDateMappe
             return interViewDateVo;
         }).toList();
     }
+
+    @Override
+    public Object deleteInterviewDate(Long interviewDateId) {
+        removeById(interviewDateId);
+        return null;
+    }
 }

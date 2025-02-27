@@ -1,6 +1,6 @@
 <script lang="js" setup>
 import { roleList } from '@/api/admin/RoleApi'
-import { adminList, adminInfo, adminUpdate, adminAdd, adminDelete } from '@/api/admin/AdminApi';
+import { adminList, adminInfoURL, adminUpdate, adminAdd, adminDelete } from '@/api/admin/AdminApi';
 import { ref, computed, reactive, defineEmits } from 'vue'
 import useAdminStore from '@/store/adminStore'
 import { ElMessage } from 'element-plus';
@@ -78,7 +78,7 @@ const debounce = (func, delay) => {
         timeoutId = setTimeout(() => func.apply(context, args), delay);
     };
 };
-// 处理表格右侧操作(形参列表：[按钮编号，行数据，行索引])  
+// 处理表格右侧操作(形参列表：[按钮编号，行数据，行索引])
 // 注：按钮为循环生成，事件会多次触发，因此使用防抖函数处理
 const handleOperation = debounce((index, row, i) => {
     switch (index) {
@@ -128,11 +128,11 @@ const handleUserAdd = (index, row) => {
 }
 
 /* 用户信息 */
-const info = reactive({});// 用户信息
-const isShowDialogInfo = ref(false);// 用户信息弹窗
+const info = reactive({});
+const isShowDialogInfo = ref(false);
 const handleInspect = async (row) => {
     // 请求用户信息
-    await adminInfo(row.adminId).then(res => { info.content = res.content; });
+    await adminInfoURL(row.adminId).then(res => { info.content = res.content; });
     // 打开弹窗
     isShowDialogInfo.value = true;
 }
@@ -191,7 +191,7 @@ let editId = '';
 // 编辑用户信息
 const handleEdit = async (row) => {
     // 请求用户信息
-    const data = await adminInfo(row.adminId);
+    const data = await adminInfoURL(row.adminId);
     const keys = Object.keys(data.content);
     // const values = Object.values(data.content);
     for (let i = 0; i < keys.length; i++) {

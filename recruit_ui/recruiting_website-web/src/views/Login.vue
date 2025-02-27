@@ -40,7 +40,7 @@ import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import userStore from '@/store/user'
-import { adminInfo, adminLogin, menuList } from '@/api/admin/adminApi'
+import { adminInfoURL, adminLogin, menuList } from '@/api/admin/adminApi'
 import { getUserInfo } from '@/api/company/companyApi'
 import CardLogin from '@/components/company/cardLogin.vue'
 

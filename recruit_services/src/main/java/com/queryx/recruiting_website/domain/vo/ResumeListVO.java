@@ -9,8 +9,11 @@ import lombok.Data;
 public class ResumeListVO {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long resumeId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long userId;
     private String resumeName;
     private String resumeType;
     private String resumeStatus;
     private String resumeDelete;
+    private String interviewStatus;
 }

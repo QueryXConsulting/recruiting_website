@@ -17,7 +17,7 @@
 
 
       <div class="tab-container">
-        <el-tabs v-model="activeTab" >
+        <el-tabs v-model="activeTab">
           <el-tab-pane label="简历查看" name="resume">
             <div v-if="activeTab === 'resume'">
               <div class="search-section">
@@ -149,13 +149,13 @@
                 <el-table-column label="操作" width="180" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-button type="primary" link @click="editInterview(scope.row)"
-                        :disabled="scope.row.interviewResult != '0' ||
-                                   (scope.row.interviewStatus == '3' &&
-                                   scope.row.interviewStatus == '0')">
+                      <el-button type="primary" link @click="editInterview(scope.row)" :disabled="scope.row.interviewResult != '0' ||
+                        (scope.row.interviewStatus == '3' &&
+                          scope.row.interviewStatus == '0')">
                         修改
                       </el-button>
-                      <el-button type="danger" link @click="viewInterview(scope.row)" v-if="scope.row.interviewStatus != '3'&& scope.row.interviewResult == '0'">
+                      <el-button type="danger" link @click="viewInterview(scope.row)"
+                        v-if="scope.row.interviewStatus != '3' && scope.row.interviewResult == '0'">
                         取消
                       </el-button>
                     </div>
@@ -365,7 +365,7 @@ const getResumeList = async () => {
 // 获取面试列表
 const getInterviewList = async () => {
   try {
-    const res = await selectInterviewList(pageNum.value, pageSize.value)
+    const res = await selectInterviewList(pageNum.value, pageSize.value, jobId)
     if (res.code === 200) {
       interviewList.value = res.content.records
       interviewTotal.value = res.content.total
@@ -586,7 +586,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-
 .resume-container {
   padding: 24px;
   min-height: calc(100vh - 64px);

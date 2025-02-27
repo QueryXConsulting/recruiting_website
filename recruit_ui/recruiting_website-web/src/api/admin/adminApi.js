@@ -164,7 +164,7 @@ export const jobNatureUpdate = (jobNatureDto) => request.put(API.JOBNATURE_UPDAT
 export const jobNatureAdd = (jobNatureName, natureStatus) =>
   request.get(API.JOBNATURE_ADD, { params: { jobNatureName, natureStatus } })
 export const jobNatureDelete = (natureId) => request.delete(`${API.JOBNATURE_DELETE}/${natureId}`)
-export const adminInfo = () => request.get(API.ADMIN_INFO)
+export const adminInfoURL = () => request.get(API.ADMIN_INFO)
 
 export const adminList = (params) => request.get(API.ADMIN_LIST_URL, { params: params })
 export const adminInfo = (id) => request.get(`${API.ADMIN_INFO_URL}/${id}`)

@@ -1,4 +1,4 @@
-import { adminInfo, adminRouters } from '@/api/admin/adminApi'
+import { adminInfoURL, adminRouters } from '@/api/admin/adminApi'
 import router from '@/router'
 import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
@@ -17,7 +17,7 @@ const userStore = defineStore('User', {
   actions: {
     // 拿到管理员数据
     async getUserInfo() {
-      let result = await adminInfo()
+      let result = await adminInfoURL()
       if (result.code == 200) {
         this.userInfo = result.content
         return

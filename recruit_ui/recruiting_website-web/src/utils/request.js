@@ -25,11 +25,7 @@ request.interceptors.request.use((config) => {
   if (token != null) {
     config.headers['token'] = `${token}`
   }
-  // 2xx 范围内的状态码都会触发该函数。
-  if (response.data.code !== 200) {
-    ElMessage.error(response.data.message);
-    return;
-  }
+
   // 获取当前请求的基础URL（移除动态参数）
   const baseUrl = config.url.replace(/\/\d+/g, '')
 
@@ -63,6 +59,13 @@ request.interceptors.request.use((config) => {
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
+
+     // 2xx 范围内的状态码都会触发该函数。
+  if (response.data.code !== 200) {
+    ElMessage.error(response.data.message);
+    return;
+  }
+
     if (response.data.code == 450) {
       userStore().token = null
       ElMessage({
