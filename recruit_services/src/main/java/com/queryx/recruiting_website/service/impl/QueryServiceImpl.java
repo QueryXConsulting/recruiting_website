@@ -32,9 +32,6 @@ public class QueryServiceImpl implements QueryService {
     private TDResumeAttachmentsMapper attachmentsMapper;
 
     @Autowired
-    private InterviewMapper interviewMapper;
-
-    @Autowired
     private TDJobMapper jobInfoMapper;
 
     @Autowired
@@ -83,18 +80,6 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public InterviewVO getInterview(Long id) {
-        // 构建SQL语句，查询简历信息
-        final InterviewVO interviewVO = new InterviewVO();
-        List<TDInterview> list = interviewMapper.getInterviewsByUserId(id);
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-        list.forEach(data -> BeanUtils.copyProperties(data, interviewVO));
-        return interviewVO;
-    }
-
-    @Override
     public JobVO getJob(Long id) {
         final TDJob tdJob = jobInfoMapper.selectById(id);
         if (!isJobExist(tdJob)) {
@@ -105,7 +90,7 @@ public class QueryServiceImpl implements QueryService {
         return jobVO;
     }
 
-    @Override // TODO 未测试
+    @Override
     public Page<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();

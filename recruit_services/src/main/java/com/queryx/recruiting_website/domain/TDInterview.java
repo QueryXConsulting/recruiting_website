@@ -29,8 +29,8 @@ public class TDInterview {
     @Schema(name = "公司ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyId;
 
-    @Schema(name = "面试工作名", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String interviewJob;
+    @Schema(name = "工作id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobId;
 
     @Schema(name = "面试结果", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String interviewResult;

@@ -99,29 +99,6 @@ public class QueryController {
     }
 
     /**
-     * 查询用户面试信息
-     *
-     * @return 面试信息
-     */
-    @Operation(summary = "查询用户面试信息", responses = {
-            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "425", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
-    @GetMapping("/interview")
-    public CommonResp<InterviewVO> queryReviewResume() {
-        InterviewVO resp;
-        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
-        try {
-            resp = queryUserInfo.getInterview(id);
-        } catch (Exception e) {
-            log.error("用户面试信息查询失败，{}", e.getMessage());
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-        }
-        return CommonResp.success(resp);
-    }
-
-    /**
      * 查询招聘岗位信息
      *
      * @param id 岗位id
@@ -153,8 +130,8 @@ public class QueryController {
     /**
      * 查询招聘岗位列表
      *
-     * @param keyword 关键字
-     * @param page    页码
+     * @param keyword  关键字
+     * @param page     页码
      * @param pageSize 页大小
      * @return 招聘岗位列表
      */
@@ -168,7 +145,7 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
-    public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
+    public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);

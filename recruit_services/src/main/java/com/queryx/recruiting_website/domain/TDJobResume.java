@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Date;
+
 
 /**
  * (TDJobResume)实体类
@@ -38,6 +40,12 @@ public class TDJobResume {
 
     @Schema(name = "简历投递状态", description = "1(已查看) 2(待面试) 0:用户端(已投递), 公司端(待查看)", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeStatus;
+
+    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long userId;
+
+    @Schema(name = "简历投递时间", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Date.class)
+    private Date deliverDate;
 
 }
 
