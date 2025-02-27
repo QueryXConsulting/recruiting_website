@@ -7,6 +7,11 @@ const API = {
   USER_RESUME_LIST_URL: '/admin/selectResumeList',
   USER_RESUME_INFO_URL: '/admin/selectResumeInfo',
   USER_RESUME_REVIEW_URL: '/admin/resumeReview',
+  ADMIN_LIST_URL: '/admin/selectAdminList',
+  ADMIN_INFO_URL: '/admin/selectAdminInfo',
+  ADMIN_ADD_URL: '/admin/addAdmin',
+  ADMIN_UPDATE_URL: '/admin/updateAdminInfo',
+  ADMIN_DELETE_URL: '/admin/deleteAdmin',
 
   LOGIN_URL: '/user/login',
   ADMIN_INFO: '/admin/getInfo',
@@ -160,3 +165,9 @@ export const jobNatureAdd = (jobNatureName, natureStatus) =>
   request.get(API.JOBNATURE_ADD, { params: { jobNatureName, natureStatus } })
 export const jobNatureDelete = (natureId) => request.delete(`${API.JOBNATURE_DELETE}/${natureId}`)
 export const adminInfo = () => request.get(API.ADMIN_INFO)
+
+export const adminList = (params) => request.get(API.ADMIN_LIST_URL, { params: params })
+export const adminInfo = (id) => request.get(`${API.ADMIN_INFO_URL}/${id}`)
+export const adminAdd = (params) => request.post(API.ADMIN_ADD_URL, params)
+export const adminUpdate = (params) => request.put(API.ADMIN_UPDATE_URL, params)
+export const adminDelete = (id) => request.delete(`${API.ADMIN_DELETE_URL}/${id}`)

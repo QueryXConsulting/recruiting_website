@@ -11,4 +11,6 @@ public interface TDInterviewDateService extends IService<TDInterviewDate> {
     Object addInterviewDate(AddInterviewDto addInterviewDto);
 
     Object selectInterviewDate();
+
+    Object deleteInterviewDate(Long interviewDateId);
 }

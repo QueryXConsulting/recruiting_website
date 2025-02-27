@@ -3,7 +3,7 @@
     <div class="scheduler-header">
       <h2>面试时间安排</h2>
       <div class="scheduler-tips">
-        <el-alert title="温馨提示" type="info" :closable="false" description="请选择可用于面试的时间段，求职者将在这些时间段内选择合适的面试时间。" />
+        <el-alert title="温馨提示" type="info" :closable="false" description="请选择可用于面试的时间段，求职者将在这些时间段内选择合适的面试时间。一天可选择多个时间段" />
       </div>
     </div>
 
@@ -52,7 +52,7 @@
                     <el-tag size="small" :type="'success'">
                       可预约
                     </el-tag>
-                    <el-button type="danger" size="small" circle @click="removeTimeSlot(date, index)"
+                    <el-button type="danger" size="small" circle @click="removeTimeSlot(slot.id, date, index)"
                       :disabled="slot.status !== 'available'">
                       <el-icon>
                         <Delete />
@@ -102,7 +102,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Delete } from '@element-plus/icons-vue';
-import { addInterviewDate, selectInterviewDate } from '@/api/company/companyApi';
+import { addInterviewDate, selectInterviewDate, deleteInterviewDateById } from '@/api/company/companyApi';
 import userStore from '@/store/user';
 
 const currentDate = ref(new Date());
@@ -125,11 +125,26 @@ const interviewDates = ref([]);
 const fetchInterviewDates = async () => {
   try {
     const response = await selectInterviewDate();
-    interviewDates.value = response.data.map(date => ({
+    interviewDates.value = response.content.map(date => ({
       id: date.interviewDateId,
       start: new Date(date.interviewDateStart),
       end: new Date(date.interviewDateEnd)
     }));
+
+    interviewDates.value.forEach(date => {
+      const dateStr = formatDate(date.start);
+      if (!timeSlots.value[dateStr]) {
+        timeSlots.value[dateStr] = [];
+      }
+
+      timeSlots.value[dateStr].push({
+        start: formatTime(date.start),
+        end: formatTime(date.end),
+        duration: (date.end - date.start) / (1000 * 60),
+        status: 'available',
+        id: date.id
+      });
+    });
   } catch (error) {
     ElMessage.error('获取面试时间失败');
   }
@@ -191,12 +206,7 @@ const confirmTimeSelection = () => {
     timeSlots.value[dateStr] = [];
   }
 
-  timeSlots.value[dateStr].push({
-    start: formatTime(start),
-    end: formatTime(end),
-    duration: timeForm.value.duration,
-    status: 'available'
-  });
+
 
   const interviewData = {
     companyId: userStore().userInfo.companyInfoId,
@@ -204,22 +214,30 @@ const confirmTimeSelection = () => {
     interviewDateEnd: end
   };
 
-  addInterviewDate(interviewData).then(() => {
+  addInterviewDate(interviewData).then(async () => {
+    timeSlots.value = {};
+    await fetchInterviewDates();
     ElMessage.success('面试时间段设置成功');
   }).catch(() => {
     ElMessage.error('设置面试时间段失败');
   });
 
+
   timeDialogVisible.value = false;
   activeCollapse.value = [dateStr];
 };
 
-const removeTimeSlot = (date, index) => {
-  timeSlots.value[date].splice(index, 1);
-  if (timeSlots.value[date].length === 0) {
-    delete timeSlots.value[date];
-  }
-  ElMessage.success('已删除该时间段');
+const removeTimeSlot = (interviewDateId, date, index) => {
+
+  deleteInterviewDateById(interviewDateId).then(() => {
+    timeSlots.value[date].splice(index, 1);
+    if (timeSlots.value[date].length === 0) {
+      delete timeSlots.value[date];
+    }
+    ElMessage.success('已删除该时间段');
+  }).catch(() => {
+    ElMessage.error('删除面试时间段失败');
+  });
 };
 
 const formatDate = (date) => {
