@@ -13,6 +13,10 @@ import java.util.List;
 @Component
 public class Common {
 
+    public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";
+    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
+    public static final String DELIVER_RESUME_STATUS_VIEWED = "1";
+    public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";
     private static String port;
     private static String ip;
 

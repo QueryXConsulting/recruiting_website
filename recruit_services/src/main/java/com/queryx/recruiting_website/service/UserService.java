@@ -16,11 +16,11 @@ public interface UserService {
     AppHttpCodeEnum insertUser(RegisterDTO registerDTO);
 
     /**
-     * 用户更新信息
+     * 用户头像上传
      *
      * @param userId 用户id
      * @param image  用户头像
      * @return 更新结果
      */
-    CommonResp<String> uploadAvatar(String userId, MultipartFile image);
+    CommonResp<String> uploadAvatar(Long userId, MultipartFile image);
 }

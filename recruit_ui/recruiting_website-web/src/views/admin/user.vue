@@ -49,7 +49,7 @@ const getRoleLabel = (_roleId) => {
     return _roleId;
 }
 
-// 
+//
 const response = reactive([
     { tag: 'edit, table', prop: 'userId', label: '用户ID', value: '' },
     { tag: 'add, edit, info, table', prop: 'userName', label: '用户名', value: '' },

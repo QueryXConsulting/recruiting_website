@@ -43,7 +43,7 @@ public class UserResumeController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PostMapping("/upload")
-    public CommonResp<Integer> handleResumeUpload(@RequestParam("file") MultipartFile file) {
+    public CommonResp<Integer> handleResumeUpload(@RequestParam("attachment") MultipartFile file) {
         Integer message = 0;
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
         try {

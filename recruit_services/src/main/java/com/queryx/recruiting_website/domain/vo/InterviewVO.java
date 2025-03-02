@@ -19,6 +19,10 @@ public class InterviewVO {
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private Long companyInfoId;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long jobId;// 职位id
+
     /**
      * 面试工作名称
      */

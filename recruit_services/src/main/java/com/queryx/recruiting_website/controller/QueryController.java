@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.service.QueryService;
@@ -25,6 +26,23 @@ public class QueryController {
 
     @Autowired
     private QueryService queryUserInfo;
+
+    /**
+     * 查询用户所有简历
+     *
+     * @return 简历列表
+     */
+    @Operation(summary = "查询用户所有简历", responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "485", description = "用户不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "472", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @GetMapping("/resume/all")
+    public CommonResp<AllResumeVO> queryAllResume() {
+        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
+        return queryUserInfo.getAllResume(id);
+    }
 
     /**
      * 查询用户在线简历
@@ -81,29 +99,6 @@ public class QueryController {
     }
 
     /**
-     * 查询用户面试信息
-     *
-     * @return 面试信息
-     */
-    @Operation(summary = "查询用户面试信息", responses = {
-            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "425", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
-    @GetMapping("/interview")
-    public CommonResp<InterviewVO> queryReviewResume() {
-        InterviewVO resp;
-        final Long id = SecurityUtils.getLoginUser().getTdUser().getUserId();
-        try {
-            resp = queryUserInfo.getInterview(id);
-        } catch (Exception e) {
-            log.error("用户面试信息查询失败，{}", e.getMessage());
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-        }
-        return CommonResp.success(resp);
-    }
-
-    /**
      * 查询招聘岗位信息
      *
      * @param id 岗位id
@@ -132,14 +127,30 @@ public class QueryController {
         return CommonResp.success(resp);
     }
 
-
+    /**
+     * 查询招聘岗位列表
+     *
+     * @param keyword  关键字
+     * @param page     页码
+     * @param pageSize 页大小
+     * @return 招聘岗位列表
+     */
+    @Operation(summary = "查询招聘岗位列表", parameters = {
+            @Parameter(name = "keyword", description = "关键字", schema = @Schema(implementation = String.class), required = true),
+            @Parameter(name = "page", description = "页码", schema = @Schema(implementation = Integer.class), required = true),
+            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
     @GetMapping("/jobs")
-    public CommonResp<List<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize){
+    public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        List<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        Page<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);

@@ -171,3 +171,4 @@ export const adminInfo = (id) => request.get(`${API.ADMIN_INFO_URL}/${id}`)
 export const adminAdd = (params) => request.post(API.ADMIN_ADD_URL, params)
 export const adminUpdate = (params) => request.put(API.ADMIN_UPDATE_URL, params)
 export const adminDelete = (id) => request.delete(`${API.ADMIN_DELETE_URL}/${id}`)
+
