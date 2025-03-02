@@ -29,7 +29,7 @@ public class TDInterview {
     @Schema(name = "公司ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long companyId;
 
-    @Schema(name = "工作ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "工作id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long jobId;
 
     @Schema(name = "面试结果", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -47,12 +47,14 @@ public class TDInterview {
     @Schema(name = "启用状态", description = "0代表拒绝,1代表接受", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String interviewStatus;
 
-    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class)
     private String isDeleted;
 
-    @Schema(name = "面试时长", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "面试时长", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer interviewTime;
 
+    @Schema(name = "简历投递id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobResumeId;
 
 }
 

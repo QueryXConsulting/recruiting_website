@@ -13,10 +13,13 @@ import java.util.List;
 @Component
 public class Common {
 
-    public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";
-    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
-    public static final String DELIVER_RESUME_STATUS_VIEWED = "1";
-    public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";
+    // 简历投递表相关常量
+    public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";// 已投递
+    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";// 待查看
+    public static final String DELIVER_RESUME_STATUS_VIEWED = "1";// 已查看
+    public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";// 待面试
+    // 面试相关常量
+    public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
     private static String port;
     private static String ip;
 

@@ -5,13 +5,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.TDInterview;
+import com.queryx.recruiting_website.domain.TDInterviewDate;
+import com.queryx.recruiting_website.domain.TDJobResume;
 import com.queryx.recruiting_website.domain.dto.SendInterviewDto;
 import com.queryx.recruiting_website.domain.dto.UpdateInterviewDto;
 import com.queryx.recruiting_website.domain.vo.InterviewDateVO;
 import com.queryx.recruiting_website.domain.vo.InterviewListVo;
 import com.queryx.recruiting_website.domain.vo.InterviewVO;
-import com.queryx.recruiting_website.mapper.*;
+import com.queryx.recruiting_website.mapper.InterviewDateMapper;
+import com.queryx.recruiting_website.mapper.InterviewMapper;
+import com.queryx.recruiting_website.mapper.TDJobMapper;
+import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.service.InterviewService;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.utils.CommonResp;
@@ -22,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -106,6 +112,8 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     }
 
 
+    @Autowired
+    private TDJobResumeMapper jobResumeMapper;
 
     @Override
     public CommonResp<Page<InterviewVO>> getInterviews(Long userId, Integer page, Integer pageSize) {
@@ -173,19 +181,34 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     }
 
     @Override
-    public CommonResp<Boolean>  isAcceptInterview(Long interviewId, String isAccept) {
+    public CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept, Date interviewDate) {
         if (isAccept == null || interviewId == null || isAccept.trim().isEmpty())
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, false);
         TDInterview interview = interviewMapper.selectById(interviewId);
         if (interview == null) return CommonResp.fail(AppHttpCodeEnum.INTERVIEW_NOT_EXIST, false);
         if (Common.DELETE.equals(interview.getIsDeleted()))
             return CommonResp.fail(AppHttpCodeEnum.USER_NOT_EXIST, false);
+        // 状态为待面试且面试时间不为空
+        if (Common.INTERVIEW_STATUS_BE_INTERVIEWED.equals(isAccept)) {
+            if (interviewDate == null) {
+                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            }
+            interview.setInterviewDate(interviewDate);
+        }
+
         interview.setInterviewStatus(isAccept);
-        return CommonResp.success(interviewMapper.updateById(interview) > 0);
+        final boolean result = interviewMapper.updateById(interview) > 0;
+        TDJobResume tdJobResume = jobResumeMapper.selectById(interview.getJobResumeId());
+        if (tdJobResume == null) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+        }
+        tdJobResume.setResumeStatus(Common.DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED);
+        int i = jobResumeMapper.updateById(tdJobResume);
+        if (i <= 0) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+        }
+        return CommonResp.success(result);
     }
-
-
-
 
 
 }
