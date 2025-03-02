@@ -1,42 +1,27 @@
-package com.queryx.recruiting_website.domain;
+package com.queryx.recruiting_website.domain.vo;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-
 import java.util.Date;
 
-/**
- * (TDInterviewDate)实体类
- *
- * @author makejava
- * @since 2024-12-23 12:21:50
- */
 @Data
-@Schema(name = "面试时间实体类")
-public class TDInterviewDate {
-
-    @TableId(value = "interview_date_id", type = IdType.AUTO)
+public class InterViewDateVo {
+    @JsonSerialize(using = StringSerializer.class)
     @Schema(name = "面试时间id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long interviewDateId;
 
-    @Schema(name = "公司id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long companyId;
-
-
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @Schema(name = "面试时间开始范围", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date interviewDateStart;
 
-
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @Schema(name = "面试时间结束范围", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date interviewDateEnd;
-
-
-    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String isDeleted;
-
-
 }
-

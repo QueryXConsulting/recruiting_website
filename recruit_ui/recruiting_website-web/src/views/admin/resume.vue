@@ -1,102 +1,131 @@
 <script setup lang="js">
-import { defineProps, defineEmits, ref } from 'vue';
-import useResumeListStore from '@/store/resumeListQueryParmesStore'
-import { adminUserResumeList, adminUserResumeInfo, adminUserResumeReview } from '@/api/admin/adminApi';
+import { ref } from 'vue';
+import useResumeListStore from '@/store/resumeStore'
+import { resumeList, resumeInfo, resumeReview, resumeDelete } from '@/api/admin/ResumeApi';
 import { ElMessage } from 'element-plus';
-import { Search } from '@element-plus/icons-vue';
+import WBDrawer from '@/components/WBDrawer.vue';
+import WBForm from '@/components/WBForm.vue';
+import WBDialog from '@/components/WBDialog.vue';
+import { reactive } from 'vue';
 
+// 数据请求对象
+const queryObj = useResumeListStore().getResumeListQueryParams;
+
+// 状态变量
 const isShow = ref(false); // 简历详情抽屉
-const isReview = ref(true); // 审核状态
-const changeReview = ref(false); // 审核状态切换
-const dialogVisible = ref(false); // 请求参数修改弹窗
-const isOnlineResume = ref('0'); // 简历类型选择
-const isResumeDisabled = ref('0'); // 简历禁用状态
+const isResumeDisabled = ref(useResumeListStore().getResumeListScreenParams.resumeStatusOption); // 简历禁用状态
+const isShowDeleteDialog = ref(false); // 删除确认弹窗
+const isOnlineResume = ref(useResumeListStore().getResumeListScreenParams.resumeTypeOption); // 简历类型选择
+const isShowDeleteBtn = ref(isOnlineResume.value); // 删除按钮显示控制
 
 // 简历类型选项
 const resumeTypeOptions = [
     { label: '在线简历', value: '0' },
     { label: '附件简历', value: '1' }
-]
+];
 // 简历启用状态选项
 const resumeStatusOptions = [
-    { label: '启用', value: '0' },
-    { label: '停用', value: '1' }
-]
-
-// 数据请求对象
-const queryObj = useResumeListStore().getResumeListQueryParams;
+    { label: '全部', value: '-1' },
+    { label: '启用', value: '0', tag: 'success' },
+    { label: '停用', value: '1', tag: 'danger' }
+];
+// 简历审核状态选项
+const resumeReviewOptions = [
+    { label: '待审核', value: '0', tag: 'info' },
+    { label: '审核通过', value: '1', tag: 'success' },
+    { label: '打回修改', value: '2', tag: 'warning' }
+];
+// 表格列定义
+const columns = [
+    { prop: 'resumeId', label: '简历ID', value: '' },
+    { prop: 'userName', label: '用户名', value: '' },
+    { prop: 'resumeType', label: '简历类型', value: '', option: resumeTypeOptions },
+    { prop: 'resumeReview', label: '审核状态', value: '', option: resumeReviewOptions },
+    { prop: 'resumeStatus', label: '启用状态', value: '', option: resumeStatusOptions },
+];
+// 定义在线简历表单项
+const infoItems = reactive({
+    resumeReview: "审核状态",
+    resumeId: "简历ID",
+    resumeBirth: "生日",
+    resumeEducation: "学历",
+    resumeEmail: "邮箱",
+    resumeExperience: "工作经验",
+    resumeGender: "性别",
+    resumeIntroduction: "个人简介",
+    resumeJob: "意向工作",
+    resumeMajor: "专业",
+    resumeMarriage: "婚姻状况",
+    resumePhone: "手机号",
+    resumePolitical: "政治面貌",
+    resumeSalary: "意向薪资"
+});
+// 表格审核和启用列label
+const getColumnLabel = (val, prop) => {
+    const op = columns.find((item) => item.prop === prop).option
+    if (!op) { return val[prop]; }
+    return op.find((item) => item.value === val[prop]).label;
+}
 
 
 // 响应结果
-const result = ref({}); // 简历列表
+const result = ref([]); // 简历列表
 const info = ref({}); // 简历详情
 
 // 请求简历列表
 const queryResume = (obj) => {
-    adminUserResumeList(obj)
-        .then(res => {
-            if (res.code !== 200) {
-                ElMessage.error(res.message);
-                return;
-            }
-            result.value = res.content;
-            result.value.records.forEach(item => {
-                item.resumeType = showText(item.resumeType, '在线简历', '附件简历');
-                if (item.resumeReview == 0) isReview.value = false;
-                item.resumeReview = showText(item.resumeReview, '待审核', '审核通过');
-                item.resumeStatus = showText(item.resumeStatus, '启用', '停用');
-            });
-            ElMessage.success(res.message);
-        }).catch(err => {
-            ElMessage.error(err.message);
-            return;
-        });
+    resumeList(obj).then(res => {
+        result.value = res.content;
+        isShowDeleteBtn.value = isOnlineResume.value;
+        ElMessage.success(res.message);
+    });
 }
 queryResume(queryObj)
 
-// 请求简历详情
-const queryResumeInfo = (resumeInfo) => {
-    adminUserResumeInfo(resumeInfo)
-        .then(res => {
-            if (res.code !== 200) {
-                ElMessage.error(res.message);
-                return;
-            }
-            info.value = res.content;
-            ElMessage.success(res.message);
-        }).catch(err => {
-            ElMessage.error(err.message);
-        });
-}
 
 // 处理查看按钮
 const handleEdit = (index, row) => {
-    row.resumeType = resumeDetailsText(row.resumeType, '在线简历', '附件简历');
-    queryResumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType })
+    // 请求简历详情
+    resumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType }).then(res => {
+        if (typeof res.content === 'object') {
+            // 在线简历
+            console.log(111111);
+            res.content.resumeReview = row.resumeReview;
+            info.value = res.content;
+        } else {
+            // 附件简历
+            console.log(222222);
+            // getFilePath(res.content);
+        }
+    });
+    // queryResumeInfo()
+    //     .then((filePath) => {
+    // TODO PDF简历预览
+    // if (typeof filePath === 'string') {
+    //     const a = document.createElement('a');
+    //     filePath = filePath.replaceAll('\\', '/');
+    //     a.href = `/${filePath}`;
+    //     console.log('filePath', filePath);
+    //     a.click();
+    //     return;
+    // }
     isShow.value = !isShow.value;
+    // });
 }
 
-
-// 修改审核状态
-const changeResumeReview = (val, index, row) => {
-    row.resumeReview = val ? '审核通过' : '待审核';
-    const reviewCode = val ? 1 : 0;
-    const resumeType = resumeDetailsText(row.resumeType, '在线简历', '附件简历');
-    changeReview.value = true;
-    // 发送请求修改审核状态
-    adminUserResumeReview(reviewCode, row.resumeId, resumeType)
-        .then((res) => {
-            if (res.code !== 200) {
-                ElMessage.error(res.message);
-                return;
-            }
-            changeReview.value = false;
-            ElMessage.success(res.message);
-            queryResume(queryObj);// 更新列表
-
-        }).catch(err => {
-            ElMessage.error(err.message);
-        });
+/* 处理删除按钮 */
+let deleteId = null;
+// 处理删除确认弹窗
+const handleDelete = (row) => {
+    // TODO 附件简历删除
+    deleteId = row.resumeId;
+    isShowDeleteDialog.value = true;
+}
+// 处理删除确认弹窗提交
+const submitDelete = async () => {
+    await resumeDelete({ id: deleteId });
+    isShowDeleteDialog.value = false;
+    queryResume(queryObj);
 }
 
 /* 请求参数构建部分 */
@@ -109,19 +138,28 @@ const updateResumeType = (val) => {
 
 // 更新简历启用状态
 const updateResumeStatus = (val) => {
+    if (val === '-1') {
+        delete queryObj.resumeStatus;
+    }
     queryObj.resumeStatus = val;
 }
 
 // 搜索
 const handleSearch = () => {
     queryObj.userName = input.value;
+    // 保存查询参数到 store
     useResumeListStore().setResumeListQueryParams({
-        page: result.value.current,
-        size: result.value.size,
+        page: result.value?.current,
+        size: result.value?.size,
         userName: queryObj.userName,
         resumeReview: queryObj.resumeReview,
         resumeStatus: queryObj.resumeStatus,
         resumeType: queryObj.resumeType
+    });
+    // 保存筛选参数到 store
+    useResumeListStore().setResumeListScreenParams({
+        resumeTypeOption: queryObj.resumeType,
+        resumeStatusOption: queryObj.resumeStatus
     });
     queryResume(queryObj);
 }
@@ -138,29 +176,30 @@ const handleCurrentChange = (val) => {
     queryResume(queryObj);
 }
 
-// 表格展示文字
-function showText(val, val0, val1) {
-    val = parseInt(val);
-    switch (val) {
-        case 1:
-            return val1;
-        case 0:
-            return val0;
-        default:
-            console.log('未知状态', val);
-            return val;
-    }
+/* tag颜色处理 */
+// 获得标签颜色
+const getTagType = (o, val) => {
+    const op = columns.find((item) => item.prop === o).option;
+    return op.find((item) => item.value === val).tag;
 }
-// 查看简历详情文字处理
-function resumeDetailsText(val, val0, val1) {
-    switch (val) {
-        case val0:
-            return '0';
-        case val1:
-            return '1';
-        default:
-            console.log('未知状态', val);
-            return val;
+
+
+/* 表单验证 */
+const infoForm = ref(); // 详情表单实例
+// 表单校验规则
+const rules = {
+    resumeReview: [{ required: true, message: '请选择审核状态', trigger: 'blur' }]
+};
+// 详情抽屉确认
+const handleDrawerConfirm = async () => {
+    isShow.value = false;
+    // 发送请求修改审核状态
+    if (queryObj.resumeType === '0') { // 在线简历
+        // 表单校验方法
+        // infoForm.value.validate((valid) => {if (!valid) return;})
+        await resumeReview(info.value.resumeReview, info.value.resumeId, queryObj.resumeType)
+        queryResume(queryObj);// 更新列表
+        return;
     }
 }
 
@@ -170,98 +209,98 @@ function resumeDetailsText(val, val0, val1) {
 <template>
     <div>
         <div class="container">
-            <div class="tableBar">
-                <div class="tableLab">
-                    <!-- 搜索部分 -->
-                    <div class="search">
-                        <el-input @keyup.enter="handleSearch" class="search-input" clearable v-model="input"
-                            size="large" placeholder="点击搜索" />
-                        <el-button @click="handleSearch" type="primary" size="large">
-                            <el-icon style="vertical-align: middle">
-                                <Search />
-                            </el-icon>
-                            <span style="vertical-align: middle"> 搜索 </span>
-                        </el-button>
-                    </div>
-                    <!-- 筛选部分 -->
-                    <div class="screen">
-                        <div class="change-type">
-                            <span>简历类型：</span>
-                            <el-select @change="updateResumeType" v-model="isOnlineResume" value-key="value"
-                                placeholder="简历类型" size="large" style="width: 140px;">
-                                <el-option v-for="item in resumeTypeOptions" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </div>
-                        <div class="change-status">
-                            <span>启用状态：</span>
-                            <el-select @change="updateResumeStatus" v-model="isResumeDisabled" value-key="value"
-                                placeholder="启用状态" size="large" style="width: 140px;">
-                                <el-option v-for="item in resumeStatusOptions" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="tableBox">
-                <el-table :data="result.records" border>
-                    <el-table-column prop="resumeId" label="简历ID" align="center"></el-table-column>
-                    <el-table-column prop="userName" label="用户名" align="center"></el-table-column>
-                    <el-table-column prop="resumeType" label="简历类型" align="center">
-                    </el-table-column>
-                    <el-table-column prop="resumeReview" label="审核状态" align="center">
-                        <template #default="scope">
-                            <el-tooltip :content="result.records[scope.$index].resumeReview" placement="top">
-                                <el-switch :loading="changeReview" v-model="isReview"
-                                    @change="changeResumeReview(isReview, scope.$index, scope.row)" />
-                            </el-tooltip>
+            <WBTable v-model:table-data="result.records" :table-columns="columns" v-model:current-page="result.current"
+                v-model:page-size="result.size" :total="result.total" @update:page-size="handleSizeChange"
+                @update:current-page="handleCurrentChange" border>
+                <!-- 头部 -->
+                <template #header>
+                    <WBTableHeader v-model:input="input" @click-search="handleSearch">
+                        <template #add><span></span></template>
+                        <template #screen>
+                            <div class="screen">
+                                <div class="change-type">
+                                    <span>简历类型：</span>
+                                    <el-select @change="updateResumeType" v-model="isOnlineResume" value-key="value"
+                                        placeholder="简历类型" size="large" style="width: 140px;">
+                                        <el-option v-for="item in resumeTypeOptions" :key="item.value" :label="item.label"
+                                            :value="item.value" />
+                                    </el-select>
+                                </div>
+                                <div v-if="isOnlineResume !== '1'" class="change-status">
+                                    <span>启用状态：</span>
+                                    <el-select @change="updateResumeStatus" v-model="isResumeDisabled" value-key="value"
+                                        placeholder="启用状态" size="large" style="width: 140px;">
+                                        <el-option v-for="item in resumeStatusOptions" :key="item.value" :label="item.label"
+                                            :value="item.value" />
+                                    </el-select>
+                                </div>
+                            </div>
                         </template>
-                    </el-table-column>
-                    <el-table-column prop="resumeStatus" label="启用状态" align="center">
-                    </el-table-column>
-                    <el-table-column fixed="right" label="操作" align="center">
-                        <template #default="scope">
-                            <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
-                                查看
-                            </el-button>
-                            <!-- TODO: 简历删除功能暂时隐藏 -->
-                            <!-- <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">
-                                删除
-                            </el-button> -->
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <!-- 分页 -->
-                <div class="page">
-                    <el-pagination v-model:current-page="result.page" v-model:page-size="result.size"
-                        :page-sizes="[10, 20, 30, 40]" background :total="result.total"
-                        layout="total, sizes, prev, pager, next, jumper" @update:page-size="handleSizeChange"
-                        @update:current-page="handleCurrentChange" />
-                </div>
-            </div>
+                    </WBTableHeader>
+                </template>
+                <!-- 表格内容 -->
+                <template #default="scope">
+                    <!-- 简历启用状态 -->
+                    <el-tag v-if="scope.prop === 'resumeStatus' || scope.prop === 'resumeReview'"
+                        :type="getTagType(scope.prop, result.records[scope.$index][scope.prop])">
+                        {{ getColumnLabel(result.records[scope.$index], scope.prop) }}
+                    </el-tag>
+                    <span v-else>{{ getColumnLabel(result.records[scope.$index], scope.prop) }}</span>
+                </template>
+                <!-- 操作按钮 -->
+                <template #operation="scope">
+                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
+                        查看
+                    </el-button>
+                    <el-button v-if="isShowDeleteBtn === '1'" size="small" type="danger"
+                        @click="handleDelete(scope.row, scope.$index)">
+                        删除
+                    </el-button>
+                </template>
+            </WBTable>
         </div>
 
         <!-- 简历详情抽屉 -->
-        <el-drawer v-model="isShow" title="简历信息" direction="rtl" size="50%">
-            <template #default>
-                <div class="drawer-main-form">
-                    <el-form :model="info">
-                        <el-form-item v-for="(_, index) in info" :key="index" :label="`${index}：`"
-                            label-position="right" label-width="100px" size="large">
-                            <el-input v-model="info[index]" size="large" />
-                        </el-form-item>
-                    </el-form>
-                </div>
-            </template>
-        </el-drawer>
+        <WBDrawer v-model="isShow" @cancel="isShow = false" @confirm="handleDrawerConfirm" title="简历信息" direction="rtl"
+            size="40%">
+            <WBForm :model="info" :rules="rules" :items="infoItems" ref="infoForm">
+                <template #default="scope">
+                    <el-select v-if="scope.key === 'resumeReview'" v-model="info[scope.key]" size="large"
+                        placeholder="审核状态">
+                        <el-option v-for="item in resumeReviewOptions" :key="item.value" :label="item.label"
+                            :value="item.value" />
+                    </el-select>
+                    <el-input v-else :value="info[scope.key]" size="large" readonly />
+                </template>
+            </WBForm>
+        </WBDrawer>
+
+        <!-- 简历删除确认框 -->
+        <WBDialog draggable v-model="isShowDeleteDialog" @submit="submitDelete" @cancel="isShowDeleteDialog = false"
+            title="删除附件简历">
+            <span>确认删除该简历？</span>
+        </WBDialog>
     </div>
 </template>
 
 <style scoped lang="scss">
+.screen {
+    display: flex;
+
+    // 选择部分
+    [class^="change-"] {
+        margin-left: 2vw;
+
+        // 文字部分
+        span {
+            color: #7f8184;
+        }
+    }
+}
+
 .container {
     height: 100vh;
-    box-sizing: border-box;
+    // box-sizing: border-box;
 
     .tableLab {
         width: 100%;
@@ -279,19 +318,7 @@ function resumeDetailsText(val, val0, val1) {
             }
         }
 
-        .screen {
-            display: flex;
 
-            // 选择部分
-            [class^="change-"] {
-                margin-left: 2vw;
-
-                // 文字部分
-                span {
-                    color: #7f8184;
-                }
-            }
-        }
 
     }
 

@@ -31,6 +31,27 @@ const routes = [
     component: () => import('../views/company/registerCompany.vue'),
   },
   {
+    path: '/user/register',
+    component: () => import('../views/user/Register.vue'),
+  },
+  {
+    name: 'JobInfo',
+    path: '/user/jobInfo',
+    component: () => import('../views/user/JobInfo.vue'),
+  },
+  {
+    path: '/user/jobList',
+    component: () => import('../views/user/JobList.vue'),
+  },
+  {
+    path: '/user/userInfo',
+    component: () => import('../views/user/UserInfo.vue'),
+  },
+  {
+    path: '/user/application',
+    component: () => import('../views/user/applicationRecord/index.vue'),
+  },
+  {
     path: '/home',
     name: 'home',
     component: () => import('../views/admin/home.vue'),
@@ -46,6 +67,10 @@ const routes = [
       {
         path: 'userInfo',
         component: () => import('../views/company/userInfo.vue'),
+      },
+      {
+        path: 'interviewTime',
+        component: () => import('../views/company/interviewDate.vue'),
       },
     ],
   },

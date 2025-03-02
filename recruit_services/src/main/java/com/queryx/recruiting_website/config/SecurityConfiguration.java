@@ -83,7 +83,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(it ->
                         // TODO 待配置其他路径
-                        it.requestMatchers("/user/login", "/user/register", "/user/logout").permitAll()
+                        it.requestMatchers("/user/login", "/user/register", "/user/logout","/company/registerCompany").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class)

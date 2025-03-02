@@ -75,7 +75,8 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 "/admin/menuList",
                 "/admin/selectRoleMenusTree",
                 "/admin/role",
-                "/avatar_files/**"
+                "/avatar_files/**",
+                "/company/registerCompany"
         );
 
         String path = request.getRequestURI();

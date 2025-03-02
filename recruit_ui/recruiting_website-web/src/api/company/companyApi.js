@@ -18,6 +18,13 @@ const API = {
   USER_INFO: '/api/company/selectUserInfo',
   USER_LOGOUT: '/user/logout',
   COMPANY_REGISTER_INFO: '/api/company/registerCompany',
+  COMPANY_UPDATE_RESUME_STATUS: '/api/company/updateResumeStatus',
+  COMPANY_ADD_INTERVIEW_DATE: '/api/company/addInterviewDate',
+  COMPANY_SELECT_INTERVIEW_DATE: '/api/company/selectInterviewDate',
+  COMPANY_DELETE_INTERVIEW_DATE_BY_ID: '/api/company/deleteInterviewDate',
+  COMPANY_SEND_INVITATION: '/api/company/sendInterview',
+  COMPANY_SELECT_INTERVIEW_LIST: '/api/company/selectInterviewList',
+  COMPANY_UPDATE_INTERVIEW_LIST: '/api/company/updateInterviewList',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -100,9 +107,9 @@ export const addUserCompany = (formData) => {
 
 export const deleteUserCompany = (userId) => request.delete(`${API.COMPANY_USER_DELETE}/${userId}`)
 
-export const companyResumeList = (jobId, page, size, resumeType, resumeName) =>
+export const companyResumeList = (jobId, page, size, resumeType, resumeName, resumeStatus) =>
   request.get(`${API.COMPANY_RESUME_LIST}/${jobId}`, {
-    params: { page, size, resumeType, resumeName },
+    params: { page, size, resumeType, resumeName, resumeStatus },
   })
 
 export const selectResume = (data) => request.post(API.COMPANY_SELECT_RESUME, data)
@@ -112,3 +119,19 @@ export const getUserInfo = () => request.get(API.USER_INFO)
 export const userLogout = () => request.post(API.USER_LOGOUT)
 
 export const registerCompany = (data) => request.post(API.COMPANY_REGISTER_INFO, data)
+
+export const updateResumeStatus = (resumeStatus, resumeId, jobId, resumeDelete) =>
+  request.post(
+    `${API.COMPANY_UPDATE_RESUME_STATUS}/${resumeStatus}/${resumeId}/${jobId}/${resumeDelete}`,
+  )
+export const addInterviewDate = (data) => request.post(API.COMPANY_ADD_INTERVIEW_DATE, data)
+export const selectInterviewDate = () => request.get(API.COMPANY_SELECT_INTERVIEW_DATE)
+export const deleteInterviewDateById = (interviewDateId) => request.delete(`${API.COMPANY_DELETE_INTERVIEW_DATE_BY_ID}/${interviewDateId}`)
+export const sendInvitationData = (data) => request.post(API.COMPANY_SEND_INVITATION, data)
+
+export const selectInterviewList = (page, size, jobId) =>
+  request.get(API.COMPANY_SELECT_INTERVIEW_LIST, {
+    params: { page, size, jobId },
+  });
+
+export const updateInterviewList = (data) => request.put(API.COMPANY_UPDATE_INTERVIEW_LIST, data)

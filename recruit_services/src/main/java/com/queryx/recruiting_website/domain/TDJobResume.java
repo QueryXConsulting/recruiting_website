@@ -38,11 +38,15 @@ public class TDJobResume {
     @Schema(name = "简历名称", description = "默认是用户名", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeName;
 
-    @Schema(name = "简历投递状态", description = "1(已查看) 2(待面试) 0:用户端(已投递), 公司端(待查看)", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "简历投递状态", description = "简历投递状态1已查看 2待面试 0用户端(已投递)公司端(待查看) 3offer发放 4上传材料 5录入信息6预约报道", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resumeStatus;
+
+    @Schema(name = "简历通过状态", description = "为0时则代表不合适", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String resumeDelete;
 
     @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
+
 
     @Schema(name = "简历投递时间", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Date.class)
     private Date deliverDate;
