@@ -31,9 +31,6 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class UserResumeServiceImpl implements UserResumeService {
 
-    // 上传附件简历命名前缀及后缀
-    final String prefix = "resume";
-    final String suffix = ".pdf";
 
     final String timeZone = "Asia/Shanghai";
 
@@ -53,8 +50,8 @@ public class UserResumeServiceImpl implements UserResumeService {
     public Integer insertResumeAttachment(Long userId, MultipartFile file) throws IOException {
         FileOutputStream fileOutputStream = null;
         try {
-            // 创建本地文件 TODO 附件简历命名规则
-            File resumeFile = File.createTempFile(String.format("%s_%d_", prefix, userId), suffix, Paths.get(filePath).toFile());
+            // 创建本地文件
+            File resumeFile = File.createTempFile(String.format("%d_", System.currentTimeMillis()), file.getOriginalFilename(), new File(filePath));
             // 写入文件
             byte[] fileBytes = file.getBytes();
             fileOutputStream = new FileOutputStream(resumeFile, false);
@@ -62,12 +59,16 @@ public class UserResumeServiceImpl implements UserResumeService {
             fileOutputStream.flush();// 刷新缓冲区，立即将数据写入文件
             // 装配数据
             final TDResumeAttachments tdRS = new TDResumeAttachments();
-            // TODO 上传附件简历：数据装配待优化
+            // 附件简历数据装配
             tdRS.setUserId(userId);
             tdRS.setFileName(file.getOriginalFilename());
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
             tdRS.setUploadDate(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
-            tdRS.setFilePath(resumeFile.getPath());
+//            String[] strings = filePath.split("/");
+//            String s = strings[strings.length - 1] + "/";
+//            tdRS.setFilePath(s + resumeFile.getName());
+            // TODO 附件简历路径
+            tdRS.setFilePath("/" + Common.getUploadFolderName(filePath, "/", resumeFile.getName()));
             tdRS.setAttachmentsReview(Common.REVIEW_OK);
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
@@ -82,7 +83,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         }
     }
 
-    @Override // TODO 应该先查询用户是否有附件简历，如果有附件简历，再通过附件简历ID查询并删除附件简历
+    @Override
     public Integer deleteResumeAttachment(Long raId) {
         // 获取附件信息
         TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectById(raId);
@@ -90,11 +91,13 @@ public class UserResumeServiceImpl implements UserResumeService {
         if (resumeAttachment == null) {
             return 0;
         }
-        // 获取文件路径
-        String filePath = resumeAttachment.getFilePath();
-
+        // TODO 获取文件路径,待测试
+        String path = resumeAttachment.getFilePath();
+//        int lastIndex = filePath.lastIndexOf("/", filePath.length() - 2);
+//        path = path.substring(0, lastIndex);
+        path = Common.getUploadFolderPath(filePath, "/") + path;
         // 删除本地文件
-        File file = new File(filePath);
+        File file = new File(path);
         if (file.exists() && file.delete()) {
             // 再删除数据库字段
             return TDResumeAttachmentsMapper.delete(new LambdaUpdateWrapper<TDResumeAttachments>()

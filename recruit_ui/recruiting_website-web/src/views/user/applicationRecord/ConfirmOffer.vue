@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import WBForm from '@/components/WBForm.vue';
-import { deliverList } from '@/api/user/UserApi';
+import { offer, offerFilePath, offerList, offerStatus } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1);// 当前页
@@ -13,15 +13,16 @@ const pages = ref(0);// 总页数
 
 // 表格根数据
 const rootData = reactive([
-    { tag: 'table, info', prop: "companyInfoName", label: "公司名" },
-    { tag: 'table, info', prop: "deliverDate", label: "投递日期" },
-    { tag: '', prop: "resumeId", label: "简历ID" },
-    { tag: 'table, info', prop: "jobPosition", label: "面试岗位" },
-    { tag: 'info', prop: "resumeName", label: "简历名" },
-    { tag: 'info', prop: "resumeStatus", label: "简历状态" },
-    { tag: 'info', prop: "resumeDelete", label: "流程状态" },
-    { tag: 'info', prop: "resumeType", label: "简历类型" },
-    { tag: '', prop: "userId", label: "用户ID" }
+    { tag: '', prop: "jobId", label: "职位ID" },
+    { tag: '', prop: "userId", label: "用户ID" },
+    { tag: '', prop: "offerId", label: "offerID" },
+    { tag: '', prop: "jobPosition", label: "面试岗位" },
+    { tag: '', prop: "companyInfoName", label: "公司名" },
+    { tag: '', prop: "offersDate", label: "发送时间" },
+    { tag: '', prop: "offersStatus", label: "offer状态" },
+    // { tag: 'info', prop: "resumeName", label: "简历名" },
+    // { tag: 'table, info', prop: "deliverDate", label: "投递日期" },
+    // { tag: 'info', prop: "resumeType", label: "简历类型" },
 ]);
 // 对象数据填充
 const createObject = (val, data, fn) => {
@@ -37,7 +38,7 @@ const createObject = (val, data, fn) => {
 // 表格列显示
 const tableColumns = reactive([]);
 (() => {
-    const o = rootData.filter((item) => item.tag.includes('table'));
+    const o = rootData.filter((item) => !item.prop.includes('Id'));
     for (let i = 0; i < o.length; i++) {
         tableColumns.push({ prop: o[i].prop, label: o[i].label });
     }
@@ -45,8 +46,8 @@ const tableColumns = reactive([]);
 
 // 表格数据
 const tableData = ref([]);
-const getDeliverList = async () => {
-    const res = await deliverList(currentPage.value, pageSize.value);
+const getOfferList = async () => {
+    const res = await offerList(currentPage.value, pageSize.value);
     tableData.value = res.content.records;
     currentPage.value = res.content.current;
     pageSize.value = res.content.size;
@@ -55,7 +56,7 @@ const getDeliverList = async () => {
     ElMessage.success(res.message);
 }
 onMounted(async () => {
-    getDeliverList();
+    getOfferList();
 })
 
 // 获取选项label
@@ -70,17 +71,28 @@ const getTagType = (options, value) => {
 }
 
 
-// 应聘状态选项
+// 应聘状态选项  0待发送 1是已接受 2拒绝 3撤销
 const statusOptions = [
-    { status: null, value: '0', label: '已投递' },
-    { status: null, value: '1', label: '已查看' },
-    { status: null, value: '2', label: '待面试' },
-    { status: null, value: '3', label: 'offer发放' },
-    { status: null, value: '4', label: '上传材料' },
-    { status: null, value: '5', label: '录入信息' },
-    { status: null, value: '6', label: '预约报道' }
+    { tag: 'warning', value: '0', label: '待发送' },
+    { tag: 'success', value: '1', label: '已接受' },
+    { tag: 'danger', value: '2', label: '拒绝' },
+    // { tag: '', value: '3', label: '撤销' },
 ]
-
+// 表格右侧操作栏
+const hasOperation = ref(true);// 是否有操作栏
+const tableOperation = [
+    { type: 'default', text: '查看' },
+    { type: 'danger', text: '拒绝' },
+    { type: 'success', text: '接受' },
+]
+// const filteredOperation = tableOperation;
+const getStatusOptionsLabel = (value) => {
+    if (value !== '0') {
+        // filteredOperation = [];
+        hasOperation.value = false;
+    }
+    return getOptionLabel(statusOptions, value);
+}
 // 面试类型选项
 const typeOptions = [
     { tag: 'default', value: '0', label: '线上' },
@@ -100,9 +112,31 @@ createObject('label', formItems, (data) => {
 const isShowDialog = ref(false);// 详情弹窗是否显示
 
 // 表格点击事件
-const handleClick = async (row, _) => {
-    formData.value = row;
-    isShowDialog.value = true;
+const handleOperationClick = async (btnIndex, row, text) => {
+    // console.log(btnIndex, row, text);
+    switch (btnIndex) {
+        case 0:
+            // 查看详情
+            const _filePath = await offerFilePath(row.offerId);
+            console.log(_filePath);
+            break;
+        case 1:
+            // 拒绝
+            const _updateResult = await offerStatus(row.offerId, 2);
+            console.log('拒绝', _updateResult);
+            if (_updateResult) {
+                getOfferList();
+            }
+            break;
+        case 2:
+            // 接受
+            // const res = await acceptOffer(row.offerId);
+
+            // getOfferList();
+            break;
+        default:
+            break;
+    }
 
 }
 
@@ -123,24 +157,24 @@ const handleCurrentChange = (page) => {
 
 <template>
     <div>
-        <WBTable :total="total" @row-click="handleClick" @update:currentPage="handleCurrentChange"
-            @update:page-size="handleSizeChange" :table-columns="tableColumns" v-model:tableData="tableData"
-            v-model:currentPage="currentPage" operation-width="620px" v-model:pageSize="pageSize" border>
+        <WBTable :total="total" @update:currentPage="handleCurrentChange" @update:page-size="handleSizeChange"
+            :table-columns="tableColumns" v-model:tableData="tableData" v-model:currentPage="currentPage"
+            :operation-list="tableOperation" @operation-click="handleOperationClick" :has-operation="hasOperation"
+            v-model:pageSize="pageSize" border>
             <template #default="scope">
-                <span>{{ tableData[scope.$index][scope.prop] }}</span>
+                <el-tag v-if="scope.prop === 'offersStatus'"
+                    :type="getTagType(statusOptions, tableData[scope.$index][scope.prop])">
+                    {{ getStatusOptionsLabel(tableData[scope.$index][scope.prop]) }}
+                </el-tag>
+                <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
             </template>
             <!-- 表格右侧操作栏 -->
-            <template #operation="scope">
-                <el-steps :process-status="scope.row.resumeDelete === '0' ? 'error' : 'success'" style="max-width: 600px"
-                    :active="+scope.row.resumeStatus" finish-status="success" align-center>
-                    <el-step class="step-item" v-for="(item, index) in statusOptions" :description="item.label"
-                        :key="index">
-                        <!-- <template #icon>
-                            <i class="step-icon"></i>
-                        </template> -->
-                    </el-step>
-                </el-steps>
-            </template>
+            <!-- <template #operation="scope">
+                <el-button v-for="(item, index) in tableOperation" :type="item.type" :key="index" size="small"
+                    @click="handleOperationClick(index, scope.row, item.text)">
+                    {{ item.text }}
+                </el-button>
+            </template> -->
         </WBTable>
 
         <!-- 面试时间选择窗口 -->

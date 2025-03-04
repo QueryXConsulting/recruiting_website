@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override // TODO 未测试
+    @Override
     public CommonResp<String> uploadAvatar(Long userId, MultipartFile image) {
         // 查询用户是否存在头像
         TDUser user = userMapper.selectById(userId);
@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
             }
         }
+        String path;
         // 保存头像图片
         String fileName = image.getOriginalFilename();
         String newFileName = System.currentTimeMillis() + "_" + fileName;
@@ -109,12 +110,16 @@ public class UserServiceImpl implements UserService {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
             }
             // 更新数据库
-            user.setUserAvatar(newFileName);
+            path = "/" + Common.getUploadFolderName(uploadPathAvatar, "/", newFileName);
+            user.setUserAvatar(path);
             userMapper.updateById(user);
         } catch (Exception e) {
             return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
         }
-        return CommonResp.success(newFileName);
+//        String[] strings = uploadPathAvatar.split("/");
+//        String uploadFolder = strings[strings.length - 1];
+//        return CommonResp.success(uploadFolder + "/" + newFileName);
+        return CommonResp.success(Common.getImgURL() + path);
     }
 
 }

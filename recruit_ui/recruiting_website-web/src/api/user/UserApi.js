@@ -20,7 +20,13 @@ const API = {
   INTERVIEW_INFO_URL: '/interview/info',
   INTERVIEW_DATE_URL: '/interview/date',
   INTERVIEW_UPDATE_URL: '/interview/isAccept',
-
+  // 应聘相关接口
+  DELIVER_LIST_URL: '/deliver/list',
+  // offer相关接口
+  OFFER_LIST_URL: '/offer/list',
+  OFFER_STATUS_URL: '/offer/status',
+  OFFER_FILE_PATH_URL: '/offer/detail',
+  OFFER_SIGNATURE_URL: '/offer/signature'
 }
 
 // 用户相关
@@ -42,4 +48,12 @@ export const resumeAll = () => request.get(API.ALL_RESUME_URL)
 export const interviewList = (page, pageSize) => request.get(API.INTERVIEW_LIST_URL, {params: {page: page, pageSize: pageSize}})
 export const interviewDate = (companyId) => request.get(API.INTERVIEW_DATE_URL, {params: {companyId: companyId}})
 export const interviewAccept = (id, isAccept) => request.put(API.INTERVIEW_UPDATE_URL, null, {params: {interviewId: id, isAccept: isAccept}})
+// 应聘相关
+export const deliverList = (page, pageSize) => request.get(API.DELIVER_LIST_URL, { params: { page: page, pageSize: pageSize } })
+// offer相关
+export const offerList = (page, size) => request.get(API.OFFER_LIST_URL, { params: { page: page, size: size } })
+export const offerStatus = (id, status) => request.put(API.OFFER_STATUS_URL, null, { params: { offerId: id, status: status } })
+export const offerFilePath = (id) => request.get(API.OFFER_FILE_PATH_URL, { params: { offerId: id } })
+export const offerSignature = (id, img) => request.put(API.OFFER_SIGNATURE_URL, null, { params: { offerId: id, image: img } })
+
 

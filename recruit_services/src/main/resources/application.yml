@@ -2,6 +2,8 @@
 file:
   upload-path-resume: D:/maven/resume_files/ # TODO 文件上传路径 生产环境下需要修改
   upload-path-avatar: D:/maven/avatar_files/
+  upload-path-offers: D:/maven/offer_files/
+  upload-path-signature: D:/maven/signature_files/
   upload-path-enterpriseFile: D:/maven/enterprise_files/
 
 

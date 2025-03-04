@@ -13,13 +13,22 @@ import java.util.List;
 @Component
 public class Common {
 
-    // 简历投递表相关常量
+    // offer相关常量
+    public static final String OFFER_STATUS_WAIT = "0";// 待发送
+    public static final String OFFER_STATUS_ACCEPT = "1";// 接受
+    public static final String OFFER_STATUS_REJECT = "2";// 拒绝
+    public static final String OFFER_STATUS_CANCEL = "3";// 撤销
+    // 简历投递表(job_resume)相关常量
     public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";// 已投递
     public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";// 待查看
     public static final String DELIVER_RESUME_STATUS_VIEWED = "1";// 已查看
     public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";// 待面试
+    public static final String DELIVER_RESUME_DELETE_SQUARE_PEG = "0";// 不合适
+    public static final String DELIVER_RESUME_STATUS_OFFER = "3";// 不合适
     // 面试相关常量
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
+
+
     private static String port;
     private static String ip;
 
@@ -89,6 +98,29 @@ public class Common {
 
     public static String getImgURL(){
         return "http://" + ip + ":" + port;
+    }
+
+    /**
+     * 获取上传文件夹名称（不含路径）
+     * @param src 上传文件路径
+     * @param splitCode 分隔符
+     * @param appendCode 追加字符
+     * @return 上传文件夹名称
+     */
+    public static String getUploadFolderName(String src, String splitCode, String appendCode){
+        String[] strings = src.split(splitCode);
+        return strings[strings.length - 1] + appendCode;
+    }
+
+    /**
+     * 获取上传文件夹路径（只含路径）
+     * @param src 上传文件路径
+     * @param splitCode 分隔符
+     * @return 上传文件夹路径
+     */
+    public static String getUploadFolderPath(String src, String splitCode){
+        String folderName = Common.getUploadFolderName(src, splitCode, "");
+        return src.replace(folderName, "");
     }
 
 }
