@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,13 +14,21 @@ import java.util.Date;
 @Data
 public class InterviewListVo {
 
-    @JsonSerialize(using = StringSerializer.class)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "面试ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long interviewId;
 
-    @JsonSerialize(using = StringSerializer.class)
-    @Schema(name = "简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long ResumeId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(name = "投递简历ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobResumeId;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(name = "用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long userId;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(name = "工作ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobId;
 
     @Schema(name = "面试时长", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer interviewTime;

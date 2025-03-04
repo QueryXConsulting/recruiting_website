@@ -19,7 +19,7 @@ public interface TDResumeService extends IService<TDResume> {
     Object resumeReview(String review, Long resumeId, String resumeType);
 
 
-    Object updateResumeStatus(String resumeStatus, Long resumeId, Long jobId, String resumeDelete);
+    Object updateResumeStatus(String resumeStatus, Long jobResumeId, String resumeDelete);
 
 
 }

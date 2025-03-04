@@ -7,6 +7,8 @@ import { ElMessage } from 'element-plus';
 import WBDialog from '@/components/WBDialog.vue';
 import WBForm from '@/components/WBForm.vue';
 import WBDrawer from '@/components/WBDrawer.vue';
+import WBTable from '@/components/table/WBTable.vue';
+import WBTableHeader from '@/components/table/WBTableHeader.vue';
 
 const tableData = reactive([]); // 表格数据
 const responseData = reactive({}); // 请求响应数据
@@ -288,9 +290,9 @@ const handleCurrentChange = (val) => {
 
 <template>
     <WBTable :table-data="tableData" :table-columns="tableColumns" :operation-list="operationButtons"
-        @operation-click="handleOperationClick" :total="responseData.total" v-model:current-page="responseData.pages"
+        @operation-click="handleOperationClick" :total="responseData.total" v-model:current-page="responseData.current"
         v-model:page-size="responseData.size" @update:page-size="handleSizeChange"
-        @update:current-page="handleCurrentChange" height="100%" :border=true style="width: 100%">
+        @update:current-page="handleCurrentChange" height="100%" :border=true >
         <!-- 表格头 -->
         <template #header>
             <WBTableHeader v-model:input="input" v-model:select="isUserDisabled" @click-add="handleUserAdd"

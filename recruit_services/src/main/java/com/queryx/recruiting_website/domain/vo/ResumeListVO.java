@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 public class ResumeListVO {
     @JsonSerialize(using = ToStringSerializer.class)
+    private Long jobResumeId;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long resumeId;
     @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;

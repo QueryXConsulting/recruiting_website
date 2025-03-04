@@ -7,6 +7,8 @@ import WBDrawer from '@/components/WBDrawer.vue';
 import WBForm from '@/components/WBForm.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import { reactive } from 'vue';
+import WBTable from '@/components/table/WBTable.vue';
+import WBTableHeader from '@/components/table/WBTableHeader.vue';
 
 // 数据请求对象
 const queryObj = useResumeListStore().getResumeListQueryParams;

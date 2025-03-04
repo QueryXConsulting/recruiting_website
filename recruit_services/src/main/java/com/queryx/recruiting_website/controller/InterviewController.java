@@ -14,13 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -92,8 +85,7 @@ public class InterviewController {
      */
     @Operation(summary = "更新面试状态", parameters = {
             @Parameter(name = "interviewId", description = "面试id", schema = @Schema(implementation = Long.class), required = true),
-            @Parameter(name = "isAccept", description = "是否接受", schema = @Schema(implementation = String.class), required = true),
-            @Parameter(name = "interviewDate", description = "面试时间", schema = @Schema(implementation = Long.class), required = true)
+            @Parameter(name = "isAccept", description = "是否接受", schema = @Schema(implementation = String.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "接受成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "477", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
@@ -102,14 +94,8 @@ public class InterviewController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/isAccept")
-    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept, @RequestParam(required = false, name = "interviewDate") String interviewDate) throws ParseException {
-        Date date = null;
-        if (interviewDate != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            ZonedDateTime zonedDateTime = ZonedDateTime.parse(interviewDate, formatter);
-            date = Date.from(zonedDateTime.toInstant());
-        }
-        return interviewService.isAcceptInterview(interviewId, isAccept, date);
+    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept) {
+        return interviewService.isAcceptInterview(interviewId, isAccept);
     }
 
 
