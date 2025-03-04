@@ -1,7 +1,7 @@
 package com.queryx.recruiting_website.domain.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,6 +13,17 @@ public class UpdateInterviewDto {
 
     @Schema(name = "面试ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long interviewId;
+
+    @Schema(name = "简历工作关联id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobResumeId;
+
+
+    @Schema(name = "用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long userId;
+
+
+    @Schema(name = "工作ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long jobId;
 
     @Schema(name = "面试结果", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String interviewResult;

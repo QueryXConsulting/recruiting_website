@@ -42,6 +42,8 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     private TDResumeService tdResumeService;
     @Resource
     private TDJobResumeMapper tdJobResumeMapper;
+    @Resource
+    private TDOffersMapper offersMapper;
 
     @Override
     public Object sendInterviewDto(SendInterviewDto sendInterviewDto) {
@@ -60,23 +62,20 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
 
         LambdaQueryWrapper<TDInterview> tdInterviewLambdaQueryWrapper = new LambdaQueryWrapper<>();
         tdInterviewLambdaQueryWrapper.eq(TDInterview::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
-                .eq(TDInterview::getJobId,jobId)
+                .eq(TDInterview::getJobId, jobId)
                 .eq(TDInterview::getIsDeleted, Common.NOT_DELETE);
         Page<TDInterview> interviewPage = page(new Page<>(page, size), tdInterviewLambdaQueryWrapper);
 
 
-        List<TDJobResume> tdJobResumes = tdJobResumeMapper.selectList(new LambdaQueryWrapper<TDJobResume>().eq(TDJobResume::getJobId,jobId));
+        List<TDJobResume> tdJobResumes = tdJobResumeMapper.selectList(new LambdaQueryWrapper<TDJobResume>().eq(TDJobResume::getJobId, jobId));
         Map<Long, String> resumeMap = tdJobResumes.stream()
                 .collect(Collectors.toMap(TDJobResume::getUserId, TDJobResume::getResumeName));
-        Map<Long, Long> resumeIdmap = tdJobResumes.stream().
-                collect(Collectors.toMap(TDJobResume::getUserId, TDJobResume::getResumeId));
 
         Page<InterviewListVo> interviewListVoPage = new Page<>(interviewPage.getCurrent(), interviewPage.getSize(), interviewPage.getTotal());
         interviewListVoPage.setRecords(interviewPage.getRecords().stream().map(interview -> {
             InterviewListVo interviewListVo = new InterviewListVo();
             BeanUtils.copyProperties(interview, interviewListVo);
             String resumeName = resumeMap.get(interview.getUserId());
-            interviewListVo.setInterviewId(resumeIdmap.get(interview.getUserId()));
             if (resumeName != null) {
                 interviewListVo.setResumeName(resumeName);
             }
@@ -91,17 +90,19 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     public Object updateInterview(UpdateInterviewDto updateInterviewDto) {
         TDInterview tdInterview = new TDInterview();
         BeanUtils.copyProperties(updateInterviewDto, tdInterview);
-        // TODO 待修改
-//        if (tdInterview.getInterviewResult().equals("1")) {
-//            tdResumeService.updateResumeStatus("3", tdInterview.)
-//        }
+
+        if (tdInterview.getInterviewResult() != null && tdInterview.getInterviewResult().equals("1")) {
+            tdResumeService.updateResumeStatus("3", tdInterview.getJobResumeId(), null);
+            TDOffers tdOffers = new TDOffers();
+            tdOffers.setUserId(updateInterviewDto.getUserId());
+            tdOffers.setJobId(updateInterviewDto.getJobId());
+            offersMapper.insert(tdOffers);
+        } else if (tdInterview.getInterviewStatus().equals("3")) {
+            tdResumeService.updateResumeStatus("1", tdInterview.getJobResumeId(), null);
+        }
+        tdInterview.setJobId(null);
+        tdInterview.setUserId(null);
         update(tdInterview, new LambdaQueryWrapper<TDInterview>().eq(TDInterview::getInterviewId, updateInterviewDto.getInterviewId()));
-        return null;
-    }
-
-    @Override
-    public Object offerList(Integer page, Integer size) {
-
         return null;
     }
 
@@ -173,7 +174,7 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     }
 
     @Override
-    public CommonResp<Boolean>  isAcceptInterview(Long interviewId, String isAccept) {
+    public CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept) {
         if (isAccept == null || interviewId == null || isAccept.trim().isEmpty())
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, false);
         TDInterview interview = interviewMapper.selectById(interviewId);
@@ -183,9 +184,6 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
         interview.setInterviewStatus(isAccept);
         return CommonResp.success(interviewMapper.updateById(interview) > 0);
     }
-
-
-
 
 
 }

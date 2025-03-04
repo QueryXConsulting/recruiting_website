@@ -1,27 +1,37 @@
 package com.queryx.recruiting_website.domain.vo;
 
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 面试时间
+ *
+ * @author fjj
+ * @since 2025-2-27
+ */
 @Data
-public class InterViewDateVo {
-    @JsonSerialize(using = StringSerializer.class)
+@Schema(name = "面试时间VO类")
+public class InterviewDateVO {
+
     @Schema(name = "面试时间id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long interviewDateId;
 
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @Schema(name = "面试时间开始范围", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "公司id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long companyId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(name = "面试时间段(开始时间)", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date interviewDateStart;
 
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @Schema(name = "面试时间结束范围", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(name = "面试时间段(结束时间)", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date interviewDateEnd;
+
+    @Schema(name = "删除状态", description = "0代表未删除,1代表已删除", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String isDeleted;
+
 }
+

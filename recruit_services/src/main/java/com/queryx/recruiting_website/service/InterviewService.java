@@ -21,7 +21,7 @@ public interface InterviewService extends IService<TDInterview> {
 
     Object updateInterview(UpdateInterviewDto updateInterviewDto);
 
-    Object offerList(Integer page, Integer size);
+
 
     /**
      * 查询用户所有面试信息

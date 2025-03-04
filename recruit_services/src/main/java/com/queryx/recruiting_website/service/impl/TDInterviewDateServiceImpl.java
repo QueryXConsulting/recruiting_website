@@ -5,7 +5,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDInterviewDate;
 import com.queryx.recruiting_website.domain.dto.AddInterviewDto;
-import com.queryx.recruiting_website.domain.vo.InterViewDateVo;
+
+import com.queryx.recruiting_website.domain.vo.InterviewDateVO;
 import com.queryx.recruiting_website.mapper.TDInterviewDateMapper;
 import com.queryx.recruiting_website.service.TDInterviewDateService;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -33,7 +34,7 @@ public class TDInterviewDateServiceImpl extends ServiceImpl<TDInterviewDateMappe
         return tdInterviewDateMapper.selectList(
                 new LambdaQueryWrapper<TDInterviewDate>().eq(TDInterviewDate::getCompanyId, companyInfoId)
                         .eq(TDInterviewDate::getIsDeleted, Common.NOT_DELETE)).stream().map(data->{
-            InterViewDateVo interViewDateVo = new InterViewDateVo();
+            InterviewDateVO interViewDateVo = new InterviewDateVO();
             BeanUtils.copyProperties(data,interViewDateVo);
             return interViewDateVo;
         }).toList();

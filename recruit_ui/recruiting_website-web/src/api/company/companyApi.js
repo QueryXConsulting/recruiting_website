@@ -25,6 +25,8 @@ const API = {
   COMPANY_SEND_INVITATION: '/api/company/sendInterview',
   COMPANY_SELECT_INTERVIEW_LIST: '/api/company/selectInterviewList',
   COMPANY_UPDATE_INTERVIEW_LIST: '/api/company/updateInterviewList',
+  COMPANY_OFFER_LIST: '/api/company/offerList',
+  COMPANY_SELECT_OFFER_TEMPLATE: '/api/company/selectOfferTemplate',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -120,9 +122,9 @@ export const userLogout = () => request.post(API.USER_LOGOUT)
 
 export const registerCompany = (data) => request.post(API.COMPANY_REGISTER_INFO, data)
 
-export const updateResumeStatus = (resumeStatus, resumeId, jobId, resumeDelete) =>
+export const updateResumeStatus = (resumeStatus, jobResumeId, resumeDelete) =>
   request.post(
-    `${API.COMPANY_UPDATE_RESUME_STATUS}/${resumeStatus}/${resumeId}/${jobId}/${resumeDelete}`,
+    `${API.COMPANY_UPDATE_RESUME_STATUS}/${resumeStatus}/${jobResumeId}/${resumeDelete}`,
   )
 export const addInterviewDate = (data) => request.post(API.COMPANY_ADD_INTERVIEW_DATE, data)
 export const selectInterviewDate = () => request.get(API.COMPANY_SELECT_INTERVIEW_DATE)
@@ -135,3 +137,10 @@ export const selectInterviewList = (page, size, jobId) =>
   });
 
 export const updateInterviewList = (data) => request.put(API.COMPANY_UPDATE_INTERVIEW_LIST, data)
+
+export const selectOffersList = (page, size, jobId) =>
+  request.get(API.COMPANY_OFFER_LIST, {
+    params: { page, size, jobId },
+  })
+
+export const selectOfferTemplate = () => request.get(API.COMPANY_SELECT_OFFER_TEMPLATE)
