@@ -7,30 +7,40 @@ import lombok.Data;
 
 import java.util.Date;
 
-
+/**
+ * @Author：fjj
+ * @Date：2025/3/3 15:35
+ */
 @Data
 @Schema(description = "offers类")
 public class TDOffers {
 
-    @TableId(type = IdType.AUTO)
-    @Schema(name = "offerID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long offersId;
+    // 主键ID
+    @TableId(value = "offers_id", type = IdType.AUTO)
+    @Schema(name = "offers表id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long offerId;
 
-    @Schema(name = "用户ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    // 用户ID
+    @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
 
-    @Schema(name = "工作ID", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    // 职位ID
+    @Schema(name = "职位id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long jobId;
 
-
-    @Schema(name = "offers状态", description = "状态0待发送 1是已接受 2拒绝 3撤销", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    // offer状态
+    @Schema(name = "offer状态", description = "offer状态：0-接受，1-拒绝，2-未选择", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String offersStatus;
 
-    @Schema(name = "发送时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    // offer发放时间
+    @Schema(name = "offer发放时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Date offersDate;
 
-    @Schema(name = "offer文件存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    // offer存储路径
+    @Schema(name = "offer存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String offersFilePath;
 
+    // 签名存储路径
+    @Schema(name = "签名存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String signaturePath;
 }
-
