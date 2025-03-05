@@ -72,17 +72,17 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         LambdaQueryWrapper<TDInterview> tdInterviewLambdaQueryWrapper = new LambdaQueryWrapper<>();
         List<Long> userIds = tdJobResumes.getRecords().stream().map(TDJobResume::getUserId).toList();
         tdInterviewLambdaQueryWrapper.eq(TDInterview::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
-                .eq(TDInterview::getJobId,jobId)
-                .eq(TDInterview::getIsDeleted,Common.NOT_DELETE)
-                .in(TDInterview::getUserId,userIds);
+                .eq(TDInterview::getJobId, jobId)
+                .eq(TDInterview::getIsDeleted, Common.NOT_DELETE)
+                .in(TDInterview::getUserId, userIds);
 
         Map<Long, String> interviewMap = interviewMapper.selectList(tdInterviewLambdaQueryWrapper)
                 .stream().collect(Collectors.toMap(TDInterview::getUserId, TDInterview::getInterviewStatus));
         List<ResumeListVO> resumeListVOS = tdJobResumes.getRecords().stream().map(tdJobResume -> {
             ResumeListVO resumeListVO = new ResumeListVO();
-            BeanUtils.copyProperties(tdJobResume,resumeListVO);
+            BeanUtils.copyProperties(tdJobResume, resumeListVO);
             String InterviewStatus = interviewMap.get(tdJobResume.getUserId());
-            if (StringUtils.hasText(InterviewStatus)){
+            if (StringUtils.hasText(InterviewStatus)) {
                 resumeListVO.setInterviewStatus(InterviewStatus);
             }
             return resumeListVO;
@@ -132,7 +132,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         if (resumeType.equals(Common.RESUME_ONLINE)) {
             // 查找在线简历
             List<Long> userResumeOnlineIds = users.stream().map(TDUser::getResumeId).filter(Objects::nonNull).toList();
-            Map<Long, String> resumeIDMap = users.stream().collect(Collectors.toMap(TDUser::getResumeId, TDUser::getUserName));
+            Map<Long, String> resumeIDMap = users.stream().filter(map -> map.getResumeId() != null).collect(Collectors.toMap(TDUser::getResumeId, TDUser::getUserName));
 
             LambdaQueryWrapper<TDResume> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.in(TDResume::getResumeId, userResumeOnlineIds)
@@ -190,16 +190,14 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     }
 
     @Override
-    public Object updateResumeStatus(String resumeStatus, Long resumeId, Long jobId, String resumeDelete) {
+    public Object updateResumeStatus(String resumeStatus,Long jobResumeId, String resumeDelete) {
         LambdaUpdateWrapper<TDJobResume> tdResumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        tdResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId, jobId)
-                .eq(TDJobResume::getResumeId, resumeId)
-                .set(StringUtils.hasText(resumeStatus)&&!resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
+        tdResumeLambdaUpdateWrapper.eq(TDJobResume::getJobResumeId,jobResumeId)
+                .set(StringUtils.hasText(resumeStatus) && !resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
                 .set(StringUtils.hasText(resumeDelete), TDJobResume::getResumeDelete, resumeDelete);
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
         return null;
     }
-
 
 
 }

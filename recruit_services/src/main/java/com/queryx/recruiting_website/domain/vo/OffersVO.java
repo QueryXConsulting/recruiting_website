@@ -2,6 +2,8 @@ package com.queryx.recruiting_website.domain.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,10 +14,12 @@ import java.util.Date;
  * @Date：2025/3/3 15:47
  */
 @Data
+@Schema(description = "offers类")
 public class OffersVO {
 
     // 主键ID
     @TableId(value = "offers_id", type = IdType.AUTO)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "offers表id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long offerId;
 

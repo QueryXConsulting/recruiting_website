@@ -6,7 +6,11 @@ file:
   upload-path-signature: D:/maven/signature_files/
   upload-path-enterpriseFile: D:/maven/enterprise_files/
 
-
+office:
+  type: oo  # 指定使用OnlyOffice
+  oo:
+    doc-service: 127.0.0.1:80  # OnlyOffice服务的地址
+    call-back-url: 127.0.0.1:8080/company/OnlyOffice/callback
 
 # 服务器配置
 server:

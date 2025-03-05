@@ -8,4 +8,5 @@ import com.queryx.recruiting_website.domain.TDOffers;
  * @Date：2025/3/3 15:49
  */
 public interface TDOffersMapper extends BaseMapper<TDOffers> {
+
 }

@@ -13,6 +13,7 @@ import java.util.List;
 @Component
 public class Common {
 
+
     // offer相关常量
     public static final String OFFER_STATUS_WAIT = "0";// 待发送
     public static final String OFFER_STATUS_ACCEPT = "1";// 接受

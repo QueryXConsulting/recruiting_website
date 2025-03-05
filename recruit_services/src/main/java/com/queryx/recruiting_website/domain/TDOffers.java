@@ -12,6 +12,7 @@ import java.util.Date;
  * @Date：2025/3/3 15:35
  */
 @Data
+@Schema(description = "offers类")
 public class TDOffers {
 
     // 主键ID

@@ -47,7 +47,4 @@ public class InterviewVO {
      * 0代表拒绝,1代表接受
      */
     private String interviewStatus;
-
-    private Integer interviewTime;// 面试时长
-    private Long jobResumeId;// 投递简历id
 }

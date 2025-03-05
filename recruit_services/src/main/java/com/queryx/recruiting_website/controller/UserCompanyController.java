@@ -10,12 +10,22 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -38,6 +48,8 @@ public class UserCompanyController {
     private TDInterviewDateService tdInterviewDateService;
     @Resource
     private InterviewService interviewService;
+    @Resource
+    private TDOffersService offersService;
 
 
     @GetMapping("/selectCategory")
@@ -158,11 +170,10 @@ public class UserCompanyController {
         return CommonResp.success(tdCompanyInfoService.registerCompany(registerCompanyDto));
     }
 
-    @PostMapping("/updateResumeStatus/{resumeStatus}/{resumeId}/{jobId}/{resumeDelete}")
+    @PostMapping("/updateResumeStatus/{resumeStatus}/{jobResumeId}/{resumeDelete}")
     @Operation(summary = "修改简历投递状态")
-    public CommonResp updateResumeStatus(@PathVariable("resumeStatus") String resumeStatus, @PathVariable("resumeId") Long resumeId
-            , @PathVariable("jobId") Long jobId, @PathVariable("resumeDelete") String resumeDelete) {
-        return CommonResp.success(tdResumeService.updateResumeStatus(resumeStatus, resumeId, jobId, resumeDelete));
+    public CommonResp updateResumeStatus(@PathVariable("resumeStatus") String resumeStatus, @PathVariable("jobResumeId") Long jobResumeId, @PathVariable("resumeDelete") String resumeDelete) {
+        return CommonResp.success(tdResumeService.updateResumeStatus(resumeStatus, jobResumeId, resumeDelete));
     }
 
     @PostMapping("/addInterviewDate")
@@ -202,8 +213,20 @@ public class UserCompanyController {
 
     @GetMapping("/offerList")
     @Operation(summary = "offer列表")
-    public CommonResp offerList(Integer page,Integer size) {
-        return CommonResp.success(interviewService.offerList(page,size));
+    public CommonResp offerList(Integer page,Integer size,Long jobId) {
+        return CommonResp.success(offersService.offerList(page,size,jobId));
     }
+
+    @GetMapping("/selectOfferTemplate")
+    @Operation(summary = "offer模板查询")
+    public CommonResp selectOffer() {
+        return CommonResp.success(offersService.selectOfferTemplate());
+    }
+
+//    TODO 回调
+//    @PostMapping("/OnlyOffice/callback")
+//    public CommonResp callback(@RequestBody Map<String, Object> body) {
+//
+//    }
 
 }
