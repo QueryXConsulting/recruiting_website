@@ -49,7 +49,8 @@ public enum AppHttpCodeEnum {
     AVATAR_DELETE_ERROR(483, "头像删除失败"),
     AVATAR_UPLOAD_ERROR(484, "头像上传失败"),
     USER_NOT_EXIST(485, "用户不存在"),
-    OFFER_NOT_EXIST(486, "offer不存在");
+    OFFER_NOT_EXIST(486, "offer不存在"),
+    FILE_UPLOAD_FAIL(487, "文件上传失败");
 
     final int code;
     final String msg;

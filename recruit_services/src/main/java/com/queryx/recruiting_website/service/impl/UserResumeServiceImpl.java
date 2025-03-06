@@ -95,7 +95,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         String path = resumeAttachment.getFilePath();
 //        int lastIndex = filePath.lastIndexOf("/", filePath.length() - 2);
 //        path = path.substring(0, lastIndex);
-        path = Common.getUploadFolderPath(filePath, "/") + path;
+        path = Common.getUploadFolderPath(filePath, "/", "") + path;
         // 删除本地文件
         File file = new File(path);
         if (file.exists() && file.delete()) {
