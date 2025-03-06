@@ -28,13 +28,8 @@ request.interceptors.request.use((config) => {
 
   // 获取当前请求的基础URL（移除动态参数）
   const baseUrl = config.url.replace(/\/\d+/g, '')
-
   if (
     whiteList.some((path) => {
-      // 直接放行公司用户的后端请求(暂定 便于测试)
-      if (path === '/company/') {
-        return config.url.startsWith(path)
-      }
       return config.url.includes(path)
     })
   ) {

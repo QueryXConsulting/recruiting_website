@@ -32,5 +32,8 @@ public class TDOffers {
     @Schema(name = "offer文件存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String offersFilePath;
 
+    @Schema(name = "签名存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String signaturePath;
+
 }
 

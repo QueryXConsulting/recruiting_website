@@ -69,7 +69,10 @@ public class SecurityConfiguration {
         return (web) -> web.ignoring().requestMatchers(
                 "/swagger-ui/**",
                 "/v3/**",
-                "/avatar_files/**"
+                "/avatar_files/**",
+                "/offer_files/**",
+                "/company/offer/save",
+                "/signature_files/**"
         );
     }
 
