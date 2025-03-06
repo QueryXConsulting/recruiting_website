@@ -103,6 +103,8 @@ public class Common {
 
     /**
      * 获取上传文件夹名称（不含路径）
+     * <p>例如：/upload/resume/ --> resume</p>
+     *
      * @param src 上传文件路径
      * @param splitCode 分隔符
      * @param appendCode 追加字符
@@ -115,13 +117,19 @@ public class Common {
 
     /**
      * 获取上传文件夹路径（只含路径）
+     * <p>例如：/upload/resume/ --> /upload(没有追加字符的情况)</p>
+     *
      * @param src 上传文件路径
      * @param splitCode 分隔符
+     * @param appendCode 追加字符
      * @return 上传文件夹路径
      */
-    public static String getUploadFolderPath(String src, String splitCode){
-        String folderName = Common.getUploadFolderName(src, splitCode, "");
-        return src.replace(folderName, "");
+    public static String getUploadFolderPath(String src, String splitCode, String appendCode){
+        if (appendCode == null || appendCode.isEmpty()){
+            appendCode = "/";
+        }
+        String folderName = Common.getUploadFolderName(src, splitCode, appendCode);
+        return src.replace("/" + folderName, "");
     }
 
 }

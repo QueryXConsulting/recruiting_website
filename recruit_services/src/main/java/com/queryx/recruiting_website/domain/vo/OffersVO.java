@@ -34,8 +34,11 @@ public class OffersVO {
     @Schema(name = "职位名称", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String jobPosition;
 
-    @Schema(name = "公司名", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    @Schema(name = "公司名", description = "普通用户端显示字段", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String companyInfoName;
+
+    @Schema(name = "用户名", description = "公司端显示字段", implementation = String.class)
+    private String userName;
 
     // offer状态
     @Schema(name = "offer状态", description = "offer状态：0-接受，1-拒绝，2-未选择", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)

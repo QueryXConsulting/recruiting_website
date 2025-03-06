@@ -1,9 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, nextTick } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
-import WBForm from '@/components/WBForm.vue';
-import { offer, offerFilePath, offerList, offerStatus } from '@/api/user/UserApi';
+import { offerFilePath, offerList, offerStatus, offerSignature } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1);// 当前页
@@ -20,20 +19,7 @@ const rootData = reactive([
     { tag: '', prop: "companyInfoName", label: "公司名" },
     { tag: '', prop: "offersDate", label: "发送时间" },
     { tag: '', prop: "offersStatus", label: "offer状态" },
-    // { tag: 'info', prop: "resumeName", label: "简历名" },
-    // { tag: 'table, info', prop: "deliverDate", label: "投递日期" },
-    // { tag: 'info', prop: "resumeType", label: "简历类型" },
 ]);
-// 对象数据填充
-const createObject = (val, data, fn) => {
-    const k = rootData.flatMap((item) => item.prop);
-    const v = rootData.flatMap((item) => item[val]);
-    for (let i = 0; i < k.length; i++) {
-        data[k[i]] = v[i];
-    }
-    fn(data);
-    return data;
-}
 
 // 表格列显示
 const tableColumns = reactive([]);
@@ -71,12 +57,14 @@ const getTagType = (options, value) => {
 }
 
 
-// 应聘状态选项  0待发送 1是已接受 2拒绝 3撤销
+// 应聘状态选项  
 const statusOptions = [
     { tag: 'warning', value: '0', label: '待发送' },
     { tag: 'success', value: '1', label: '已接受' },
     { tag: 'danger', value: '2', label: '拒绝' },
-    // { tag: '', value: '3', label: '撤销' },
+    { tag: 'info', value: '3', label: '撤销' },
+    { tag: 'primary', value: '4', label: '已发送' },
+    { tag: 'danger', value: '5', label: '已打回' },
 ]
 // 表格右侧操作栏
 const hasOperation = ref(true);// 是否有操作栏
@@ -85,54 +73,116 @@ const tableOperation = [
     { type: 'danger', text: '拒绝' },
     { type: 'success', text: '接受' },
 ]
-// const filteredOperation = tableOperation;
+let filteredOperation = tableOperation;
 const getStatusOptionsLabel = (value) => {
-    if (value !== '0') {
-        // filteredOperation = [];
-        hasOperation.value = false;
+    if (value !== '0' && value !== '5' ) {
+        filteredOperation = [];
+    } else {
+        filteredOperation = tableOperation;
     }
     return getOptionLabel(statusOptions, value);
 }
-// 面试类型选项
-const typeOptions = [
-    { tag: 'default', value: '0', label: '线上' },
-    { tag: 'info', value: '1', label: '线下' },
-    // { tag: 'danger', value: '2', label: '视频面试' }
-]
 
 
+/*================= 预览弹窗 =================*/
+const isShowPreview = ref(false);// 详情弹窗是否显示
+const pdfUrl = ref('');// pdf地址
 
-/*================= 详情弹窗 =================*/
-const formData = ref({});
-const formItems = reactive({});
-createObject('label', formItems, (data) => {
-    delete data.userId;
-    delete data.resumeId;
-});
-const isShowDialog = ref(false);// 详情弹窗是否显示
+// 预览offer
+const previewOffer = async (row) => {
+    const _filePath = await offerFilePath(row.offerId);
+    if (!_filePath) return;
+    isShowPreview.value = true;
+    pdfUrl.value = _filePath.content;
+}
+
+/*================= 签名弹窗 =================*/
+const isShowSignature = ref(false);// 签名弹窗是否显示
+let offerId = '';
+// cavas绘制相关变量
+let canvasRef, ctx, painting;
+let lastX = 0;
+let lastY = 0;
+
+// 初始化canvas
+const initCanvas = () => {
+    canvasRef = document.querySelector('.signature-canvas');
+    ctx = canvasRef.getContext('2d');
+    painting = false;
+    // 设定Canvas尺寸
+    canvasRef.width = canvasRef.offsetWidth;
+    canvasRef.height = canvasRef.offsetHeight;
+}
+
+// 开始绘制
+const startPainting = (e) => {
+    painting = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+}
+// 结束绘制
+const stopPainting = () => {
+    // 结束绘制
+    painting = false;
+    ctx.closePath();
+}
+// 绘制
+const draw = (e) => {
+    if (!painting) return;
+    ctx.lineWidth = 2;
+    ctx.lineTo(lastX, lastY);
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
+// 提交签名
+const signatureSubmit = async () => {
+    const dataURL = canvasRef.toDataURL('image/png');
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeType = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeType });
+    const formData = new FormData();
+    const imgName = Date.now() + '.' + mimeType.split('/')[1];
+    formData.append('image', blob, imgName);
+    const _res = await offerSignature(offerId, formData);
+    if (_res) {
+        isShowSignature.value = false;
+        if (_res.code !== 200) {
+            return ElMessage.error(_res.message);
+        }
+        const _res2 = await offerStatus(offerId, '1');
+        if (_res2) {
+            getOfferList();
+        }
+    }
+}
+
+// 清空画布
+const clearCanvas = () => {
+    ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
+}
 
 // 表格点击事件
-const handleOperationClick = async (btnIndex, row, text) => {
-    // console.log(btnIndex, row, text);
+const handleOperationClick = async (btnIndex, row, _) => {
     switch (btnIndex) {
-        case 0:
-            // 查看详情
-            const _filePath = await offerFilePath(row.offerId);
-            console.log(_filePath);
-            break;
-        case 1:
-            // 拒绝
+        case 0: // 拒绝
             const _updateResult = await offerStatus(row.offerId, 2);
             console.log('拒绝', _updateResult);
             if (_updateResult) {
                 getOfferList();
             }
             break;
-        case 2:
-            // 接受
-            // const res = await acceptOffer(row.offerId);
-
-            // getOfferList();
+        case 1: // 接受
+            isShowSignature.value = true;
+            await nextTick();// 等待DOM加载完成           
+            initCanvas(); // 初始化canvas
+            offerId = row.offerId;
             break;
         default:
             break;
@@ -152,15 +202,14 @@ const handleCurrentChange = (page) => {
     currentPage.value = page
 }
 
-
 </script>
 
 <template>
     <div>
         <WBTable :total="total" @update:currentPage="handleCurrentChange" @update:page-size="handleSizeChange"
             :table-columns="tableColumns" v-model:tableData="tableData" v-model:currentPage="currentPage"
-            :operation-list="tableOperation" @operation-click="handleOperationClick" :has-operation="hasOperation"
-            v-model:pageSize="pageSize" border>
+            @row-click="previewOffer" :has-operation="hasOperation" v-model:pageSize="pageSize" border
+            style="cursor: pointer;">
             <template #default="scope">
                 <el-tag v-if="scope.prop === 'offersStatus'"
                     :type="getTagType(statusOptions, tableData[scope.$index][scope.prop])">
@@ -169,45 +218,55 @@ const handleCurrentChange = (page) => {
                 <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
             </template>
             <!-- 表格右侧操作栏 -->
-            <!-- <template #operation="scope">
-                <el-button v-for="(item, index) in tableOperation" :type="item.type" :key="index" size="small"
+            <template #operation="scope">
+                <el-button v-for="(item, index) in filteredOperation" :type="item.type" :key="index" size="small"
                     @click="handleOperationClick(index, scope.row, item.text)">
                     {{ item.text }}
                 </el-button>
-            </template> -->
+            </template>
         </WBTable>
 
-        <!-- 面试时间选择窗口 -->
-        <WBDialog v-model="isShowDialog" @submit="isShowDialog = false" @cancel="isShowDialog = false" title="详情信息"
-            width="40%" draggable>
-            <WBForm v-model="formData" :items="formItems" class="form-detail">
-                <template #default="scope">
-                    <span v-if="scope.key === 'resumeStatus'">
-                        {{ getOptionLabel(statusOptions, formData[scope.key]) }}
-                    </span>
-                    <span v-else-if="scope.key === 'resumeType'">
-                        {{ getOptionLabel(typeOptions, formData[scope.key]) }}
-                    </span>
-                    <span v-else-if="scope.key === 'resumeDelete'">{{ formData[scope.key] === '0' ? '不合适' : '已通过' }}</span>
-                    <span v-else>{{ formData[scope.key] }}</span>
-                </template>
-            </WBForm>
+        <!-- 签名弹窗 -->
+        <WBDialog v-model="isShowSignature" @cancel="clearCanvas" @submit="signatureSubmit" cancel-text="清空" width="50%"
+            title="offer签名" draggable>
+            <fieldset style="display: flex; justify-content: center; align-items: center; height: 300px;">
+                <canvas @mousedown="startPainting" @mousemove="draw" @mouseleave="stopPainting" @mouseup="stopPainting"
+                    class="signature-canvas"></canvas>
+            </fieldset>
+        </WBDialog>
+
+        <!-- pdf预览弹窗 -->
+        <WBDialog v-model="isShowPreview" fullscreen title="offer预览">
+            <iframe :src="pdfUrl" class="pdf-preview" frameborder="0"></iframe>
+            <template #footer><i></i></template>
         </WBDialog>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.form-detail {
-    display: flex;
-    justify-content: center;
+/* 为iframe设置一些基本样式 */
+.pdf-preview {
+    width: 100%;
+    /* 以适应其父容器 */
+    height: 600px;
+    /* 高度可以根据需要调整 */
+    border: none;
+    /* 去掉边框 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 添加阴影效果 */
+    margin: 5px auto;
+    /* 上下外边距为20px，左右自动居中 */
+    display: block;
+    /* 将iframe显示为块级元素 */
+    background-color: #f5f5f5;
+    /* 背景颜色，当PDF加载失败时会显示 */
+
 }
 
-
-.step-icon {
-    border-radius: 50%;
-    border: 2px solid rgb(168, 171, 178);
-    width: 24px;
-    height: 24px;
-    background: transparent;
+.signature-canvas {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #269eeeef;
+    border-radius: 10px;
 }
 </style>

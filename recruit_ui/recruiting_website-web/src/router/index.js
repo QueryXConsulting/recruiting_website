@@ -31,24 +31,24 @@ const routes = [
     component: () => import('../views/company/registerCompany.vue'),
   },
   {
-    path: '/user/register',
+    path: '/users/register',
     component: () => import('../views/user/Register.vue'),
   },
   {
     name: 'JobInfo',
-    path: '/user/jobInfo',
+    path: '/users/jobInfo',
     component: () => import('../views/user/JobInfo.vue'),
   },
   {
-    path: '/user/jobList',
+    path: '/users/jobList',
     component: () => import('../views/user/JobList.vue'),
   },
   {
-    path: '/user/userInfo',
+    path: '/users/userInfo',
     component: () => import('../views/user/UserInfo.vue'),
   },
   {
-    path: '/user/application',
+    path: '/users/application',
     component: () => import('../views/user/applicationRecord/index.vue'),
   },
   {

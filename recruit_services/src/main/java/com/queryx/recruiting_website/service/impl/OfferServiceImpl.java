@@ -146,6 +146,7 @@ public class OfferServiceImpl implements OfferService {
             }
             throw new RuntimeException(e);
         }
+        newFileName =  "/" + newFileName;
         offers.setSignaturePath(Common.getUploadFolderName(signaturePath, "/", newFileName));
         int ui = offerMapper.updateById(offers);
         if (ui <= 0) {
