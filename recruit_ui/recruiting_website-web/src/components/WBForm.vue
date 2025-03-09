@@ -13,7 +13,7 @@ const props = defineProps({
 
 
 // methods
-const args = (key, value) => {  return { key, value }; }
+const args = (key, value) => { return { key, value }; }
 
 // expose
 const formRef = ref(null);
@@ -32,13 +32,13 @@ defineExpose(new Proxy({}, {
 </script>
 
 <template>
-    <div >
+    <div>
         <el-form :model="formData" ref="formRef" v-bind="$attrs">
             <template #default="scope">
                 <slot name="form-items" v-bind="scope">
                     <!-- index: 属性名，val: 显示名称（对应中文名） -->
-                    <el-form-item v-for="(val, index) in props.items" :key="index" :label="val + '：'"
-                        :label-width="props.labelWidth" size="large" :prop="index">
+                    <el-form-item v-for="(val, index) in props.items" :key="index" :label="val + '：'" label-width="100px"
+                        size="large" :prop="index">
                         <slot v-bind="args(index, val)"></slot>
                     </el-form-item>
                 </slot>
@@ -53,6 +53,4 @@ defineExpose(new Proxy({}, {
     </div>
 </template>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

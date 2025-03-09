@@ -12,9 +12,17 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    hasOperation: {
+        type: Boolean,
+        default: true
+    },
     operationList: {
         type: Array,
         default: () => []
+    },
+    operationWidth: {
+        type: String,
+        default: 'auto'
     },
     pageSizes: {
         type: Array,
@@ -65,12 +73,13 @@ const operationArgs = (row, $index) => { return { row, $index } }
                         </template>
                     </el-table-column>
 
-                    <el-table-column align="center" fixed="right" label="操作">
+                    <el-table-column v-if="props.hasOperation" :width="props.operationWidth" align="center" fixed="right"
+                        label="操作">
                         <template #default="scope">
                             <slot name="operation" v-bind="operationArgs(scope.row, scope.$index)">
                                 <!-- type：按钮类型， text：按钮文字 -->
                                 <el-button v-for="(item, index) in props.operationList" :type="item.type" :key="index"
-                                    size="small" @click="handleClick(index, scope.row, scope.$index)"> 
+                                    size="small" @click="handleClick(index, scope.row, scope.$index)">
                                     <!-- index：按钮索引（从0开始）， row：当前行数据， $index：当前行索引 -->
                                     {{ item.text }}
                                 </el-button>

@@ -73,6 +73,7 @@ public class SecurityConfiguration {
                 "/offer_files/**",
                 "/company/offer/save",
                 "/signature_files/**"
+
         );
     }
 
