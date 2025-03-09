@@ -82,7 +82,7 @@ const formData = ref({});// 表单数据
 onMounted(async () => {
     // 获取用户在线简历
     const res = await userInfo();
-    工资赋值
+    // 工资赋值
     salaryRange.length = 0;// 清空工资范围
     for (let m of res.content.resumeSalary.split('-')) {
         salaryRange.push(m);
