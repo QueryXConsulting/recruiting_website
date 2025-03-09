@@ -10,6 +10,7 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +23,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 
 
 @RestController
@@ -223,10 +222,22 @@ public class UserCompanyController {
         return CommonResp.success(offersService.selectOfferTemplate());
     }
 
-//    TODO 回调
-//    @PostMapping("/OnlyOffice/callback")
-//    public CommonResp callback(@RequestBody Map<String, Object> body) {
-//
-//    }
+
+
+    @PostMapping("/offer/save")
+    @Operation(summary = "OnlyOffice回调函数")
+    public ResponseEntity<String> handleCallback(
+            @RequestParam Long offerId,
+            @RequestBody Map<String, Object> callbackData
+    ) {
+        return offersService.saveOfferDocument(offerId,callbackData);
+    }
+
+    @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")
+    @Operation(summary = "修改offer状态")
+    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId,@PathVariable("status") String status,@PathVariable("jobId") Long jobId) {
+        return CommonResp.success(offersService.updateOfferStatus(offerId,status,jobId));
+    }
+
 
 }

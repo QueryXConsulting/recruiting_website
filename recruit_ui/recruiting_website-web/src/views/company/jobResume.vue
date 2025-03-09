@@ -1,4 +1,4 @@
-<template >
+<template>
   <div class="resume-container">
     <el-card class="resume-card">
       <template #header>
@@ -190,15 +190,17 @@
                 <el-table-column label="操作" width="250" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-button type="primary" link @click="viewOffer(scope.row)">
-                        {{ scope.row.offersFilePath ? '查看' : '上传offer' }}
+                      <el-button type="primary" link @click="viewOffer(scope.row)"
+                        v-if="scope.row.offersStatus === '0' && !scope.row.offersFilePath">
+                        上传offer
                       </el-button>
-                      <el-button type="success" link @click="sendOffer(scope.row)"
-                        v-if="scope.row.offersFilePath && scope.row.offersStatus === '0'">
-                        发送
+                      <el-button type="primary" link @click="viewOffer(scope.row)"
+                        v-if="scope.row.offersStatus === '1'">
+                        查看
                       </el-button>
+
                       <el-button type="danger" link @click="cancelOffer(scope.row)"
-                        v-if="scope.row.offersStatus === '0'">
+                        v-if="scope.row.offersStatus && scope.row.offersStatus !== '2' && scope.row.offersStatus !== '3'">
                         撤销
                       </el-button>
                     </div>
@@ -295,16 +297,9 @@
             </el-icon>
             选择模板
           </el-button>
-          <el-upload
-            class="upload-pdf"
-            :action="uploadUrl"
-            :headers="headers"
-            :data="{ offerId: currentOfferId }"
-            :show-file-list="false"
-            :before-upload="beforeUpload"
-            :on-success="handleUploadSuccess"
-            :on-error="handleUploadError"
-            accept=".doc,.docx">
+          <el-upload class="upload-pdf" :action="uploadUrl" :headers="headers" :data="{ offerId: currentOfferId }"
+            :show-file-list="false" :before-upload="beforeUpload" :on-success="handleUploadSuccess"
+            :on-error="handleUploadError" accept=".doc,.docx">
             <template #default>
               <el-button type="primary">
                 <el-icon>
@@ -315,33 +310,23 @@
             </template>
             <template #tip>
               <div class="el-upload__tip">
-                只能上传Word文件(.doc/.docx)
+                请上传.pdf文件
               </div>
             </template>
           </el-upload>
         </div>
       </el-dialog>
 
-      <!-- 修改 Word 编辑对话框 -->
-      <el-dialog
-        v-model="wordEditDialogVisible"
-        title="Word编辑"
-        width="90%"
-        :destroy-on-close="true"
+
+      <el-dialog v-model="pdfEditDialogVisible" title="pdf编辑" width="90%" :destroy-on-close="true"
         :close-on-click-modal="false">
-        <div class="word-edit-container">
-          <DocumentEditor
-            v-if="documentConfig"
-            :id="'docEditor'"
-            :documentServerUrl="documentServerUrl"
-            :config="documentConfig"
-            :events_onDocumentReady="onDocumentReady"
-            :events_onError="onDocumentError"
-          />
+        <div class="pdf-edit-container">
+          <DocumentEditor ref="docEditor" v-if="documentConfig" :id="'docEditor'" :documentServerUrl="documentServerUrl"
+            :config="documentConfig" :events_onDocumentReady="onDocumentReady" :events_onError="onDocumentError"
+            :events_onDocumentStateChange="onDocumentStateChange" />
         </div>
         <template #footer>
-          <el-button type="primary" @click="saveWordEdit">保存</el-button>
-          <el-button @click="wordEditDialogVisible = false">取消</el-button>
+          <el-button @click="handleBeforeClose">发送</el-button>
         </template>
       </el-dialog>
 
@@ -350,15 +335,15 @@
         <div class="template-list">
           <el-row :gutter="20">
             <el-col v-for="template in templateList" :key="template.id" :span="6">
-              <div class="template-item" @click="handleTemplateSelect(template)" :class="{ 'active': selectedTemplate === template.id }">
+              <div class="template-item" @click="handleTemplateSelect(template)"
+                :class="{ 'active': selectedTemplate === template.id }">
                 <div class="template-preview">
-                  <el-image
-                    :src="template.thumbnail"
-                    fit="cover"
-                    :preview-src-list="[template.preview]">
+                  <el-image :src="template.thumbnail" fit="cover" :preview-src-list="[template.preview]">
                     <template #error>
                       <div class="image-placeholder">
-                        <el-icon><Document /></el-icon>
+                        <el-icon>
+                          <Document />
+                        </el-icon>
                       </div>
                     </template>
                   </el-image>
@@ -376,64 +361,88 @@
           <el-button type="primary" @click="confirmTemplate" :disabled="!selectedTemplate">确定</el-button>
         </template>
       </el-dialog>
+
+      <!-- 添加签名预览对话框 -->
+      <el-dialog v-model="signatureDialogVisible" title="签名预览" width="30%" center>
+        <div class="signature-container">
+          <el-image :src="currentSignature" fit="contain" style="width: 100%;">
+            <template #error>
+              <div class="image-error">
+                <el-icon>
+                  <Picture />
+                </el-icon>
+                <div>加载失败</div>
+              </div>
+            </template>
+          </el-image>
+        </div>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button type="primary" @click="handleSignatureConfirm">通过</el-button>
+            <el-button type="danger" @click="handleSignatureReject">打回</el-button>
+          </div>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, defineAsyncComponent } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
-import { Calendar, Document, Upload } from '@element-plus/icons-vue'
-import { Editor } from '@hufe921/canvas-editor'
+import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate } from '@/api/company/companyApi'
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, sendOffer, updateOfferStatus } from '@/api/company/companyApi'
 import { DocumentEditor } from '@onlyoffice/document-editor-vue'
 import userStore from '@/store/user'
 
-
+const currentOfferId = ref(null)
 const documentConfig = ref({
   width: "100%",
   height: "100%",
   type: "desktop",
   document: {
-    fileType: "docx",
+    fileType: "",
     key: "",
     title: "",
     url: "",
     permissions: {
-      edit: true,
+      edit: false,
       download: true,
-      review: true
+      print: true,
+      fillForms: true,
+      review: false
     }
   },
   editorConfig: {
-    mode: "edit",
+    mode: "fillForms",
     lang: "zh-CN",
-    region: "cn",
+    location: "cn",
     user: {
-      id: userStore.userId || "guest",
-      name: userStore.userName || "访客"
+      id: userStore().userInfo.companyInfoId,
+      name: userStore().userInfo.userName
     },
     customization: {
-      autosave: false,
+      autosave: true,
       comments: false,
       chat: false,
-      compactToolbar: false,
+      compactToolbar: true,
       feedback: false,
-      forcesave: false,
+      forcesave: true,
       help: true,
       hideRightMenu: false,
-      toolbarNoTabs: false,
+      toolbarNoTabs: true,
       plugins: true
-    }
+    },
+    callbackUrl: ""
   }
 })
 
-const wordEditDialogVisible = ref(false)
+const pdfEditDialogVisible = ref(false)
 
 const editor = ref(null)
 
-const currentOfferId = ref(null)
+
 const uploadOfferDialogVisible = ref(false)
 
 const route = useRoute()
@@ -538,7 +547,9 @@ const getOfferStatusType = (status) => {
     '0': 'info',
     '1': 'success',
     '2': 'danger',
-    '3': 'warning'
+    '3': 'warning',
+    '4': 'success',
+    '5': 'danger'
   }
   return statusMap[status] || 'info'
 }
@@ -548,7 +559,9 @@ const getOfferStatusText = (status) => {
     '0': '待发送',
     '1': '已接受',
     '2': '已拒绝',
-    '3': '已撤销'
+    '3': '已撤销',
+    '4': '已发送',
+    '5': '打回'
   }
   return statusMap[status] || '未知'
 }
@@ -588,7 +601,6 @@ const getInterviewList = async () => {
     if (res.code === 200) {
       interviewList.value = res.content?.records
       interviewTotal.value = res.content?.total
-
     } else {
       ElMessage.error(res.msg || '获取面试列表失败')
     }
@@ -844,27 +856,31 @@ const handleOfferPageChange = (val) => {
 
 // Offer操作方法
 const viewOffer = (row) => {
-  if (!row.offersFilePath) {
+  if (row.offersStatus === '0' && !row.offersFilePath) {
     currentOfferId.value = row.offersId
     uploadOfferDialogVisible.value = true
-  } else {
+  } else if (row.offersStatus === '1' && row.signaturePath) {
+    currentOfferId.value = row.offersId
+    currentSignature.value = row.signaturePath
+    signatureDialogVisible.value = true
+  } else if (row.offersFilePath) {
     window.open(row.offersFilePath)
   }
 }
 
-const sendOffer = async (row) => {
-  try {
 
-    const result = await sendOfferRequest(row.offersId)
-    if (result.code === 200) {
-      ElMessage.success('发送成功')
-      getOffersList()
+const handleOfferStatus = async (offerId, status,jobId) => {
+  try {
+    const result = await updateOfferStatus(offerId, status,jobId)
+    if (result.code == 200) {
+      ElMessage.success('状态更新成功')
+      getOffersList() // 刷新列表
     } else {
-      ElMessage.error(result.msg || '发送失败')
+      ElMessage.error(result.msg || '状态更新失败')
     }
   } catch (error) {
-    console.error('发送offer失败:', error)
-    ElMessage.error('发送失败')
+    console.error('更新offer状态失败:', error)
+    ElMessage.error('更新offer状态失败')
   }
 }
 
@@ -875,13 +891,7 @@ const cancelOffer = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const result = await cancelOfferRequest(row.offersId)
-    if (result.code === 200) {
-      ElMessage.success('撤销成功')
-      getOffersList()
-    } else {
-      ElMessage.error(result.msg || '撤销失败')
-    }
+    await handleOfferStatus(row.offersId, '3',jobId) // 3 表示已撤销状态
   } catch (error) {
     if (error !== 'cancel') {
       console.error('撤销offer失败:', error)
@@ -924,11 +934,11 @@ const getTemplateList = async () => {
 // 修改选择模板的方法
 const selectTemplate = () => {
   getTemplateList()
-  uploadOfferDialogVisible.value = false // 关闭上传对话框
+  uploadOfferDialogVisible.value = false
   templateDialogVisible.value = true
 }
 
-// 修改 confirmTemplate 函数中的配置更新部分
+
 const confirmTemplate = async () => {
   const loading = ElLoading.service({
     lock: true,
@@ -945,7 +955,7 @@ const confirmTemplate = async () => {
     }
 
     templateDialogVisible.value = false
-    wordEditDialogVisible.value = true
+    pdfEditDialogVisible.value = true
 
     // 更新配置
     documentConfig.value = {
@@ -955,9 +965,11 @@ const confirmTemplate = async () => {
         key: `template-${template.id}-${Date.now()}`,
         title: template.name,
         url: template.fileUrl,
-        fileType: "docx"
+        fileType: "pdf"
       }
     }
+    documentConfig.value.editorConfig.callbackUrl = 'http://127.0.0.1:8080/company/offer/save?offerId=' + currentOfferId.value
+    console.log('offerId:', currentOfferId.value);
 
     loading.close()
   } catch (error) {
@@ -967,49 +979,79 @@ const confirmTemplate = async () => {
   }
 }
 
+
 // 修改文档服务器地址
 const documentServerUrl = ref('http://127.0.0.1')
 
-// 修改保存函数
-const saveWordEdit = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: '保存中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  })
-
-  try {
-    if (window.DocEditor) {
-      window.DocEditor.execCommand('save')
-    }
-
-    wordEditDialogVisible.value = false
-    getOffersList()
-    loading.close()
-    ElMessage.success('保存成功')
-  } catch (error) {
-    console.error('保存失败:', error)
-    ElMessage.error('保存失败')
-    loading.close()
-  }
-}
-
-// 监听模板对话框关闭
-watch(templateDialogVisible, (newVal) => {
-  if (!newVal) {
-    selectedTemplate.value = null
-  }
-})
-
-// 添加 OnlyOffice 事件处理函数
 const onDocumentReady = () => {
   console.log('Document is ready')
+  editor.value = window.DocEditor
 }
 
 const onDocumentError = (event) => {
   console.error('Document error:', event)
   if (event.data) {
     ElMessage.error(`文档加载失败：${event.data}`)
+  }
+}
+
+const onDocumentStateChange = (event) => {
+  if (event.data) {
+    const payload = event.data
+
+    console.log('Document state changed:', payload)
+
+    if (payload.status === 2) {
+      ElMessage.success('文档保存成功')
+    }
+  }
+}
+const handleBeforeClose = async () => {
+
+  pdfEditDialogVisible.value = false
+  const loading = ElLoading.service({
+    lock: true,
+    text: '发送中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  });
+
+  try {
+    handleOfferStatus(currentOfferId.value, '4',jobId)
+    pdfEditDialogVisible.value = false;
+    ElMessage.success('offer已发送');
+    getOffersList();
+  } catch (error) {
+    console.error('保存文档失败:', error);
+    ElMessage.error(error.message || '保存文档失败');
+  } finally {
+    loading.close();
+  }
+}
+
+// 在 script setup 中添加以下代码
+const signatureDialogVisible = ref(false)
+const currentSignature = ref('')
+
+
+const handleSignatureConfirm = async () => {
+  try {
+    await handleOfferStatus(currentOfferId.value, "1", jobId)
+    signatureDialogVisible.value = false
+    ElMessage.success('已通过')
+    getOffersList()
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
+}
+
+const handleSignatureReject = async () => {
+  try {
+    await handleOfferStatus(currentOfferId.value, '5', jobId)
+    signatureDialogVisible.value = false
+    ElMessage.success('已打回')
+    getOffersList()
+  } catch (error) {
+    ElMessage.error('操作失败')
   }
 }
 
@@ -1395,13 +1437,13 @@ onBeforeUnmount(() => {
   gap: 8px;
 }
 
-.word-edit-container {
+.pdf-edit-container {
   height: 800px;
   background: #fff;
   overflow: hidden;
 }
 
-/* 确保编辑器容器填满对话框 */
+
 :deep(.onlyoffice-editor) {
   width: 100%;
   height: 100%;
@@ -1445,7 +1487,8 @@ onBeforeUnmount(() => {
 .template-preview .el-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 修改为 cover 以确保图片填满容器 */
+  object-fit: cover;
+  /* 修改为 cover 以确保图片填满容器 */
 }
 
 .image-placeholder {
@@ -1473,5 +1516,27 @@ onBeforeUnmount(() => {
   font-size: 12px;
   color: #909399;
   line-height: 1.4;
+}
+
+.signature-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.image-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #909399;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.dialog-footer {
+  text-align: center;
+  padding-top: 20px;
 }
 </style>

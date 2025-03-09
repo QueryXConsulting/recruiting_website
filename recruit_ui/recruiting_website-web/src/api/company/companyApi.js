@@ -27,6 +27,8 @@ const API = {
   COMPANY_UPDATE_INTERVIEW_LIST: '/api/company/updateInterviewList',
   COMPANY_OFFER_LIST: '/api/company/offerList',
   COMPANY_SELECT_OFFER_TEMPLATE: '/api/company/selectOfferTemplate',
+  COMPANY_SEND_OFFER: '/api/company//offer/save',
+  COMPANY_UPDATE_OFFER_STATUS: '/api/company/updateOfferStatus',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -144,3 +146,8 @@ export const selectOffersList = (page, size, jobId) =>
   })
 
 export const selectOfferTemplate = () => request.get(API.COMPANY_SELECT_OFFER_TEMPLATE)
+
+export const sendOffer = (data) => request.post(API.COMPANY_SEND_OFFER, data)
+
+export const updateOfferStatus = (offerId, status,jobId) =>
+  request.put(`${API.COMPANY_UPDATE_OFFER_STATUS}/${offerId}/${status}/${jobId}`)

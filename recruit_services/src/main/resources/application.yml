@@ -5,7 +5,9 @@ file:
   upload-path-offers: D:/maven/offer_files/
   upload-path-signature: D:/maven/signature_files/
   upload-path-enterpriseFile: D:/maven/enterprise_files/
-
+  upload-path-signature: D:/maven/signature_files/
+  upload-path-office: D:/maven/offer_files/
+  upload-path-officeTemplate: D:/maven/offer_Template/
 office:
   type: oo  # 指定使用OnlyOffice
   oo:

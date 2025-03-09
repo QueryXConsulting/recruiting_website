@@ -70,7 +70,10 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/v3/**",
                 "/avatar_files/**",
-                "/offer_files/**"
+                "/offer_files/**",
+                "/company/offer/save",
+                "/signature_files/**"
+
         );
     }
 

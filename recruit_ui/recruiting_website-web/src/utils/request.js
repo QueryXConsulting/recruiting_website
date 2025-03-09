@@ -30,17 +30,13 @@ request.interceptors.request.use((config) => {
   const baseUrl = config.url.replace(/\/\d+/g, '')
 
   // 用户端测试专用
-  if(baseUrl.startsWith('/api')){
+  /*if(baseUrl.startsWith('/api')){
     // config.url = baseUrl.replace('/api', '')
     return config;
-  }
+  }*/
 
   if (
     whiteList.some((path) => {
-      // 直接放行公司用户的后端请求(暂定 便于测试)
-      if (path === '/company/') {
-        return config.url.startsWith(path)
-      }
       return config.url.includes(path)
     })
   ) {

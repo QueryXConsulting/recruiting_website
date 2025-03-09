@@ -28,8 +28,6 @@ public class OfferTemplates {
     @Schema(name = "offer模板文件存储路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String templateFilePath;
 
-    @Schema(name = "offer模板缩略图路径", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String templateImg;
 
 }
 
