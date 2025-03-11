@@ -26,8 +26,20 @@ public class Common {
     public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";// 待面试
     public static final String DELIVER_RESUME_DELETE_SQUARE_PEG = "0";// 不合适
     public static final String DELIVER_RESUME_STATUS_OFFER = "3";// 不合适
+    public static final String DELIVER_RESUME_STATUS_UPLOAD_MATERIAL = "4";// 上传资料中
     // 面试相关常量
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
+    // 材料相关常量
+    public static final String MATERIAL_OTHER_STRING_SPLIT = "|";// other材料路径分隔符
+    public static final String MATERIAL_STATUS_WAIT_REVIEW = "3";// 待审核
+    public static final String MATERIAL_STATUS_MATERIAL_PASSED = "1";// 材料已通过审核
+    public static final String MATERIAL_STATUS_NOT_SUBMIT = "0";// 材料未提交
+    public static final String MATERIAL_STATUS_NOT_PASS = "2";// 材料审核未通过
+    public static final String MATERIAL_STATUS_THE_UPLOAD_PASSED = "您上传的材料已通过审核，请进入下一环节！";// 材料通过审核
+    public static final String MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED = "您上传的材料未通过审核，请重新上传！";// 材料未通过审核
+    public static final String MATERIAL_STATUS_UPLOADING_MATERIAL = "您已收到offer，请上传入职相关材料！";// 准备上传材料
+    public static final String MATERIAL_STATUS_UPLOAD_NOT_BEGIN = "您还没有收到offer，不能上传材料！";// 未到上传材料环节
+    public static final String MATERIAL_STATUS_UPLOAD_SUCCESS = "您上传的材料已提交，请等待审核！";// 上传材料成功
 
 
     private static String port;
@@ -121,14 +133,10 @@ public class Common {
      *
      * @param src 上传文件路径
      * @param splitCode 分隔符
-     * @param appendCode 追加字符
      * @return 上传文件夹路径
      */
-    public static String getUploadFolderPath(String src, String splitCode, String appendCode){
-        if (appendCode == null || appendCode.isEmpty()){
-            appendCode = "/";
-        }
-        String folderName = Common.getUploadFolderName(src, splitCode, appendCode);
+    public static String getUploadFolderPath(String src, String splitCode){
+        String folderName = Common.getUploadFolderName(src, splitCode, "");
         return src.replace("/" + folderName, "");
     }
 

@@ -27,7 +27,12 @@ const API = {
   OFFER_LIST_URL: '/api/offer/list',
   OFFER_STATUS_URL: '/api/offer/status',
   OFFER_FILE_PATH_URL: '/api/offer/detail',
-  OFFER_SIGNATURE_URL: '/api/offer/signature'
+  OFFER_SIGNATURE_URL: '/api/offer/signature',
+  // 入职材料相关接口
+  MATERIAL_STATUS_URL: '/api/materials/status',
+  UPLOAD_MATERIAL_URL: '/api/materials/upload',
+  UPLOAD_OTHER_MATERIAL_URL: '/api/materials/upload/other',
+
 }
 
 // 用户相关
@@ -56,6 +61,10 @@ export const offerList = (page, size) => request.get(API.OFFER_LIST_URL, { param
 export const offerStatus = (id, status) => request.put(API.OFFER_STATUS_URL, null, { params: { offerId: id, status: status } })
 export const offerFilePath = (id) => request.get(API.OFFER_FILE_PATH_URL, { params: { offerId: id } })
 export const offerSignature = (id, img) => request.put(API.OFFER_SIGNATURE_URL, img, { params: { offerId: id } })
+// 入职材料相关
+export const materialStatus = () => request.get(API.MATERIAL_STATUS_URL)
+export const materialUpload = (file) => request.post(API.UPLOAD_MATERIAL_URL, file)
+export const materialOtherUpload = (file) => request.post(API.UPLOAD_OTHER_MATERIAL_URL, file)
 
 
 

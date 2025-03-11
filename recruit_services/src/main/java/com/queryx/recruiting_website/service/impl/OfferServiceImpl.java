@@ -134,6 +134,14 @@ public class OfferServiceImpl implements OfferService {
             log.warn("offer不存在，offerId: {}", offerId);
             return CommonResp.fail(AppHttpCodeEnum.OFFER_NOT_EXIST, false);
         }
+        if (offers.getSignaturePath() != null) {
+            String folderPath = Common.getUploadFolderPath(signaturePath, "/") + offers.getSignaturePath();
+            File file1 = new File(folderPath);
+            if (!(file1.exists() && file1.delete())) {
+                log.warn("删除旧的签名失败，offerId: {}, 文件路径: {}", offerId, folderPath);
+                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            }
+        }
         String newFileName = System.currentTimeMillis() + file.getOriginalFilename();
         // 保存文件
         try {
