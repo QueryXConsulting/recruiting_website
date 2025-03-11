@@ -71,13 +71,10 @@ public class SecurityConfiguration {
                 "/avatar_files/**",
                 "/offer_files/**",
                 "/company/offer/save",
-<<<<<<< HEAD
                 "/signature_files/**",
-                "/offer_Template/**"
-=======
+                "/offer_Template/**",
                 "/signature_files/**"
 
->>>>>>> 647e558c13a43244eddb72fb9daa94d53c92cf59
         );
     }
 

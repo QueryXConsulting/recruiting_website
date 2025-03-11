@@ -13,12 +13,8 @@ import java.util.List;
 @Component
 public class Common {
 
-<<<<<<< HEAD
-    public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";
-    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
-    public static final String DELIVER_RESUME_STATUS_VIEWED = "1";
-    public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";
 
+    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
 
     public static String uploadPath;
 
@@ -35,16 +31,12 @@ public class Common {
     public static String ip;
 
 
-=======
-
-    // offer相关常量
     public static final String OFFER_STATUS_WAIT = "0";// 待发送
     public static final String OFFER_STATUS_ACCEPT = "1";// 接受
     public static final String OFFER_STATUS_REJECT = "2";// 拒绝
     public static final String OFFER_STATUS_CANCEL = "3";// 撤销
     // 简历投递表(job_resume)相关常量
     public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";// 已投递
-    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";// 待查看
     public static final String DELIVER_RESUME_STATUS_VIEWED = "1";// 已查看
     public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";// 待面试
     public static final String DELIVER_RESUME_DELETE_SQUARE_PEG = "0";// 不合适
@@ -53,9 +45,6 @@ public class Common {
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
 
 
-    private static String port;
-    private static String ip;
->>>>>>> 647e558c13a43244eddb72fb9daa94d53c92cf59
 
     @Value("${server.port}")
     public void setPort(String serverPort) {
@@ -152,7 +141,7 @@ public class Common {
         return "http://" + ip + ":" + port;
     }
 
-<<<<<<< HEAD
+
 
     // 获取基础 URL
     public static String getBaseURL() {
@@ -161,7 +150,7 @@ public class Common {
 
 
 
-=======
+
     /**
      * 获取上传文件夹名称（不含路径）
      * <p>例如：/upload/resume/ --> resume</p>
@@ -192,6 +181,6 @@ public class Common {
         String folderName = Common.getUploadFolderName(src, splitCode, appendCode);
         return src.replace("/" + folderName, "");
     }
->>>>>>> 647e558c13a43244eddb72fb9daa94d53c92cf59
+
 
 }
