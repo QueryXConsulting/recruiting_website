@@ -5,26 +5,20 @@ import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.*;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.service.*;
+import com.queryx.recruiting_website.service.impl.OnlyOfficeConversionService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import lombok.Data;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.List;
 
 
 @RestController
@@ -49,6 +43,12 @@ public class UserCompanyController {
     private InterviewService interviewService;
     @Resource
     private TDOffersService offersService;
+    @Resource
+    private MaterialService materialService;
+    @Resource
+    private TDRegistrationService registrationService;
+    @Resource
+    private OnlyOfficeConversionService onlyOfficeConversionService;
 
 
     @GetMapping("/selectCategory")
@@ -180,6 +180,7 @@ public class UserCompanyController {
     public CommonResp addInterviewDate(@RequestBody AddInterviewDto addInterviewDto) {
         return CommonResp.success(tdInterviewDateService.addInterviewDate(addInterviewDto));
     }
+
     @GetMapping("/selectInterviewDate")
     @Operation(summary = "面试时间查询")
     public CommonResp addInterviewDate() {
@@ -200,8 +201,8 @@ public class UserCompanyController {
 
     @GetMapping("/selectInterviewList")
     @Operation(summary = "查询面试列表")
-    public CommonResp selectInterviewList(Integer page,Integer size,Long jobId) {
-        return CommonResp.success(interviewService.selectInterviewList(page,size,jobId));
+    public CommonResp selectInterviewList(Integer page, Integer size, Long jobId) {
+        return CommonResp.success(interviewService.selectInterviewList(page, size, jobId));
     }
 
     @PutMapping("/updateInterviewList")
@@ -212,8 +213,8 @@ public class UserCompanyController {
 
     @GetMapping("/offerList")
     @Operation(summary = "offer列表")
-    public CommonResp offerList(Integer page,Integer size,Long jobId) {
-        return CommonResp.success(offersService.offerList(page,size,jobId));
+    public CommonResp offerList(Integer page, Integer size, Long jobId) {
+        return CommonResp.success(offersService.offerList(page, size, jobId));
     }
 
     @GetMapping("/selectOfferTemplate")
@@ -223,21 +224,58 @@ public class UserCompanyController {
     }
 
 
-
     @PostMapping("/offer/save")
     @Operation(summary = "OnlyOffice回调函数")
     public ResponseEntity<String> handleCallback(
             @RequestParam Long offerId,
             @RequestBody Map<String, Object> callbackData
     ) {
-        return offersService.saveOfferDocument(offerId,callbackData);
+        return offersService.saveOfferDocument(offerId, callbackData);
+    }
+
+
+    @PostMapping("/uploadWithThumbnail")
+    @Operation(summary = "上传模板接口")
+    public CommonResp uploadWithThumbnail(
+            @RequestParam("file") MultipartFile pdfFile,
+            @RequestParam("offerId") String offerId) throws IOException {
+        return CommonResp.success(onlyOfficeConversionService.convertPdfToImage(pdfFile, offerId));
     }
 
     @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")
     @Operation(summary = "修改offer状态")
-    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId,@PathVariable("status") String status,@PathVariable("jobId") Long jobId) {
-        return CommonResp.success(offersService.updateOfferStatus(offerId,status,jobId));
+    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId, @PathVariable("status") String status, @PathVariable("jobId") Long jobId) {
+        return CommonResp.success(offersService.updateOfferStatus(offerId, status, jobId));
     }
 
+    @GetMapping("selectMaterial")
+    @Operation(summary = "查询材料审核列表")
+    public CommonResp selectMaterial(Integer page, Integer size, Long jobId) {
+        return CommonResp.success(materialService.selectMaterial(page, size, jobId));
+    }
+
+    @GetMapping("selectMaterialDetail")
+    @Operation(summary = "查询材料")
+    public CommonResp selectMaterialDetail(Long materialId) {
+        return CommonResp.success(materialService.selectMaterialDetail(materialId));
+    }
+
+    @PutMapping("updateMaterialStatus")
+    @Operation(summary = "更新材料状态")
+    public CommonResp updateMaterialStatus(Long materialId, String status) {
+        return CommonResp.success(materialService.updateMaterialStatus(materialId, status));
+    }
+
+    @GetMapping("selectRegistration")
+    @Operation(summary = "查询入职信息列表")
+    public CommonResp selectRegistration(Integer page, Integer size, Long jobId, String status) {
+        return CommonResp.success(registrationService.selectRegistration(page, size, jobId, status));
+    }
+
+    @PutMapping("updateRegistrationStatus")
+    @Operation(summary = "更新入职信息状态以及设置入职时间")
+    public CommonResp updateRegistrationStatus(Long registrationId, String status, @DateTimeFormat(pattern = "yyyy-MM-dd")Date date) {
+        return CommonResp.success(registrationService.updateRegistrationStatus(registrationId, status, date));
+    }
 
 }

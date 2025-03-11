@@ -186,6 +186,9 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .eq(TDJob::getDelFlag, Common.NOT_DELETE)
                 .like(StringUtils.hasText(jobCategory), TDJob::getJobCategory, jobCategory);
         Page<TDJob> tdJobPage = tdJobMapper.selectPage(new Page<>(page, size), tdJobLambdaQueryWrapper);
+        if (tdJobPage.getRecords().isEmpty()) {
+            return null;
+        }
         Page<JobCompanyListVO> jobCompanyListVOPage = new Page<>(tdJobPage.getCurrent(), tdJobPage.getSize(), tdJobPage.getTotal());
         jobCompanyListVOPage.setRecords(tdJobPage.getRecords().stream().map(job -> {
             JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();

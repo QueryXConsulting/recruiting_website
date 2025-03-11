@@ -29,6 +29,12 @@ const API = {
   COMPANY_SELECT_OFFER_TEMPLATE: '/api/company/selectOfferTemplate',
   COMPANY_SEND_OFFER: '/api/company//offer/save',
   COMPANY_UPDATE_OFFER_STATUS: '/api/company/updateOfferStatus',
+  COMPANY_SELECT_MATERIAL: '/api/company/selectMaterial',
+  COMPANY_SELECT_MATERIAL_DETAIL: '/api/company/selectMaterialDetail',
+  COMPANY_UPDATE_MATERIAL_STATUS: '/api/company/updateMaterialStatus',
+  COMPANY_SELECT_REGISTRATION: '/api/company/selectRegistration',
+  COMPANY_UPDATE_REGISTRATION_STATUS: '/api/company/updateRegistrationStatus',
+  COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/offer/uploadWithThumbnail',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -151,3 +157,31 @@ export const sendOffer = (data) => request.post(API.COMPANY_SEND_OFFER, data)
 
 export const updateOfferStatus = (offerId, status,jobId) =>
   request.put(`${API.COMPANY_UPDATE_OFFER_STATUS}/${offerId}/${status}/${jobId}`)
+
+export const selectMaterial = (page, size,jobId) =>
+  request.get(API.COMPANY_SELECT_MATERIAL, {
+    params: { page, size,jobId }
+  })
+
+export const selectMaterialDetail = (materialId) =>
+  request.get(API.COMPANY_SELECT_MATERIAL_DETAIL, {
+    params: { materialId }
+  })
+
+export const updateMaterialStatus = (materialId, status) =>
+  request.put(API.COMPANY_UPDATE_MATERIAL_STATUS, null, {
+    params: { materialId, status }
+  })
+
+export const selectRegistration = (page, size, jobId, status) =>
+  request.get(API.COMPANY_SELECT_REGISTRATION, {
+    params: { page, size, jobId, status }
+  })
+
+export const updateRegistrationStatus = (registrationId, status,date) =>
+  request.put(API.COMPANY_UPDATE_REGISTRATION_STATUS, null, {
+    params: { registrationId, status,date }
+  })
+
+export const uploadWithThumbnail = (formData) =>
+  request.post(API.COMPANY_UPLOAD_WITH_THUMBNAIL, formData)

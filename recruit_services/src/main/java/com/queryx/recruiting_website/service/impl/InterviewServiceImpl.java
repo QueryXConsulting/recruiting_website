@@ -65,7 +65,9 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
                 .eq(TDInterview::getJobId, jobId)
                 .eq(TDInterview::getIsDeleted, Common.NOT_DELETE);
         Page<TDInterview> interviewPage = page(new Page<>(page, size), tdInterviewLambdaQueryWrapper);
-
+        if (interviewPage.getRecords().isEmpty()) {
+            return null;
+        }
 
         List<TDJobResume> tdJobResumes = tdJobResumeMapper.selectList(new LambdaQueryWrapper<TDJobResume>().eq(TDJobResume::getJobId, jobId));
         Map<Long, String> resumeMap = tdJobResumes.stream()

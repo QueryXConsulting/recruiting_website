@@ -2,6 +2,8 @@
 file:
   upload-path-resume: D:/maven/resume_files/ # TODO 文件上传路径 生产环境下需要修改
   upload-path-avatar: D:/maven/avatar_files/
+  upload-path-offers: D:/maven/offer_files/
+  upload-path-signature: D:/maven/signature_files/
   upload-path-enterpriseFile: D:/maven/enterprise_files/
   upload-path-signature: D:/maven/signature_files/
   upload-path-office: D:/maven/offer_files/
@@ -9,8 +11,9 @@ file:
 office:
   type: oo  # 指定使用OnlyOffice
   oo:
-    doc-service: 127.0.0.1:80  # OnlyOffice服务的地址
-    call-back-url: 127.0.0.1:8080/company/OnlyOffice/callback
+    doc-service: http://127.0.0.1:80  # OnlyOffice服务的地址
+    convert-service: http://127.0.0.1:80/ConvertService.ashx
+    call-back-url: http://127.0.0.1:8080/company/OnlyOffice/callback
 
 # 服务器配置
 server:

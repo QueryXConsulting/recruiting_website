@@ -4,6 +4,7 @@ import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import { interviewList, interviewAccept, interviewDate } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
+import { ArrowRight, ArrowDown } from '@element-plus/icons-vue'
 
 const currentPage = ref(1);// 当前页
 const pageSize = ref(10);// 每页显示条数
@@ -20,6 +21,9 @@ const rootData = reactive([
     { prop: "interviewResult", label: "面试结果" },
     { prop: "interviewStatus", label: "面试状态" },
     { prop: "interviewType", label: "面试类型" },
+    { prop: "interviewTime", label: "面试时长" },
+    { prop: "jobId", label: "职位id" },
+    { prop: "jobResumeId", label: "简历投递id" },
     { prop: "userId", label: "用户ID" }
 ]);
 // 对象数据填充
@@ -36,7 +40,7 @@ const createObject = (val, data, fn) => {
 // 表格列显示
 const tableColumns = reactive([]);
 (() => {
-    const o = rootData.filter((item) => !item.label.includes('ID'));
+    const o = rootData.filter((item) => !item.prop.includes('Id'));
     for (let i = 0; i < o.length; i++) {
         tableColumns.push({ prop: o[i].prop, label: o[i].label });
     }
@@ -67,6 +71,8 @@ const getTagType = (options, value) => {
     const option = options.find((item) => item.value === value);
     return option ? option.tag : 'default';
 }
+
+
 // 面试结果选项
 const resultOptions = [
     { tag: 'warning', value: '0', label: '待面试' },
@@ -76,7 +82,7 @@ const resultOptions = [
 // 面试状态选项
 const statusOptions = [
     { tag: 'danger', value: '0', label: '拒绝' },
-    { tag: 'success', value: '1', label: '接收' },
+    { tag: 'success', value: '1', label: '接受' },
     { tag: 'warning', value: '2', label: '未选择' },
     { tag: 'info', value: '3', label: '已取消' }
 ]
@@ -114,19 +120,18 @@ const timeRange = reactive([]);// 时间范围(例如：['4:00', '5:00'])
 
 
 // 接受面试函数
-const isAcceptInterview = async (id, status) => {
-    console.log('acceptInterview', id, status)
+const isAcceptInterview = async (id, status, date) => {
     // 调用接口
-    const res = await interviewAccept(id, status);
+    const res = await interviewAccept(id, status, date);
     ElMessage.success(res.message);
     // 刷新表格数据
     getInterviewList();
 }
 
+let $interviewId = '';
 // 表格右侧按钮点击事件
 const handleClick = async (index, row, $index) => {
-    // console.log('operationClick', index, row, $index)
-    // console.log('operationClick', index);
+    $interviewId = row.interviewId;
     switch (index) {
         case 0:
             // 面试状态为接受后，修改状态为取消
@@ -135,10 +140,12 @@ const handleClick = async (index, row, $index) => {
             }
             isAcceptInterview(row.interviewId, index + '');
             break;
-        case 1: // 拒绝面试
+        case 1: // 接受面试
             isShowDialog.value = true;
             const res = await interviewDate(+row.companyInfoId);
-            // isAcceptInterview(row.interviewId, index + '');
+            for (let i = 0; i < res.content.length; i++) {
+                timeRange[i] = res.content[i];
+            }
             break;
         default:
     }
@@ -153,6 +160,48 @@ const handleCurrentChange = (page) => {
     // console.log('update:current-page', page)
     currentPage.value = page
 }
+
+/*================= 面试时间选择 =================*/
+const interviewTime = ref('');// 用户选择的面试时间
+const itemIndex = ref(null);// 时间选项索引
+const selected = ref(0);// item是否被选中
+// 时间转换函数 
+const parseTime = (time) => {
+    const date = new Date(time);
+    const h = date.getHours();
+    const m = String(date.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+}
+// 选择时间
+const selectTime = (index) => {
+    itemIndex.value = index;// 记录当前选择项索引
+    selected.value = timeRange[index].interviewDateId;// 记录当前选择项id
+    interviewTime.value = null;// 重置面试时间
+}
+// 确认选择时间
+const submitTime = async () => {
+    if (!interviewTime.value) {
+        ElMessage.error('请选择面试时间');
+        return;
+    }
+    // 获取面试时间（年月日）
+    let time = timeRange.find((item) => item.interviewDateId === selected.value).interviewDateEnd;
+    time = new Date(time);
+    const y = time.getFullYear();
+    const m = String(time.getMonth() + 1).padStart(2, '0');
+    const d = String(time.getDate()).padStart(2, '0');
+    time = new Date(`${y}-${m}-${d} ${interviewTime.value}`);
+    await isAcceptInterview($interviewId, 1, time);
+    cancelTime();// 重置弹窗数据
+}
+// 取消选择时间
+const cancelTime = () => {
+    isShowDialog.value = false;// 关闭时间选择弹窗
+    itemIndex.value = null;// 重置选择项索引
+    selected.value = 0;// 重置选择项id
+    interviewTime.value = '';// 重置面试时间
+}
+
 
 
 </script>
@@ -185,16 +234,50 @@ const handleCurrentChange = (page) => {
         </WBTable>
 
         <!-- 面试时间选择窗口 -->
-        <WBDialog v-model="isShowDialog" title="请选择面试时间" width="41%" draggable>
-            <div class="interview-time-range">
-                <el-time-select v-model="timeRange[0]" size="large" style="width: 240px" :max-time="timeRange[1]"
-                    class="mr-4" placeholder="Start time" start="08:30" step="00:15" end="18:30" />
-                <span>&emsp;-&emsp;</span>
-                <el-time-select v-model="timeRange[1]" size="large" style="width: 240px" :min-time="timeRange[0]"
-                    placeholder="End time" start="08:30" step="00:15" end="18:30" />
-            </div>
+        <WBDialog v-model="isShowDialog" @submit="submitTime" @cancel="cancelTime" title="请选择面试时间" width="40%" draggable
+            style="background: #f0f0f0;">
+            <ul>
+                <li v-for="(item, index) in timeRange" @click="selectTime(index)" :key="index" class="interview-time-item">
+                    <span class="interview-time-label">
+                        <label>
+                            <input type="radio" v-model="selected" :value="item.interviewDateId" />
+                        </label>
+                        <el-icon>
+                            <component :is="itemIndex === index ? ArrowDown : ArrowRight" />
+                        </el-icon>
+                        {{ item.interviewDateStart }} - {{ item.interviewDateEnd }}
+                    </span>
+
+                    <p v-if="index === itemIndex" style=" margin: 10px 0 0 50px;">
+                        <el-time-select v-model="interviewTime" size="large" style="width: 200px"
+                            :end="parseTime(item.interviewDateEnd)" placeholder="请选择面试时间"
+                            :start="parseTime(item.interviewDateStart)" :editable="false" step="00:15" />
+                    </p>
+                </li>
+            </ul>
         </WBDialog>
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.interview-time-item {
+    margin: 5px;
+    padding: 5px 0 5px 20px;
+    background: #fff;
+    border-radius: 10px;
+    min-height: 50px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .interview-time-label {
+        gap: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    // gap: 10px;
+    font-size: 17px;
+}
+</style>

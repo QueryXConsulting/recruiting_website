@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.dto.DeliverResumeDTO;
 import com.queryx.recruiting_website.domain.vo.JobResumeVO;
@@ -15,8 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -57,10 +56,25 @@ public class DeliverController {
         return CommonResp.success(count);
     }
 
-    public CommonResp<List<JobResumeVO>> queryJobResumeList(@RequestParam("page") Integer pageNum, @RequestParam("pageSize") Integer pageSize) {
+    /**
+     * 简历列表
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 简历列表
+     */
+    @Operation(summary = "简历列表", parameters = {
+            @Parameter(name = "pageNum", description = "页码", required = true, schema = @Schema(type = "integer", defaultValue = "1")),
+            @Parameter(name = "pageSize", description = "每页大小", required = true, schema = @Schema(type = "integer", defaultValue = "10"))
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(type = "object", implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "421", description = "分页不能为空", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
+    })
+    @GetMapping("/list")
+    public CommonResp<Page<JobResumeVO>> queryJobResumeList(@RequestParam("page") Integer pageNum, @RequestParam("pageSize") Integer pageSize) {
         if (pageNum == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
-        List<JobResumeVO> jobResumeList = deliverService.queryJobResumeList(userId, pageNum, pageSize);
-        return CommonResp.success(jobResumeList);
+        return deliverService.queryJobResumeList(userId, pageNum, pageSize);
     }
 }

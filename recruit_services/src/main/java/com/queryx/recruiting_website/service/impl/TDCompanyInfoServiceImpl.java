@@ -42,11 +42,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     private TDUserMapper userMapper;
 
 
-    @Value("${file.upload-path-avatar}")
-    private String uploadPath;
 
-    @Value("${file.upload-path-enterpriseFile}")
-    private String enterpriseFilePath;
 
 
     @Override
@@ -110,7 +106,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 
         for (MultipartFile pdf : pdfFiles) {
             String fileName = pdf.getOriginalFilename();
-            validateAndSaveFile(pdf, enterpriseFilePath, currentTimeMillis, fileName);
+            validateAndSaveFile(pdf, Common.enterpriseFilePath, currentTimeMillis, fileName);
             appendFilePathToBuilder(enterpriseFiles, currentTimeMillis, fileName);
         }
 
@@ -124,7 +120,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         String fileName = applyFiles.getOriginalFilename();
         long currentTimeMillis = System.currentTimeMillis();
 
-        validateAndSaveFile(applyFiles, uploadPath, currentTimeMillis, fileName);
+        validateAndSaveFile(applyFiles, Common.uploadPath, currentTimeMillis, fileName);
         tdCompanyInfo.setCompanyLogo("/avatar_files/" + currentTimeMillis + "_" + fileName);
 
 
@@ -156,7 +152,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         if (StringUtils.hasText(oldFiles)) {
             Arrays.stream(oldFiles.split(","))
                     .filter(fileUrl -> fileUrl != null && !fileUrl.trim().isEmpty())
-                    .map(fileUrl -> new File(enterpriseFilePath + fileUrl.substring(fileUrl.lastIndexOf('/') + 1)))
+                    .map(fileUrl -> new File(Common.enterpriseFilePath + fileUrl.substring(fileUrl.lastIndexOf('/') + 1)))
                     .filter(File::exists)
                     .forEach(File::delete);
         }
@@ -165,7 +161,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     private void deleteOldCompanyLogo(Long companyInfoId) {
         String oldLogo = getById(companyInfoId).getCompanyLogo();
         if (StringUtils.hasText(oldLogo)) {
-            File oldFile = new File(uploadPath + oldLogo.substring(oldLogo.lastIndexOf('/') + 1));
+            File oldFile = new File(Common.uploadPath + oldLogo.substring(oldLogo.lastIndexOf('/') + 1));
             if (oldFile.exists()) {
                 oldFile.delete();
             }
@@ -220,7 +216,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         enterpriseFiles.forEach(enterpriseFile -> {
             int lastIndex = enterpriseFile.lastIndexOf('/');
             String fileName = enterpriseFile.substring(lastIndex + 1);
-            Path filePath = Paths.get(enterpriseFilePath, fileName);
+            Path filePath = Paths.get(Common.enterpriseFilePath, fileName);
             File file = filePath.toFile();
 
             if (!file.exists()) {

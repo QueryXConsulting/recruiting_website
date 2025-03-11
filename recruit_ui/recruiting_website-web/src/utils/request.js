@@ -28,6 +28,13 @@ request.interceptors.request.use((config) => {
 
   // 获取当前请求的基础URL（移除动态参数）
   const baseUrl = config.url.replace(/\/\d+/g, '')
+
+  // 用户端测试专用
+  /*if(baseUrl.startsWith('/api')){
+    // config.url = baseUrl.replace('/api', '')
+    return config;
+  }*/
+
   if (
     whiteList.some((path) => {
       return config.url.includes(path)
