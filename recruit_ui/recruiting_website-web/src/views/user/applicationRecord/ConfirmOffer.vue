@@ -69,7 +69,7 @@ const statusOptions = [
 // 表格右侧操作栏
 const hasOperation = ref(true);// 是否有操作栏
 const tableOperation = [
-    { type: 'default', text: '查看' },
+    // { type: 'default', text: '查看' },
     { type: 'danger', text: '拒绝' },
     { type: 'success', text: '接受' },
 ]
@@ -89,7 +89,9 @@ const isShowPreview = ref(false);// 详情弹窗是否显示
 const pdfUrl = ref('');// pdf地址
 
 // 预览offer
-const previewOffer = async (row) => {
+const previewOffer = async (row, _, e) => {
+    // 点击表格右侧按钮会触发表格行的点击事件，这里需要阻止冒泡
+    if (e.target.innerText === '接受' || e.target.innerText === '拒绝') return;
     const _filePath = await offerFilePath(row.offerId);
     if (!_filePath) return;
     isShowPreview.value = true;
@@ -112,6 +114,9 @@ const initCanvas = () => {
     // 设定Canvas尺寸
     canvasRef.width = canvasRef.offsetWidth;
     canvasRef.height = canvasRef.offsetHeight;
+    // 填充背景
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvasRef.width, canvasRef.height);
 }
 
 // 开始绘制
@@ -169,16 +174,16 @@ const clearCanvas = () => {
 }
 
 // 表格点击事件
-const handleOperationClick = async (btnIndex, row, _) => {
-    switch (btnIndex) {
-        case 0: // 拒绝
+const handleOperationClick = async (btnIndex, row, text) => {
+    switch (text) {
+        case '拒绝': // 拒绝
             const _updateResult = await offerStatus(row.offerId, 2);
             console.log('拒绝', _updateResult);
             if (_updateResult) {
                 getOfferList();
             }
             break;
-        case 1: // 接受
+        case '接受': // 接受
             isShowSignature.value = true;
             await nextTick();// 等待DOM加载完成           
             initCanvas(); // 初始化canvas

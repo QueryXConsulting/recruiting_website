@@ -57,7 +57,7 @@ const cilckTab = (pane, e) => {
                 <component :is="activeName === '3'? UploadMaterials : null"></component>
             </el-tab-pane>
             
-            <el-tab-pane name="4" label="录入信息">Task</el-tab-pane>
+            <el-tab-pane name="4" label="信息录入">Task</el-tab-pane>
             <el-tab-pane name="5" label="预约报到">Task</el-tab-pane>
         </el-tabs>
     </div>
