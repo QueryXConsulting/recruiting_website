@@ -27,14 +27,15 @@ const API = {
   COMPANY_UPDATE_INTERVIEW_LIST: '/api/company/updateInterviewList',
   COMPANY_OFFER_LIST: '/api/company/offerList',
   COMPANY_SELECT_OFFER_TEMPLATE: '/api/company/selectOfferTemplate',
-  COMPANY_SEND_OFFER: '/api/company//offer/save',
+  COMPANY_SEND_OFFER: '/api/company/offer/save',
   COMPANY_UPDATE_OFFER_STATUS: '/api/company/updateOfferStatus',
   COMPANY_SELECT_MATERIAL: '/api/company/selectMaterial',
   COMPANY_SELECT_MATERIAL_DETAIL: '/api/company/selectMaterialDetail',
   COMPANY_UPDATE_MATERIAL_STATUS: '/api/company/updateMaterialStatus',
   COMPANY_SELECT_REGISTRATION: '/api/company/selectRegistration',
   COMPANY_UPDATE_REGISTRATION_STATUS: '/api/company/updateRegistrationStatus',
-  COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/offer/uploadWithThumbnail',
+  COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/uploadWithThumbnail',
+  COMPANY_DOWNLOAD_PDF: '/api/company/downloadPdf',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -185,3 +186,10 @@ export const updateRegistrationStatus = (registrationId, status,date) =>
 
 export const uploadWithThumbnail = (formData) =>
   request.post(API.COMPANY_UPLOAD_WITH_THUMBNAIL, formData)
+
+export const downloadRegistrationPdf = (id) =>
+  request({
+    url: API.COMPANY_DOWNLOAD_PDF,
+    method: 'get',
+    params: { id },
+  })

@@ -50,6 +50,12 @@
             <version>0.12.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
         <!--		fastjson2-->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
@@ -154,6 +160,7 @@
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
+
                 </configuration>
             </plugin>
             <plugin>

@@ -229,7 +229,7 @@ public class UserCompanyController {
     public ResponseEntity<String> handleCallback(
             @RequestParam Long offerId,
             @RequestBody Map<String, Object> callbackData
-    ) {
+    ) throws IOException {
         return offersService.saveOfferDocument(offerId, callbackData);
     }
 
@@ -276,6 +276,12 @@ public class UserCompanyController {
     @Operation(summary = "更新入职信息状态以及设置入职时间")
     public CommonResp updateRegistrationStatus(Long registrationId, String status, @DateTimeFormat(pattern = "yyyy-MM-dd")Date date) {
         return CommonResp.success(registrationService.updateRegistrationStatus(registrationId, status, date));
+    }
+
+    @GetMapping("downloadPdf")
+    @Operation(summary = "pdf填充下载")
+    public CommonResp  downloadPdf(Long id) throws IOException {
+        return CommonResp.success(registrationService.downloadPdf(id));
     }
 
 }

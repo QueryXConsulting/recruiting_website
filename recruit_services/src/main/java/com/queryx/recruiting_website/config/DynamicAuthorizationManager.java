@@ -60,7 +60,6 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
             return new AuthorizationDecision(false);
         }
 
-
         // 获取用户所拥有的权限
         Set<String> userPermissions = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
