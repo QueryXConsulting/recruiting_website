@@ -45,8 +45,9 @@ const submitDeliver = async () => {
         resumeId: radioModel.value.resumeId,
         resumeType: radioModel.value.type
     }
-    await resumeDeliver(dto).then((res)=> {
+    await resumeDeliver(dto).then((res) => {
         ElMessage.success(res.message);
+        isShowDialog.value = true;
     });
 };
 
