@@ -11,6 +11,7 @@ import com.queryx.recruiting_website.domain.vo.ReservationRegistrationVO;
  */
 public interface TDRegistrationMapper extends BaseMapper<TDRegistration> {
 
+
     /**
      * 查询状态
      *
@@ -27,5 +28,6 @@ public interface TDRegistrationMapper extends BaseMapper<TDRegistration> {
      * @return 用于用户报到确认的信息
      */
     ReservationRegistrationVO selectRegistrationInfo(Integer id);
+
 
 }

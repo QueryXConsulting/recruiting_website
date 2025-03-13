@@ -14,14 +14,29 @@ import java.util.List;
 public class Common {
 
 
-    // offer相关常量
+    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
+
+    public static String uploadPath;
+
+
+    public static String enterpriseFilePath;
+
+
+    public static String officeFilePath;
+
+    public static String officeTemplatePath;
+
+    public static String signPath;
+    public static String port;
+    public static String ip;
+
+
     public static final String OFFER_STATUS_WAIT = "0";// 待发送
     public static final String OFFER_STATUS_ACCEPT = "1";// 接受
     public static final String OFFER_STATUS_REJECT = "2";// 拒绝
     public static final String OFFER_STATUS_CANCEL = "3";// 撤销
     // 简历投递表(job_resume)相关常量
     public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";// 已投递
-    public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";// 待查看
     public static final String DELIVER_RESUME_STATUS_VIEWED = "1";// 已查看
     public static final String DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED = "2";// 待面试
     public static final String DELIVER_RESUME_DELETE_SQUARE_PEG = "0";// 不合适
@@ -45,8 +60,6 @@ public class Common {
     public static final String INPUT_STATUS_SEND = "1";// 已发送
 
 
-    private static String port;
-    private static String ip;
 
     @Value("${server.port}")
     public void setPort(String serverPort) {
@@ -57,6 +70,33 @@ public class Common {
     public void setIp(String serverIp) {
         Common.ip = serverIp;
     }
+
+    @Value("${file.upload-path-avatar}")
+    public void setUploadPath(String uploadPath) {
+        Common.uploadPath = uploadPath;
+    }
+
+    @Value("${file.upload-path-enterpriseFile}")
+    public void setEnterpriseFilePath(String enterpriseFilePath) {
+        Common.enterpriseFilePath = enterpriseFilePath;
+    }
+
+    @Value("${file.upload-path-office}")
+    public void setOfficeFilePath(String officeFilePath) {
+        Common.officeFilePath = officeFilePath;
+    }
+
+    @Value("${file.upload-path-officeTemplate}")
+    public void setOfficeTemplatePath(String officeTemplatePath) {
+        Common.officeTemplatePath = officeTemplatePath;
+    }
+
+    @Value("${file.upload-path-signature}")
+    public void setSignPath(String signPath) {
+        Common.signPath = signPath;
+    }
+
+
 
     public static final String ENTERPRISEREVIEW_ENABLE = "1";
     // 启用
@@ -116,6 +156,16 @@ public class Common {
         return "http://" + ip + ":" + port;
     }
 
+
+
+    // 获取基础 URL
+    public static String getBaseURL() {
+        return "http://" + ip + ":" + port;
+    }
+
+
+
+
     /**
      * 获取上传文件夹名称（不含路径）
      * <p>例如：/upload/resume/ --> resume</p>
@@ -142,5 +192,6 @@ public class Common {
         String folderName = Common.getUploadFolderName(src, splitCode, "");
         return src.replace("/" + folderName, "");
     }
+
 
 }

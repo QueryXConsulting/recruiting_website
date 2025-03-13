@@ -190,9 +190,9 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     }
 
     @Override
-    public Object updateResumeStatus(String resumeStatus,Long jobResumeId, String resumeDelete) {
+    public Object updateResumeStatus(String resumeStatus, Long jobResumeId, String resumeDelete) {
         LambdaUpdateWrapper<TDJobResume> tdResumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        tdResumeLambdaUpdateWrapper.eq(TDJobResume::getJobResumeId,jobResumeId)
+        tdResumeLambdaUpdateWrapper.eq(TDJobResume::getJobResumeId, jobResumeId)
                 .set(StringUtils.hasText(resumeStatus) && !resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
                 .set(StringUtils.hasText(resumeDelete), TDJobResume::getResumeDelete, resumeDelete);
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);

@@ -58,9 +58,8 @@ public class SecurityConfiguration {
     @Bean
     public MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
         // 设置自定义权限评估器
-        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
-//        handler.setPermissionEvaluator(customPermissionEvaluator);
-        return handler;
+        //        handler.setPermissionEvaluator(customPermissionEvaluator);
+        return new DefaultMethodSecurityExpressionHandler();
     }
 
 
@@ -72,6 +71,8 @@ public class SecurityConfiguration {
                 "/avatar_files/**",
                 "/offer_files/**",
                 "/company/offer/save",
+                "/signature_files/**",
+                "/offer_Template/**",
                 "/signature_files/**"
 
         );

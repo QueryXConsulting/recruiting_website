@@ -58,12 +58,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     private TPRoleMapper roleMapper;
     @Resource
     private TPRoleMapper tpRoleMapper;
-    @Value("${file.upload-path-avatar}")
-    private String uploadPath;
-    @Value("${server.port}")
-    private String port;
-    @Value("${server.address}")
-    private String ip;
+
 
     @Override
     public UserCompanyDto selectUserInfo(Long userId, String userRole) {
@@ -298,7 +293,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
                 throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
             }
-            File uploadDir = new File(uploadPath);
+            File uploadDir = new File(Common.uploadPath);
             File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
             if (!destFile.getParentFile().exists()) {
                 destFile.getParentFile().mkdirs();
@@ -309,7 +304,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             String oldCompanyLogoURL = getById(tdUser.getUserId()).getUserAvatar();
             int lastIndex = oldCompanyLogoURL.lastIndexOf('/');
             String file = oldCompanyLogoURL.substring(lastIndex + 1);
-            File oldFile = new File(uploadPath + file);
+            File oldFile = new File(Common.uploadPath + file);
             if (oldFile.exists()) {
                 oldFile.delete();
             }
@@ -348,7 +343,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             if (!SecurityUtils.isAllowedFileType(SecurityUtils.getFileExtension(fileName))) {
                 throw new SystemException(AppHttpCodeEnum.FILE_TYPE_ERROR);
             }
-            File uploadDir = new File(uploadPath);
+            File uploadDir = new File(Common.uploadPath);
             File destFile = new File(uploadDir, currentTimeMillis + "_" + fileName);
             if (!destFile.getParentFile().exists()) {
                 destFile.getParentFile().mkdirs();
