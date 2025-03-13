@@ -27,7 +27,17 @@ const API = {
   OFFER_LIST_URL: '/api/offer/list',
   OFFER_STATUS_URL: '/api/offer/status',
   OFFER_FILE_PATH_URL: '/api/offer/detail',
-  OFFER_SIGNATURE_URL: '/api/offer/signature'
+  OFFER_SIGNATURE_URL: '/api/offer/signature',
+  // 入职材料相关接口
+  MATERIAL_STATUS_URL: '/api/materials/status',
+  UPLOAD_MATERIAL_URL: '/api/materials/upload',
+  UPLOAD_OTHER_MATERIAL_URL: '/api/materials/upload/other',
+  // 信息录入相关接口
+  REGISTRATION_STATUS_URL: '/api/registration/status/query',
+  REGISTRATION_INFO_URL: '/api/registration/info',
+  REGISTRATION_SUBMIT_URL: '/api/registration/submit',
+  RESERVATION_INFO_URL: '/api/registration/reservation',
+  RESERVATION_STATUS_UPDATE_URL: '/api/registration/status/update',
 }
 
 // 用户相关
@@ -56,7 +66,16 @@ export const offerList = (page, size) => request.get(API.OFFER_LIST_URL, { param
 export const offerStatus = (id, status) => request.put(API.OFFER_STATUS_URL, null, { params: { offerId: id, status: status } })
 export const offerFilePath = (id) => request.get(API.OFFER_FILE_PATH_URL, { params: { offerId: id } })
 export const offerSignature = (id, img) => request.put(API.OFFER_SIGNATURE_URL, img, { params: { offerId: id } })
-
+// 入职材料相关
+export const materialStatus = () => request.get(API.MATERIAL_STATUS_URL)
+export const materialUpload = (file) => request.post(API.UPLOAD_MATERIAL_URL, file)
+export const materialOtherUpload = (file) => request.post(API.UPLOAD_OTHER_MATERIAL_URL, file)
+// 信息录入相关
+export const registrationStatus = () => request.get(API.REGISTRATION_STATUS_URL)
+export const registrationInfo = () => request.get(API.REGISTRATION_INFO_URL)
+export const registrationSubmit = (dto) => request.post(API.REGISTRATION_SUBMIT_URL, dto)
+export const reservationInfo = () => request.get(API.RESERVATION_INFO_URL)
+export const reservationUpdateStatus = (status) => request.put(API.RESERVATION_STATUS_UPDATE_URL, status, {headers: {'Content-Type': 'text/plain'}})
 
 
 

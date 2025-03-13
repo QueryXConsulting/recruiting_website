@@ -7,6 +7,11 @@ import lombok.Data;
 import java.time.LocalDate;
 
 
+/**
+ * @Author：fjj
+ * @Date：2025/3/11 15:39
+ */
+
 @Data
 public class TDRegistration {
 
@@ -67,4 +72,5 @@ public class TDRegistration {
 
     @Schema(name = "预约状态",description = "预约状态0待选择  1已发送 2已接受 3拒绝" ,implementation = String.class)
     private String reservationStatus;
+
 }

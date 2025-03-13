@@ -5,6 +5,9 @@ import ApplicationRecord from './ApplicationRecord.vue';
 import AppointmentInterview from './AppointmentInterview.vue';
 import ConfirmOffer from './ConfirmOffer.vue';
 import UploadMaterials from './UploadMaterials.vue';
+import InformationInput from './InformationInput.vue';
+import AppointmentRegistration from './AppointmentRegistration.vue';
+
 
 const useTabStore = defineStore('tab', {
     state: () => ({
@@ -57,8 +60,12 @@ const cilckTab = (pane, e) => {
                 <component :is="activeName === '3'? UploadMaterials : null"></component>
             </el-tab-pane>
             
-            <el-tab-pane name="4" label="录入信息">Task</el-tab-pane>
-            <el-tab-pane name="5" label="预约报到">Task</el-tab-pane>
+            <el-tab-pane name="4" label="信息录入">
+                <component :is="activeName === '4'? InformationInput : null"></component>
+            </el-tab-pane>
+            <el-tab-pane name="5" label="预约报到">
+                <component :is="activeName === '5'? AppointmentRegistration : null"></component>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
