@@ -191,7 +191,7 @@
                   <template #default="scope">
                     <div class="action-buttons">
                       <el-button type="primary" link @click="viewOffer(scope.row)"
-                        v-if="scope.row.offersStatus === '0' && !scope.row.offersFilePath">
+                        v-if="scope.row.offersStatus === '0'">
                         上传offer
                       </el-button>
                       <el-button type="primary" link @click="viewOffer(scope.row)"
@@ -214,20 +214,158 @@
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="材料审核" name="material"></el-tab-pane>
-          <el-tab-pane label="信息录入" name="info"></el-tab-pane>
-          <el-tab-pane label="报到预约" name="checkin"></el-tab-pane>
+          <el-tab-pane label="材料审核" name="material">
+            <div class="table-section" style="min-width: 830px; max-width: 100%;">
+              <el-table :data="materialList" border stripe class="custom-table" row-key="materialId">
+                <el-table-column label="序号" type="index" width="100" align="center" />
+                <el-table-column label="应聘者" prop="userName" width="180" align="center" />
+                <el-table-column label="提交时间" prop="sendTime" width="180" align="center">
+                  <template #default="scope">
+                    {{ scope.row.sendTime }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" prop="status" width="120" align="center">
+                  <template #default="scope">
+                    <el-tag :type="getMaterialStatusType(scope.row.status)">
+                      {{ getMaterialStatusText(scope.row.status) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="250" align="center">
+                  <template #default="scope">
+                    <div class="action-buttons">
+                      <template v-if="scope.row.status === '3'">
+                        <el-button type="success" link @click="handleMaterialPass(scope.row)">
+                          通过
+                        </el-button>
+                        <el-button type="danger" link @click="handleMaterialReject(scope.row)">
+                          拒绝
+                        </el-button>
+                      </template>
+                      <el-button type="primary" link @click="viewMaterial(scope.row)">
+                        查看
+                      </el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div class="pagination-container">
+                <el-pagination v-model:currentPage="materialPageNum" v-model:pageSize="materialPageSize"
+                  :pageSizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next" :total="materialTotal"
+                  @size-change="handleMaterialSizeChange" @current-change="handleMaterialPageChange" />
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="信息录入" name="info">
+            <div class="table-section" style="min-width: 830px; max-width: 100%;">
+              <el-table :data="registrationList" border stripe class="custom-table" row-key="id">
+                <el-table-column label="序号" type="index" width="80" align="center" />
+                <el-table-column label="姓名" prop="userName" width="120" align="center" />
+                <el-table-column label="性别" prop="gender" width="80" align="center" />
+                <el-table-column label="职位" prop="position" width="120" align="center" />
+                <el-table-column label="入职日期" prop="hireDate" width="120" align="center" />
+                <el-table-column label="联系电话" prop="phoneNumber" width="120" align="center" />
+                <el-table-column label="学历" prop="educationLevel" width="60" align="center" />
+
+                <el-table-column label="状态" prop="registrationStatus" width="90" align="center">
+                  <template #default="scope">
+                    <el-tag :type="getRegistrationStatusType(scope.row.registrationStatus)">
+                      {{ getRegistrationStatusText(scope.row.registrationStatus) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="150" fixed="right" align="center">
+                  <template #default="scope">
+                    <div class="action-buttons">
+                      <el-button type="primary" link @click="viewRegistration(scope.row)">
+                        查看
+                      </el-button>
+                      <template v-if="scope.row.registrationStatus === '1'">
+                        <el-button type="success" link @click="handleRegistrationPass(scope.row)">
+                          通过
+                        </el-button>
+                        <el-button type="danger" link @click="handleRegistrationReject(scope.row)">
+                          拒绝
+                        </el-button>
+                      </template>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div class="pagination-container">
+                <el-pagination v-model:currentPage="registrationPageNum" v-model:pageSize="registrationPageSize"
+                  :pageSizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next" :total="registrationTotal"
+                  @size-change="handleRegistrationSizeChange" @current-change="handleRegistrationPageChange" />
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="报到预约" name="checkin">
+            <div class="table-section" style="min-width: 830px; max-width: 100%;">
+              <el-table :data="checkinList" border stripe class="custom-table" row-key="id">
+                <el-table-column label="序号" type="index" width="80" align="center" />
+                <el-table-column label="姓名" prop="userName" width="120" align="center" />
+                <el-table-column label="性别" prop="gender" width="80" align="center" />
+                <el-table-column label="手机号码" prop="phoneNumber" width="130" align="center" />
+                <el-table-column label="邮箱地址" prop="email" width="180" align="center" show-overflow-tooltip />
+                <el-table-column label="入职日期" prop="hireDate" width="120" align="center" />
+                <el-table-column label="学历" prop="educationLevel" width="100" align="center" />
+                <el-table-column label="状态" prop="reservationStatus" width="100" align="center">
+                  <template #default="scope">
+                    <el-tag :type="getCheckinStatusType(scope.row.reservationStatus)">
+                      {{ getCheckinStatusText(scope.row.reservationStatus) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="180" fixed="right" align="center">
+                  <template #default="scope">
+                    <div class="action-buttons">
+                      <el-button
+                        type="primary"
+                        link
+                        v-if="scope.row.reservationStatus === '0'"
+                        @click="openCheckinDialog(scope.row)"
+                      >
+                        设置
+                      </el-button>
+
+                      <el-button
+                        type="success"
+                        link
+                        disabled
+                        v-else
+                      >
+                        已设置
+                      </el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div class="pagination-container">
+                <el-pagination
+                  v-model:currentPage="checkinPageNum"
+                  v-model:pageSize="checkinPageSize"
+                  :pageSizes="[10, 20, 30, 50]"
+                  layout="total, sizes, prev, pager, next"
+                  :total="checkinTotal"
+                  @size-change="handleCheckinSizeChange"
+                  @current-change="handleCheckinPageChange"
+                />
+              </div>
+            </div>
+          </el-tab-pane>
         </el-tabs>
       </div>
 
       <!-- 添加PDF预览对话框 -->
-      <el-dialog v-model="pdfDialogVisible" title="简历预览" width="80%" :destroy-on-close="true">
+      <el-dialog v-model="pdfDialogVisible" title="简历预览" width="80%" :destroy-on-close="true"
+        :close-on-click-modal="false">
         <div class="pdf-container">
           <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="600px" frameborder="0"></iframe>
         </div>
       </el-dialog>
 
-      <el-dialog v-model="interviewDialogVisible" title="面试邀约" width="50%" style="width: 300px;">
+      <el-dialog v-model="interviewDialogVisible" title="面试邀约" width="50%" :destroy-on-close="true"
+        :close-on-click-modal="false">
         <el-form :model="interviewData" ref="interviewForm">
           <el-form-item label="面试类型" prop="interviewType">
             <el-select v-model="interviewData.interviewType" placeholder="请选择面试类型" @change="handleInterviewTypeChange">
@@ -297,9 +435,8 @@
             </el-icon>
             选择模板
           </el-button>
-          <el-upload class="upload-pdf" :action="uploadUrl" :headers="headers" :data="{ offerId: currentOfferId }"
-            :show-file-list="false" :before-upload="beforeUpload" :on-success="handleUploadSuccess"
-            :on-error="handleUploadError" accept=".doc,.docx">
+          <el-upload class="upload-pdf" :data="{ offerId: currentOfferId }" :show-file-list="false"
+            :before-upload="beforeUpload" :on-success="handleUploadSuccess" :on-error="handleUploadError" accept=".pdf">
             <template #default>
               <el-button type="primary">
                 <el-icon>
@@ -383,18 +520,185 @@
           </div>
         </template>
       </el-dialog>
+
+      <!-- 添加材料预览对话框 -->
+      <el-dialog v-model="materialDialogVisible" title="材料预览" width="70%" center>
+        <div class="material-container">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="身份证">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.identityCard" :src="currentMaterial.identityCard" fit="contain"
+                  :preview-src-list="[currentMaterial.identityCard]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="体检报告">
+              <div class="preview-item">
+                <template v-if="currentMaterial.physicalExamination">
+                  <el-button type="primary" link @click="openPdfFile(currentMaterial.physicalExamination)">
+                    查看PDF
+                  </el-button>
+                </template>
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="学历证书">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.diploma" :src="currentMaterial.diploma" fit="contain"
+                  :preview-src-list="[currentMaterial.diploma]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="证件照">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.identificationPhoto" :src="currentMaterial.identificationPhoto"
+                  fit="contain" :preview-src-list="[currentMaterial.identificationPhoto]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="银行卡">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.bankCard" :src="currentMaterial.bankCard" fit="contain"
+                  :preview-src-list="[currentMaterial.bankCard]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="资格证">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.qualificationCertificate"
+                  :src="currentMaterial.qualificationCertificate" fit="contain"
+                  :preview-src-list="[currentMaterial.qualificationCertificate]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="离职证明">
+              <div class="preview-item">
+                <el-image v-if="currentMaterial.resignCertificate" :src="currentMaterial.resignCertificate"
+                  fit="contain" :preview-src-list="[currentMaterial.resignCertificate]" />
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="其他材料">
+              <div class="preview-item">
+                <template v-if="currentMaterial.other && currentMaterial.other.length > 0">
+                  <el-carousel height="150px" :autoplay="false" indicator-position="none"
+                    v-if="currentMaterial.other.length > 1" class="material-carousel">
+                    <el-carousel-item v-for="(url, index) in currentMaterial.other" :key="index">
+                      <el-image :src="url" fit="contain" :preview-src-list="currentMaterial.other"
+                        :initial-index="index" :preview-teleported="true" class="material-image" />
+                    </el-carousel-item>
+                  </el-carousel>
+                  <el-image v-else :src="currentMaterial.other[0]" fit="contain"
+                    :preview-src-list="currentMaterial.other" :preview-teleported="true" class="material-image" />
+                </template>
+                <span v-else>未上传</span>
+              </div>
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </el-dialog>
+
+      <!-- 修改入职信息详情对话框 -->
+      <el-dialog v-model="registrationDialogVisible" title="入职信息详情" width="60%" center>
+        <div class="registration-container">
+          <el-descriptions :column="2" border>
+
+            <el-descriptions-item label="姓名" class="info-item">
+              <span class="info-content">{{ currentRegistration.userName || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="性别" class="info-item">
+              <span class="info-content">{{ currentRegistration.gender || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="出生日期" class="info-item">
+              <span class="info-content">{{ currentRegistration.birthDate || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="身份证号" class="info-item">
+              <span class="info-content">{{ currentRegistration.idCardNumber || '未填写' }}</span>
+            </el-descriptions-item>
+
+
+            <el-descriptions-item label="手机号码" class="info-item">
+              <span class="info-content">{{ currentRegistration.phoneNumber || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="邮箱地址" class="info-item">
+              <span class="info-content">{{ currentRegistration.email || '未填写' }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item label="入职日期" class="info-item">
+              <span class="info-content">{{ currentRegistration.hireDate || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="职位" class="info-item">
+              <span class="info-content">{{ currentRegistration.position || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="状态" class="info-item">
+              <el-tag :type="getRegistrationStatusType(currentRegistration.registrationStatus)">
+                {{ getRegistrationStatusText(currentRegistration.registrationStatus) }}
+              </el-tag>
+            </el-descriptions-item>
+
+
+            <el-descriptions-item label="学历" class="info-item">
+              <span class="info-content">{{ currentRegistration.educationLevel || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="毕业学校" class="info-item">
+              <span class="info-content">{{ currentRegistration.schoolName || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="银行账号" class="info-item">
+              <span class="info-content">{{ currentRegistration.bankAccount || '未填写' }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item label="紧急联系人" :span="2" class="info-item">
+              <span class="info-content">{{ currentRegistration.emergencyContact || '未填写' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="家庭地址" :span="2" class="info-item">
+              <span class="info-content">{{ currentRegistration.address || '未填写' }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </el-dialog>
+
+      <!-- 添加入职日期设置对话框 -->
+      <el-dialog
+        v-model="checkinDialogVisible"
+        title="设置入职日期"
+        width="30%"
+        :destroy-on-close="true"
+      >
+        <el-form :model="checkinForm" ref="checkinFormRef" label-width="100px">
+          <el-form-item label="入职日期" prop="checkinDate">
+            <el-date-picker
+              v-model="checkinForm.checkinDate"
+              type="datetime"
+              placeholder="请选择入职日期"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              :disabled-date="disabledDate"
+              :disabled-time="disabledTime"
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="checkinDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitCheckin">确定</el-button>
+          </span>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, defineAsyncComponent } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, sendOffer, updateOfferStatus } from '@/api/company/companyApi'
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail } from '@/api/company/companyApi'
 import { DocumentEditor } from '@onlyoffice/document-editor-vue'
 import userStore from '@/store/user'
+
+
+
 
 const currentOfferId = ref(null)
 const documentConfig = ref({
@@ -402,7 +706,7 @@ const documentConfig = ref({
   height: "100%",
   type: "desktop",
   document: {
-    fileType: "",
+    fileType: "pdf",
     key: "",
     title: "",
     url: "",
@@ -492,8 +796,14 @@ watch(activeTab, (newTab) => {
   title.value = tabTitles[newTab] || '其他标题';
   if (newTab === 'offer') {
     getOffersList()
+  } else if (newTab === 'material') {
+    getMaterialList()
+  } else if (newTab === 'info') {
+    getRegistrationList()
+  } else if (newTab === 'checkin') {
+    getCheckinList()
   }
-});
+}, { immediate: true });
 
 
 
@@ -856,25 +1166,25 @@ const handleOfferPageChange = (val) => {
 
 // Offer操作方法
 const viewOffer = (row) => {
-  if (row.offersStatus === '0' && !row.offersFilePath) {
+  if (row.offersStatus === '0') {
     currentOfferId.value = row.offersId
     uploadOfferDialogVisible.value = true
-  } else if (row.offersStatus === '1' && row.signaturePath) {
+  } else if (row.offersStatus === '1') {
     currentOfferId.value = row.offersId
     currentSignature.value = row.signaturePath
     signatureDialogVisible.value = true
   } else if (row.offersFilePath) {
-    window.open(row.offersFilePath)
+    openPdfFile(row.offersFilePath)
   }
 }
 
 
-const handleOfferStatus = async (offerId, status,jobId) => {
+const handleOfferStatus = async (offerId, status, jobId) => {
   try {
-    const result = await updateOfferStatus(offerId, status,jobId)
+    const result = await updateOfferStatus(offerId, status, jobId)
     if (result.code == 200) {
       ElMessage.success('状态更新成功')
-      getOffersList() // 刷新列表
+      getOffersList()
     } else {
       ElMessage.error(result.msg || '状态更新失败')
     }
@@ -891,7 +1201,7 @@ const cancelOffer = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await handleOfferStatus(row.offersId, '3',jobId) // 3 表示已撤销状态
+    await handleOfferStatus(row.offersId, '3', jobId)
   } catch (error) {
     if (error !== 'cancel') {
       console.error('撤销offer失败:', error)
@@ -900,17 +1210,17 @@ const cancelOffer = async (row) => {
   }
 }
 
-// 修改模板相关的状态变量
+
 const templateDialogVisible = ref(false)
 const selectedTemplate = ref(null)
 const templateList = ref([])
 
-// 处理模板选择
+
 const handleTemplateSelect = (template) => {
   selectedTemplate.value = template.id
 }
 
-// 获取模板列表
+
 const getTemplateList = async () => {
   try {
     const res = await selectOfferTemplate()
@@ -931,7 +1241,6 @@ const getTemplateList = async () => {
   }
 }
 
-// 修改选择模板的方法
 const selectTemplate = () => {
   getTemplateList()
   uploadOfferDialogVisible.value = false
@@ -957,7 +1266,6 @@ const confirmTemplate = async () => {
     templateDialogVisible.value = false
     pdfEditDialogVisible.value = true
 
-    // 更新配置
     documentConfig.value = {
       ...documentConfig.value,
       document: {
@@ -965,7 +1273,32 @@ const confirmTemplate = async () => {
         key: `template-${template.id}-${Date.now()}`,
         title: template.name,
         url: template.fileUrl,
-        fileType: "pdf"
+        fileType: "pdf",
+        permissions: {
+          edit: false,
+          download: true,
+          print: true,
+          fillForms: true,
+          review: false
+        }
+      },
+      editorConfig: {
+        ...documentConfig.value.editorConfig,
+        mode: "fillForms",
+        customization: {
+          autosave: false,
+          forcesave: false,
+          comments: false,
+          chat: false,
+          compactToolbar: true,
+          feedback: false,
+          help: true,
+          hideRightMenu: false,
+          toolbarNoTabs: true,
+          plugins: true,
+          saveAs: false,
+          save: true
+        }
       }
     }
     documentConfig.value.editorConfig.callbackUrl = 'http://127.0.0.1:8080/company/offer/save?offerId=' + currentOfferId.value
@@ -980,7 +1313,7 @@ const confirmTemplate = async () => {
 }
 
 
-// 修改文档服务器地址
+
 const documentServerUrl = ref('http://127.0.0.1')
 
 const onDocumentReady = () => {
@@ -1007,24 +1340,56 @@ const onDocumentStateChange = (event) => {
   }
 }
 const handleBeforeClose = async () => {
-
-  pdfEditDialogVisible.value = false
   const loading = ElLoading.service({
     lock: true,
     text: '发送中...',
     background: 'rgba(0, 0, 0, 0.7)'
-  });
+  })
 
   try {
-    handleOfferStatus(currentOfferId.value, '4',jobId)
-    pdfEditDialogVisible.value = false;
-    ElMessage.success('offer已发送');
-    getOffersList();
+    // 获取编辑后的PDF内容
+    if (editor.value) {
+      // 将PDF转换为缩略图
+      const pdf = await pdfjsLib.getDocument(documentConfig.value.document.url).promise
+      const page = await pdf.getPage(1)
+      const scale = 1.5
+      const viewport = page.getViewport({ scale })
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      canvas.height = viewport.height
+      canvas.width = viewport.width
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise
+
+      // 将画布转换为图片数据
+      const thumbnailData = canvas.toDataURL('image/png')
+      const thumbnailBlob = await fetch(thumbnailData).then(res => res.blob())
+
+      // 创建FormData对象
+      const formData = new FormData()
+      formData.append('file', new Blob([await editor.value.getFileData()], { type: 'application/pdf' }), 'document.pdf')
+      formData.append('thumbnail', new File([thumbnailBlob], 'thumbnail.png', { type: 'image/png' }))
+      formData.append('offerId', currentOfferId.value)
+
+      // 上传文件和缩略图
+      const result = await uploadWithThumbnail(formData)
+      if (result.code === 200) {
+        await handleOfferStatus(currentOfferId.value, '4', jobId)
+        ElMessage.success('offer已发送')
+        getOffersList()
+      } else {
+        throw new Error(result.msg || '上传失败')
+      }
+    }
   } catch (error) {
-    console.error('保存文档失败:', error);
-    ElMessage.error(error.message || '保存文档失败');
+    console.error('保存文档失败:', error)
+    ElMessage.error(error.message || '保存文档失败')
   } finally {
-    loading.close();
+    pdfEditDialogVisible.value = false
+    loading.close()
   }
 }
 
@@ -1055,6 +1420,254 @@ const handleSignatureReject = async () => {
   }
 }
 
+const materialList = ref([])
+const materialTotal = ref(0)
+const materialPageNum = ref(1)
+const materialPageSize = ref(10)
+
+// 获取材料状态类型
+const getMaterialStatusType = (status) => {
+  const statusMap = {
+    '0': 'info',
+    '1': 'success',
+    '2': 'danger',
+    '3': 'warning'
+  }
+  return statusMap[status] || 'info'
+}
+
+// 获取材料状态文本
+const getMaterialStatusText = (status) => {
+  const statusMap = {
+    '0': '待提交',
+    '1': '通过',
+    '2': '未通过',
+    '3': '待审核'
+  }
+  return statusMap[status] || '未知'
+}
+
+// 获取材料列表
+const getMaterialList = async () => {
+  try {
+    const res = await selectMaterial(materialPageNum.value, materialPageSize.value, jobId)
+    if (res.code === 200) {
+      materialList.value = res.content?.records
+      materialTotal.value = res.content?.total
+    } else {
+      ElMessage.error(res.msg || '获取材料列表失败')
+    }
+  } catch (error) {
+    console.error('获取材料列表失败:', error)
+    ElMessage.error('获取材料列表失败')
+  }
+}
+
+// 添加新的响应式变量
+const materialDialogVisible = ref(false)
+const currentMaterial = ref({
+  identityCard: '',
+  physicalExamination: '',
+  diploma: '',
+  identificationPhoto: '',
+  bankCard: '',
+  qualificationCertificate: '',
+  resignCertificate: '',
+  other: []
+})
+
+// 修改查看材料方法
+const viewMaterial = async (row) => {
+  try {
+    const res = await selectMaterialDetail(row.materialId)
+    if (res.code === 200) {
+      // 直接使用后端返回的数组
+      currentMaterial.value = {
+        identityCard: res.content.identityCard,
+        physicalExamination: res.content.physicalExamination,
+        diploma: res.content.diploma,
+        identificationPhoto: res.content.identificationPhoto,
+        bankCard: res.content.bankCard,
+        qualificationCertificate: res.content.qualificationCertificate,
+        resignCertificate: res.content.resignCertificate,
+        other: Array.isArray(res.content.other) ? res.content.other : []
+      }
+      materialDialogVisible.value = true
+    } else {
+      ElMessage.error(res.msg || '获取材料详情失败')
+    }
+  } catch (error) {
+    console.error('获取材料详情失败:', error)
+    ElMessage.error('获取材料详情失败')
+  }
+}
+
+// 处理分页大小变化
+const handleMaterialSizeChange = (val) => {
+  materialPageSize.value = val
+  getMaterialList()
+}
+
+// 处理页码变化
+const handleMaterialPageChange = (val) => {
+  materialPageNum.value = val
+  getMaterialList()
+}
+
+// 处理材料通过
+const handleMaterialPass = async (row) => {
+  try {
+    await ElMessageBox.confirm('确认通过该材料？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const result = await updateMaterialStatus(row.materialId, '1')
+    if (result.code === 200) {
+      ElMessage.success('审核通过')
+      getMaterialList()
+    } else {
+      ElMessage.error(result.msg || '操作失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('操作失败:', error)
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+// 处理材料拒绝
+const handleMaterialReject = async (row) => {
+  try {
+    await ElMessageBox.confirm('确认拒绝该材料？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const result = await updateMaterialStatus(row.materialId, '2')
+    if (result.code === 200) {
+      ElMessage.success('已拒绝')
+      getMaterialList()
+    } else {
+      ElMessage.error(result.msg || '操作失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('操作失败:', error)
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+// 添加新的方法来处理 PDF 打开
+const openPdfFile = (url) => {
+  if (url) {
+    window?.open(url)
+  } else {
+    ElMessage.warning('文件地址不存在')
+  }
+}
+
+const registrationList = ref([])
+const registrationTotal = ref(0)
+const registrationPageNum = ref(1)
+const registrationPageSize = ref(10)
+
+// 获取入职信息列表
+const getRegistrationList = async () => {
+  try {
+    const res = await selectRegistration(registrationPageNum.value, registrationPageSize.value, jobId, null)
+    if (res.code === 200) {
+      registrationList.value = res.content?.records
+      registrationTotal.value = res.content?.total
+    } else {
+      ElMessage.error(res.msg || '获取入职信息列表失败')
+    }
+  } catch (error) {
+    console.error('获取入职信息列表失败:', error)
+    ElMessage.error('获取入职信息列表失败')
+  }
+}
+
+// 处理分页大小变化
+const handleRegistrationSizeChange = (val) => {
+  registrationPageSize.value = val
+  getRegistrationList()
+}
+
+// 处理页码变化
+const handleRegistrationPageChange = (val) => {
+  registrationPageNum.value = val
+  getRegistrationList()
+}
+
+// 获取状态类型
+const getRegistrationStatusType = (status) => {
+  const statusMap = {
+    '0': 'info',
+    '1': 'warning',
+    '2': 'success',
+    '3': 'danger'
+  }
+  return statusMap[status] || 'info'
+}
+
+// 获取状态文本
+const getRegistrationStatusText = (status) => {
+  const statusMap = {
+    '0': '待提交',
+    '1': '待审核',
+    '2': '通过',
+    '3': '拒绝'
+  }
+  return statusMap[status] || '未知'
+}
+
+// 在其他对话框后面添加入职信息对话框
+const registrationDialogVisible = ref(false)
+const currentRegistration = ref({})
+
+// 添加查看方法
+const viewRegistration = (row) => {
+  currentRegistration.value = { ...row }
+  registrationDialogVisible.value = true
+}
+
+const checkinList = ref([])
+const checkinTotal = ref(0)
+const checkinPageNum = ref(1)
+const checkinPageSize = ref(10)
+
+// 处理分页大小变化
+const handleCheckinSizeChange = (val) => {
+  checkinPageSize.value = val
+  getCheckinList()
+}
+
+// 处理页码变化
+const handleCheckinPageChange = (val) => {
+  checkinPageNum.value = val
+  getCheckinList()
+}
+
+// 获取报到预约列表
+const getCheckinList = async () => {
+  try {
+
+    const res = await selectRegistration(checkinPageNum.value, checkinPageSize.value, jobId, '2')
+    if (res.code === 200) {
+      checkinList.value = res.content?.records
+      checkinTotal.value = res.content?.total
+    } else {
+      ElMessage.error(res.msg || '获取报到预约列表失败')
+    }
+  } catch (error) {
+    console.error('获取报到预约列表失败:', error)
+    ElMessage.error('获取报到预约列表失败')
+  }
+}
+
 onMounted(() => {
   if (!jobId) {
     ElMessage.error('缺少职位ID参数')
@@ -1062,20 +1675,201 @@ onMounted(() => {
   }
   getResumeList()
   getInterviewList()
+  // 根据当前激活的标签页加载数据
   if (activeTab.value === 'offer') {
     getOffersList()
+  } else if (activeTab.value === 'material') {
+    getMaterialList()
+  } else if (activeTab.value === 'info') {
+    getRegistrationList()
+  } else if (activeTab.value === 'checkin') {
+    getCheckinList()
   }
 })
 
 onBeforeUnmount(() => {
+
   if (pdfUrl.value) {
     URL.revokeObjectURL(pdfUrl.value)
   }
-  // 清理fabric画布
-  if (editor.value) {
-    editor.value.destroy()
+
+  // 安全地清理编辑器
+  if (editor.value && typeof editor.value.destroy === 'function') {
+    try {
+      editor.value.destroy()
+    } catch (error) {
+      console.warn('清理编辑器时出错:', error)
+    }
   }
+
+  // 重置所有对话框状态
+  pdfDialogVisible.value = false
+  interviewDialogVisible.value = false
+  editInterviewDialogVisible.value = false
+  uploadOfferDialogVisible.value = false
+  pdfEditDialogVisible.value = false
+  templateDialogVisible.value = false
+  signatureDialogVisible.value = false
+  materialDialogVisible.value = false
+  registrationDialogVisible.value = false
 })
+
+// 处理入职信息通过
+const handleRegistrationPass = async (row) => {
+  try {
+    await ElMessageBox.confirm('确认通过该入职信息？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const result = await updateRegistrationStatus(row.id, '2')
+    if (result.code === 200) {
+      ElMessage.success('审核通过')
+      getRegistrationList()
+    } else {
+      ElMessage.error(result.msg || '操作失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('操作失败:', error)
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+// 处理入职信息拒绝
+const handleRegistrationReject = async (row) => {
+  try {
+    await ElMessageBox.confirm('确认拒绝该入职信息？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const result = await updateRegistrationStatus(row.id, '3')
+    if (result.code === 200) {
+      ElMessage.success('已拒绝')
+      getRegistrationList()
+    } else {
+      ElMessage.error(result.msg || '操作失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('操作失败:', error)
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+const beforeUpload = async (file) => {
+  // TODO 上传模板功能
+}
+
+// 添加处理文件上传成功的方法
+const handleUploadSuccess = (response) => {
+  if (response.code === 200) {
+    ElMessage.success('上传成功')
+    getOffersList()
+    uploadOfferDialogVisible.value = false
+  } else {
+    ElMessage.error(response.msg || '上传失败')
+  }
+}
+
+// 添加处理文件上传失败的方法
+const handleUploadError = (error) => {
+  console.error('上传失败:', error)
+  ElMessage.error('上传失败')
+}
+
+const getCheckinStatusType = (status) => {
+  const statusMap = {
+    '0': 'info',
+    '1': 'warning',
+    '2': 'success',
+    '3': 'danger'
+  }
+  return statusMap[status] || 'info'
+}
+
+const getCheckinStatusText = (status) => {
+  const statusMap = {
+    '0': '待发送',
+    '1': '已发送',
+    '2': '已接受',
+    '3': '已拒绝'
+  }
+  return statusMap[status] || '未知'
+}
+
+// 添加新的响应式变量
+const checkinDialogVisible = ref(false)
+const checkinForm = ref({
+  checkinDate: '',
+  userId: '',
+  registrationId: ''
+})
+const checkinFormRef = ref(null)
+
+// 打开设置对话框
+const openCheckinDialog = (row) => {
+  checkinForm.value = {
+    checkinDate: '',
+    userId: row.userId,
+    registrationId: row.id
+  }
+  checkinDialogVisible.value = true
+}
+
+// 提交入职日期
+const submitCheckin = async () => {
+  if (!checkinForm.value.checkinDate) {
+    ElMessage.warning('请选择入职日期')
+    return
+  }
+
+  try {
+
+    const dateStr = new Date(checkinForm.value.checkinDate)
+      .toISOString()
+      .split('T')[0]
+
+    const result = await updateRegistrationStatus(
+      checkinForm.value.registrationId,
+      null,
+      dateStr
+    )
+
+    if (result.code === 200) {
+      ElMessage.success('入职日期设置成功')
+      checkinDialogVisible.value = false
+      getCheckinList() // 刷新列表
+    } else {
+      ElMessage.error(result.msg || '设置失败')
+    }
+  } catch (error) {
+    console.error('设置入职日期失败:', error)
+    ElMessage.error('设置失败')
+  }
+}
+
+// 在 script setup 中添加以下方法
+const disabledDate = (time) => {
+  return time.getTime() < Date.now() - 8.64e7 // 禁用今天之前的日期
+}
+
+const disabledTime = (date) => {
+  if (date && date.toDateString() === new Date().toDateString()) {
+    const hours = new Date().getHours()
+    const minutes = new Date().getMinutes()
+    return {
+      disabledHours: () => Array.from({ length: hours }, (_, i) => i),
+      disabledMinutes: (hour) => hour === hours ? Array.from({ length: minutes }, (_, i) => i) : []
+    }
+  }
+  return {}
+}
+
+
 </script>
 
 <style scoped>
@@ -1536,7 +2330,150 @@ onBeforeUnmount(() => {
 }
 
 .dialog-footer {
-  text-align: center;
-  padding-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+:deep(.el-date-picker) {
+  width: 100%;
+}
+
+.material-container {
+  padding: 20px;
+}
+
+.preview-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 150px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin: 0 auto;
+}
+
+.material-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.material-carousel {
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.el-carousel__container) {
+  height: 100% !important;
+}
+
+:deep(.el-carousel__item) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+}
+
+:deep(.el-carousel__arrow) {
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  &--left {
+    left: -5px;
+  }
+
+  &--right {
+    right: -5px;
+  }
+}
+
+.other-materials-container {
+  display: none;
+}
+
+.registration-container {
+  padding: 20px;
+  background-color: #fff;
+}
+
+:deep(.el-descriptions) {
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-descriptions__label) {
+  width: 120px;
+  padding: 16px 24px !important;
+  background-color: #f7f8fa;
+  font-weight: 500;
+  color: #606266;
+}
+
+:deep(.el-descriptions__content) {
+  padding: 16px 24px !important;
+  color: #303133;
+}
+
+.info-item {
+  line-height: 1.5;
+}
+
+.info-content {
+  color: #606266;
+  font-size: 14px;
+}
+
+:deep(.el-descriptions__body) {
+  background-color: #fff;
+}
+
+:deep(.el-descriptions__cell) {
+  padding: 0;
+}
+
+:deep(.el-tag) {
+  font-weight: 500;
+  padding: 0 12px;
+  height: 28px;
+  line-height: 26px;
+}
+
+:deep(.el-dialog__header) {
+  margin-right: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+:deep(.el-dialog__body) {
+  padding: 0;
+}
+
+:deep(.el-dialog) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-descriptions__row) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+:deep(.el-descriptions__row:last-child) {
+  border-bottom: none;
 }
 </style>

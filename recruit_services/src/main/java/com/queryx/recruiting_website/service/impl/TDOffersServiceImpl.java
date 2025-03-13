@@ -43,20 +43,6 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
     @Resource
     private TDJobResumeMapper jobResumeMapper;
 
-    @Value("${file.upload-path-avatar}")
-    private String uploadPath;
-
-    @Value("${file.upload-path-enterpriseFile}")
-    private String enterpriseFilePath;
-
-    @Value("${file.upload-path-office}")
-    private String officeFilePath;
-
-    @Value("${file.upload-path-officeTemplate}")
-    private String officeTemplatePath;
-
-    @Value("${file.upload-path-signature}")
-    private String signPath;
 
     @Override
     public Object offerList(Integer page, Integer size, Long jobId) {
@@ -101,17 +87,19 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
     @Override
     public ResponseEntity<String> saveOfferDocument(Long offerId, Map<String, Object> callbackData) {
         Integer status = (Integer) callbackData.get("status");
-        if (status == 6) {
+        if (status == 2) {
             TDOffers offer = getById(offerId);
             String fileUrl = (String) callbackData.get("url");
             if (fileUrl == null) {
                 return ResponseEntity.ok("{\"error\":1, \"message\":\"保存失败\"}");
             }
+            String officeName = "/offer_files/" + System.currentTimeMillis() + "_" + offerId + ".pdf";
 
+            offer.setOffersFilePath(officeName);
+            update(offer, new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOffersId, offerId));
             // 下载文件并保存为 PDF
-            String outputPdfPath = officeFilePath + System.currentTimeMillis() + "_" + offerId + ".pdf";
             try {
-                downloadFileFromUrl(fileUrl, outputPdfPath);
+                downloadFileFromUrl(fileUrl, Common.officeFilePath + System.currentTimeMillis() + "_" + offerId + ".pdf");
                 return ResponseEntity.ok("{\"error\":0, \"message\":\"保存成功\"}");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -123,13 +111,13 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
 
     @Override
     public CommonResp updateOfferStatus(Long offerId, String status, Long jobId) {
-        if (status.equals("1")){
+        if (status.equals("1")) {
             // 更新简历流程状态
             LambdaUpdateWrapper<TDJobResume> resumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-            resumeLambdaUpdateWrapper.eq(TDJobResume::getUserId,
-                    SecurityUtils.getLoginUser().getTdUser().getUserId())
-                    .eq(TDJobResume::getJobId,jobId)
-                            .set(TDJobResume::getResumeStatus,"4");
+            resumeLambdaUpdateWrapper
+                    .eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId())
+                    .eq(TDJobResume::getJobId, jobId)
+                    .set(TDJobResume::getResumeStatus, "4");
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
 
         }
