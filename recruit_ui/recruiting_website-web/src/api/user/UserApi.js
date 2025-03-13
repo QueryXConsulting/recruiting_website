@@ -32,7 +32,12 @@ const API = {
   MATERIAL_STATUS_URL: '/api/materials/status',
   UPLOAD_MATERIAL_URL: '/api/materials/upload',
   UPLOAD_OTHER_MATERIAL_URL: '/api/materials/upload/other',
-
+  // 信息录入相关接口
+  REGISTRATION_STATUS_URL: '/api/registration/status/query',
+  REGISTRATION_INFO_URL: '/api/registration/info',
+  REGISTRATION_SUBMIT_URL: '/api/registration/submit',
+  RESERVATION_INFO_URL: '/api/registration/reservation',
+  RESERVATION_STATUS_UPDATE_URL: '/api/registration/status/update',
 }
 
 // 用户相关
@@ -65,7 +70,12 @@ export const offerSignature = (id, img) => request.put(API.OFFER_SIGNATURE_URL, 
 export const materialStatus = () => request.get(API.MATERIAL_STATUS_URL)
 export const materialUpload = (file) => request.post(API.UPLOAD_MATERIAL_URL, file)
 export const materialOtherUpload = (file) => request.post(API.UPLOAD_OTHER_MATERIAL_URL, file)
-
+// 信息录入相关
+export const registrationStatus = () => request.get(API.REGISTRATION_STATUS_URL)
+export const registrationInfo = () => request.get(API.REGISTRATION_INFO_URL)
+export const registrationSubmit = (dto) => request.post(API.REGISTRATION_SUBMIT_URL, dto)
+export const reservationInfo = () => request.get(API.RESERVATION_INFO_URL)
+export const reservationUpdateStatus = (status) => request.put(API.RESERVATION_STATUS_UPDATE_URL, status, {headers: {'Content-Type': 'text/plain'}})
 
 
 

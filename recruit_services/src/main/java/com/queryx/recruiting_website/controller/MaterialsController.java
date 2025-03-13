@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/materials")
+@Tag(name = "材料管理", description = "材料上传管理")
 public class MaterialsController {
 
     private final MaterialsService materialsService;
@@ -30,16 +32,14 @@ public class MaterialsController {
     }
 
 
-
-        @GetMapping("/status")
-    @Operation(summary = "是否到达该流程", responses = {
+    @GetMapping("/status")
+    @Operation(summary = "获取材料上传状态", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    public CommonResp<Integer> queryIsProcessArrives() {
+    public CommonResp<Integer> getProcessStatus() {
         return materialsService.queryProcessStatus();
     }
-
 
 
     @PostMapping("/upload")
@@ -49,7 +49,7 @@ public class MaterialsController {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    public CommonResp<Boolean> uploadMaterials(@RequestParam() Map<String , MultipartFile> files) {
+    public CommonResp<Boolean> uploadMaterials(@RequestParam() Map<String, MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }
@@ -70,11 +70,6 @@ public class MaterialsController {
         }
         return materialsService.insertOtherMaterials(files);
     }
-
-
-
-
-
 
 
 }
