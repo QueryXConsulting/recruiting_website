@@ -1,4 +1,3 @@
-
 file:
   upload-path-resume: D:/maven/resume_files/ # TODO 文件上传路径 生产环境下需要修改
   upload-path-avatar: D:/maven/avatar_files/
@@ -8,6 +7,10 @@ file:
   upload-path-enterpriseFile: D:/maven/enterprise_files/
   upload-path-office: D:/maven/offer_files/
   upload-path-officeTemplate: D:/maven/offer_Template/
+pdf:
+  # TODO 使用yml配置路径爆错
+  font-path: C:\\Windows\\Fonts\\STXIHEI.TTF
+  registration-path: D:\\maven\\offer_files\\1741588126573_18.pdf
 office:
   type: oo  # 指定使用OnlyOffice
   oo:
@@ -34,7 +37,7 @@ spring:
   web:
     resources:
       static-locations:
-      - "file:D:/maven/"   # 生产环境需要进行修改该参数
+        - "file:D:/maven/"   # 生产环境需要进行修改该参数
   application:
     name: recruiting_website
 

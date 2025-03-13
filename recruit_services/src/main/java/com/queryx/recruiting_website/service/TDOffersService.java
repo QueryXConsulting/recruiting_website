@@ -5,6 +5,7 @@ import com.queryx.recruiting_website.domain.TDOffers;
 import com.queryx.recruiting_website.utils.CommonResp;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.Map;
 
 
@@ -15,7 +16,7 @@ public interface TDOffersService extends IService<TDOffers> {
 
     Object selectOfferTemplate();
 
-    ResponseEntity<String> saveOfferDocument(Long offerId, Map<String, Object> callbackData);
+    ResponseEntity<String> saveOfferDocument(Long offerId, Map<String, Object> callbackData) throws IOException;
 
 
     CommonResp updateOfferStatus(Long offerId, String status, Long jobId);

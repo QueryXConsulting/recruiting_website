@@ -93,13 +93,13 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
             if (fileUrl == null) {
                 return ResponseEntity.ok("{\"error\":1, \"message\":\"保存失败\"}");
             }
-            String officeName = "/offer_files/" + System.currentTimeMillis() + "_" + offerId + ".pdf";
-
+            String fileName = System.currentTimeMillis() + "_" + offerId + ".pdf";
+            String officeName = "/offer_files/" + fileName;
             offer.setOffersFilePath(officeName);
-            update(offer, new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOffersId, offerId));
+            update(offer, new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId));
             // 下载文件并保存为 PDF
             try {
-                downloadFileFromUrl(fileUrl, Common.officeFilePath + System.currentTimeMillis() + "_" + offerId + ".pdf");
+                downloadFileFromUrl(fileUrl, Common.officeFilePath + fileName);
                 return ResponseEntity.ok("{\"error\":0, \"message\":\"保存成功\"}");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -121,7 +121,7 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
 
         }
-        offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOffersId, offerId)
+        offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
                 .set(TDOffers::getOffersStatus, status));
         return null;
     }

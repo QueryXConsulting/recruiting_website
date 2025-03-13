@@ -259,7 +259,7 @@
           <el-tab-pane label="信息录入" name="info">
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="registrationList" border stripe class="custom-table" row-key="id">
-                <el-table-column label="序号" type="index" width="80" align="center" />
+                <el-table-column label="序号" type="index" width="60" align="center" />
                 <el-table-column label="姓名" prop="userName" width="120" align="center" />
                 <el-table-column label="性别" prop="gender" width="80" align="center" />
                 <el-table-column label="职位" prop="position" width="120" align="center" />
@@ -274,7 +274,7 @@
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="150" fixed="right" align="center">
+                <el-table-column label="操作" width="200" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
                       <el-button type="primary" link @click="viewRegistration(scope.row)">
@@ -288,6 +288,11 @@
                           拒绝
                         </el-button>
                       </template>
+
+                      <el-button type="primary" link @click="downloadRegistrationFile(scope.row)"
+                        v-if="scope.row.registrationStatus === '2'">
+                        下载附件
+                      </el-button>
                     </div>
                   </template>
                 </el-table-column>
@@ -319,21 +324,12 @@
                 <el-table-column label="操作" width="180" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-button
-                        type="primary"
-                        link
-                        v-if="scope.row.reservationStatus === '0'"
-                        @click="openCheckinDialog(scope.row)"
-                      >
+                      <el-button type="primary" link v-if="scope.row.reservationStatus === '0'"
+                        @click="openCheckinDialog(scope.row)">
                         设置
                       </el-button>
 
-                      <el-button
-                        type="success"
-                        link
-                        disabled
-                        v-else
-                      >
+                      <el-button type="success" link disabled v-else>
                         已设置
                       </el-button>
                     </div>
@@ -341,15 +337,9 @@
                 </el-table-column>
               </el-table>
               <div class="pagination-container">
-                <el-pagination
-                  v-model:currentPage="checkinPageNum"
-                  v-model:pageSize="checkinPageSize"
-                  :pageSizes="[10, 20, 30, 50]"
-                  layout="total, sizes, prev, pager, next"
-                  :total="checkinTotal"
-                  @size-change="handleCheckinSizeChange"
-                  @current-change="handleCheckinPageChange"
-                />
+                <el-pagination v-model:currentPage="checkinPageNum" v-model:pageSize="checkinPageSize"
+                  :pageSizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next" :total="checkinTotal"
+                  @size-change="handleCheckinSizeChange" @current-change="handleCheckinPageChange" />
               </div>
             </div>
           </el-tab-pane>
@@ -475,7 +465,15 @@
               <div class="template-item" @click="handleTemplateSelect(template)"
                 :class="{ 'active': selectedTemplate === template.id }">
                 <div class="template-preview">
-                  <el-image :src="template.thumbnail" fit="cover" :preview-src-list="[template.preview]">
+                  <el-image
+                    :src="template.thumbnail"
+                    fit="cover"
+                    :preview-src-list="[template.preview]"
+                    :initial-index="0"
+                    :preview-teleported="true"
+                    :zoom-rate="1.2"
+                    :close-on-press-escape="true"
+                    preview-teleported>
                     <template #error>
                       <div class="image-placeholder">
                         <el-icon>
@@ -495,7 +493,7 @@
         </div>
         <template #footer>
           <el-button @click="templateDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmTemplate" :disabled="!selectedTemplate">确定</el-button>
+          <el-button type="primary" @click="(confirmTemplate)" :disabled="!selectedTemplate">确定</el-button>
         </template>
       </el-dialog>
 
@@ -658,23 +656,12 @@
       </el-dialog>
 
       <!-- 添加入职日期设置对话框 -->
-      <el-dialog
-        v-model="checkinDialogVisible"
-        title="设置入职日期"
-        width="30%"
-        :destroy-on-close="true"
-      >
+      <el-dialog v-model="checkinDialogVisible" title="设置入职日期" width="30%" :destroy-on-close="true">
         <el-form :model="checkinForm" ref="checkinFormRef" label-width="100px">
           <el-form-item label="入职日期" prop="checkinDate">
-            <el-date-picker
-              v-model="checkinForm.checkinDate"
-              type="datetime"
-              placeholder="请选择入职日期"
-              format="YYYY-MM-DD HH:mm"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              :disabled-date="disabledDate"
-              :disabled-time="disabledTime"
-            />
+            <el-date-picker v-model="checkinForm.checkinDate" type="datetime" placeholder="请选择入职日期"
+              format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm:ss" :disabled-date="disabledDate"
+              :disabled-time="disabledTime" />
           </el-form-item>
         </el-form>
         <template #footer>
@@ -693,7 +680,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail } from '@/api/company/companyApi'
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf } from '@/api/company/companyApi'
 import { DocumentEditor } from '@onlyoffice/document-editor-vue'
 import userStore from '@/store/user'
 
@@ -1167,7 +1154,7 @@ const handleOfferPageChange = (val) => {
 // Offer操作方法
 const viewOffer = (row) => {
   if (row.offersStatus === '0') {
-    currentOfferId.value = row.offersId
+    currentOfferId.value = row.offerId
     uploadOfferDialogVisible.value = true
   } else if (row.offersStatus === '1') {
     currentOfferId.value = row.offersId
@@ -1301,6 +1288,7 @@ const confirmTemplate = async () => {
         }
       }
     }
+
     documentConfig.value.editorConfig.callbackUrl = 'http://127.0.0.1:8080/company/offer/save?offerId=' + currentOfferId.value
     console.log('offerId:', currentOfferId.value);
 
@@ -1340,57 +1328,25 @@ const onDocumentStateChange = (event) => {
   }
 }
 const handleBeforeClose = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: '发送中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  })
 
-  try {
-    // 获取编辑后的PDF内容
-    if (editor.value) {
-      // 将PDF转换为缩略图
-      const pdf = await pdfjsLib.getDocument(documentConfig.value.document.url).promise
-      const page = await pdf.getPage(1)
-      const scale = 1.5
-      const viewport = page.getViewport({ scale })
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
-      canvas.height = viewport.height
-      canvas.width = viewport.width
+pdfEditDialogVisible.value = false
+const loading = ElLoading.service({
+  lock: true,
+  text: '发送中...',
+  background: 'rgba(0, 0, 0, 0.7)'
+});
 
-      await page.render({
-        canvasContext: context,
-        viewport: viewport
-      }).promise
-
-      // 将画布转换为图片数据
-      const thumbnailData = canvas.toDataURL('image/png')
-      const thumbnailBlob = await fetch(thumbnailData).then(res => res.blob())
-
-      // 创建FormData对象
-      const formData = new FormData()
-      formData.append('file', new Blob([await editor.value.getFileData()], { type: 'application/pdf' }), 'document.pdf')
-      formData.append('thumbnail', new File([thumbnailBlob], 'thumbnail.png', { type: 'image/png' }))
-      formData.append('offerId', currentOfferId.value)
-
-      // 上传文件和缩略图
-      const result = await uploadWithThumbnail(formData)
-      if (result.code === 200) {
-        await handleOfferStatus(currentOfferId.value, '4', jobId)
-        ElMessage.success('offer已发送')
-        getOffersList()
-      } else {
-        throw new Error(result.msg || '上传失败')
-      }
-    }
-  } catch (error) {
-    console.error('保存文档失败:', error)
-    ElMessage.error(error.message || '保存文档失败')
-  } finally {
-    pdfEditDialogVisible.value = false
-    loading.close()
-  }
+try {
+  handleOfferStatus(currentOfferId.value, '4',jobId)
+  pdfEditDialogVisible.value = false;
+  ElMessage.success('offer已发送');
+  getOffersList();
+} catch (error) {
+  console.error('保存文档失败:', error);
+  ElMessage.error(error.message || '保存文档失败');
+} finally {
+  loading.close();
+}
 }
 
 // 在 script setup 中添加以下代码
@@ -1761,25 +1717,31 @@ const handleRegistrationReject = async (row) => {
 }
 
 const beforeUpload = async (file) => {
-  // TODO 上传模板功能
-}
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('offerId', currentOfferId.value)
 
-// 添加处理文件上传成功的方法
-const handleUploadSuccess = (response) => {
-  if (response.code === 200) {
-    ElMessage.success('上传成功')
-    getOffersList()
-    uploadOfferDialogVisible.value = false
-  } else {
-    ElMessage.error(response.msg || '上传失败')
+    const result = await uploadWithThumbnail(formData)
+
+    if (result.code === 200) {
+      ElMessage.success('上传成功')
+      getOffersList()
+      uploadOfferDialogVisible.value = false
+      return false // 阻止默认上传行为
+    } else {
+      ElMessage.error(result.msg || '上传失败')
+      return false
+    }
+  } catch (error) {
+    console.error('上传失败:', error)
+    ElMessage.error('上传失败')
+    return false
   }
 }
 
-// 添加处理文件上传失败的方法
-const handleUploadError = (error) => {
-  console.error('上传失败:', error)
-  ElMessage.error('上传失败')
-}
+
+
 
 const getCheckinStatusType = (status) => {
   const statusMap = {
@@ -1869,6 +1831,46 @@ const disabledTime = (date) => {
   return {}
 }
 
+const downloadRegistrationFile = async (row) => {
+  try {
+    const response = await downloadRegistrationPdf(row.id)
+
+    if (response.code === 200 && response.content) {
+      // 将 base64 转换为二进制数据
+      const binaryString = atob(response.content)
+      const bytes = new Uint8Array(binaryString.length)
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i)
+      }
+
+      // 创建 Blob 对象
+      const blob = new Blob([bytes], { type: 'application/pdf' })
+
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `入职信息_${row.userName || '未命名'}.pdf`
+
+      // 触发下载
+      document.body.appendChild(link)
+      link.click()
+
+      // 清理
+      document.body.removeChild(link)
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url)
+      }, 100)
+
+      ElMessage.success('文件下载成功')
+    } else {
+      throw new Error(response.msg || '下载失败')
+    }
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败')
+  }
+}
 
 </script>
 

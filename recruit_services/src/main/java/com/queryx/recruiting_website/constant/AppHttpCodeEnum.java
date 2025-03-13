@@ -51,8 +51,9 @@ public enum AppHttpCodeEnum {
     USER_NOT_EXIST(485, "用户不存在"),
     OFFER_NOT_EXIST(486, "offer不存在"),
     FILE_UPLOAD_FAIL(487, "文件上传失败"),
-    REQUIRED_MATERIALS_WERE_NOT_UPLOADED(488, "未上传必要的材料"),
-    ;
+    FILE_PDF_PAGE(488,"上传页数过多"),
+    REQUIRED_MATERIALS_WERE_NOT_UPLOADED(489, "未上传必要的材料");
+
 
     final int code;
     final String msg;
