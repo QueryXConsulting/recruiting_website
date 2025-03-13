@@ -40,6 +40,9 @@ public class Common {
     public static final String MATERIAL_STATUS_UPLOADING_MATERIAL = "您已收到offer，请上传入职相关材料！";// 准备上传材料
     public static final String MATERIAL_STATUS_UPLOAD_NOT_BEGIN = "您还没有收到offer，不能上传材料！";// 未到上传材料环节
     public static final String MATERIAL_STATUS_UPLOAD_SUCCESS = "您上传的材料已提交，请等待审核！";// 上传材料成功
+    // 信息录入相关常量
+    public static final String INPUT_STATUS_NOT_INPUT = "0";// 待发送
+    public static final String INPUT_STATUS_SEND = "1";// 已发送
 
 
     private static String port;
