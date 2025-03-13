@@ -96,7 +96,7 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
             String officeName = "/offer_files/" + System.currentTimeMillis() + "_" + offerId + ".pdf";
 
             offer.setOffersFilePath(officeName);
-            update(offer, new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOffersId, offerId));
+            update(offer, new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId));
             // 下载文件并保存为 PDF
             try {
                 downloadFileFromUrl(fileUrl, Common.officeFilePath + System.currentTimeMillis() + "_" + offerId + ".pdf");
@@ -121,7 +121,7 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
 
         }
-        offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOffersId, offerId)
+        offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
                 .set(TDOffers::getOffersStatus, status));
         return null;
     }

@@ -69,7 +69,7 @@ const getOptionLabel = (options, value) => {
 // 获取tag类型
 const getTagType = (options, value) => {
     const option = options.find((item) => item.value === value);
-    return option ? option.tag : 'default';
+    return option ? option.tag : 'info';
 }
 
 
