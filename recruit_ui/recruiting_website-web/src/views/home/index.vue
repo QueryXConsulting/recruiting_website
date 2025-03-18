@@ -11,6 +11,12 @@
         <a href="#" class="nav-item active">首页</a>
         <a href="#" class="nav-item">校园招聘</a>
         <a href="#" class="nav-item">社会招聘</a>
+        <a href="#" class="nav-item" v-if="userStore().token">
+          <el-icon>
+            <component :is="Bell"></component>
+          </el-icon>
+          <i class="message-flag"></i>
+        </a>
         <router-link to="/auth/login" class="login-btn" v-show="userStore().token == null">登录</router-link>
       </div>
     </nav>
@@ -42,7 +48,8 @@
 <script setup>
 import router from '@/router';
 import userStore from '@/store/user';
-import { ref } from 'vue'
+import { ref } from 'vue';
+import { Bell } from '@element-plus/icons-vue';
 
 
 
@@ -141,6 +148,15 @@ const cultureItems = ref([
   width: 100%;
   height: 2px;
   background-color: #e60012;
+}
+
+.message-flag {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  right: 1%;
+  background: #f00;
+  border-radius: 50%;
 }
 
 .login-btn {

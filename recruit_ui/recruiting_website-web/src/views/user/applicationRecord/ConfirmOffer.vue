@@ -75,7 +75,7 @@ const tableOperation = [
 ]
 let filteredOperation = tableOperation;
 const getStatusOptionsLabel = (value) => {
-    if (value !== '0' && value !== '5' ) {
+    if (value === '1' || value == '2' || value == '3') {
         filteredOperation = [];
     } else {
         filteredOperation = tableOperation;

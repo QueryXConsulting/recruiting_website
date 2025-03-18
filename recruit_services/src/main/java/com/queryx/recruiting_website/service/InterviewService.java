@@ -9,6 +9,7 @@ import com.queryx.recruiting_website.domain.vo.InterviewDateVO;
 import com.queryx.recruiting_website.domain.vo.InterviewVO;
 import com.queryx.recruiting_website.utils.CommonResp;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -54,7 +55,8 @@ public interface InterviewService extends IService<TDInterview> {
      *
      * @param interviewId 面试id
      * @param isAccept 是否接受
+     * @param interviewDate 面试时间
      * @return 是否成功
      */
-    CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept);
+    CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept, Date interviewDate);
 }

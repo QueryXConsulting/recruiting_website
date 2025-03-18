@@ -4,6 +4,6 @@ import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.vo.LoginVO;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 
-public interface LoginStrategy {
+public interface SearchStrategy {
     LoginVO login(TDUserMapper userMapper, LoginDTO loginDTO);
 }

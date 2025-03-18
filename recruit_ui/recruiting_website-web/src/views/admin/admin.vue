@@ -1,6 +1,6 @@
 <script lang="js" setup>
 import { roleList } from '@/api/admin/RoleApi'
-import { adminList, adminInfoURL, adminUpdate, adminAdd, adminDelete } from '@/api/admin/AdminApi';
+import { adminList, adminInfo, adminUpdate, adminAdd, adminDelete, adminUpdateAvatar } from '@/api/admin/adminApi';
 import { ref, computed, reactive, defineEmits } from 'vue'
 import useAdminStore from '@/store/adminStore'
 import { ElMessage } from 'element-plus';
@@ -30,7 +30,7 @@ const response = reactive([
     { tag: 'table, edit', prop: 'adminUsername', label: '账号', value: '' },
     { tag: 'table, edit', prop: 'adminStatus', label: '状态', value: '', option: adminStatusOptions },
     { tag: 'table', prop: 'roleName', label: '角色', value: '' },
-    { tag: 'edit', prop: 'adminAvatar', label: '头像', value: '' },
+    { tag: 'edit, table', prop: 'adminAvatar', label: '头像', value: '' },
     { tag: 'edit', prop: 'roleId', label: '角色', value: '' },
     { tag: 'edit', prop: 'adminPassword', label: '密码', value: '' },
 ]);
@@ -59,15 +59,15 @@ const getColumnLabels = (tag) => {
     }, {})
 }
 // 根据tag获得所以value
-const getColumnValues = (tag) => {
-    const _item = filteredResponse(tag);
-    const keys = _item.flatMap((i) => i.prop);
-    const values = _item.flatMap((i) => i.value);
-    return keys.reduce((acc, key, index) => {
-        acc[key] = values[index];
-        return acc;
-    }, {})
-}
+// const getColumnValues = (tag) => {
+//     const _item = filteredResponse(tag);
+//     const keys = _item.flatMap((i) => i.prop);
+//     const values = _item.flatMap((i) => i.value);
+//     return keys.reduce((acc, key, index) => {
+//         acc[key] = values[index];
+//         return acc;
+//     }, {})
+// }
 
 // 定义防抖函数
 const debounce = (func, delay) => {
@@ -132,7 +132,7 @@ const info = reactive({});
 const isShowDialogInfo = ref(false);
 const handleInspect = async (row) => {
     // 请求用户信息
-    await adminInfoURL(row.adminId).then(res => { info.content = res.content; });
+    await adminInfo(row.adminId).then(res => { info.content = res.content; });
     // 打开弹窗
     isShowDialogInfo.value = true;
 }
@@ -155,7 +155,8 @@ const handleDeleteRequest = () => {
 
 
 // 用户新增和修改信息对象
-const editInfo = reactive(getColumnValues('edit'));
+const editInfo = reactive({});
+// const editInfo = reactive(getColumnValues('edit'));
 // 角色列表请求
 const roleListRequest = async () => {
     const data = await roleList();
@@ -183,28 +184,62 @@ const editRules = {
         { required: true, message: '请选择状态', trigger: 'change' }
     ],
 }
+
+/* 头像上传相关函数 */
+const avatarUpload = ref(null);// 上传组件实例
+let avatarFile = null;// 头像文件对象
+const updateAvatar = (file) => {
+    avatarFile = file.file;
+    const fileSize = avatarFile.size / 1024 / 1024;
+    if (fileSize > 2) {
+        ElMessage.error('头像图片大小不能超过2M');
+        return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(avatarFile);
+    reader.onload = (e) => {
+        editInfo.adminAvatar = e.target.result;
+    };
+    avatarUpload.value.clearFiles();
+}
+
+
+
 /* 编辑相关函数 */
 const isShowDialogEdit = ref(false);// 编辑弹窗控制
 const roleSelectValue = ref('');// 角色选择值
 const editForm = ref(null);// 编辑表单实例
-let editId = '';
+let editId = '';// 记录管理员id
 // 编辑用户信息
 const handleEdit = async (row) => {
     // 请求用户信息
-    const data = await adminInfoURL(row.adminId);
-    const keys = Object.keys(data.content);
-    // const values = Object.values(data.content);
-    for (let i = 0; i < keys.length; i++) {
-        editInfo[keys[i]] = null;
-        // editInfo[keys[i]] = values[i];
-    }
-    await roleListRequest();// 请求角色列表
-    const role = adminRoleOptions.find((item) => item.roleName === row.roleName)
-    // 表单赋值
-    editInfo.roleId = role.roleId;
+    const data = await adminInfo(row.adminId);
+    const keys = filteredResponse('edit').flatMap((i) => i.prop);
     // 打开弹窗
     isShowDialogEdit.value = true;
+
+    await roleListRequest();// 请求角色列表
+    const role = adminRoleOptions.find((item) => item.roleName === row.roleName);
     editId = row.adminId;// 记录编辑用户id
+    editForm.value.resetFields();
+    // TIP：不知道为什么，在循环外对对象的某个属性赋值，会导致整个对象的属性值变得不可预测。
+    // 表单赋值
+    for (let i = 0; i < keys.length; i++) {
+        if (row[keys[i]]) {
+            editInfo[keys[i]] = row[keys[i]];
+            continue;
+        }
+        if (data[keys[i]]) {
+            editInfo[keys[i]] = data[keys[i]];
+            continue;
+        }
+        if (row.roleName === '学生用户' && !role) {
+            editInfo.roleId = 5;
+        } else {
+            editInfo.roleId = role.roleId;
+        }
+        editInfo[keys[i]] = null;
+    }
 }
 
 // 用户信息修改提交
@@ -217,8 +252,16 @@ const updateInfo = () => {
         isShowDialogEdit.value = false;
         // 构建参数对象
         editInfo.adminId = editId;
+        editInfo.adminAvatar = null;
         // 发送请求
         await adminUpdate(editInfo);
+        // 上传头像
+        if (avatarFile) {
+            const data = new FormData();
+            data.append('adminId', editId);
+            data.append('image', avatarFile);
+            await adminUpdateAvatar(data);
+        }
         getListResult(searchObj);// 刷新用户列表
     });
 }
@@ -303,7 +346,7 @@ const handleCurrentChange = (val) => {
 }
 
 const btnObj = [
-    { text: '编辑', type: 'default' },
+    { text: '编辑', type: 'primary' },
     { text: '查看', type: 'default' },
     { text: '删除', type: 'danger' },
 ]
@@ -315,7 +358,8 @@ const btnObj = [
         <!-- 表格 -->
         <WBTable v-model:tableData="tableData" v-model:current-page="responseData.current"
             v-model:page-size="responseData.size" :total="responseData.total" :table-columns="filteredResponse('table')"
-            @update:current-page="handleCurrentChange" @update:page-size="handleSizeChange" @operation-click="handleOperation" :operation-list="btnObj" border>
+            @update:current-page="handleCurrentChange" @update:page-size="handleSizeChange"
+            @operation-click="handleOperation" :operation-list="btnObj" border>
             <!-- 顶部搜索栏 -->
             <template #header>
                 <WBTableHeader v-model:input="input" v-model:select="isDisabled" :options="adminStatusOptions"
@@ -328,6 +372,8 @@ const btnObj = [
                     :type="getTagType(scope.prop, tableData[scope.$index][scope.prop], 'table')">
                     {{ getColumnLabel(tableData[scope.$index], scope.prop, 'table') }}
                 </el-tag>
+                <el-avatar v-else-if="scope.prop === 'adminAvatar'" size="large" :src="tableData[scope.$index][scope.prop]">
+                </el-avatar>
                 <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
             </template>
         </WBTable>
@@ -369,7 +415,8 @@ const btnObj = [
     <WBDialog v-model="isShowDialogInfo" class="info-dialog" title="用户信息" width="300" align-center draggable>
         <WBForm :model="info" class="info-form" :items="getColumnLabels('table')">
             <template #default="scope">
-                <span>{{ info.content[scope.key] }}</span>
+                <el-avatar v-if="scope.key === 'adminAvatar'" size="large" :src="info.content[scope.key]"></el-avatar>
+                <span v-else>{{ info.content[scope.key] }}</span>
             </template>
         </WBForm>
         <template #footer><br></template>
@@ -389,6 +436,15 @@ const btnObj = [
                     size="large">
                     <el-option v-for="(val, i) in filteredStatusOptions" :key="i" :label="val.label" :value="val.value" />
                 </el-select>
+                <span v-else-if="scope.key === 'adminAvatar'" style="display: flex;align-items: center;">
+                    <el-avatar size="large" :src="editInfo[scope.key]">
+                    </el-avatar>
+                    <i style="width: 20px;"></i>
+                    <el-upload :show-file-list="false" :http-request="updateAvatar" ref="avatarUpload" :limit="1"
+                        accept="'image/*'">
+                        <el-button size="small" type="primary">点击上传</el-button>
+                    </el-upload>
+                </span>
                 <el-input v-else-if="scope.key === 'adminPassword'" show-password type="password"
                     v-model="editInfo[scope.key]" placeholder="请输入" />
                 <el-input v-else v-model="editInfo[scope.key]" placeholder="请输入" />

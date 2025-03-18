@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,7 +110,6 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     }
 
 
-
     @Override
     public CommonResp<Page<InterviewVO>> getInterviews(Long userId, Integer page, Integer pageSize) {
         // 构建查询条件
@@ -176,14 +176,20 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     }
 
     @Override
-    public CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept) {
-        if (isAccept == null || interviewId == null || isAccept.trim().isEmpty())
+    public CommonResp<Boolean> isAcceptInterview(Long interviewId, String isAccept, Date interviewDate) {
+        if (isAccept.trim().isEmpty())
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, false);
         TDInterview interview = interviewMapper.selectById(interviewId);
         if (interview == null) return CommonResp.fail(AppHttpCodeEnum.INTERVIEW_NOT_EXIST, false);
         if (Common.DELETE.equals(interview.getIsDeleted()))
             return CommonResp.fail(AppHttpCodeEnum.USER_NOT_EXIST, false);
         interview.setInterviewStatus(isAccept);
+        if (Common.INTERVIEW_STATUS_BE_INTERVIEWED.equals(isAccept)) {
+            if (interviewDate == null) {
+                return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+            }
+            interview.setInterviewDate(interviewDate);
+        }
         return CommonResp.success(interviewMapper.updateById(interview) > 0);
     }
 

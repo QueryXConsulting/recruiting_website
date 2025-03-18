@@ -11,10 +11,10 @@ let date = null;
 
 // 0待发送  1已发送 2已接受 3拒绝
 const reservationStatusOptions = [
-    { value: 0, label: '待发送' },
-    { value: 1, label: '您的申请已发送，请等待审核！' },
-    { value: 2, label: '恭喜您，对方已经通过您的申请！' },
-    { value: 3, label: '很抱歉，您的申请已被对方拒绝！' }
+    { value: 0, label: '请等待对方发送报到邀约' },
+    { value: 1, label: '' },
+    { value: 2, label: '恭喜您，找到心仪的工作，请准时到岗！' },
+    { value: 3, label: '对方的邀约已被您拒绝！' }
 ];
 
 
@@ -52,7 +52,7 @@ const updateStatus = async (status) => {
 </script>
 
 <template>
-    <div v-if="!reservationStatus || reservationStatus === 1">
+    <div v-if="reservationStatus === 1">
         <!-- <h1>请选择报到时间</h1> -->
         <main class="container">
             <section class="left">
@@ -96,10 +96,10 @@ const updateStatus = async (status) => {
 
     </div>
 
-    <!-- 页面状态提示-已发送(待审核) -->
-    <!-- <div v-if="reservationStatus === 1" class="reservation-status">
+    <!-- 页面状态提示-待发送(待审核) -->
+    <div v-if="reservationStatus === 0" class="reservation-status">
         <el-result icon="warning" :title="reservationStatusMessage"></el-result>
-    </div> -->
+    </div>
     <!-- 页面状态提示-接受(通过) -->
     <div v-if="reservationStatus === 2" class="reservation-status">
         <el-result icon="success" :title="reservationStatusMessage"></el-result>

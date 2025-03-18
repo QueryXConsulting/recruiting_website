@@ -9,6 +9,7 @@ import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.domain.dto.UserRegisterDTO;
 import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.domain.vo.UserVO;
+import com.queryx.recruiting_website.utils.CommonResp;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,5 +40,24 @@ public interface TDUserService extends IService<TDUser> {
     Object updateUserCompany(UserDto userDto, MultipartFile userAvatar) throws IOException;
 
     Object addUserCompany(UserDto userDto, MultipartFile userAvatar) throws IOException;
+
+    /**
+     * 管理端修改用户头像
+     *
+     * @param userId 用户id
+     * @param image  用户头像
+     * @return 头像相对路径
+     */
+    CommonResp<String> userUploadAvatar(Long userId, MultipartFile image);
+
+
+    /**
+     * 管理端修改管理员头像
+     *
+     * @param adminId 管理员id
+     * @param image  管理员头像
+     * @return 头像相对路径
+     */
+    CommonResp<String> adminUploadAvatar(Long adminId, MultipartFile image);
 }
 

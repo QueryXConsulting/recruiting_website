@@ -19,11 +19,13 @@ import com.queryx.recruiting_website.domain.vo.UserVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.TDUserService;
+import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import com.queryx.recruiting_website.utils.TokenStorage;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -59,6 +61,11 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
     @Resource
     private TPRoleMapper tpRoleMapper;
 
+    @Autowired
+    private TDUserMapper userMapper;
+
+    @Value("${file.upload-path-avatar}")
+    private String uploadPathAvatar;
 
     @Override
     public UserCompanyDto selectUserInfo(Long userId, String userRole) {
@@ -355,6 +362,91 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         tdUser.setUserRegisterTime(new Date());
         save(tdUser);
         return null;
+    }
+
+
+    @Override
+    public CommonResp<String> userUploadAvatar(Long userId, MultipartFile image) {
+        // 查询用户是否存在头像
+        TDUser user = userMapper.selectById(userId);
+        // 判断非法用户
+        if (user == null) {
+            return CommonResp.fail(AppHttpCodeEnum.USER_NOT_EXIST, null);
+        }
+        if (Common.DELETE.equals(user.getDelFlag()) && Common.STATUS_DISABLE.equals(user.getUserStatus())) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        }
+        // 有 -> 删除
+        if (user.getUserAvatar() != null && !user.getUserAvatar().trim().isEmpty()) {
+            String avatar = Common.getLastPath(user.getUserAvatar(), "/", "");
+            File oldFile = new File(uploadPathAvatar + avatar);
+            if (!(oldFile.exists() && oldFile.delete())) {
+                return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
+            }
+        }
+        String path = saveAvatar(uploadPathAvatar, "/", image);
+        if (path == null) {
+            return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
+        }
+        user.setUserAvatar(path);
+        userMapper.updateById(user);
+        return CommonResp.success(Common.getImgURL() + path);
+    }
+
+
+    @Override
+    public CommonResp<String> adminUploadAvatar(Long adminId, MultipartFile image) {
+        // 查询用户是否存在头像
+        TDAdmin admin = adminMapper.selectById(adminId);
+        // 判断非法用户
+        if (admin == null) {
+            return CommonResp.fail(AppHttpCodeEnum.USER_NOT_EXIST, null);
+        }
+        if (Common.STATUS_DISABLE.equals(admin.getAdminStatus())) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        }
+        // 有 -> 删除
+        if (admin.getAdminAvatar() != null && !admin.getAdminAvatar().trim().isEmpty()) {
+            String avatar = Common.getLastPath(admin.getAdminAvatar(), "/", "");
+            File oldFile = new File(uploadPathAvatar + avatar);
+            if (!(oldFile.exists() && oldFile.delete())) {
+                return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
+            }
+        }
+        String path = saveAvatar(uploadPathAvatar, "/", image);
+        if (path == null) {
+            return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
+        }
+        admin.setAdminAvatar(path);
+        adminMapper.updateById(admin);
+        return CommonResp.success(Common.getImgURL() + path);
+    }
+
+
+    /**
+     * 保存头像图片
+     *
+     * @param savePath  文件保存路径
+     * @param separator 路径分隔符
+     * @param image     图片文件
+     * @return 保存后的文件相对路径
+     */
+    private String saveAvatar(String savePath, String separator, MultipartFile image) {
+        String path;
+        // 保存头像图片
+        String fileName = image.getOriginalFilename();
+        String newFileName = System.currentTimeMillis() + "_" + fileName;
+        File file = new File(savePath + newFileName);
+        try {
+            image.transferTo(file);
+            if (!file.exists()) {
+                return null;
+            }
+            path = separator + Common.getLastPath(savePath, separator, separator + newFileName);
+        } catch (Exception e) {
+            return null;
+        }
+        return path;
     }
 }
 

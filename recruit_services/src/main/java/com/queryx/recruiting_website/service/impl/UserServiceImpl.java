@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TDResumeMapper resumeMapper;
 
-    @Value("${file.upload-path-avatar")
+    @Value("${file.upload-path-avatar}")
     private String uploadPathAvatar;
 
     public static final String PHONE = "(^1[3-9]\\d{9}$)";
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
         // 有 -> 删除
-        if (user.getUserAvatar() != null || user.getUserAvatar().trim().isEmpty()) {
+        if (user.getUserAvatar() != null && user.getUserAvatar().trim().isEmpty()) {
             File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
             if (!(oldFile.exists() && oldFile.delete())) {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
@@ -110,15 +110,12 @@ public class UserServiceImpl implements UserService {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
             }
             // 更新数据库
-            path = "/" + Common.getUploadFolderName(uploadPathAvatar, "/", newFileName);
+            path = "/" + Common.getLastPath(uploadPathAvatar, "/", newFileName);
             user.setUserAvatar(path);
             userMapper.updateById(user);
         } catch (Exception e) {
             return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
         }
-//        String[] strings = uploadPathAvatar.split("/");
-//        String uploadFolder = strings[strings.length - 1];
-//        return CommonResp.success(uploadFolder + "/" + newFileName);
         return CommonResp.success(Common.getImgURL() + path);
     }
 

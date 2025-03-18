@@ -40,7 +40,7 @@ onMounted(async () => {
     const resultStatus = +res1.content.registrationStatus;
     windowStatus.value = resultStatus;
     windowStatusMessage.value = windowStatusOptions.find(item => item.status === resultStatus)?.description || '';
-    if (windowStatus.value === 0) {
+    if (windowStatus.value === 0 || windowStatus.value === 3) {
         const res2 = await registrationInfo();
         //    hireDate.value = res2.content.hireDate;
         position.value = res2.content.position;
@@ -90,7 +90,7 @@ const submitForm = async () => {
 
     // 提交成功后，更新页面状态
     const res = await registrationStatus();
-    const resultStatus = +res1.content.registrationStatus;
+    const resultStatus = +res.content.registrationStatus;
     // 更新页面状态
     windowStatus.value = resultStatus;
     // 页面状态提示信息
@@ -109,9 +109,10 @@ const resetForm = () => {
 </script>
 
 <template>
-    <div v-if="!windowStatus">
+    <div v-if="!windowStatus || windowStatus === 3">
         <main class="form-container">
             <h1 class="form-title">个人信息录入</h1>
+            <el-alert v-if="windowStatus === 3" title="信息为通过审核，请重新提交" type="warning" center show-icon  />
             <el-row justify="center">
                 <el-col :span="12" class="form-subtitle">
                     职位：{{ position }}
@@ -128,7 +129,7 @@ const resetForm = () => {
                     <el-col :span="8" class="form-item">
                         <label class="w-50" for="">性别</label>
                         <!-- <input class="form-input" type="text" v-model="formData.gender" required="true" alt="性别" maxlength="1" minlength="1"> -->
-                        <select name="gender" class="form-input w-50">
+                        <select v-model="formData.gender" name="gender" class="form-input w-50">
                             <option value="">--请选择--</option>
                             <option value="男">男</option>
                             <option value="女">女</option>
@@ -174,7 +175,7 @@ const resetForm = () => {
                         <label class="w-50" for="">最高学历</label>
                         <!-- <input class="form-input" type="text" v-model="formData.educationLevel" required="true" alt="最高学历"
                             maxlength="5" minlength="2"> -->
-                        <select name="educationLevel" class="form-input w-50">
+                        <select v-model="formData.educationLevel" name="educationLevel" class="form-input w-50">
                             <option value="">--请选择--</option>
                             <option value="高中">高中</option>
                             <option value="大专">大专</option>
@@ -219,9 +220,6 @@ const resetForm = () => {
         <el-result icon="success" :title="windowStatusMessage"></el-result>
     </div>
     <!-- 页面状态提示-拒绝 -->
-    <div v-if="windowStatus === 3" class="info-status">
-        <el-result icon="error" :title="windowStatusMessage"></el-result>
-    </div>
 </template>
 
 <style lang="scss" scoped>
@@ -235,7 +233,7 @@ const resetForm = () => {
     .form-subtitle {
         text-align: center;
         font-size: 20px;
-        margin: 0 0 10px 0;
+        margin: 5px 0 10px 0;
     }
 
     width: 80vw;

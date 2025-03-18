@@ -1,6 +1,6 @@
 <script lang="js" setup>
 import { roleList } from '@/api/admin/RoleApi'
-import { userDelete, userList, userAdd, userInfo, userUpdate } from '@/api/admin/UserApi';
+import { userDelete, userList, userAdd, userInfo, userUpdate, userAvatarUpload } from '@/api/admin/UserApi';
 import { ref, computed, reactive, defineEmits } from 'vue'
 import useUserListStore from '@/store/userListQueryParmesStore'
 import { ElMessage } from 'element-plus';
@@ -25,6 +25,8 @@ const opened = ref(false);// 详情抽屉是否打开
 const getRoleList = async () => {
     const d = await roleList();
     roles = d.content;
+    // 学生用户比较特殊，角色列表中状态为删除状态，需要单独添加
+    roles.push({ roleId: '5', roleName: '学生' });
 }
 getRoleList();
 
@@ -44,7 +46,10 @@ const getStatusLabel = (status) => {
 
 // 用户角色选项
 const getRoleLabel = (_roleId) => {
-    const roleO = roles.find(item => item.roleId === (+_roleId));
+    if (_roleId === '5') {
+        return '学生';
+    }
+    const roleO = roles.find(item => item.roleId === _roleId);
     if (roleO) {
         return roleO.roleName;
     }
@@ -85,21 +90,30 @@ const getFormConfig = (val) => {
 
 
 const searchObj = useUserListStore().getUserListQueryParams;
+
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
 // 请求用户列表
-const getUserListResult = (obj) => {
+const getUserListResult = debounce((obj) => {
     tableData.length = 0;
     const data = userList(obj);
     data.then(res => {
         responseData.size = res.content.size;// 每页显示条数
         responseData.total = res.content.total;// 总条数
-        responseData.pages = res.content.pages;// 总页数
+        responseData.page = res.content.pages;// 总页数
         responseData.current = res.content.current;// 当前页
         for (let record of res.content.records) {
             tableData.push(record);
         }
         ElMessage.success(res.message);
     });
-}
+}, 300);
 getUserListResult(searchObj);
 
 /* 表格相关函数 */
@@ -172,31 +186,61 @@ const handleEdit = async (index, row) => {
     opened.value = true;
     const d = response.filter(item => item.tag.includes('edit'));
     const _k = d.flatMap(item => item.prop);
-    const _v = d.flatMap(item => item.value);
-    const _role = roles.find(item => item.roleId === +row.userRole);
     for (let i = 0; i < _k.length; i++) {
-        editModel[_k[i]] = _v[i];
+        if (row[_k[i]]) {
+            editModel[_k[i]] = row[_k[i]];
+            continue;
+        }
+        if (_info.content[_k[i]]) {
+            editModel[_k[i]] = _info.content[_k[i]];
+            continue;
+        }
+        editModel[_k[i]] = null;
     }
-    // 表单赋值
-    editModel.userRole = _role?.roleName;
-    editModel.userId = row.userId;
-    editModel.userPhone = row.userPhone;
-    editModel.userName = row.userName;
-    editModel.userStatus = row.userStatus;
-    editModel.resumeId = _info.content.resumeId;
 }
+
+/* 头像上传相关函数 */
+const avatarUpload = ref(null);// 上传组件实例
+let avatarFile = null;// 上传文件列表
+let _userInfo = null;// 用户信息
+const updateAvatar = (file) => {
+    const fileSize = file.file.size / 1024 / 1024;
+    if (fileSize > 2) {
+        ElMessage.error('头像图片大小不能超过2M');
+        return;
+    }
+    avatarFile = file.file;
+    const reader = new FileReader();
+    reader.readAsDataURL(file.file);
+    reader.onload = (e) => {
+        _userInfo.userAvatar = e.target.result;
+    };
+    avatarUpload.value.clearFiles();
+}
+
 // 编辑表单提交
 const confirmEditForm = () => {
+    console.log(new Number(editModel.userId));
     editForm.value.validate(async (valid) => {
         if (!valid) {
             return;
         }
+        // 修改用户信息
         opened.value = false;
-        console.log(editModel);
+        editModel.userAvatar = null;
         await userUpdate(editModel);
+        // 上传头像
+        if (avatarFile) {
+            const formData = new FormData();
+            formData.append('userId', editModel.userId);
+            formData.append('image', avatarFile);
+            await userAvatarUpload(formData);
+        }
         getUserListResult(searchObj);
     });
 }
+
+
 // 详情抽屉关闭事件
 const handleDrawerCancel = () => {
     opened.value = false;
@@ -281,7 +325,7 @@ const handleSizeChange = (val) => {
 }
 // 处理翻页
 const handleCurrentChange = (val) => {
-    searchObj.pages = val;
+    searchObj.page = val;
     getUserListResult(searchObj);
 }
 
@@ -289,10 +333,10 @@ const handleCurrentChange = (val) => {
 </script>
 
 <template>
-    <WBTable :table-data="tableData" :table-columns="tableColumns" :operation-list="operationButtons"
+    <WBTable v-model:table-data="tableData" :table-columns="tableColumns" :operation-list="operationButtons"
         @operation-click="handleOperationClick" :total="responseData.total" v-model:current-page="responseData.current"
         v-model:page-size="responseData.size" @update:page-size="handleSizeChange"
-        @update:current-page="handleCurrentChange" height="100%" :border=true >
+        @update:current-page="handleCurrentChange" height="100%" :border=true>
         <!-- 表格头 -->
         <template #header>
             <WBTableHeader v-model:input="input" v-model:select="isUserDisabled" @click-add="handleUserAdd"
@@ -329,33 +373,6 @@ const handleCurrentChange = (val) => {
                 </el-select>
                 <el-input v-else v-model="userAddForm[scope.key]" placeholder="请输入"></el-input>
             </template>
-            <!-- <el-form-item v-for="(val, index) in filteredResponse" :prop="val.prop" :key="index" :label="`${val.label}：`"
-                label-position="right" label-width="100px" size="large"> -->
-            <!-- 用户密码 -->
-            <!-- <el-input v-if="val.prop === 'userPassword'" type="password" show-password v-model="val.value"
-                    placeholder="请输入" /> -->
-            <!-- 用户邮箱 -->
-            <!-- <el-input v-else-if="val.prop === 'userEmail'" type="email" v-model="val.value" placeholder="请输入" /> -->
-
-            <!-- 用户角色选择  @change="addUserRole"-->
-            <!-- <el-select v-else-if="val.prop === 'userRole'" v-model="val.value" placeholder="用户角色" size="large"
-                    style="width: 240px;">
-                    <el-option v-for="(val, index) in roles" :key="index" :label="val" :value="val" />
-                </el-select> -->
-
-            <!-- 用户状态选择  @change="addUserStatus"-->
-            <!-- <el-select v-else-if="val.prop === 'userStatus'" v-model="val.value" placeholder="用户状态" size="large"
-                    style="width: 240px;">
-                    <el-option v-for="(val, index) in addUserStatusOptions" :key="index" :label="val.label"
-                        :value="val.value" />
-                </el-select> -->
-
-            <!-- 用户面试数 -->
-            <!-- <el-input v-else-if="val.prop === 'userInterviews'" v-model.number="val.value" placeholder="请输入" /> -->
-
-            <!-- 其他 -->
-            <!-- <el-input v-else v-model="val.value" placeholder="请输入" /> -->
-            <!-- </el-form-item> -->
         </WBForm>
     </WBDialog>
 
@@ -381,6 +398,16 @@ const handleCurrentChange = (val) => {
                 <el-select v-else-if="scope.key === 'userRole'" v-model="editModel[scope.key]" placeholder="用户角色">
                     <el-option v-for="(val, index) in roles" :key="index" :label="val.roleName" :value="val.roleId" />
                 </el-select>
+                <!-- 用户头像 -->
+                <span v-else-if="scope.key === 'userAvatar'" style="display: flex;align-items: center;">
+                    <el-avatar size="large" :src="editModel[scope.key]">
+                    </el-avatar>
+                    <i style="width: 20px;"></i>
+                    <el-upload :show-file-list="false" :http-request="updateAvatar" ref="avatarUpload" :limit="1"
+                        accept="'image/*'">
+                        <el-button size="small" type="primary" @click="_userInfo = editModel">点击上传</el-button>
+                    </el-upload>
+                </span>
                 <el-input v-else v-model="editModel[scope.key]" placeholder="请输入"></el-input>
             </template>
         </WBForm>
@@ -394,8 +421,8 @@ const handleCurrentChange = (val) => {
                 <span v-else-if="scope.key === 'userPassword'">不能看哦＞︿＜</span>
                 <span v-else>{{ info[scope.key] }}</span>
             </template>
-            <template #footer><a></a></template>
         </WBForm>
+        <template #footer><a> </a></template>
     </WBDialog>
 </template>
 

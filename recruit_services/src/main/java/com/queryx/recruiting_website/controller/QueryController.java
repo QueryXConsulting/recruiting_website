@@ -2,7 +2,11 @@ package com.queryx.recruiting_website.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.vo.*;
+import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
 import com.queryx.recruiting_website.service.QueryService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -127,6 +131,31 @@ public class QueryController {
         return CommonResp.success(resp);
     }
 
+
+    /**
+     * 用户搜索接口
+     *
+     * @param searchDTO 搜索条件
+     * @return 搜索结果
+     */
+    @Operation(summary = "用户搜索接口", parameters = {
+            @Parameter(name = "searchDTO", description = "搜索条件", schema = @Schema(implementation = SearchDTO.class), required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @GetMapping("/")
+    public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
+        // 校验参数
+        if (searchDTO == null) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+        }
+        // 查询岗位列表
+        return queryUserInfo.getSearchList(searchDTO);
+    }
+
+
     /**
      * 查询招聘岗位列表
      *
@@ -145,14 +174,40 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
-    public CommonResp<Page<JobCompanyListVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public CommonResp<Page<SearchJobVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<JobCompanyListVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
+    }
+
+
+    /**
+     * 查询公司列表
+     *
+     * @param keyword  关键字
+     * @param page     页码
+     * @param pageSize 页大小
+     * @return 公司列表
+     */
+    @Operation(summary = "查询公司列表", parameters = {
+            @Parameter(name = "keyword", description = "关键字", schema = @Schema(implementation = String.class), required = true),
+            @Parameter(name = "page", description = "页码", schema = @Schema(implementation = Integer.class), required = true),
+            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @GetMapping("/companyList")
+    public CommonResp<Page<SearchCompanyVO>> queryCompanyList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        // 校验参数
+        if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
+        if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
+        // 查询岗位列表
+        return queryUserInfo.getCompanyList(keyword, page, pageSize);
     }
 }

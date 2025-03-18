@@ -50,6 +50,7 @@ const handleSizeChange = (size) => {
 }
 // 当前页码变化时触发
 const handleCurrentChange = (page) => {
+    console.log(currentPage.value);
     emits('update:current-page', page)
 }
 

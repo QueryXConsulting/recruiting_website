@@ -34,7 +34,7 @@ const API = {
   UPLOAD_OTHER_MATERIAL_URL: '/api/materials/upload/other',
   // 信息录入相关接口
   REGISTRATION_STATUS_URL: '/api/registration/status/query',
-  REGISTRATION_INFO_URL: '/api/registration/info',
+  REGISTRATION_INFO_URL: '/api/registration/position',
   REGISTRATION_SUBMIT_URL: '/api/registration/submit',
   RESERVATION_INFO_URL: '/api/registration/reservation',
   RESERVATION_STATUS_UPDATE_URL: '/api/registration/status/update',
@@ -58,7 +58,7 @@ export const resumeAll = () => request.get(API.ALL_RESUME_URL)
 // 面试相关
 export const interviewList = (page, pageSize) => request.get(API.INTERVIEW_LIST_URL, { params: { page: page, pageSize: pageSize } })
 export const interviewDate = (companyId) => request.get(API.INTERVIEW_DATE_URL, { params: { companyId: companyId } })
-export const interviewAccept = (id, isAccept) => request.put(API.INTERVIEW_UPDATE_URL, null, { params: { interviewId: id, isAccept: isAccept } })
+export const interviewAccept = (id, isAccept, data) => request.put(API.INTERVIEW_UPDATE_URL, data, { params: { interviewId: id, isAccept: isAccept } })
 // 应聘相关
 export const deliverList = (page, pageSize) => request.get(API.DELIVER_LIST_URL, { params: { page: page, pageSize: pageSize } })
 // offer相关
