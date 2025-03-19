@@ -98,8 +98,7 @@ public class UserController {
      * @param image 头像图片
      * @return 上传结果
      */
-    @Operation(summary = "用户头像上传", description = "用户头像上传未测试", parameters = {
-            @Parameter(name = "userId", description = "用户id", required = true),
+    @Operation(summary = "用户头像上传", parameters = {
             @Parameter(name = "image", description = "头像图片", required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),

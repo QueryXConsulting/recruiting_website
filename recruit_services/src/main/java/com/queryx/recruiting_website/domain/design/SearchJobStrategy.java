@@ -6,7 +6,7 @@ import com.queryx.recruiting_website.domain.vo.LoginVO;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import org.springframework.beans.BeanUtils;
 
-public class EmailLoginStrategy implements LoginStrategy {
+public class SearchJobStrategy implements SearchStrategy {
 
     @Override
     public LoginVO login(TDUserMapper userMapper, LoginDTO loginDTO) {

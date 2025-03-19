@@ -75,17 +75,21 @@ public class MaterialsServiceImpl implements MaterialsService {
             materialQueryWrapper.eq(TDMaterial::getCompanyId, materialDTO.getCompanyId());
             materialQueryWrapper.eq(TDMaterial::getJobId, materialDTO.getJobId());
             TDMaterial material = materialsMapper.selectOne(materialQueryWrapper);
-            if (material.getMaterialId() == null) {
-                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-            }
-            if (Common.MATERIAL_STATUS_NOT_PASS.equals(material.getStatus())) {
-                // 材料未通过审核，需要重新上传材料
-                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED, reload);
-            } else if (Common.MATERIAL_STATUS_NOT_SUBMIT.equals(material.getStatus())) {
+            if (material == null) {
                 // 用户第一次上传材料
                 return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
-            } else if (Common.MATERIAL_STATUS_WAIT_REVIEW.equals(material.getStatus())) {
-                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_SUCCESS, waitReview);
+            }
+            if (material.getMaterialId() == null || material.getStatus() == null) {
+                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+            }
+            switch (material.getStatus()) {
+                case Common.MATERIAL_STATUS_WAIT_REVIEW: // 材料待审核，需要等待审核
+                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_SUCCESS, waitReview);
+                case Common.MATERIAL_STATUS_NOT_PASS: // 材料未通过审核，需要重新上传材料
+                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED, reload);
+                case Common.MATERIAL_STATUS_NOT_SUBMIT: // 用户第一次上传材料
+                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
+                default:
             }
 
         } else {
@@ -110,7 +114,8 @@ public class MaterialsServiceImpl implements MaterialsService {
         materialQueryWrapper.eq(TDMaterial::getJobId, materialDTO.getJobId());
         TDMaterial material = materialsMapper.selectOne(materialQueryWrapper);
 
-        if (material.getMaterialId() == null) {
+        if (material == null) {
+            material = new TDMaterial();
             material.setOfferId(materialDTO.getOffersId());
             material.setUserId(userId);
             material.setCompanyId(materialDTO.getCompanyId());
@@ -201,8 +206,6 @@ public class MaterialsServiceImpl implements MaterialsService {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
         }
     }
-
-
 
 
 }

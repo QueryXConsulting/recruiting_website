@@ -8,7 +8,7 @@ import com.queryx.recruiting_website.mapper.TDUserMapper;
 import jakarta.annotation.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class PhoneLoginStrategy implements LoginStrategy {
+public class SearchCompanyStrategy implements SearchStrategy {
 
     @Resource
     private PasswordEncoder passwordEncoder;

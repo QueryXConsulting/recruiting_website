@@ -1,6 +1,8 @@
 package com.queryx.recruiting_website.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.vo.InterviewDateVO;
 import com.queryx.recruiting_website.domain.vo.InterviewVO;
 import com.queryx.recruiting_website.service.InterviewService;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -85,7 +88,8 @@ public class InterviewController {
      */
     @Operation(summary = "更新面试状态", parameters = {
             @Parameter(name = "interviewId", description = "面试id", schema = @Schema(implementation = Long.class), required = true),
-            @Parameter(name = "isAccept", description = "是否接受", schema = @Schema(implementation = String.class), required = true)
+            @Parameter(name = "isAccept", description = "是否接受", schema = @Schema(implementation = String.class), required = true),
+            @Parameter(name = "date", description = "接受之后约定的面试时间", schema = @Schema(implementation = Date.class), required = false)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "接受成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "477", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
@@ -94,8 +98,11 @@ public class InterviewController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/isAccept")
-    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept) {
-        return interviewService.isAcceptInterview(interviewId, isAccept);
+    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept, @RequestBody() Date date) {
+        if (interviewId == null || isAccept == null) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+        }
+        return interviewService.isAcceptInterview(interviewId, isAccept, date);
     }
 
 

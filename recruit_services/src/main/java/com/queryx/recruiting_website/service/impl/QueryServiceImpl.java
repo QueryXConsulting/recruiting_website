@@ -3,7 +3,11 @@ package com.queryx.recruiting_website.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.vo.*;
+import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.utils.CommonResp;
 import lombok.extern.slf4j.Slf4j;
@@ -80,9 +84,28 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
+    public CommonResp<Page<?>> getSearchList(SearchDTO searchDTO) {
+        Page<?> result = null;
+        switch (searchDTO.getSearchType()) {
+            case JOB ->
+                result = getJobList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize());
+            case COMPANY ->
+                result =  getCompanyList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize()).getContent();
+            default -> {
+                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+            }
+        }
+        return CommonResp.success(result);
+    }
+
+    @Override
     public JobVO getJob(Long id) {
         final TDJob tdJob = jobInfoMapper.selectById(id);
-        if (!isJobExist(tdJob)) {
+        if (tdJob == null) {
+            return null;
+        }
+        if (Common.JOB_STATUS_ENABLE_OK.equals(tdJob.getJobStatus()) &&
+                Common.REVIEW_OK.equals(tdJob.getJobReview())) {
             return null;
         }
         final JobVO jobVO = new JobVO();
@@ -91,7 +114,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public Page<JobCompanyListVO> getJobList(String keyword, Integer page, Integer pageSize) {
+    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(TDJob::getJobPosition, keyword);
@@ -101,16 +124,39 @@ public class QueryServiceImpl implements QueryService {
         // 构建分页对象
         Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
         if (jobPage == null) return null;
-        Page<JobCompanyListVO> resPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
-        List<JobCompanyListVO> list = new ArrayList<>();
+        Page<SearchJobVO> resPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
+        List<SearchJobVO> list = new ArrayList<>();
         for (TDJob record : jobPage.getRecords()) {
             String companyName = companyInfoMapper.selectById(record.getCompanyId()).getCompanyInfoName();
-            JobCompanyListVO jobCompanyListVO = new JobCompanyListVO();
-            BeanUtils.copyProperties(record, jobCompanyListVO);
-            jobCompanyListVO.setCompanyName(companyName);
-            list.add(jobCompanyListVO);
+            SearchJobVO searchJobVO = new SearchJobVO();
+            BeanUtils.copyProperties(record, searchJobVO);
+            searchJobVO.setCompanyName(companyName);
+            list.add(searchJobVO);
         }
         return resPage.setRecords(list);
+    }
+
+    @Override
+    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize) {
+        // 构建SQL语句，查询招聘信息
+        LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(TDCompanyInfo::getCompanyInfoName, keyword);
+        queryWrapper.eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);
+        queryWrapper.eq(TDCompanyInfo::getEnterpriseReview, Common.REVIEW_OK);
+        queryWrapper.eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
+        // 构建分页对象
+        Page<TDCompanyInfo> company = companyInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
+        if (company == null) {
+            return CommonResp.success(null);
+        }
+        Page<SearchCompanyVO> resPage = new Page<>(company.getCurrent(), company.getSize(), company.getTotal());
+        List<SearchCompanyVO> list = new ArrayList<>();
+        for (TDCompanyInfo record : company.getRecords()) {
+            SearchCompanyVO searchJobVO = new SearchCompanyVO();
+            BeanUtils.copyProperties(record, searchJobVO);
+            list.add(searchJobVO);
+        }
+        return CommonResp.success(resPage.setRecords(list));
     }
 
     @Override
@@ -156,12 +202,4 @@ public class QueryServiceImpl implements QueryService {
     }
 
 
-    // 招聘信息存在返回true，不存在返回false
-    private boolean isJobExist(TDJob job) {
-        if (job == null) {
-            return false;
-        }
-        return job.getJobStatus().equals(Common.JOB_STATUS_ENABLE_OK) &&
-                job.getJobReview().equals(Common.REVIEW_OK);
-    }
 }

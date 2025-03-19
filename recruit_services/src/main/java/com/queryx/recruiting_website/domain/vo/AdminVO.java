@@ -15,5 +15,7 @@ public class AdminVO {
 
     private String adminUsername;
 
+    private String adminAvatar;
+
     private String adminStatus;
 }

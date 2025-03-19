@@ -52,6 +52,8 @@ public class OfferServiceImpl implements OfferService {
         final TDUser user = SecurityUtils.getLoginUser().getTdUser();
         LambdaQueryWrapper<TDOffers> offerQueryWrapper = new LambdaQueryWrapper<>();
         offerQueryWrapper.eq(TDOffers::getUserId, user.getUserId());
+        offerQueryWrapper.ne(TDOffers::getOffersStatus, Common.OFFER_STATUS_CANCEL);
+        offerQueryWrapper.ne(TDOffers::getOffersStatus, Common.OFFER_STATUS_WAIT);
         Page<TDOffers> selectPage = offerMapper.selectPage(new Page<>(page, size), offerQueryWrapper);
         if (selectPage == null) {
             log.warn("查询offer失败, 用户id: {}", user.getUserId());
@@ -135,7 +137,7 @@ public class OfferServiceImpl implements OfferService {
             return CommonResp.fail(AppHttpCodeEnum.OFFER_NOT_EXIST, false);
         }
         if (offers.getSignaturePath() != null) {
-            String folderPath = Common.getUploadFolderPath(signaturePath, "/") + offers.getSignaturePath();
+            String folderPath = Common.getSplitPath(signaturePath, "/") + offers.getSignaturePath();
             File file1 = new File(folderPath);
             if (!(file1.exists() && file1.delete())) {
                 log.warn("删除旧的签名失败，offerId: {}, 文件路径: {}", offerId, folderPath);
@@ -155,7 +157,7 @@ public class OfferServiceImpl implements OfferService {
             throw new RuntimeException(e);
         }
         newFileName =  "/" + newFileName;
-        offers.setSignaturePath(Common.getUploadFolderName(signaturePath, "/", newFileName));
+        offers.setSignaturePath(Common.getLastPath(signaturePath, "/", newFileName));
         int ui = offerMapper.updateById(offers);
         if (ui <= 0) {
             log.warn("offerId: {} 更新签名失败", offerId);

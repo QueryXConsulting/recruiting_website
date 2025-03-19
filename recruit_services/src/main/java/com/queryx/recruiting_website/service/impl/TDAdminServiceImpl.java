@@ -129,6 +129,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
             AdminVO adminVO = new AdminVO();
             BeanUtils.copyProperties(user, adminVO);
             adminVO.setRoleName(roleName.get(user.getRoleId()));
+            adminVO.setAdminAvatar(Common.getImgURL() + user.getAdminAvatar());
             return adminVO;
         }).collect(Collectors.toList()));
 
@@ -142,6 +143,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         AdminVO adminVO = new AdminVO();
         BeanUtils.copyProperties(byId, adminVO);
         adminVO.setRoleName(tpRole.getRoleName());
+        adminVO.setAdminAvatar(Common.getImgURL() + byId.getAdminAvatar());
         return adminVO;
     }
 

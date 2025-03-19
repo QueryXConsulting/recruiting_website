@@ -21,7 +21,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -68,7 +67,7 @@ public class UserResumeServiceImpl implements UserResumeService {
 //            String s = strings[strings.length - 1] + "/";
 //            tdRS.setFilePath(s + resumeFile.getName());
             // TODO 附件简历路径
-            tdRS.setFilePath("/" + Common.getUploadFolderName(filePath, "/", resumeFile.getName()));
+            tdRS.setFilePath("/" + Common.getLastPath(filePath, "/", resumeFile.getName()));
             tdRS.setAttachmentsReview(Common.REVIEW_OK);
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
@@ -95,7 +94,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         String path = resumeAttachment.getFilePath();
 //        int lastIndex = filePath.lastIndexOf("/", filePath.length() - 2);
 //        path = path.substring(0, lastIndex);
-        path = Common.getUploadFolderPath(filePath, "/") + path;
+        path = Common.getSplitPath(filePath, "/") + path;
         // 删除本地文件
         File file = new File(path);
         if (file.exists() && file.delete()) {

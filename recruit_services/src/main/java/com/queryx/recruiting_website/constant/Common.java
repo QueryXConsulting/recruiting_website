@@ -32,6 +32,7 @@ public class Common {
 
 
     public static final String OFFER_STATUS_WAIT = "0";// 待发送
+    public static final String OFFER_STATUS_SEND = "4";// 已发送
     public static final String OFFER_STATUS_ACCEPT = "1";// 接受
     public static final String OFFER_STATUS_REJECT = "2";// 拒绝
     public static final String OFFER_STATUS_CANCEL = "3";// 撤销
@@ -167,7 +168,7 @@ public class Common {
 
 
     /**
-     * 获取上传文件夹名称（不含路径）
+     * 获取路径最后一级（不含路径分隔符的文件夹或文件名）
      * <p>例如：/upload/resume/ --> resume</p>
      *
      * @param src 上传文件路径
@@ -175,7 +176,7 @@ public class Common {
      * @param appendCode 追加字符
      * @return 上传文件夹名称
      */
-    public static String getUploadFolderName(String src, String splitCode, String appendCode){
+    public static String getLastPath(String src, String splitCode, String appendCode){
         String[] strings = src.split(splitCode);
         return strings[strings.length - 1] + appendCode;
     }
@@ -188,8 +189,8 @@ public class Common {
      * @param splitCode 分隔符
      * @return 上传文件夹路径
      */
-    public static String getUploadFolderPath(String src, String splitCode){
-        String folderName = Common.getUploadFolderName(src, splitCode, "");
+    public static String getSplitPath(String src, String splitCode){
+        String folderName = Common.getLastPath(src, splitCode, "");
         return src.replace("/" + folderName, "");
     }
 

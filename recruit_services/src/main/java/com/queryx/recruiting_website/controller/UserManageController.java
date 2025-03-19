@@ -1,14 +1,20 @@
 package com.queryx.recruiting_website.controller;
 
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.dto.AdminDto;
 import com.queryx.recruiting_website.domain.dto.UserDto;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Tag(name = "管理员模块下用户相关数据管理")
@@ -79,6 +85,54 @@ public class UserManageController {
     @Operation(summary = "用户账号删除")
     public CommonResp deleteUser(@PathVariable("userId") Long userId) {
         return CommonResp.success(userService.deleteUser(userId));
+    }
+
+
+    /**
+     * 用户头像上传
+     *
+     * @param image 头像图片
+     * @return 上传结果
+     */
+    @Operation(summary = "用户头像上传", parameters = {
+            @Parameter(name = "userId", description = "用户id", required = true),
+            @Parameter(name = "image", description = "头像图片", required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺失参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @PostMapping("/uploadAvatar/user")
+    public CommonResp<String> userUploadAvatar(@RequestParam("userId") String userId, @RequestParam("image") MultipartFile image) {
+        // 校验参数
+        if (userId != null && image != null) {
+            // 上传头像
+            return userService.userUploadAvatar(Long.parseLong(userId), image);
+        }
+        return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+    }
+
+
+    /**
+     * 管理员头像上传
+     *
+     * @param image 头像图片
+     * @return 上传结果
+     */
+    @Operation(summary = "管理员头像上传", parameters = {
+            @Parameter(name = "adminId", description = "管理员id", required = true),
+            @Parameter(name = "image", description = "头像图片", required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺失参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @PostMapping("/uploadAvatar/admin")
+    public CommonResp<String> adminUploadAvatar(@RequestParam("adminId") String adminId, @RequestParam("image") MultipartFile image) {
+        // 校验参数
+        if (adminId != null && image != null) {
+            // 上传头像
+            return userService.adminUploadAvatar(Long.parseLong(adminId), image);
+        }
+        return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
     }
 
 }
