@@ -9,13 +9,14 @@
       </div>
       <div class="nav-items">
         <a href="#" class="nav-item active">首页</a>
-        <a href="#" class="nav-item">校园招聘</a>
+        <a href="/users/search" class="nav-item">校园招聘</a>
         <a href="#" class="nav-item">社会招聘</a>
-        <a href="#" class="nav-item" v-if="userStore().token">
+        <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
+        <a href="#" class="nav-item" v-if="userStore().token" style="padding-top: 15px;">
           <el-icon>
             <component :is="Bell"></component>
           </el-icon>
-          <i class="message-flag"></i>
+          <i v-if="hasMessage" class="message-flag"></i>
         </a>
         <router-link to="/auth/login" class="login-btn" v-show="userStore().token == null">登录</router-link>
       </div>
@@ -25,7 +26,7 @@
     <div class="banner">
       <div class="banner-content">
         <div class="banner-buttons">
-          <button class="primary-btn">校园招聘</button>
+          <button class="primary-btn" @click="router.push('/users/search')">校园招聘</button>
           <button class="primary-btn" @click="router.push('/users/registerCompany')">企业入驻</button>
         </div>
       </div>
@@ -52,6 +53,7 @@ import { ref } from 'vue';
 import { Bell } from '@element-plus/icons-vue';
 
 
+const hasMessage = ref(false); // 是否有未读消息
 
 const cultureItems = ref([
   {

@@ -116,10 +116,10 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("job")
-    public CommonResp<JobVO> queryJob(@RequestParam("id") Long id) {
+    public CommonResp<JobVO> queryJob(@RequestParam("id") String id) {
         JobVO resp;
         try {
-            resp = queryUserInfo.getJob(id);
+            resp = queryUserInfo.getJob(Long.parseLong(id));
             if (resp == null) {
                 log.error("招聘岗位不存在，id={}", id);
                 return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
@@ -145,7 +145,7 @@ public class QueryController {
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("/")
+    @PostMapping("/search")
     public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
         // 校验参数
         if (searchDTO == null) {
@@ -174,12 +174,16 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
-    public CommonResp<Page<SearchJobVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public CommonResp<Page<SearchJobVO>> queryJobList(
+            @RequestParam("keyword") String keyword,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam(value = "isAsc", required = false, defaultValue = "true") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize, isAsc);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
@@ -203,11 +207,15 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/companyList")
-    public CommonResp<Page<SearchCompanyVO>> queryCompanyList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public CommonResp<Page<SearchCompanyVO>> queryCompanyList(
+            @RequestParam("keyword") String keyword,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam(value = "isAsc", required = false, defaultValue = "true") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        return queryUserInfo.getCompanyList(keyword, page, pageSize);
+        return queryUserInfo.getCompanyList(keyword, page, pageSize, isAsc);
     }
 }
