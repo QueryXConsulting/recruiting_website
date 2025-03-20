@@ -244,8 +244,8 @@ public class UserCompanyController {
 
     @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")
     @Operation(summary = "修改offer状态")
-    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId, @PathVariable("status") String status, @PathVariable("jobId") Long jobId) {
-        return CommonResp.success(offersService.updateOfferStatus(offerId, status, jobId));
+    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId, @PathVariable("status") String status, @PathVariable("jobId") Long jobId,Long userId) {
+        return CommonResp.success(offersService.updateOfferStatus(offerId, status, jobId, userId));
     }
 
     @GetMapping("selectMaterial")
@@ -274,13 +274,13 @@ public class UserCompanyController {
 
     @PutMapping("updateRegistrationStatus")
     @Operation(summary = "更新入职信息状态以及设置入职时间")
-    public CommonResp updateRegistrationStatus(Long registrationId, String status, @DateTimeFormat(pattern = "yyyy-MM-dd")Date date) {
+    public CommonResp updateRegistrationStatus(Long registrationId, String status, @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
         return CommonResp.success(registrationService.updateRegistrationStatus(registrationId, status, date));
     }
 
     @GetMapping("downloadPdf")
     @Operation(summary = "pdf填充下载")
-    public CommonResp  downloadPdf(Long id) throws IOException {
+    public CommonResp downloadPdf(Long id) throws IOException {
         return CommonResp.success(registrationService.downloadPdf(id));
     }
 

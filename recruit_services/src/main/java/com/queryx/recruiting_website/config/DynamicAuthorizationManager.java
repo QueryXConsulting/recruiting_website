@@ -31,9 +31,18 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         HttpServletRequest request = context.getRequest();
-
         // 获取当前请求所需的权限
         String url = request.getRequestURI();
+
+        String method = request.getMethod();
+        FilterInvocation fi = new FilterInvocation(String.valueOf(request), url, method);
+        Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
+        // 没有配置权限要求，允许访问
+        if (CollectionUtils.isEmpty(attributes)) {
+            return new AuthorizationDecision(true);
+        }
+
+
         int i = url.lastIndexOf("/");
         String substring = url.substring(0,i);
         if (url.startsWith("/company") && !url.equals("/company/updateCompanyInfo")&&!substring.equals("/company/selectCompanyInfo")) {
@@ -41,15 +50,6 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
             if (!(tdCompanyInfo.getEnterpriseReview().equals("1") && tdCompanyInfo.getCompanyInfoReview().equals("1"))) {
                 return new AuthorizationDecision(false);
             }
-        }
-
-        String method = request.getMethod();
-        FilterInvocation fi = new FilterInvocation(String.valueOf(request), url, method);
-        Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
-
-        // 没有配置权限要求，允许访问
-        if (CollectionUtils.isEmpty(attributes)) {
-            return new AuthorizationDecision(true);
         }
 
         // 获取当前用户认证信息

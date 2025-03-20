@@ -24,10 +24,12 @@ public class OffersVO {
     private Long offerId;
 
     // 用户ID
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "用户id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long userId;
 
     // 职位ID
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "职位id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long jobId;
 

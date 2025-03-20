@@ -3,7 +3,7 @@
     <!-- 左侧对话列表 -->
     <div class="conversation-list">
       <div v-for="conv in conversations" :key="conv.id"
-        :class="['conversation-item', { active: currentConvId === conv.id }]" @click="switchConversation(conv.id)">
+        :class="['conversation-item', { active: currentConvId === conv.id, unread: !conv.isRead }]" @click="switchConversation(conv.id)">
         <div class="conv-info">
           <div class="conv-title">{{ conv.title }}</div>
           <div class="conv-last-message">{{ conv.lastMessage }}</div>
@@ -15,24 +15,32 @@
     <div class="message-area">
       <div class="message-board">
         <el-timeline>
-          <el-timeline-item v-for="msg in currentMessages" :key="msg.id" :timestamp="formatDate(msg.createTime)"
+          <el-timeline-item v-for="msg in currentMessages" :key="msg.id" :timestamp="msg.createTime"
             :hide-timestamp="true" placement="top" type="primary">
             <template #dot>
               <div class="custom-dot"></div>
             </template>
-            <div class="message-time">{{ formatDate(msg.createTime) }}</div>
-            <div class="message-content">
-              <div class="visitor-label">求职者：</div>
+            <div class="message-time">{{ msg.createTime }}</div>
+            <div class="message-content" :class="{ 'message-self': msg.ownerUser === '1'}">
+              <div class="message-header">
+                <div class="message-header-left">
+                  <span class="sender-name">{{ msg.user }}</span>
+                  <span class="sender-type">{{ msg.ownerUser === '1' ? '招聘者' : '应聘者' }}</span>
+                </div>
+                <div v-if="msg.ownerUser !== '1'" class="message-status" :class="{ 'status-unread': !msg.isRead }">
+                  {{ msg.isRead ? '已读' : '未读' }}
+                </div>
+              </div>
               <div class="content-text">{{ msg.content }}</div>
             </div>
           </el-timeline-item>
         </el-timeline>
 
         <div class="post-message">
-          <el-input v-model="newMessage" type="textarea" :rows="4" placeholder="输入留言(应聘者最多只能发三次留言)" resize="none"
+          <el-input v-model="newMessage" type="textarea" :rows="4" placeholder="输入留言(应聘者得到回复之后才能发送下一条)" resize="none"
             class="message-input" />
           <div class="button-wrapper">
-            <el-button class="submit-button" type="primary" @click="postMessage" :loading="posting">
+            <el-button @click="postMessage" class="submit-button" type="primary" :loading="posting">
               留 言
             </el-button>
           </div>
@@ -43,59 +51,90 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getLastMessage, getMessageData, postMessage as postMessageApi } from '@/api/company/companyApi'
+import userStore from '@/store/user'
 
 
-const conversations = ref([
-  {
-    id: 1,
-    title: '求职者',
-    lastMessage: '好的，我明白了，谢谢',
-    lastTime: '2024/01/07'
-  },
-  {
-    id: 2,
-    title: '求职者',
-    lastMessage: '请问这个功能怎么使用？',
-    lastTime: '2024/01/06'
-  },
-  {
-    id: 3,
-    title: '求职者',
-    lastMessage: '产品质量很好',
-    lastTime: '2024/01/05'
+const conversations = ref([])
+
+const fetchLastMessages = async () => {
+  try {
+    const res = await getLastMessage()
+    if (res.code === 200 && res.content) {
+
+      conversations.value = res.content.map(msg => ({
+        id: msg.userId,
+        title: msg.userName,
+        lastMessage: msg.content,
+        lastTime: msg.createTime,
+        isRead: msg.isRead == 1
+      }))
+    }
+  } catch (error) {
+    ElMessage.error('获取留言列表失败')
   }
-])
+}
 
 
-const allMessages = ref({
-  1: [
-    {
-      id: 1,
-      content: '这个留言板感觉实现很简单，还舒服。',
-      createTime: '2021/01/07 23:21'
-    },
-    {
-      id: 2,
-      content: '我现在的五笔练习已经很棒了',
-      createTime: '2021/01/07 23:23'
+const allMessages = ref({})
+
+
+const fetchMessageData = async (userId) => {
+  try {
+    const companyId = userStore().userInfo.companyInfoId
+    const res = await getMessageData(userId, companyId)
+    if (res.code === 200 && res.content) {
+
+      allMessages.value[userId] = res.content.map(msg => ({
+        id: msg.messageId,
+        content: msg.content,
+        createTime: msg.createTime,
+        isRead: msg.isRead == 0 ? false : true,
+        user: msg.user,
+        ownerUser: msg.ownerUser,
+        userId: msg.userId,
+        companyUserId: msg.companyUserId
+      }))
     }
-  ],
-  2: [
-    {
-      id: 1,
-      content: '请问这个功能怎么使用？',
-      createTime: '2021/01/07 23:24'
+  } catch (error) {
+    ElMessage.error('获取留言数据失败')
+  }
+}
+
+const switchConversation = async (convId) => {
+  currentConvId.value = convId
+  newMessage.value = ''
+  await fetchMessageData(convId)
+}
+
+
+onMounted(async () => {
+  await fetchLastMessages()
+  if (conversations.value.length > 0) {
+    currentConvId.value = conversations.value[0].id
+    await fetchMessageData(currentConvId.value)
+  }
+})
+
+
+const refreshInterval = ref(null)
+
+onMounted(() => {
+  fetchLastMessages()
+  refreshInterval.value = setInterval(async () => {
+    await fetchLastMessages()
+    if (currentConvId.value) {
+      await fetchMessageData(currentConvId.value)
     }
-  ],
-  3: [
-    {
-      id: 1,
-      content: '产品质量很好，很满意',
-      createTime: '2021/01/07 23:25'
-    }
-  ]
+  }, 30000)
+})
+
+onUnmounted(() => {
+  if (refreshInterval.value) {
+    clearInterval(refreshInterval.value)
+  }
 })
 
 const currentConvId = ref(1)
@@ -108,12 +147,6 @@ const currentMessages = computed(() => {
 })
 
 
-const switchConversation = (convId) => {
-  currentConvId.value = convId
-  newMessage.value = ''
-}
-
-
 const postMessage = async () => {
   if (!newMessage.value.trim()) {
     ElMessage.warning('请输入留言内容')
@@ -122,23 +155,12 @@ const postMessage = async () => {
 
   posting.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    const now = new Date()
-    const newMsg = {
-      id: currentMessages.value.length + 1,
+    await postMessageApi({
+      userId: currentConvId.value,
       content: newMessage.value,
-      createTime: `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    }
-
-    allMessages.value[currentConvId.value].unshift(newMsg)
-
-
-    const currentConv = conversations.value.find(c => c.id === currentConvId.value)
-    if (currentConv) {
-      currentConv.lastMessage = newMessage.value
-      currentConv.lastTime = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`
-    }
+    })
+    await fetchMessageData(currentConvId.value)
+    await fetchLastMessages()
 
     ElMessage.success('留言发表成功')
     newMessage.value = ''
@@ -149,11 +171,7 @@ const postMessage = async () => {
   }
 }
 
-// 添加日期格式化函数
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
+
 </script>
 
 <style scoped>
@@ -183,6 +201,7 @@ const formatDate = (dateString) => {
   transition: all 0.3s;
   display: flex;
   justify-content: space-between;
+  position: relative;
 }
 
 .conversation-item:hover {
@@ -191,6 +210,23 @@ const formatDate = (dateString) => {
 
 .conversation-item.active {
   background-color: #f5f5f5;
+}
+
+.conversation-item::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background-color: #f56c6c;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  display: none;
+}
+
+.conversation-item.unread::after {
+  display: block;
 }
 
 .conv-info {
@@ -301,6 +337,16 @@ const formatDate = (dateString) => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   border: 1px solid #e8e8e8;
   animation: fadeIn 0.3s ease-in-out;
+  margin-left: 0;
+  margin-right: auto;
+  max-width: 80%;
+}
+
+
+
+.message-self .sender-type {
+  background-color: #c8e6c9;
+  color: #2e7d32;
 }
 
 @keyframes fadeIn {
@@ -315,11 +361,44 @@ const formatDate = (dateString) => {
   }
 }
 
-.visitor-label {
-  color: #666666;
-  font-weight: normal;
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.message-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.sender-name {
   font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.sender-type {
+  font-size: 12px;
+  color: #909399;
+  background-color: #f4f4f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.message-status {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background-color: #f0f9eb;
+  color: #67c23a;
+}
+
+.message-status.status-unread {
+  background-color: #fef0f0;
+  color: #f56c6c;
 }
 
 .content-text {
@@ -414,9 +493,8 @@ const formatDate = (dateString) => {
     animation: fadeIn 0.3s ease-in-out;
   }
 
-  .visitor-label {
-    color: #a6a6a6;
-  }
+
+
 
   .content-text {
     color: #e0e0e0;
@@ -460,6 +538,14 @@ const formatDate = (dateString) => {
 
   .message-time {
     color: #909399;
+  }
+
+  .message-status {
+    background-color: rgba(103, 194, 58, 0.1);
+  }
+
+  .message-status.status-unread {
+    background-color: rgba(245, 108, 108, 0.1);
   }
 
   :deep(.el-timeline) {
