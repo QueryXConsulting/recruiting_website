@@ -9,11 +9,14 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.AddInterviewDto;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
+import com.queryx.recruiting_website.domain.vo.JobResumeVO;
 import com.queryx.recruiting_website.domain.vo.ResumeListVO;
 import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 import com.queryx.recruiting_website.domain.vo.ResumeVO;
 import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.*;
+import com.queryx.recruiting_website.service.MessageBoardService;
+import com.queryx.recruiting_website.service.TDJobResumeService;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
@@ -53,6 +56,10 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
     private String resumePath;
     @Resource
     private InterviewMapper interviewMapper;
+    @Resource
+    private TDJobResumeService jobResumeService;
+    @Resource
+    private MessageBoardService messageBoardService;
 
 
     @Override
@@ -196,6 +203,10 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                 .set(StringUtils.hasText(resumeStatus) && !resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
                 .set(StringUtils.hasText(resumeDelete), TDJobResume::getResumeDelete, resumeDelete);
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
+        if (Common.DELIVER_RESUME_DELETE_SQUARE_PEG.equals(resumeDelete)){
+            Long userId = jobResumeService.getById(jobResumeId).getUserId();
+            messageBoardService.sendMessage(userId, "对不起,经过仔细评估您的简历不合适");
+        }
         return null;
     }
 

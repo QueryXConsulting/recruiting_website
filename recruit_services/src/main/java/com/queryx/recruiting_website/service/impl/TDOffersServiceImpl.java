@@ -15,12 +15,12 @@ import com.queryx.recruiting_website.mapper.OfferTemplateMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDOffersMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.service.MessageBoardService;
 import com.queryx.recruiting_website.service.TDOffersService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +42,8 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
     private OfferTemplateMapper offerTemplateMapper;
     @Resource
     private TDJobResumeMapper jobResumeMapper;
+    @Resource
+    private MessageBoardService messageBoardService;
 
 
     @Override
@@ -110,16 +112,16 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
     }
 
     @Override
-    public CommonResp updateOfferStatus(Long offerId, String status, Long jobId) {
-        if (status.equals("1")) {
+    public CommonResp updateOfferStatus(Long offerId, String status, Long jobId, Long userId) {
+        if (status.equals("6")) {
             // 更新简历流程状态
             LambdaUpdateWrapper<TDJobResume> resumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
             resumeLambdaUpdateWrapper
-                    .eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId())
+                    .eq(TDJobResume::getUserId, userId)
                     .eq(TDJobResume::getJobId, jobId)
                     .set(TDJobResume::getResumeStatus, "4");
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
-
+            messageBoardService.sendMessage(userId, "offer已通过,请上传材料");
         }
         offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
                 .set(TDOffers::getOffersStatus, status));

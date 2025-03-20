@@ -57,9 +57,7 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 accessDeniedHandler.handle(request, response, new AccessDeniedException("权限不足"));
             }
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServletException e) {
+        } catch (IOException | ServletException e) {
             throw new RuntimeException(e);
         }
     }

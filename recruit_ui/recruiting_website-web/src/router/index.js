@@ -72,6 +72,13 @@ const routes = [
         path: 'interviewTime',
         component: () => import('../views/company/interviewDate.vue'),
       },
+      {
+        path: 'interviewRoom',
+        component: () => import('../views/company/interviewRoom.vue'),
+        meta: {
+          hideNavbar: true
+        }
+      },
     ],
   },
   {

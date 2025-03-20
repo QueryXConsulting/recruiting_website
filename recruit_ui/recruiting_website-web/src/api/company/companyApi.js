@@ -1,3 +1,4 @@
+import userStore from '@/store/user'
 import request from '@/utils/request'
 
 const API = {
@@ -36,6 +37,9 @@ const API = {
   COMPANY_UPDATE_REGISTRATION_STATUS: '/api/company/updateRegistrationStatus',
   COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/uploadWithThumbnail',
   COMPANY_DOWNLOAD_PDF: '/api/company/downloadPdf',
+  COMPANY_LAST_MESSAGE: '/api/company/lastMessage',
+  COMPANY_GET_MESSAGE_DATA: '/api/company/getMessageData',
+  COMPANY_POST_MESSAGE: '/api/company/sendMessage',
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -156,8 +160,13 @@ export const selectOfferTemplate = () => request.get(API.COMPANY_SELECT_OFFER_TE
 
 export const sendOffer = (data) => request.post(API.COMPANY_SEND_OFFER, data)
 
-export const updateOfferStatus = (offerId, status,jobId) =>
-  request.put(`${API.COMPANY_UPDATE_OFFER_STATUS}/${offerId}/${status}/${jobId}`)
+export const updateOfferStatus = (offerId, status, jobId, userId) => {
+  const url = userId ?
+    `${API.COMPANY_UPDATE_OFFER_STATUS}/${offerId}/${status}/${jobId}?userId=${userId}` :
+    `${API.COMPANY_UPDATE_OFFER_STATUS}/${offerId}/${status}/${jobId}`;
+
+  return request.put(url);
+}
 
 export const selectMaterial = (page, size,jobId) =>
   request.get(API.COMPANY_SELECT_MATERIAL, {
@@ -193,3 +202,11 @@ export const downloadRegistrationPdf = (id) =>
     method: 'get',
     params: { id },
   })
+
+export const getLastMessage = () => request.get(API.COMPANY_LAST_MESSAGE)
+
+export const getMessageData = (userId) => request.get(API.COMPANY_GET_MESSAGE_DATA, {
+  params: { userId }
+})
+
+export const postMessage = (data) => request.post(API.COMPANY_POST_MESSAGE, data)

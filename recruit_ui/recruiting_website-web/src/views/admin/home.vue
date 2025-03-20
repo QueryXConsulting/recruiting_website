@@ -103,11 +103,12 @@ import CardLogin from '@/components/company/cardLogin.vue';
 const router = useRouter()
 const route = useRoute()
 
-
 const store = userStore()
 let menus = ref();
+let flag = ref({})
 onMounted(() => {
   menus.value = filterMenus(store.menuTree);
+
 })
 
 watch(() => store.menuTree, (newVal) => {

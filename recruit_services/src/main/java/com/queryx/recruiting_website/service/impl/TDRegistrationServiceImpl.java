@@ -5,12 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDOffers;
 import com.queryx.recruiting_website.domain.TDRegistration;
 import com.queryx.recruiting_website.domain.vo.RegistrationListVO;
 import com.queryx.recruiting_website.domain.vo.ReservationListVO;
+import com.queryx.recruiting_website.mapper.TDOffersMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
+import com.queryx.recruiting_website.service.MessageBoardService;
+import com.queryx.recruiting_website.service.OfferService;
 import com.queryx.recruiting_website.service.TDRegistrationService;
 
+import jakarta.annotation.Resource;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -33,6 +39,11 @@ import java.util.Map;
  */
 @Service
 public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper, TDRegistration> implements TDRegistrationService {
+
+    @Resource
+    private MessageBoardService messageBoardService;
+    @Resource
+    private TDOffersMapper offersMapper;
 
     @Override
     public Object selectRegistration(Integer page, Integer size, Long jobId, String status) {
@@ -64,12 +75,18 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
     @Override
     public Object updateRegistrationStatus(Long registrationId, String status, Date date) {
         LambdaUpdateWrapper<TDRegistration> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(TDRegistration::getId, registrationId)
-                .set(StringUtils.hasText(status), TDRegistration::getRegistrationStatus, status);
+        updateWrapper.eq(TDRegistration::getId, registrationId).set(StringUtils.hasText(status), TDRegistration::getRegistrationStatus, status);
+
+        TDRegistration tdRegistration = getById(registrationId);
+        TDOffers offers = offersMapper.selectById(tdRegistration.getOfferId());
+        if ("2".equals(status)){
+            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过");
+        }
 
         if (date != null) {
             updateWrapper.set(TDRegistration::getReservationStatus, "1")
                     .set(TDRegistration::getHireDate, date);
+            messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认");
         }
 
         update(updateWrapper);

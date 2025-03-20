@@ -43,6 +43,7 @@ public class Common {
     public static final String DELIVER_RESUME_DELETE_SQUARE_PEG = "0";// 不合适
     public static final String DELIVER_RESUME_STATUS_OFFER = "3";// 不合适
     public static final String DELIVER_RESUME_STATUS_UPLOAD_MATERIAL = "4";// 上传资料中
+    public static final String INTERVIEW_ONLINE = "0";// 线上面试
     // 面试相关常量
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
     // 材料相关常量
@@ -59,7 +60,6 @@ public class Common {
     // 信息录入相关常量
     public static final String INPUT_STATUS_NOT_INPUT = "0";// 待发送
     public static final String INPUT_STATUS_SEND = "1";// 已发送
-
 
 
     @Value("${server.port}")
@@ -98,7 +98,9 @@ public class Common {
     }
 
 
-
+    public static final String READ = "1";
+    public static final String COMPANY_TYPE = "1";
+    public static final String NOT_READ = "0";
     public static final String ENTERPRISEREVIEW_ENABLE = "1";
     // 启用
     public static final String STATUS_ENABLE = "0";
@@ -153,10 +155,9 @@ public class Common {
 
     public static final String RESUME_ATTACHMENTS = "1";
 
-    public static String getImgURL(){
+    public static String getImgURL() {
         return "http://" + ip + ":" + port;
     }
-
 
 
     // 获取基础 URL
@@ -165,17 +166,16 @@ public class Common {
     }
 
 
-
-
     /**
      * 获取路径最后一级（不含路径分隔符的文件夹或文件名）
      * <p>例如：/upload/resume/ --> resume</p>
      *
-     * @param src 上传文件路径
-     * @param splitCode 分隔符
+     * @param src        上传文件路径
+     * @param splitCode  分隔符
      * @param appendCode 追加字符
      * @return 上传文件夹名称
      */
+    public static String getUploadFolderName(String src, String splitCode, String appendCode) {
     public static String getLastPath(String src, String splitCode, String appendCode){
         String[] strings = src.split(splitCode);
         return strings[strings.length - 1] + appendCode;
@@ -185,7 +185,7 @@ public class Common {
      * 获取上传文件夹路径（只含路径）
      * <p>例如：/upload/resume/ --> /upload(没有追加字符的情况)</p>
      *
-     * @param src 上传文件路径
+     * @param src       上传文件路径
      * @param splitCode 分隔符
      * @return 上传文件夹路径
      */
