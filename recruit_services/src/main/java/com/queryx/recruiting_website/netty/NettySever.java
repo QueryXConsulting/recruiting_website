@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.netty;
 
+import com.queryx.recruiting_website.common.VideoMsgEncoder;
 import com.queryx.recruiting_website.common.WebsocketEncoder;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.common.VideoMsgDecoder;
@@ -39,7 +40,6 @@ public class NettySever implements InitializingBean {
         // 连接请求数量的最大值
         sb.option(ChannelOption.SO_BACKLOG, 1024);
         // 设置为非阻塞类型
-        sb.channel(NioServerSocketChannel.class);
         sb.group(group, bossGroup) // 绑定线程池
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -55,8 +55,9 @@ public class NettySever implements InitializingBean {
                         // WebSocket 握手处理
                         ch.pipeline().addLast(wsSharkHandler);
                         // 自定义编解码器
-                        ch.pipeline().addLast(new WebsocketEncoder());
                         ch.pipeline().addLast(new VideoMsgDecoder());
+                        ch.pipeline().addLast(new WebsocketEncoder());
+                        ch.pipeline().addLast(new VideoMsgEncoder());
                         // 业务逻辑处理器
                         ch.pipeline().addLast(coordinationSocketHandler);
                     }
