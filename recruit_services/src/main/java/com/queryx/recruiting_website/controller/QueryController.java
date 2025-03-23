@@ -1,24 +1,23 @@
 package com.queryx.recruiting_website.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.SearchDTO;
-import com.queryx.recruiting_website.domain.vo.*;
-import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
-import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.utils.CommonResp;
-import com.queryx.recruiting_website.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.queryx.recruiting_website.domain.vo.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import com.queryx.recruiting_website.utils.CommonResp;
+import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.domain.dto.SearchDTO;
+import com.queryx.recruiting_website.service.QueryService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 
 import java.util.List;
 
@@ -178,7 +177,7 @@ public class QueryController {
             @RequestParam("keyword") String keyword,
             @RequestParam("page") Integer page,
             @RequestParam("pageSize") Integer pageSize,
-            @RequestParam(value = "isAsc", required = false, defaultValue = "true") boolean isAsc) {
+            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
@@ -211,7 +210,7 @@ public class QueryController {
             @RequestParam("keyword") String keyword,
             @RequestParam("page") Integer page,
             @RequestParam("pageSize") Integer pageSize,
-            @RequestParam(value = "isAsc", required = false, defaultValue = "true") boolean isAsc) {
+            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
