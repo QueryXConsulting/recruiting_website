@@ -135,8 +135,6 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
         LambdaQueryWrapper<TDInterview> interviewQueryWrapper = new LambdaQueryWrapper<>();
         interviewQueryWrapper.eq(TDInterview::getUserId, userId);
         interviewQueryWrapper.eq(TDInterview::getIsDeleted, Common.NOT_DELETE);
-        interviewQueryWrapper.groupBy(TDInterview::getInterviewId);
-        System.err.println(interviewQueryWrapper);
         // 执行查询
         Page<TDInterview> interviewPage = interviewMapper.selectPage(new Page<>(page, pageSize), interviewQueryWrapper);
         if (interviewPage == null || interviewPage.getRecords() == null || interviewPage.getRecords().isEmpty())

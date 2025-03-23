@@ -1,24 +1,23 @@
 package com.queryx.recruiting_website.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.SearchDTO;
-import com.queryx.recruiting_website.domain.vo.*;
-import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
-import com.queryx.recruiting_website.service.QueryService;
-import com.queryx.recruiting_website.utils.CommonResp;
-import com.queryx.recruiting_website.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.queryx.recruiting_website.domain.vo.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import com.queryx.recruiting_website.utils.CommonResp;
+import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.domain.dto.SearchDTO;
+import com.queryx.recruiting_website.service.QueryService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
+import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 
 import java.util.List;
 
@@ -116,10 +115,10 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("job")
-    public CommonResp<JobVO> queryJob(@RequestParam("id") Long id) {
+    public CommonResp<JobVO> queryJob(@RequestParam("id") String id) {
         JobVO resp;
         try {
-            resp = queryUserInfo.getJob(id);
+            resp = queryUserInfo.getJob(Long.parseLong(id));
             if (resp == null) {
                 log.error("招聘岗位不存在，id={}", id);
                 return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
@@ -145,7 +144,7 @@ public class QueryController {
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("/")
+    @PostMapping("/search")
     public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
         // 校验参数
         if (searchDTO == null) {
@@ -174,12 +173,16 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
-    public CommonResp<Page<SearchJobVO>> queryJobList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public CommonResp<Page<SearchJobVO>> queryJobList(
+            @RequestParam("keyword") String keyword,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize, isAsc);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
@@ -203,11 +206,15 @@ public class QueryController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/companyList")
-    public CommonResp<Page<SearchCompanyVO>> queryCompanyList(@RequestParam("keyword") String keyword, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public CommonResp<Page<SearchCompanyVO>> queryCompanyList(
+            @RequestParam("keyword") String keyword,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
         // 校验参数
         if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        return queryUserInfo.getCompanyList(keyword, page, pageSize);
+        return queryUserInfo.getCompanyList(keyword, page, pageSize, isAsc);
     }
 }

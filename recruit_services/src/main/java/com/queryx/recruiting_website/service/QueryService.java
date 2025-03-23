@@ -52,7 +52,7 @@ public interface QueryService {
      * @param pageSize 页大小
      * @return 职位列表
      */
-    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize);
+    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc);
 
     /**
      * 查询职位列表
@@ -62,7 +62,7 @@ public interface QueryService {
      * @param pageSize 页大小
      * @return 职位列表
      */
-    CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize);
+    CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc);
 
     /**
      * 查询所有简历信息

@@ -9,15 +9,42 @@
       </div>
       <div class="nav-items">
         <a href="#" class="nav-item active">首页</a>
-        <a href="#" class="nav-item">校园招聘</a>
+        <a href="/users/search" class="nav-item">校园招聘</a>
         <a href="#" class="nav-item">社会招聘</a>
-        <a href="#" class="nav-item" v-if="userStore().token">
+        <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
+        <a href="#" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
           <el-icon>
             <component :is="Bell"></component>
           </el-icon>
-          <i class="message-flag"></i>
+          <!-- 未读消息提示(小圆点) -->
+          <i v-if="hasMessage" class="message-flag"></i>
         </a>
-        <router-link to="/auth/login" class="login-btn" v-show="userStore().token == null">登录</router-link>
+        <!-- 用户头像 -->
+        <el-dropdown v-if="userStore().token" @command="handleCommand">
+          <span class="user-dropdown">
+            <el-avatar size="large" :src="userStore().userInfo.userAvatar" @error="() => { }">
+              <!-- 头像加载失败时显示默认头像 -->
+              <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="用户头像">
+            </el-avatar>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="userInfo">
+                <el-icon>
+                  <component :is="iconMapping['user']" />
+                </el-icon>
+                个人信息
+              </el-dropdown-item>
+              <el-dropdown-item command="logout" divided>
+                <el-icon>
+                  <component :is="iconMapping['switch']" />
+                </el-icon>
+                退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <router-link to="/auth/login" class="login-btn" v-else-if="userStore().token == null">登录</router-link>
       </div>
     </nav>
 
@@ -25,7 +52,7 @@
     <div class="banner">
       <div class="banner-content">
         <div class="banner-buttons">
-          <button class="primary-btn">校园招聘</button>
+          <button class="primary-btn" @click="router.push('/users/search')">校园招聘</button>
           <button class="primary-btn" @click="router.push('/users/registerCompany')">企业入驻</button>
         </div>
       </div>
@@ -50,8 +77,33 @@ import router from '@/router';
 import userStore from '@/store/user';
 import { ref } from 'vue';
 import { Bell } from '@element-plus/icons-vue';
+import { iconMapping } from '@/utils/iconList';
+import { ElMessageBox } from 'element-plus';
+import { userLogout } from '@/api/company/companyApi';
 
 
+const hasMessage = ref(false); // 是否有未读消息
+
+
+const handleCommand = (command) => {
+  if (command === 'logout') {
+    ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      userLogout().then(() => {
+        userStore().$reset();
+        window.location.reload();
+        // 跳转到登录页
+        router.push('/auth/login');
+        ElMessage.success('已安全退出登录');
+      })
+    }).catch(() => { })
+  } else if (command === 'userInfo') {
+    router.push('/users/userInfo');
+  }
+}
 
 const cultureItems = ref([
   {

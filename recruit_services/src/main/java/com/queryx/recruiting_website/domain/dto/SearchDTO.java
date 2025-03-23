@@ -18,7 +18,7 @@ public class SearchDTO {
     // 搜索类型
     private SearchType searchType;
     // 排序类型
-    private boolean isAsc;
+    private Boolean isAsc;
 
 
 
