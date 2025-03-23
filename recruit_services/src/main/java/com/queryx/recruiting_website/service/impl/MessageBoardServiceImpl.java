@@ -1,0 +1,104 @@
+package com.queryx.recruiting_website.service.impl;
+
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDMessageBoard;
+import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.vo.LastMessageVO;
+import com.queryx.recruiting_website.domain.vo.MessageDataVO;
+import com.queryx.recruiting_website.mapper.MessageBoardMapper;
+import com.queryx.recruiting_website.service.MessageBoardService;
+import com.queryx.recruiting_website.service.TDCompanyInfoService;
+import com.queryx.recruiting_website.service.TDUserService;
+import com.queryx.recruiting_website.utils.SecurityUtils;
+import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+
+@Service
+public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDMessageBoard> implements MessageBoardService {
+
+    @Resource
+    private TDUserService userService;
+    @Resource
+    private TDCompanyInfoService companyInfoService;
+
+    @Override
+    public Object getMessageData(Long userId) {
+        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
+                .eq(TDMessageBoard::getUserId, userId)
+                .eq(TDMessageBoard::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
+                .eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
+        List<TDMessageBoard> messageBoards = list(queryWrapper);
+        if (messageBoards.isEmpty()){
+            return null;
+        }
+
+
+        for (TDMessageBoard messageBoard : messageBoards) {
+            messageBoard.setIsRead(Common.READ);
+        }
+        updateBatchById(messageBoards);
+
+        messageBoards.sort(Comparator.comparing(TDMessageBoard::getCreateTime));
+
+        return messageBoards.stream().map(messageBoard -> {
+            MessageDataVO messageDataVO = new MessageDataVO();
+            BeanUtils.copyProperties(messageBoard, messageDataVO);
+            if(messageBoard.getOwnerUser().equals("0")){
+                String userName = userService.getById(userId).getUserName();
+                messageDataVO.setUser(userName);
+            }else {
+                String companyInfoName = companyInfoService.getById(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId()).getCompanyInfoName();
+                messageDataVO.setUser(companyInfoName);
+            }
+            return messageDataVO;
+        }).toList();
+    }
+
+    @Override
+    public Object lastMessage() {
+        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
+                .eq(TDMessageBoard::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
+                .eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
+        List<TDMessageBoard> messageBoards = list(queryWrapper);
+        if (messageBoards.isEmpty()) {
+            return null;
+        }
+        List<Long> userId = messageBoards.stream().map(TDMessageBoard::getUserId).toList();
+        Map<Long, String> userNameMap = userService.listByIds(userId).stream().collect(Collectors.toMap(TDUser::getUserId, TDUser::getUserName));
+
+        List<TDMessageBoard> latestMessageBoards = new ArrayList<>(messageBoards.stream()
+                .collect(Collectors.toMap(TDMessageBoard::getUserId, Function.identity()
+                        , BinaryOperator.maxBy(Comparator.comparing(TDMessageBoard::getCreateTime))))
+                .values());
+
+        return latestMessageBoards.stream().map(messageBoard -> {
+            LastMessageVO lastMessageVO = new LastMessageVO();
+            BeanUtils.copyProperties(messageBoard, lastMessageVO);
+            lastMessageVO.setUserName(userNameMap.get(messageBoard.getUserId()));
+            return lastMessageVO;
+        }).toList();
+    }
+
+    @Override
+    public Object sendMessage(Long userId, String content) {
+        Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
+        TDMessageBoard tdMessageBoard = new TDMessageBoard();
+        tdMessageBoard.setCompanyId(companyInfoId);
+        tdMessageBoard.setUserId(userId);
+        tdMessageBoard.setOwnerUser(Common.COMPANY_TYPE);
+        tdMessageBoard.setContent(content);
+        tdMessageBoard.setIsRead(Common.READ);
+        save(tdMessageBoard);
+        return null;
+    }
+}

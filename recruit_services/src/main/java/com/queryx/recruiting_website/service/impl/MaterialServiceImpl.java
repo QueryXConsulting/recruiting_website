@@ -11,10 +11,7 @@ import com.queryx.recruiting_website.domain.vo.MaterialListVO;
 import com.queryx.recruiting_website.mapper.MaterialMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
-import com.queryx.recruiting_website.service.MaterialService;
-import com.queryx.recruiting_website.service.TDJobService;
-import com.queryx.recruiting_website.service.TDOffersService;
-import com.queryx.recruiting_website.service.TDUserService;
+import com.queryx.recruiting_website.service.*;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -41,6 +38,8 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
 
     @Resource
     private TDJobResumeMapper jobResumeMapper;
+    @Resource
+    private MessageBoardService messageBoardService;
 
 
 
@@ -110,6 +109,9 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
             tdJobResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId,material.getJobId())
                     .eq(TDJobResume::getUserId,material.getUserId()).set(TDJobResume::getResumeStatus,"5");
             jobResumeMapper.update(tdJobResumeLambdaUpdateWrapper);
+            TDMaterial tdMaterial = getById(materialId);
+
+            messageBoardService.sendMessage(tdMaterial.getUserId(), "您的材料已审核通过");
         }
         update(new LambdaUpdateWrapper<TDMaterial>().eq(TDMaterial::getMaterialId, materialId)
                 .set(TDMaterial::getStatus, status));

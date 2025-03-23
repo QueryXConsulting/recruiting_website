@@ -51,16 +51,16 @@
 
               <div class="table-section">
                 <el-table :data="resumeList" border stripe class="custom-table" row-key="resumeId">
-                  <el-table-column label="序号" type="index" width="90" align="center" :index="calculateIndex" />
-                  <el-table-column prop="resumeName" label="简历名称" width="160" show-overflow-tooltip align="center" />
-                  <el-table-column prop="resumeType" label="简历类型" width="160" align="center">
+                  <el-table-column label="序号" type="index" width="70" align="center" :index="calculateIndex" />
+                  <el-table-column prop="resumeName" label="简历名称" width="140" show-overflow-tooltip align="center" />
+                  <el-table-column prop="resumeType" label="简历类型" width="120" align="center">
                     <template #default="scope">
                       <el-tag :type="scope.row.resumeType == 0 ? 'success' : 'primary'">
                         {{ scope.row.resumeType == 0 ? '在线简历' : '附件简历' }}
                       </el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="resumeStatus" label="投递状态" width="500" align="center">
+                  <el-table-column prop="resumeStatus" label="投递状态" width="450" align="center">
                     <template #default="scope">
                       <div class="status-timeline">
                         <div v-for="(status, index) in statusList" :key="status.value" class="timeline-item" :class="{
@@ -95,7 +95,7 @@
                           </el-button>
                         </template>
                         <el-button type="danger" link @click="handleUnsuitable(scope.row)"
-                          v-if="scope.row.resumeDelete !== '0' & scope.row.resumeStatus !== '0'">
+                          v-if="scope.row.resumeDelete !== '0' & scope.row.resumeStatus !== '0' & scope.row.resumeStatus != '1'">
                           不合适
                         </el-button>
                       </div>
@@ -119,7 +119,7 @@
                 <el-table-column label="类型" prop="interviewType" width="90" align="center">
                   <template #default="scope">
                     <el-tag :type="scope.row.interviewType == '0' ? 'success' : 'primary'">
-                      {{ scope.row.interviewType == '0' ? '线上' : '线下' }}
+                      {{ typeMapping[scope.row.interviewType] }}
                     </el-tag>
                   </template>
                 </el-table-column>
@@ -148,11 +148,8 @@
                 <el-table-column label="操作" width="180" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-button type="primary" link @click="editInterview(scope.row)" :disabled="scope.row.interviewResult != '0' ||
-                        (scope.row.interviewStatus == '3' &&
-                          scope.row.interviewStatus == '0') ||
-                        scope.row.interviewStatus == '3' ||
-                        scope.row.interviewStatus == '0'">
+                      <el-button type="primary" link @click="editInterview(scope.row)" :disabled="scope.row.interviewStatus != '1' &&
+                        scope.row.interviewStatus != '2'">
                         修改
                       </el-button>
                       <el-button type="danger" link @click="viewInterview(scope.row)"
@@ -172,7 +169,7 @@
           </el-tab-pane>
           <el-tab-pane label="offer发放" name="offer">
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
-              <el-table :data="offersList" border stripe class="custom-table" row-key="offersId">
+              <el-table :data="offersList" border stripe class="custom-table" row-key="offerId">
                 <el-table-column label="序号" type="index" width="100" align="center" />
                 <el-table-column label="应聘者" prop="userName" width="180" align="center" />
                 <el-table-column label="发送时间" prop="offersDate" width="180" align="center">
@@ -200,7 +197,7 @@
                       </el-button>
 
                       <el-button type="danger" link @click="cancelOffer(scope.row)"
-                        v-if="scope.row.offersStatus && scope.row.offersStatus !== '2' && scope.row.offersStatus !== '3'">
+                        v-if="scope.row.offersStatus && scope.row.offersStatus !== '2' && scope.row.offersStatus !== '3' && scope.row.offersStatus !== '6'">
                         撤销
                       </el-button>
                     </div>
@@ -392,13 +389,14 @@
           </el-form-item>
           <el-form-item label="类型" prop="interviewType">
             <el-select v-model="editInterviewData.interviewType" placeholder="请选择面试类型">
-              <el-option v-for="(label, value) in interviewTypeOptions" :key="value" :label="label" :value="value" />
+              <el-option label="线上" :value="0" />
+              <el-option label="线下" :value="1" />
             </el-select>
           </el-form-item>
           <el-form-item label="结果" prop="interviewResult">
             <el-select v-model="editInterviewData.interviewResult" placeholder="请选择结果">
-              <el-option label="通过" :value="1" />
-              <el-option label="未通过" :value="2" />
+              <el-option label="通过" value="1" />
+              <el-option label="未通过" value="2" />
             </el-select>
           </el-form-item>
           <el-form-item label="时长" prop="interviewTime">
@@ -465,14 +463,8 @@
               <div class="template-item" @click="handleTemplateSelect(template)"
                 :class="{ 'active': selectedTemplate === template.id }">
                 <div class="template-preview">
-                  <el-image
-                    :src="template.thumbnail"
-                    fit="cover"
-                    :preview-src-list="[template.preview]"
-                    :initial-index="0"
-                    :preview-teleported="true"
-                    :zoom-rate="1.2"
-                    :close-on-press-escape="true"
+                  <el-image :src="template.thumbnail" fit="cover" :preview-src-list="[template.preview]"
+                    :initial-index="0" :preview-teleported="true" :zoom-rate="1.2" :close-on-press-escape="true"
                     preview-teleported>
                     <template #error>
                       <div class="image-placeholder">
@@ -688,6 +680,7 @@ import userStore from '@/store/user'
 
 
 const currentOfferId = ref(null)
+const currentUserId = ref(null)
 const documentConfig = ref({
   width: "100%",
   height: "100%",
@@ -753,7 +746,9 @@ const searchForm = ref({
   resumeStatus: ''
 })
 
-
+const handleInterviewResultChange = (value) => {
+  editInterviewData.value.interviewResult = value
+}
 const pdfDialogVisible = ref(false)
 const pdfUrl = ref('')
 
@@ -823,10 +818,7 @@ const editInterviewData = ref({
 })
 
 
-const interviewTypeOptions = {
-  0: '线上',
-  1: '线下'
-}
+
 
 
 const interviewPageNum = ref(1)
@@ -846,7 +838,8 @@ const getOfferStatusType = (status) => {
     '2': 'danger',
     '3': 'warning',
     '4': 'success',
-    '5': 'danger'
+    '5': 'danger',
+    '6': 'success'
   }
   return statusMap[status] || 'info'
 }
@@ -858,7 +851,8 @@ const getOfferStatusText = (status) => {
     '2': '已拒绝',
     '3': '已撤销',
     '4': '已发送',
-    '5': '打回'
+    '5': '打回',
+    '6': '通过'
   }
   return statusMap[status] || '未知'
 }
@@ -1086,12 +1080,11 @@ const viewInterview = async (row) => {
 }
 
 const editInterview = async (row) => {
-
   editInterviewData.value = {
     interviewId: row.interviewId,
     interviewDate: row.interviewDate,
     interviewRegion: row.interviewRegion,
-    interviewType: row.interviewType,
+
     interviewResult: row.interviewResult,
     interviewTime: row.interviewTime,
     interviewStatus: row.interviewStatus,
@@ -1100,14 +1093,17 @@ const editInterview = async (row) => {
     jobId: row.jobId
   }
 
-  const resultMapping = {
+
+  editInterviewDialogVisible.value = true
+}
+const typeMapping = {
+    '0': '线上',
+    '1': '线下'
+  };
+const resultMapping = {
     '1': '通过',
     '2': '未通过'
   };
-  editInterviewData.value.interviewResult = resultMapping[row.interviewResult];
-  editInterviewDialogVisible.value = true
-}
-
 const submitEditInterview = async () => {
   try {
     const result = await updateInterviewList(editInterviewData.value);
@@ -1157,7 +1153,9 @@ const viewOffer = (row) => {
     currentOfferId.value = row.offerId
     uploadOfferDialogVisible.value = true
   } else if (row.offersStatus === '1') {
-    currentOfferId.value = row.offersId
+    currentOfferId.value = row.offerId
+    currentUserId.value = row.userId
+    console.log("userid", currentUserId.value)
     currentSignature.value = row.signaturePath
     signatureDialogVisible.value = true
   } else if (row.offersFilePath) {
@@ -1166,9 +1164,12 @@ const viewOffer = (row) => {
 }
 
 
-const handleOfferStatus = async (offerId, status, jobId) => {
+const handleOfferStatus = async (offerId, status, jobId, userId) => {
   try {
-    const result = await updateOfferStatus(offerId, status, jobId)
+    const result = userId ?
+      await updateOfferStatus(offerId, status, jobId, userId) :
+      await updateOfferStatus(offerId, status, jobId);
+
     if (result.code == 200) {
       ElMessage.success('状态更新成功')
       getOffersList()
@@ -1188,7 +1189,7 @@ const cancelOffer = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await handleOfferStatus(row.offersId, '3', jobId)
+    await handleOfferStatus(row.offerId, '3', jobId)
   } catch (error) {
     if (error !== 'cancel') {
       console.error('撤销offer失败:', error)
@@ -1329,24 +1330,24 @@ const onDocumentStateChange = (event) => {
 }
 const handleBeforeClose = async () => {
 
-pdfEditDialogVisible.value = false
-const loading = ElLoading.service({
-  lock: true,
-  text: '发送中...',
-  background: 'rgba(0, 0, 0, 0.7)'
-});
+  pdfEditDialogVisible.value = false
+  const loading = ElLoading.service({
+    lock: true,
+    text: '发送中...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  });
 
-try {
-  handleOfferStatus(currentOfferId.value, '4',jobId)
-  pdfEditDialogVisible.value = false;
-  ElMessage.success('offer已发送');
-  getOffersList();
-} catch (error) {
-  console.error('保存文档失败:', error);
-  ElMessage.error(error.message || '保存文档失败');
-} finally {
-  loading.close();
-}
+  try {
+    handleOfferStatus(currentOfferId.value, '4', jobId)
+    pdfEditDialogVisible.value = false;
+    ElMessage.success('offer已发送');
+    getOffersList();
+  } catch (error) {
+    console.error('保存文档失败:', error);
+    ElMessage.error(error.message || '保存文档失败');
+  } finally {
+    loading.close();
+  }
 }
 
 // 在 script setup 中添加以下代码
@@ -1356,7 +1357,7 @@ const currentSignature = ref('')
 
 const handleSignatureConfirm = async () => {
   try {
-    await handleOfferStatus(currentOfferId.value, "1", jobId)
+    await handleOfferStatus(currentOfferId.value, "6", jobId, currentUserId.value)
     signatureDialogVisible.value = false
     ElMessage.success('已通过')
     getOffersList()
@@ -1781,6 +1782,7 @@ const openCheckinDialog = (row) => {
   }
   checkinDialogVisible.value = true
 }
+
 
 // 提交入职日期
 const submitCheckin = async () => {

@@ -19,7 +19,7 @@ public interface TDOffersService extends IService<TDOffers> {
     ResponseEntity<String> saveOfferDocument(Long offerId, Map<String, Object> callbackData) throws IOException;
 
 
-    CommonResp updateOfferStatus(Long offerId, String status, Long jobId);
+    CommonResp updateOfferStatus(Long offerId, String status, Long jobId, Long userId);
 
 
 }

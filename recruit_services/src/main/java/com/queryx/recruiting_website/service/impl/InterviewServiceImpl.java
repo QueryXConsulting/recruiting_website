@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
@@ -13,6 +14,7 @@ import com.queryx.recruiting_website.domain.vo.InterviewListVo;
 import com.queryx.recruiting_website.domain.vo.InterviewVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.service.InterviewService;
+import com.queryx.recruiting_website.service.MessageBoardService;
 import com.queryx.recruiting_website.service.TDResumeService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -45,16 +47,30 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     private TDJobResumeMapper tdJobResumeMapper;
     @Resource
     private TDOffersMapper offersMapper;
+    @Resource
+    private MessageBoardService messageBoardService;
 
     @Override
     public Object sendInterviewDto(SendInterviewDto sendInterviewDto) {
+        Long userId = sendInterviewDto.getUserId();
+        Long jobId = sendInterviewDto.getJobId();
+        LambdaQueryWrapper<TDJobResume> tdJobResumeLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        tdJobResumeLambdaQueryWrapper.eq(TDJobResume::getUserId, userId)
+                .eq(TDJobResume::getJobId, jobId);
+        TDJobResume tdJobResume = tdJobResumeMapper.selectOne(tdJobResumeLambdaQueryWrapper);
+
         TDInterview tdInterview = new TDInterview();
         BeanUtils.copyProperties(sendInterviewDto, tdInterview);
         tdInterview.setUserId(sendInterviewDto.getUserId());
         tdInterview.setCompanyId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
-        tdInterview.setInterviewStatus("0");
         tdInterview.setJobId(sendInterviewDto.getJobId());
+        tdInterview.setJobResumeId(tdJobResume.getJobResumeId());
         save(tdInterview);
+        if (sendInterviewDto.getInterviewType().equals(Common.INTERVIEW_ONLINE)){
+            tdInterview.setRoomId(tdInterview.getInterviewId());
+        }
+
+        messageBoardService.sendMessage(sendInterviewDto.getUserId(), SecurityUtils.getLoginUser().getUsername() + " 向您发起了面试邀约");
         return null;
     }
 
@@ -99,12 +115,15 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
             TDOffers tdOffers = new TDOffers();
             tdOffers.setUserId(updateInterviewDto.getUserId());
             tdOffers.setJobId(updateInterviewDto.getJobId());
+            tdInterview.setInterviewDate(new Date());
             offersMapper.insert(tdOffers);
+            tdInterview.setJobId(null);
+            tdInterview.setUserId(null);
+            messageBoardService.sendMessage(updateInterviewDto.getUserId(), "恭喜您通过面试");
         } else if (tdInterview.getInterviewStatus().equals("3")) {
-            tdResumeService.updateResumeStatus("1", tdInterview.getJobResumeId(), null);
+            BeanUtils.copyProperties(updateInterviewDto, tdInterview);
         }
-        tdInterview.setJobId(null);
-        tdInterview.setUserId(null);
+
         update(tdInterview, new LambdaQueryWrapper<TDInterview>().eq(TDInterview::getInterviewId, updateInterviewDto.getInterviewId()));
         return null;
     }

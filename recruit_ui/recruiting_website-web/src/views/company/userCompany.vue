@@ -254,9 +254,12 @@ const submitForm = async () => {
           userId: userData.userId,
           userName: userData.userName,
           userStatus: userData.userStatus,
-          roleId: userData.userRole,
         }
 
+
+        if (userData.userRole && userData.userRole.trim() !== '') {
+          submitData.userRole = userData.userRole
+        }
 
         if (!originalUserData.value || userData.userEmail !== originalUserData.value.userEmail) {
           submitData.userEmail = userData.userEmail
@@ -268,8 +271,6 @@ const submitForm = async () => {
         if (userData.userPassword) {
           submitData.userPassword = userData.userPassword
         }
-
-        delete submitData.userRole
 
         const dtoJson = JSON.stringify(submitData)
         formData.append('dtoJson', dtoJson)
@@ -287,7 +288,7 @@ const submitForm = async () => {
         let result;
 
         if (userForm.value.userId) {
-          result = await updateUserCompany(formData)
+           result = await updateUserCompany(formData)
         } else {
           result = await addUserCompany(formData)
         }
