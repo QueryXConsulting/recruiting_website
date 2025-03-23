@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
@@ -88,9 +89,9 @@ public class QueryServiceImpl implements QueryService {
         Page<?> result = null;
         switch (searchDTO.getSearchType()) {
             case JOB ->
-                result = getJobList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize());
+                    result = getJobList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc());
             case COMPANY ->
-                result =  getCompanyList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize()).getContent();
+                    result = getCompanyList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
             default -> {
                 return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
             }
@@ -104,8 +105,8 @@ public class QueryServiceImpl implements QueryService {
         if (tdJob == null) {
             return null;
         }
-        if (Common.JOB_STATUS_ENABLE_OK.equals(tdJob.getJobStatus()) &&
-                Common.REVIEW_OK.equals(tdJob.getJobReview())) {
+        if (Common.JOB_STATUS_ENABLE_NOT_OK.equals(tdJob.getJobStatus()) &&
+                Common.REVIEW_NOT_OK.equals(tdJob.getJobReview())) {
             return null;
         }
         final JobVO jobVO = new JobVO();
@@ -114,13 +115,14 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize) {
+    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(TDJob::getJobPosition, keyword);
+        queryWrapper.like(keyword != null, TDJob::getJobPosition, StrUtil.trim(keyword));
         queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
         queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
+        queryWrapper.orderBy(true, isAsc, TDJob::getJobTime);
         // 构建分页对象
         Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
         if (jobPage == null) return null;
@@ -137,13 +139,14 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize) {
+    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(TDCompanyInfo::getCompanyInfoName, keyword);
+        queryWrapper.like(keyword != null, TDCompanyInfo::getCompanyInfoName, StrUtil.trim(keyword));
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getEnterpriseReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
+        queryWrapper.orderBy(true, isAsc, TDCompanyInfo::getCompanyRegisterTime);
         // 构建分页对象
         Page<TDCompanyInfo> company = companyInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
         if (company == null) {

@@ -28,6 +28,7 @@
               登录
             </el-button>
           </el-form-item>
+          <el-form-item><el-link :underline="false" href="/users/register" type="primary">新用户注册</el-link></el-form-item>
         </el-form>
       </div>
     </div>

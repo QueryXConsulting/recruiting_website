@@ -97,17 +97,21 @@ const tableOperation = [
     { type: 'warning', text: '取消' },
     { type: 'danger', text: '拒绝' },
     { type: 'success', text: '接受' },
+    { type: 'primary', text: '开始面试' },
 ]
 let filteredOperation = tableOperation;
-// 根据面试状态获取表格右侧操作栏
+
 const getStatusOptionsLabel = (val) => {
     // 表格右侧操作栏根据面试状态过滤
     if (val === "1") {
-        filteredOperation = tableOperation.filter((item) => item.text === '取消');
+        // 接受面试则只显示取消按钮
+        filteredOperation = tableOperation.filter((item) => item.text !== '拒绝' && item.text !== '接受');
     } else if (val === "0" || val === "3") {
+        // 拒绝或反悔面试则不显示按钮
         filteredOperation = [];
     } else if (val === "2") {
-        filteredOperation = tableOperation.filter((item) => item.text != '取消');
+        // 未选择面试则显示接受和取消按钮
+        filteredOperation = tableOperation.filter((item) => item.text === '接受' || item.text === '拒绝');
     }
     return getOptionLabel(statusOptions, val);
 }
@@ -130,23 +134,41 @@ const isAcceptInterview = async (id, status, date) => {
 
 let $interviewId = '';
 // 表格右侧按钮点击事件
-const handleClick = async (index, row, $index) => {
+const handleClick = async (obj, row, $index) => {
     $interviewId = row.interviewId;
-    switch (index) {
-        case 0:
+    const o = obj.text;
+    switch (o) {
+        case "取消":
+        case "拒绝":
             // 面试状态为接受后，修改状态为取消
-            if (row.interviewStatus === "1") {
-                index = 3;
-            }
-            isAcceptInterview(row.interviewId, index + '');
+            const val = statusOptions.find((item) => item.label.includes(o)).value;
+            isAcceptInterview(row.interviewId, val);
             break;
-        case 1: // 接受面试
+        case '接受': // 接受面试
             isShowDialog.value = true;
             const res = await interviewDate(+row.companyInfoId);
             for (let i = 0; i < res.content.length; i++) {
                 timeRange[i] = res.content[i];
             }
             break;
+        case '开始面试': // 开始面试
+            if (row.interviewStatus) {
+                const startDate = new Date(row.interviewDate);
+                const currDate = new Date();
+                // js时间比较不能判断相等
+                if (currDate < startDate) {
+                    ElMessage.error('面试已过期！');
+                    return;
+                }
+                if (currDate > startDate) {
+                    ElMessage.error('面试未开始！');
+                    return;
+                }
+                // 路由到面试页面
+                break;
+            }
+            ElMessage.error('出现错误！');
+            return;
         default:
     }
 }
@@ -208,9 +230,9 @@ const cancelTime = () => {
 
 <template>
     <div>
-        <WBTable :total="total" @operationClick="handleClick" @update:currentPage="handleCurrentChange"
-            @update:page-size="handleSizeChange" :table-columns="tableColumns" v-model:tableData="tableData"
-            v-model:currentPage="currentPage" v-model:pageSize="pageSize" border>
+        <WBTable :total="total" @update:currentPage="handleCurrentChange" @update:page-size="handleSizeChange"
+            :table-columns="tableColumns" v-model:tableData="tableData" v-model:currentPage="currentPage"
+            v-model:pageSize="pageSize" border>
             <template #default="scope">
                 <el-tag v-if="scope.prop === 'interviewResult'"
                     :type="getTagType(resultOptions, tableData[scope.$index][scope.prop])">
@@ -227,7 +249,7 @@ const cancelTime = () => {
             <!-- 表格右侧操作栏 -->
             <template #operation="scope">
                 <el-button v-for="(item, index) in filteredOperation" :type="item.type" :key="index" size="small"
-                    @click="handleClick(index, scope.row, scope.$index)">
+                    @click="handleClick(item, scope.row, scope.$index)">
                     {{ item.text }}
                 </el-button>
             </template>

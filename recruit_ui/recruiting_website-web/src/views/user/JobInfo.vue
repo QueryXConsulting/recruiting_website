@@ -14,7 +14,7 @@ const jobDetail = ref();
 // 组件挂载完成后请求岗位信息
 onMounted(async () => {
     const route = router.currentRoute.value;
-    const response = await jobInfo(+route.query.jobId);
+    const response = await jobInfo(route.query.jobId);
     jobDetail.value = response.content;
     loading.value = false;
 });

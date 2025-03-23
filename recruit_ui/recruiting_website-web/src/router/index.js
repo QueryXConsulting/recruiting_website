@@ -41,7 +41,11 @@ const routes = [
   },
   {
     path: '/users/jobList',
-    component: () => import('../views/user/JobList.vue'),
+    component: () => import('../views/user/list/JobList.vue'),
+  },
+  {
+    path: '/users/companyList',
+    component: () => import('../views/user/list/CompanyList.vue'),
   },
   {
     path: '/users/userInfo',
@@ -50,6 +54,10 @@ const routes = [
   {
     path: '/users/application',
     component: () => import('../views/user/applicationRecord/index.vue'),
+  },
+  {
+    path: '/users/search',
+    component: () => import('../views/user/Search.vue'),
   },
   {
     path: '/home',

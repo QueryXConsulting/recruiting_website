@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -34,7 +35,11 @@ public class InterviewVO {
     /**
      * 面试时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date interviewDate;
+
+    // 面试时长
+    private Integer interviewTime;
     /**
      * 面试地点
      */
