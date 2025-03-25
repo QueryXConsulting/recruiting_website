@@ -66,9 +66,9 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
         tdInterview.setJobId(sendInterviewDto.getJobId());
         tdInterview.setJobResumeId(tdJobResume.getJobResumeId());
         save(tdInterview);
-        if (sendInterviewDto.getInterviewType().equals(Common.INTERVIEW_ONLINE)){
-            tdInterview.setRoomId(tdInterview.getInterviewId());
-        }
+//        if (sendInterviewDto.getInterviewType().equals(Common.INTERVIEW_ONLINE)){
+//            tdInterview.setRoomId(tdInterview.getInterviewId());
+//        }
 
         messageBoardService.sendMessage(sendInterviewDto.getUserId(), SecurityUtils.getLoginUser().getUsername() + " 向您发起了面试邀约");
         return null;

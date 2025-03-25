@@ -42,6 +42,10 @@ const API = {
   COMPANY_LIST_URL: '/api/query/companyList',
   // 搜索接口
   SEARCH_URL: '/api/query/search',
+  // 留言相关接口
+  MESSAGE_LIST_URL: '/api/message/list',
+  MESSAGE_SEND_URL: '/api/message/send',
+  MESSAGE_INFO_URL: '/api/message/info',
 }
 
 // 用户相关
@@ -84,6 +88,10 @@ export const reservationUpdateStatus = (status) => request.put(API.RESERVATION_S
 export const companyList = (kw, page, size, asc = false) => request.get(API.COMPANY_LIST_URL, { params: { keyword: kw, page: page, pageSize: size, isAsc: asc } })
 // 搜索接口
 export const search = (dto) => request.post(API.SEARCH_URL, dto)
+// 留言相关
+export const getLastMessage = () => request.get(API.MESSAGE_LIST_URL)
+export const getMessageData = (id) => request.get(API.MESSAGE_INFO_URL, { params: { id: id } })
+export const postMessage = (dto) => request.post(API.MESSAGE_SEND_URL,dto)
 
 
 

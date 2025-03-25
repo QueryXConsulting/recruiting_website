@@ -60,8 +60,8 @@ public class TDInterview {
     @Schema(name = "面试时长", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer interviewTime;
 
-    @Schema(name = "房间id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long roomId;
+//    @Schema(name = "房间id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+//    private Long roomId;
 
 
 }

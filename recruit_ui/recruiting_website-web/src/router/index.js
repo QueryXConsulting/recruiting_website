@@ -60,6 +60,10 @@ const routes = [
     component: () => import('../views/user/Search.vue'),
   },
   {
+    path: '/users/message',
+    component: () => import('../views/user/MessageBoard.vue'),
+  },
+  {
     path: '/home',
     name: 'home',
     component: () => import('../views/admin/home.vue'),

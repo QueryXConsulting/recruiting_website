@@ -69,7 +69,7 @@ public class NettySever implements InitializingBean {
             group.shutdownGracefully();
         }));
         // 绑定端口
-        ChannelFuture channelFuture = sb.bind(Integer.parseInt(Common.port)).syncUninterruptibly();
+        ChannelFuture channelFuture = sb.bind(3000).syncUninterruptibly();
         System.out.println(NettySever.class + "已启动，正在监听： " + channelFuture.channel().localAddress());
         // 阻塞主线程，实现服务长期开启的效果
         channelFuture.channel().closeFuture().sync();

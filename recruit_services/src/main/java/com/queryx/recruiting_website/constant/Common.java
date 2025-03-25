@@ -100,6 +100,7 @@ public class Common {
 
     public static final String READ = "1";
     public static final String COMPANY_TYPE = "1";
+    public static final String USER_TYPE = "0";
     public static final String NOT_READ = "0";
     public static final String ENTERPRISEREVIEW_ENABLE = "1";
     // 启用
@@ -175,7 +176,6 @@ public class Common {
      * @param appendCode 追加字符
      * @return 上传文件夹名称
      */
-    public static String getUploadFolderName(String src, String splitCode, String appendCode) {
     public static String getLastPath(String src, String splitCode, String appendCode){
         String[] strings = src.split(splitCode);
         return strings[strings.length - 1] + appendCode;
