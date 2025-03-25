@@ -41,9 +41,9 @@ import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import userStore from '@/store/user'
-import { adminInfoURL, adminLogin, menuList } from '@/api/admin/adminApi'
+import { adminLogin, menuList } from '@/api/admin/adminApi'
 import { getUserInfo } from '@/api/company/companyApi'
-import CardLogin from '@/components/company/cardLogin.vue'
+
 
 const router = useRouter()
 const formRef = ref()
@@ -94,9 +94,10 @@ const handleLogin = async () => {
 
           const result = await menuList()
           await perms(result.content)
+
           if (store.role == null) {
             await store.getMenus()
-            await store.getUserInfo()
+            store.getUserInfo()
             router.push('/home')
             return
           }

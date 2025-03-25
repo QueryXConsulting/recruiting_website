@@ -672,7 +672,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf } from '@/api/company/companyApi'
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf, postMessage } from '@/api/company/companyApi'
 import { DocumentEditor } from '@onlyoffice/document-editor-vue'
 import userStore from '@/store/user'
 
@@ -746,9 +746,7 @@ const searchForm = ref({
   resumeStatus: ''
 })
 
-const handleInterviewResultChange = (value) => {
-  editInterviewData.value.interviewResult = value
-}
+
 const pdfDialogVisible = ref(false)
 const pdfUrl = ref('')
 
@@ -1151,6 +1149,7 @@ const handleOfferPageChange = (val) => {
 const viewOffer = (row) => {
   if (row.offersStatus === '0') {
     currentOfferId.value = row.offerId
+    currentUserId.value = row.userId
     uploadOfferDialogVisible.value = true
   } else if (row.offersStatus === '1') {
     currentOfferId.value = row.offerId
@@ -1338,6 +1337,11 @@ const handleBeforeClose = async () => {
   });
 
   try {
+
+    postMessage({
+      userId: currentUserId.value,
+      content: "您的offer已发送,请查收 —此消息来自系统自动发送"
+    })
     handleOfferStatus(currentOfferId.value, '4', jobId)
     pdfEditDialogVisible.value = false;
     ElMessage.success('offer已发送');
@@ -1350,7 +1354,6 @@ const handleBeforeClose = async () => {
   }
 }
 
-// 在 script setup 中添加以下代码
 const signatureDialogVisible = ref(false)
 const currentSignature = ref('')
 

@@ -6,6 +6,7 @@ import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.service.TDUserService;
+import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.service.UserService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -32,7 +33,8 @@ public class UserController {
     private UserService userService;
     @Resource
     private TDAdminService tdAdminService;
-
+    @Resource
+    private TPMenuService menuService;
     /**
      * 用户注册
      *
@@ -91,6 +93,17 @@ public class UserController {
         return CommonResp.success(tdAdminService.login(adminLoginDto));
     }
 
+    @GetMapping("/getRouters")
+    @Operation(summary = "拿到菜单数据")
+    public CommonResp getRouters() {
+        return CommonResp.success(menuService.getRouter());
+    }
+
+    @GetMapping("/menuList")
+    @Operation(summary = "菜单列表")
+    public CommonResp menuList() {
+        return CommonResp.success(menuService.menuList());
+    }
 
     /**
      * 用户头像上传

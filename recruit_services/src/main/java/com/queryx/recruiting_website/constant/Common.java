@@ -175,7 +175,6 @@ public class Common {
      * @param appendCode 追加字符
      * @return 上传文件夹名称
      */
-    public static String getUploadFolderName(String src, String splitCode, String appendCode) {
     public static String getLastPath(String src, String splitCode, String appendCode){
         String[] strings = src.split(splitCode);
         return strings[strings.length - 1] + appendCode;

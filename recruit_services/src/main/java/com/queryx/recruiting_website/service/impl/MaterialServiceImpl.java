@@ -111,7 +111,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
             jobResumeMapper.update(tdJobResumeLambdaUpdateWrapper);
             TDMaterial tdMaterial = getById(materialId);
 
-            messageBoardService.sendMessage(tdMaterial.getUserId(), "您的材料已审核通过");
+            messageBoardService.sendMessage(tdMaterial.getUserId(), "您的材料已审核通过 ——此消息来自系统自动发送");
         }
         update(new LambdaUpdateWrapper<TDMaterial>().eq(TDMaterial::getMaterialId, materialId)
                 .set(TDMaterial::getStatus, status));

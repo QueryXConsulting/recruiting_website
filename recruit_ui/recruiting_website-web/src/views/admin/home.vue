@@ -6,7 +6,7 @@
       <div class="header-right">
         <el-dropdown @command="handleCommand">
           <span class="user-dropdown">
-            <el-avatar :size="32" :src="store.userInfo.userAvatar || defaultAvatar" />
+            <el-avatar :size="32" :src="store.userInfo.userAvatar || store.userInfo.user.adminAvatar || defaultAvatar" />
           </span>
           <template #dropdown>
             <el-dropdown-menu>

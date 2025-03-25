@@ -3,7 +3,8 @@
     <!-- 左侧对话列表 -->
     <div class="conversation-list">
       <div v-for="conv in conversations" :key="conv.id"
-        :class="['conversation-item', { active: currentConvId === conv.id, unread: !conv.isRead }]" @click="switchConversation(conv.id)">
+        :class="['conversation-item', { active: currentConvId === conv.id, unread: !conv.isRead }]"
+        @click="switchConversation(conv.id)">
         <div class="conv-info">
           <div class="conv-title">{{ conv.title }}</div>
           <div class="conv-last-message">{{ conv.lastMessage }}</div>
@@ -15,13 +16,18 @@
     <div class="message-area">
       <div class="message-board">
         <el-timeline>
+          <div v-if="hasMore" class="load-more">
+            <el-button type="text" @click="loadMore" :loading="loading">
+              加载更多
+            </el-button>
+          </div>
           <el-timeline-item v-for="msg in currentMessages" :key="msg.id" :timestamp="msg.createTime"
             :hide-timestamp="true" placement="top" type="primary">
             <template #dot>
               <div class="custom-dot"></div>
             </template>
             <div class="message-time">{{ msg.createTime }}</div>
-            <div class="message-content" :class="{ 'message-self': msg.ownerUser === '1'}">
+            <div class="message-content" :class="{ 'message-self': msg.ownerUser === '1' }">
               <div class="message-header">
                 <div class="message-header-left">
                   <span class="sender-name">{{ msg.user }}</span>
@@ -34,6 +40,7 @@
               <div class="content-text">{{ msg.content }}</div>
             </div>
           </el-timeline-item>
+          <div v-if="loading" class="loading-more">加载中...</div>
         </el-timeline>
 
         <div class="post-message">
@@ -54,7 +61,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getLastMessage, getMessageData, postMessage as postMessageApi } from '@/api/company/companyApi'
-import userStore from '@/store/user'
+
 
 
 const conversations = ref([])
@@ -63,7 +70,6 @@ const fetchLastMessages = async () => {
   try {
     const res = await getLastMessage()
     if (res.code === 200 && res.content) {
-
       conversations.value = res.content.map(msg => ({
         id: msg.userId,
         title: msg.userName,
@@ -79,15 +85,22 @@ const fetchLastMessages = async () => {
 
 
 const allMessages = ref({})
+const currentPage = ref(1)
+const pageSize = ref(4)
+const loading = ref(false)
+const hasMore = ref(true)
 
-
-const fetchMessageData = async (userId) => {
+const fetchMessageData = async (userId, loadMore = false) => {
   try {
-    const companyId = userStore().userInfo.companyInfoId
-    const res = await getMessageData(userId, companyId)
-    if (res.code === 200 && res.content) {
+    loading.value = true
+    const res = await getMessageData({
+      page: currentPage.value,
+      size: pageSize.value,
+      userId: userId
+    })
 
-      allMessages.value[userId] = res.content.map(msg => ({
+    if (res.code === 200 && res.content) {
+      const newMessages = res.content.map(msg => ({
         id: msg.messageId,
         content: msg.content,
         createTime: msg.createTime,
@@ -97,14 +110,40 @@ const fetchMessageData = async (userId) => {
         userId: msg.userId,
         companyUserId: msg.companyUserId
       }))
+
+
+      if (loadMore) {
+        allMessages.value[userId] = [...newMessages, ...(allMessages.value[userId] || [])]
+      } else {
+        // 如果是切换对话或首次加载，则直接替换消息列表
+        allMessages.value[userId] = newMessages
+      }
+
+      // 如果返回的消息数量小于页面大小，说明没有更多消息了
+      hasMore.value = newMessages.length >= pageSize.value
+    } else {
+      if (!loadMore) {
+        allMessages.value[userId] = []
+      }
+      hasMore.value = false
     }
   } catch (error) {
     ElMessage.error('获取留言数据失败')
+  } finally {
+    loading.value = false
   }
+}
+
+const loadMore = async () => {
+  if (!hasMore.value || loading.value) return
+  currentPage.value++
+  await fetchMessageData(currentConvId.value, true)
 }
 
 const switchConversation = async (convId) => {
   currentConvId.value = convId
+  currentPage.value = 1
+  hasMore.value = true
   newMessage.value = ''
   await fetchMessageData(convId)
 }
@@ -122,13 +161,12 @@ onMounted(async () => {
 const refreshInterval = ref(null)
 
 onMounted(() => {
-  fetchLastMessages()
   refreshInterval.value = setInterval(async () => {
     await fetchLastMessages()
     if (currentConvId.value) {
       await fetchMessageData(currentConvId.value)
     }
-  }, 30000)
+  }, 60000)
 })
 
 onUnmounted(() => {
@@ -159,9 +197,32 @@ const postMessage = async () => {
       userId: currentConvId.value,
       content: newMessage.value,
     })
-    await fetchMessageData(currentConvId.value)
-    await fetchLastMessages()
 
+    // 获取最新一条消息，但保持当前页码
+    const currentMessages = allMessages.value[currentConvId.value] || []
+    const res = await getMessageData({
+      page: 1,
+      size: 1,
+      userId: currentConvId.value
+    })
+
+    if (res.code === 200 && res.content) {
+      const newMsg = res.content.map(msg => ({
+        id: msg.messageId,
+        content: msg.content,
+        createTime: msg.createTime,
+        isRead: msg.isRead == 0 ? false : true,
+        user: msg.user,
+        ownerUser: msg.ownerUser,
+        userId: msg.userId,
+        companyUserId: msg.companyUserId
+      }))[0]
+
+      // 将新消息添加到现有消息列表末尾
+      allMessages.value[currentConvId.value] = [...currentMessages, newMsg]
+    }
+
+    await fetchLastMessages() // 更新左侧会话列表
     ElMessage.success('留言发表成功')
     newMessage.value = ''
   } catch (error) {
@@ -554,5 +615,16 @@ const postMessage = async () => {
       /* 深色模式下更淡 */
     }
   }
+}
+
+.loading-more {
+  text-align: center;
+  padding: 10px 0;
+  color: #909399;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 10px;
 }
 </style>

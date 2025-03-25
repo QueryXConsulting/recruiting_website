@@ -45,26 +45,19 @@ public class OperateLogAspect {
 
     @AfterReturning(pointcut = "controllerPointcut()", returning = "returnValue")
     public void doAfterReturning(JoinPoint joinPoint, Object returnValue) {
-        // 获取方法签名
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        String operateUser;
-        if (SecurityUtils.getAuthentication() instanceof LoginAdmin loginAdmin) {
-            operateUser = String.valueOf(loginAdmin);
-        } else {
-            operateUser = "公司用户登录: " + SecurityUtils.getLoginUser().getTdUser().getUserId();
-        }
-
-        String methodName = method.getName();
-
-        Object[] args = joinPoint.getArgs();
-        String params = Arrays.toString(args);
-
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String requestUrl = requestAttributes.getRequest().getRequestURI();
 
+        // 获取方法签名
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+
+        String methodName = method.getName();
+        Object[] args = joinPoint.getArgs();
+        String params = Arrays.toString(args);
+
         OperateLog operateLog = new OperateLog();
-        operateLog.setOperateUser(operateUser);
+        operateLog.setOperateUser(String.valueOf(SecurityUtils.getLoginAdmin().getTdAdmin().getAdminId()));
         operateLog.setOperateName("执行方法: " + methodName);
         operateLog.setMethodName(requestUrl);
         operateLog.setParams(params);

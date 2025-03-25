@@ -18,11 +18,6 @@ public class MenuMangeController {
     @Resource
     private TPMenuService menuService;
 
-    @GetMapping("/menuList")
-    @Operation(summary = "菜单列表")
-    public CommonResp menuList() {
-        return CommonResp.success(menuService.menuList());
-    }
 
     @PostMapping("/addMenu")
     @Operation(summary = "增加菜单")
