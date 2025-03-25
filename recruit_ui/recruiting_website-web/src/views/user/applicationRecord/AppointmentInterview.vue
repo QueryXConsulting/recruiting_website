@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
-import { interviewList, interviewAccept, interviewDate } from '@/api/user/UserApi';
+import { interviewList, interviewAccept, interviewDate, postMessage } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 import { ArrowRight, ArrowDown } from '@element-plus/icons-vue'
 
@@ -97,7 +97,7 @@ const tableOperation = [
     { type: 'warning', text: '取消' },
     { type: 'danger', text: '拒绝' },
     { type: 'success', text: '接受' },
-    { type: 'primary', text: '开始面试' },
+    // { type: 'primary', text: '开始面试' },
 ]
 let filteredOperation = tableOperation;
 
@@ -133,6 +133,8 @@ const isAcceptInterview = async (id, status, date) => {
 }
 
 let $interviewId = '';
+let companyId = null;// 暂存公司id
+let jobName = null;// 暂存职位名称
 // 表格右侧按钮点击事件
 const handleClick = async (obj, row, $index) => {
     $interviewId = row.interviewId;
@@ -150,6 +152,8 @@ const handleClick = async (obj, row, $index) => {
             for (let i = 0; i < res.content.length; i++) {
                 timeRange[i] = res.content[i];
             }
+            companyId = Number(row.companyInfoId);
+            jobName = row.interviewJob;
             break;
         case '开始面试': // 开始面试
             if (row.interviewStatus) {
@@ -174,12 +178,10 @@ const handleClick = async (obj, row, $index) => {
 }
 // 一页条数变化时触发
 const handleSizeChange = (size) => {
-    // console.log('update:page-size', size)
     pageSize.value = size
 }
 // 当前页码变化时触发
 const handleCurrentChange = (page) => {
-    // console.log('update:current-page', page)
     currentPage.value = page
 }
 
@@ -214,6 +216,11 @@ const submitTime = async () => {
     const d = String(time.getDate()).padStart(2, '0');
     time = new Date(`${y}-${m}-${d} ${interviewTime.value}`);
     await isAcceptInterview($interviewId, 1, time);
+    if (!(companyId && jobName)){
+        ElMessage.error('未知错误，请联系管理员');
+        return;
+    }
+    await postMessage({userId: companyId, content: `您发布的${jobName}岗位有新的面试邀请。 ——此消息由系统自动发送，请勿回复。`})
     cancelTime();// 重置弹窗数据
 }
 // 取消选择时间

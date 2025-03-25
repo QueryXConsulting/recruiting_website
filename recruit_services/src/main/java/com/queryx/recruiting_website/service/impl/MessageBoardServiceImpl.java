@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDCompanyInfo;
 import com.queryx.recruiting_website.domain.TDMessageBoard;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.vo.LastMessageVO;
@@ -73,6 +74,40 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
     }
 
     @Override
+    public List<MessageDataVO> queryMessageData(Long companyId) {
+        final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
+        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TDMessageBoard::getUserId, userId);
+        queryWrapper.eq(TDMessageBoard::getCompanyId, companyId);
+        queryWrapper.eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
+        List<TDMessageBoard> messageBoards = list(queryWrapper);
+        if (messageBoards == null || messageBoards.isEmpty()) {
+            return null;
+        }
+
+        // 留言标记已读
+        for (TDMessageBoard messageBoard : messageBoards) {
+            messageBoard.setIsRead(Common.READ);
+        }
+        updateBatchById(messageBoards);
+        // 按时间排序
+        messageBoards.sort(Comparator.comparing(TDMessageBoard::getCreateTime));
+
+        return messageBoards.stream().map(messageBoard -> {
+            MessageDataVO messageDataVO = new MessageDataVO();
+            BeanUtils.copyProperties(messageBoard, messageDataVO);
+            if ("0".equals(messageBoard.getOwnerUser())) {
+                String userName = userService.getById(userId).getUserName();
+                messageDataVO.setUser(userName);
+            } else {
+                String companyInfoName = companyInfoService.getById(companyId).getCompanyInfoName();
+                messageDataVO.setUser(companyInfoName);
+            }
+            return messageDataVO;
+        }).toList();
+    }
+
+    @Override
     public Object lastMessage() {
         LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
                 .eq(TDMessageBoard::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
@@ -98,6 +133,32 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
     }
 
     @Override
+    public List<LastMessageVO> queryMessageListAndLastMessage() {
+        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TDMessageBoard::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        queryWrapper.eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
+        List<TDMessageBoard> messageBoards = list(queryWrapper);
+        if (messageBoards == null || messageBoards.isEmpty()) {
+            return null;
+        }
+        List<Long> companyId = messageBoards.stream().map(TDMessageBoard::getCompanyId).toList();
+        Map<Long, String> companyNameMap = companyInfoService.listByIds(companyId).stream().collect(Collectors.toMap(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName));
+
+        List<TDMessageBoard> latestMessageBoards = new ArrayList<>(messageBoards.stream()
+                .collect(Collectors.toMap(TDMessageBoard::getCompanyId, Function.identity()
+                        , BinaryOperator.maxBy(Comparator.comparing(TDMessageBoard::getCreateTime))))
+                .values());
+        // TODO 留言列表：id和名字对应关系待确认
+        return latestMessageBoards.stream().map(messageBoard -> {
+            LastMessageVO lastMessageVO = new LastMessageVO();
+            BeanUtils.copyProperties(messageBoard, lastMessageVO);
+            lastMessageVO.setUserId(messageBoard.getCompanyId());
+            lastMessageVO.setUserName(companyNameMap.get(messageBoard.getCompanyId()));
+            return lastMessageVO;
+        }).toList();
+    }
+
+    @Override
     public Object sendMessage(Long userId, String content) {
         Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
         TDMessageBoard tdMessageBoard = new TDMessageBoard();
@@ -108,5 +169,17 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
         tdMessageBoard.setIsRead(Common.READ);
         save(tdMessageBoard);
         return null;
+    }
+
+    @Override
+    public Boolean saveMessage(Long companyId, String content) {
+        TDMessageBoard tdMessageBoard = new TDMessageBoard();
+        tdMessageBoard.setCompanyId(companyId);
+        tdMessageBoard.setUserId(SecurityUtils.getLoginUser().getTdUser().getUserId());
+        tdMessageBoard.setOwnerUser(Common.USER_TYPE);
+        tdMessageBoard.setContent(content);
+        tdMessageBoard.setIsRead(Common.NOT_READ);
+        tdMessageBoard.setApplicantReadStatus(Common.READ);
+        return save(tdMessageBoard);
     }
 }

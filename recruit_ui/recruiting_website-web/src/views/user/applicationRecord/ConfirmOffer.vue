@@ -2,19 +2,22 @@
 import { ref, reactive, onMounted, nextTick } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
-import { offerFilePath, offerList, offerStatus, offerSignature } from '@/api/user/UserApi';
+import { offerFilePath, offerList, offerStatus, offerSignature, postMessage } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1);// 当前页
 const pageSize = ref(10);// 每页显示条数
 const total = ref(0);// 总条数
 const pages = ref(0);// 总页数
+let jobName = null;// 职位名称
+let companyId = null;// 公司ID
 
 // 表格根数据
 const rootData = reactive([
     { tag: '', prop: "jobId", label: "职位ID" },
     { tag: '', prop: "userId", label: "用户ID" },
     { tag: '', prop: "offerId", label: "offerID" },
+    { tag: '', prop: "companyId", label: "公司ID" },
     { tag: '', prop: "jobPosition", label: "面试岗位" },
     { tag: '', prop: "companyInfoName", label: "公司名" },
     { tag: '', prop: "offersDate", label: "发送时间" },
@@ -166,6 +169,11 @@ const signatureSubmit = async () => {
             getOfferList();
         }
     }
+    if (companyId && jobName) {
+        await postMessage({ userId: companyId, content: `您发布的${jobName}职位的offer已被接收，请您及时查看。 ——此消息由系统自动发送，请勿回复。` });
+        return;
+    }
+    ElMessage.error('未知错误，请联系管理员');
 }
 
 // 清空画布
@@ -175,6 +183,8 @@ const clearCanvas = () => {
 
 // 表格点击事件
 const handleOperationClick = async (btnIndex, row, text) => {
+    // console.log(row);
+    // return
     switch (text) {
         case '拒绝': // 拒绝
             const _updateResult = await offerStatus(row.offerId, 2);
@@ -184,10 +194,14 @@ const handleOperationClick = async (btnIndex, row, text) => {
             }
             break;
         case '接受': // 接受
+            alert('接受这个offer之后，其他offer都会自动拒绝，请慎重选择！');
             isShowSignature.value = true;
             await nextTick();// 等待DOM加载完成           
             initCanvas(); // 初始化canvas
             offerId = row.offerId;
+            // 初始化留言相关
+            jobName = tableData.value[row.$index].jobPosition;
+            companyId = tableData.value[row.$index].companyId;
             break;
         default:
             break;
@@ -225,7 +239,7 @@ const handleCurrentChange = (page) => {
             <!-- 表格右侧操作栏 -->
             <template #operation="scope">
                 <el-button v-for="(item, index) in filteredOperation" :type="item.type" :key="index" size="small"
-                    @click="handleOperationClick(index, scope.row, item.text)">
+                    @click="handleOperationClick(scope.$index, scope.row, item.text)">
                     {{ item.text }}
                 </el-button>
             </template>

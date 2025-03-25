@@ -100,6 +100,7 @@ public class Common {
 
     public static final String READ = "1";
     public static final String COMPANY_TYPE = "1";
+    public static final String USER_TYPE = "0";
     public static final String NOT_READ = "0";
     public static final String ENTERPRISEREVIEW_ENABLE = "1";
     // 启用

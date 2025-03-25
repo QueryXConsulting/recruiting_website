@@ -1,5 +1,5 @@
 <script setup>
-import { jobInfo, resumeAll, resumeDeliver } from '@/api/user/UserApi';
+import { jobInfo, resumeAll, resumeDeliver, postMessage } from '@/api/user/UserApi';
 import { onMounted, reactive, ref } from 'vue';
 import router from '@/router/index';
 import { View, Picture } from '@element-plus/icons-vue';
@@ -10,6 +10,8 @@ import { ElMessage } from 'element-plus';
 const loading = ref(true);// 控制loading
 // 岗位信息
 const jobDetail = ref();
+let companyId = null;// 公司id
+let jobName = null;// 岗位名称
 
 // 组件挂载完成后请求岗位信息
 onMounted(async () => {
@@ -17,6 +19,9 @@ onMounted(async () => {
     const response = await jobInfo(route.query.jobId);
     jobDetail.value = response.content;
     loading.value = false;
+    // 暂存公司id
+    companyId = response.content.companyId;
+    jobName = response.content.jobPosition;
 });
 
 const isShowDialog = ref(false);// 简历投递弹窗控制
@@ -45,10 +50,17 @@ const submitDeliver = async () => {
         resumeId: radioModel.value.resumeId,
         resumeType: radioModel.value.type
     }
+    // 提交简历投递
     await resumeDeliver(dto).then((res) => {
         ElMessage.success(res.message);
         isShowDialog.value = true;
     });
+    // 发送消息通知
+    if (!companyId) {
+        ElMessage.error('未知错误，请联系管理员');
+        return;
+    }
+    await postMessage({userId: companyId, content: `您发布的${jobName}岗位有新的简历投递，请注意查看。 ——此消息由系统自动发送，请勿回复。`});
 };
 
 </script>
@@ -107,7 +119,7 @@ const submitDeliver = async () => {
                     <input type="radio" v-model="radioModel"
                         :value="{ type: resumeType.online, resumeId: onlineResume.resumeId }" />
                 </label>
-                <!-- 文件图标  class="deliver-resume-radio"-->
+                <!-- 文件图标 -->
                 <span style="width: 30px;margin: 0 15px 0 9px;">
                     <el-image fit="fill" src="../../../public/resume.png">
                         <template #error>
@@ -131,7 +143,7 @@ const submitDeliver = async () => {
                     <input type="radio" v-model="radioModel"
                         :value="{ type: resumeType.attachment, resumeId: item.resumeAttachmentId }" />
                 </label>
-                <!-- 文件图标  class="deliver-resume-radio"-->
+                <!-- 文件图标 -->
                 <span class="deliver-resume-icon">
                     <el-image fit="fill" src="../../../public/pdfIcon.png">
                         <template #error>
