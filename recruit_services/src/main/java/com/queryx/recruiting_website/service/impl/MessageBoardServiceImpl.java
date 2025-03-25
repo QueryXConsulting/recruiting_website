@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDMessageBoard;
@@ -32,33 +33,40 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
     private TDCompanyInfoService companyInfoService;
 
     @Override
-    public Object getMessageData(Long userId) {
+    public Object getMessageData(Integer page,Integer size,Long userId) {
+        // 设置分页参数，获取最后一页，每页4条数据
+        Page<TDMessageBoard> pageData = new Page<>(page, size);
         LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
                 .eq(TDMessageBoard::getUserId, userId)
                 .eq(TDMessageBoard::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
-                .eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
-        List<TDMessageBoard> messageBoards = list(queryWrapper);
-        if (messageBoards.isEmpty()){
+                .eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE)
+                .orderByDesc(TDMessageBoard::getCreateTime);
+
+        Page<TDMessageBoard> messageBoardPage = page(pageData, queryWrapper);
+
+        List<TDMessageBoard> messageBoards = messageBoardPage.getRecords();
+        if (messageBoards.isEmpty()) {
             return null;
         }
 
-
+        // 设置已读状态并更新
         for (TDMessageBoard messageBoard : messageBoards) {
             messageBoard.setIsRead(Common.READ);
         }
         updateBatchById(messageBoards);
 
+        // 按createTime排序（分页查询已经按createTime倒序）
         messageBoards.sort(Comparator.comparing(TDMessageBoard::getCreateTime));
 
         return messageBoards.stream().map(messageBoard -> {
             MessageDataVO messageDataVO = new MessageDataVO();
             BeanUtils.copyProperties(messageBoard, messageDataVO);
-            if(messageBoard.getOwnerUser().equals("0")){
-                String userName = userService.getById(userId).getUserName();
-                messageDataVO.setUser(userName);
-            }else {
+            if (Common.COMPANY_TYPE.equals(messageBoard.getOwnerUser())) {
                 String companyInfoName = companyInfoService.getById(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId()).getCompanyInfoName();
                 messageDataVO.setUser(companyInfoName);
+            } else {
+                String userName = userService.getById(userId).getUserName();
+                messageDataVO.setUser(userName);
             }
             return messageDataVO;
         }).toList();

@@ -121,7 +121,7 @@ router.beforeEach((to, from, next) => {
     return next('/auth/login')
   }
 
-  if (store.token && store.userInfo.isFirstLogin == 0 && to.path != '/home') {
+  if (store.token && store.userInfo?.isFirstLogin == 0 && to.path != '/home') {
     ElMessage.warning('首次登录请先完善个人信息')
     return next('/home')
   }

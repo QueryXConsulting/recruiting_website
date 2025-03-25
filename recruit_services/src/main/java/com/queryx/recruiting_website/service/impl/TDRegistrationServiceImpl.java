@@ -80,13 +80,13 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         TDRegistration tdRegistration = getById(registrationId);
         TDOffers offers = offersMapper.selectById(tdRegistration.getOfferId());
         if ("2".equals(status)){
-            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过");
+            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过 ——此消息来自系统自动发送");
         }
 
         if (date != null) {
             updateWrapper.set(TDRegistration::getReservationStatus, "1")
                     .set(TDRegistration::getHireDate, date);
-            messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认");
+            messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 ——此消息来自系统自动发送");
         }
 
         update(updateWrapper);

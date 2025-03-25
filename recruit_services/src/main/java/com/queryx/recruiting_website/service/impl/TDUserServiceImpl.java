@@ -113,13 +113,15 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         UserLoginVO userLoginVO = new UserLoginVO();
-//         生成token
+        // 生成token
         String jwt = JwtUtil.createJWT(loginUser.getTdUser().getUserId());
         userLoginVO.setToken(jwt);
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(loginUser.getTdUser(), userInfoVO);
         userInfoVO.setPermissions(loginUser.getPermissions());
-        userInfoVO.setUserAvatar(Common.getImgURL() + loginUser.getTdUser().getUserAvatar());
+        if (StringUtils.hasText(loginUser.getTdUser().getUserAvatar())) {
+            userInfoVO.setUserAvatar(Common.getImgURL() + loginUser.getTdUser().getUserAvatar());
+        }
         userLoginVO.setUserInfoVO(userInfoVO);
         TokenStorage.addToken(jwt, loginUser);
         if (!loginUser.getTdUser().getUserRole().equals(Common.STUDENT_USER.toString())) {
@@ -134,7 +136,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             tdUserLambdaQueryWrapper.set(TDUser::getIsFirstLogin, 1);
             update(tdUserLambdaQueryWrapper);
         }
-//         返回前端凭证
+        // 返回前端凭证
         return userLoginVO;
     }
 

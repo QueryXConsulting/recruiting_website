@@ -9,7 +9,7 @@ import com.queryx.recruiting_website.domain.TDMessageBoard;
  */
 public interface MessageBoardService extends IService<TDMessageBoard> {
 
-    Object getMessageData(Long userId);
+    Object getMessageData(Integer page,Integer size,Long userId);
 
     Object lastMessage();
 

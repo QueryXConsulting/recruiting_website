@@ -110,7 +110,9 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         AdminUserInfoVO adminUserInfoVO = new AdminUserInfoVO();
         adminUserInfoVO.setPermissions(perms);
         adminUserInfoVO.setUser(adminInfoVO);
-        adminInfoVO.setAdminAvatar(Common.getImgURL() + loginAdmin.getTdAdmin().getAdminAvatar());
+        if (StringUtils.hasText(loginAdmin.getTdAdmin().getAdminAvatar())){
+            adminInfoVO.setAdminAvatar(Common.getImgURL() + loginAdmin.getTdAdmin().getAdminAvatar());
+        }
         return adminUserInfoVO;
     }
 

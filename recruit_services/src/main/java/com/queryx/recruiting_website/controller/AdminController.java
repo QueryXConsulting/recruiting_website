@@ -32,13 +32,5 @@ public class AdminController {
         return CommonResp.success(tdAdminService.getInfo());
     }
 
-    @GetMapping("/getRouters")
-    @Operation(summary = "拿到管理员菜单数据")
-    public CommonResp getRouters() {
-        return CommonResp.success(menuService.getRouter());
-    }
-
-
-
 
 }

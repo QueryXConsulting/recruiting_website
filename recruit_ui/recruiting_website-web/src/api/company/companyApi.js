@@ -40,6 +40,7 @@ const API = {
   COMPANY_LAST_MESSAGE: '/api/company/lastMessage',
   COMPANY_GET_MESSAGE_DATA: '/api/company/getMessageData',
   COMPANY_POST_MESSAGE: '/api/company/sendMessage',
+
 }
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
@@ -205,8 +206,12 @@ export const downloadRegistrationPdf = (id) =>
 
 export const getLastMessage = () => request.get(API.COMPANY_LAST_MESSAGE)
 
-export const getMessageData = (userId) => request.get(API.COMPANY_GET_MESSAGE_DATA, {
-  params: { userId }
-})
+export function getMessageData(params) {
+  return request({
+    url: API.COMPANY_GET_MESSAGE_DATA,
+    method: 'get',
+    params: params
+  })
+}
 
 export const postMessage = (data) => request.post(API.COMPANY_POST_MESSAGE, data)
