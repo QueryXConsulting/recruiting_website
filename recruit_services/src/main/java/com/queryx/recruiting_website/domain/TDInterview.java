@@ -60,9 +60,6 @@ public class TDInterview {
     @Schema(name = "面试时长", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer interviewTime;
 
-    @Schema(name = "面试链接", description = "线上面试会议链接", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String interviewUrl;
-
     @Schema(name = "线上面试链接", implementation = String.class)
     private String interviewUrl;
 
