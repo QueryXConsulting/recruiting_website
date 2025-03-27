@@ -40,16 +40,16 @@ const handleUpload = async () => {
         ElMessage.error('请选择文件');
         return;
     }
-    // for (let i = 0; i < iterationObject.length; i++) {
-    //     if (!iterationObject[i].required) {
-    //         continue;
-    //     }
-    //     if (!fileList.value[i]) {
-    //         ElMessage.error(`请上传${iterationObject[i].title}`);
-    //         return;
-    //     }
-    // }
-    console.log('upload', fileList.value);
+    for (let i = 0; i < iterationObject.length; i++) {
+        if (!iterationObject[i].required) {
+            continue;
+        }
+        if (!fileList.value[i]) {
+            ElMessage.error(`请上传${iterationObject[i].title}`);
+            return;
+        }
+    }
+    
     const length = iterationObject.length - 1;
     const formData1 = new FormData();
     for (let i = 0; i < fileList.value.length; i++) {

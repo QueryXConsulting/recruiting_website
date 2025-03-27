@@ -28,7 +28,7 @@ const windowStatusOptions = [
 const windowStatus = ref(null);// 页面状态 
 const windowStatusMessage = ref('');// 页面状态提示信息
 const formData = reactive({});// 表单数据
-// let hireDate = ref(null);
+
 const position = ref(null);// 表单头部显示职位
 // 生日日期最大值
 const maxDate = new Date(new Date().setFullYear(new Date().getFullYear())).toISOString().split('T')[0]

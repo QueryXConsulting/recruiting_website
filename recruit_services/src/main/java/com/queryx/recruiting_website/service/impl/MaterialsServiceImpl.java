@@ -9,6 +9,7 @@ import com.queryx.recruiting_website.domain.dto.MaterialDTO;
 import com.queryx.recruiting_website.mapper.MaterialsMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.service.MaterialsService;
+import com.queryx.recruiting_website.service.MessageBoardService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,10 @@ public class MaterialsServiceImpl implements MaterialsService {
     private TDJobResumeMapper jobResumeMapper;
     @Autowired
     private MaterialsMapper materialsMapper;
+
+    private final String SEND_MESSAGE_CONTENT = "您发布的%s岗位入职材料以上传，请及时查看。 ——此消息由系统自动发送，请勿回复。";
+    @Autowired
+    private MessageBoardService messageBoardService;
 
     @Override
     public CommonResp<Integer> queryProcessStatus() {
@@ -150,6 +155,10 @@ public class MaterialsServiceImpl implements MaterialsService {
             material.setStatus(Common.MATERIAL_STATUS_WAIT_REVIEW);
             material.setSendTime(Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai")).getTime());
             boolean result = materialsMapper.insertOrUpdate(material);
+            Boolean b = messageBoardService.saveMessage(materialDTO.getCompanyId(), String.format(SEND_MESSAGE_CONTENT, materialDTO.getJobPosition()));
+            if (!b) {
+                log.error("发送消息失败");
+            }
             return CommonResp.success(result);
         } catch (Exception e) {
             log.error("上传文件失败", e);

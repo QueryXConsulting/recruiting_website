@@ -33,6 +33,11 @@ public class OffersVO {
     @Schema(name = "职位id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long jobId;
 
+    // 公司ID
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(name = "公司id", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long companyId;
+
     @Schema(name = "职位名称", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String jobPosition;
 

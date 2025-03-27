@@ -4,7 +4,7 @@
 <mapper namespace="com.queryx.recruiting_website.mapper.MaterialsMapper">
 
     <select id="selectOfferAndJobId" resultType="com.queryx.recruiting_website.domain.dto.MaterialDTO">
-        SELECT o.offers_id, o.job_id, j.company_id
+        SELECT o.offers_id, o.job_id, j.company_id, j.job_position
         FROM t_d_offers as o
         JOIN t_d_job as j ON o.job_id = j.job_id
         JOIN t_d_job_resume as jr ON jr.job_id = j.job_id

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author：fjj
@@ -46,6 +47,7 @@ public class OfferServiceImpl implements OfferService {
     @Autowired
     private TDCompanyInfoMapper companyInfoMapper;
 
+    List<TDOffers> offersList = null;
 
     @Override
     public CommonResp<Page<OffersVO>> getOffers(Integer page, Integer size) {
@@ -59,6 +61,7 @@ public class OfferServiceImpl implements OfferService {
             log.warn("查询offer失败, 用户id: {}", user.getUserId());
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
+        offersList = selectPage.getRecords();
         Page<OffersVO> resultPage = new Page<>(selectPage.getCurrent(), selectPage.getSize(), selectPage.getTotal());
         ArrayList<OffersVO> list = new ArrayList<>();
         for (TDOffers offer : selectPage.getRecords()) {
@@ -72,6 +75,7 @@ public class OfferServiceImpl implements OfferService {
             TDCompanyInfo companyInfo = companyInfoMapper.selectOne(new LambdaQueryWrapper<TDCompanyInfo>()
                     .select(TDCompanyInfo::getCompanyInfoName)
                     .eq(TDCompanyInfo::getCompanyInfoId, tdJob.getCompanyId()));
+            vo.setCompanyId(companyInfo.getCompanyInfoId());
             vo.setCompanyInfoName(companyInfo.getCompanyInfoName());
             list.add(vo);
         }
@@ -96,25 +100,51 @@ public class OfferServiceImpl implements OfferService {
             log.warn("offerId: {} 修改状态失败", offerId);
             throw new RuntimeException("offerId: " + offerId + " 修改状态失败");
         }
+        // 流程到此处，说明offer被拒绝
         if (Common.OFFER_STATUS_REJECT.equals(status)) {
-            TDJobResume jobResume = jobResumeMapper.selectOne(new LambdaQueryWrapper<TDJobResume>()
-                    .select(TDJobResume::getJobResumeId, TDJobResume::getResumeStatus, TDJobResume::getResumeDelete)
-                    .eq(TDJobResume::getJobId, offer.getJobId())
-                    .eq(TDJobResume::getUserId, offer.getUserId()));
-            if (jobResume == null) {
-                log.warn("offerId: {} 对应的job_resume不存在", offerId);
-                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            boolean SYSTEM_ERROR = rejectOffer(offer);
+            if (!SYSTEM_ERROR) return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            // TODO 拒绝其他offer：待测试
+        } else if (Common.OFFER_STATUS_ACCEPT.equals(status)) {
+            // 同意一个offer后，其他offer状态改为拒绝
+            if (offersList == null) {
+                log.warn("offer列表为空");
+                throw new RuntimeException("offerList为空!");
             }
-            // 流程到此处，说明offer被拒绝
-            jobResume.setResumeStatus(Common.DELIVER_RESUME_STATUS_OFFER);// 流程改为offer发放
-            jobResume.setResumeDelete(Common.DELIVER_RESUME_DELETE_SQUARE_PEG);// 状态为不合适
-            int ui2 = jobResumeMapper.updateById(jobResume);
-            if (ui2 <= 0) {
-                log.warn("offerId: {} 对应的job_resume修改状态失败", offerId);
-                throw new RuntimeException("offerId: " + offerId + " 对应的job_resume修改状态失败");
+            for (TDOffers offers : offersList) {
+                if (offers.getOfferId().equals(offerId)) {
+                    continue;
+                }
+                offers.setOffersStatus(Common.OFFER_STATUS_REJECT);
+                int ui3 = offerMapper.updateById(offers);
+                if (ui3 <= 0) {
+                    log.warn("offerId: {} 其他offer修改状态失败", offerId);
+                    throw new RuntimeException("offerId: " + offerId + " 其他offer修改状态失败");
+                }
+                boolean b = rejectOffer(offers);
+                if (!b) return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
             }
         }
         return CommonResp.success(true);
+    }
+
+    private boolean rejectOffer(TDOffers offer) {
+        TDJobResume jobResume = jobResumeMapper.selectOne(new LambdaQueryWrapper<TDJobResume>()
+                .select(TDJobResume::getJobResumeId, TDJobResume::getResumeStatus, TDJobResume::getResumeDelete)
+                .eq(TDJobResume::getJobId, offer.getJobId())
+                .eq(TDJobResume::getUserId, offer.getUserId()));
+        if (jobResume == null) {
+            log.warn("offerId: {} 对应的job_resume不存在", offer.getOfferId());
+            return false;
+        }
+        jobResume.setResumeStatus(Common.DELIVER_RESUME_STATUS_OFFER);// 流程改为offer发放
+        jobResume.setResumeDelete(Common.DELIVER_RESUME_DELETE_SQUARE_PEG);// 状态为不合适
+        int ui2 = jobResumeMapper.updateById(jobResume);
+        if (ui2 <= 0) {
+            log.warn("offerId: {} 对应的job_resume修改状态失败", offer.getOfferId());
+            throw new RuntimeException("offerId: " + offer.getOfferId() + " 对应的job_resume修改状态失败");
+        }
+        return true;
     }
 
 

@@ -12,7 +12,7 @@
         <a href="/users/search" class="nav-item">校园招聘</a>
         <a href="#" class="nav-item">社会招聘</a>
         <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
-        <a href="#" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
+        <a href="/users/message" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
           <el-icon>
             <component :is="Bell"></component>
           </el-icon>

@@ -7,4 +7,5 @@ public class MaterialDTO {
     private Long offersId;
     private Long jobId;
     private Long companyId;
+    private String jobPosition;
 }
