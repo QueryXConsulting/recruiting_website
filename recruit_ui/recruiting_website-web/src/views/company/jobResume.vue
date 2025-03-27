@@ -115,7 +115,10 @@
               <el-table :data="interviewList" border stripe class="custom-table" row-key="interviewId">
                 <el-table-column label="简历名称" prop="resumeName" width="150" align="center" />
                 <el-table-column label="时间" prop="interviewDate" width="150" align="center" />
-                <el-table-column label="地点" prop="interviewRegion" width="160" align="center" />
+                <el-table-column label="地点" prop="interviewRegion" width="160" align="center"
+                  v-if="interviewType == '0'" />
+                  <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center"
+                  v-else />
                 <el-table-column label="类型" prop="interviewType" width="90" align="center">
                   <template #default="scope">
                     <el-tag :type="scope.row.interviewType == '0' ? 'success' : 'primary'">
@@ -152,6 +155,7 @@
                         scope.row.interviewStatus != '2'">
                         修改
                       </el-button>
+
                       <el-button type="danger" link @click="viewInterview(scope.row)"
                         v-if="scope.row.interviewStatus != '3' && scope.row.interviewResult == '0' && scope.row.interviewStatus != '0'">
                         取消
@@ -239,7 +243,7 @@
                           拒绝
                         </el-button>
                       </template>
-                      <el-button type="primary" link @click="viewMaterial(scope.row)">
+                      <el-button type="primary" v-if="scope.row.status != '0'" link @click="viewMaterial(scope.row)">
                         查看
                       </el-button>
                     </div>
@@ -351,9 +355,10 @@
         </div>
       </el-dialog>
 
-      <el-dialog v-model="interviewDialogVisible" title="面试邀约" width="50%" :destroy-on-close="true"
+      <el-dialog v-model="interviewDialogVisible" title="面试邀约" width="30%" :destroy-on-close="true"
         :close-on-click-modal="false">
         <el-form :model="interviewData" ref="interviewForm">
+
           <el-form-item label="面试类型" prop="interviewType">
             <el-select v-model="interviewData.interviewType" placeholder="请选择面试类型" @change="handleInterviewTypeChange">
               <el-option label="线上" :value="0" />
@@ -363,6 +368,7 @@
           <el-form-item label="面试地点" prop="interviewRegion" v-if="interviewData.interviewType == '1'">
             <el-input v-model="interviewData.interviewRegion" placeholder="请输入面试地点" />
           </el-form-item>
+
           <el-form-item label="面试时长" prop="interviewTime">
             <el-select v-model="interviewData.interviewTime" placeholder="请选择面试时长">
               <el-option label="30分钟" :value="30" />
@@ -370,6 +376,10 @@
               <el-option label="90分钟" :value="90" />
               <el-option label="120分钟" :value="120" />
             </el-select>
+          </el-form-item>
+
+          <el-form-item label="面试链接" prop="interviewUrl" v-if="interviewData.interviewType == '0'">
+            <el-input v-model="interviewData.interviewUrl" placeholder="请输入线上面试地址" />
           </el-form-item>
         </el-form>
         <template v-slot:footer>
@@ -792,7 +802,8 @@ const interviewData = ref({
   jobId: null,
   interviewRegion: '',
   interviewType: '1',
-  interviewTime: 30
+  interviewTime: 30,
+  interviewUrl: ''
 })
 
 const interviewDialogVisible = ref(false)
@@ -812,7 +823,8 @@ const editInterviewData = ref({
   interviewType: '',
   jobResumeId: '',
   userId: '',
-  jobId: ''
+  jobId: '',
+  interviewUrl: ''
 })
 
 
@@ -1095,17 +1107,21 @@ const editInterview = async (row) => {
   editInterviewDialogVisible.value = true
 }
 const typeMapping = {
-    '0': '线上',
-    '1': '线下'
-  };
+  '0': '线上',
+  '1': '线下'
+};
 const resultMapping = {
-    '1': '通过',
-    '2': '未通过'
-  };
+  '1': '通过',
+  '2': '未通过'
+};
 const submitEditInterview = async () => {
   try {
     const result = await updateInterviewList(editInterviewData.value);
     if (result.code === 200) {
+      await postMessage({
+        userId: editInterviewData.value.userId,
+        content: "您的面试信息已被更新请及时查看 —此消息来自系统自动发送"
+      })
       ElMessage.success('面试信息更新成功');
       editInterviewDialogVisible.value = false;
       getInterviewList();
@@ -1340,7 +1356,7 @@ const handleBeforeClose = async () => {
 
     postMessage({
       userId: currentUserId.value,
-      content: "您的offer已发送,请查收 —此消息来自系统自动发送"
+      content: "您的offer已发送,请及时查收 —此消息来自系统自动发送"
     })
     handleOfferStatus(currentOfferId.value, '4', jobId)
     pdfEditDialogVisible.value = false;
@@ -1371,10 +1387,19 @@ const handleSignatureConfirm = async () => {
 
 const handleSignatureReject = async () => {
   try {
-    await handleOfferStatus(currentOfferId.value, '5', jobId)
+
+    const result = await handleOfferStatus(currentOfferId.value, '5', jobId)
+
+
     signatureDialogVisible.value = false
+    postMessage({
+      userId: currentUserId.value,
+      content: "您的签名有误,请重新签字 —此消息来自系统自动发送"
+    })
     ElMessage.success('已打回')
     getOffersList()
+
+
   } catch (error) {
     ElMessage.error('操作失败')
   }
@@ -1507,6 +1532,10 @@ const handleMaterialReject = async (row) => {
     })
     const result = await updateMaterialStatus(row.materialId, '2')
     if (result.code === 200) {
+      postMessage({
+        userId: row.userId,
+        content: "您的材料审核未通过,请重新发送 —此消息来自系统自动发送"
+      })
       ElMessage.success('已拒绝')
       getMaterialList()
     } else {

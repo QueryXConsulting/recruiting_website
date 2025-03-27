@@ -121,7 +121,7 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
                     .eq(TDJobResume::getJobId, jobId)
                     .set(TDJobResume::getResumeStatus, "4");
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
-            messageBoardService.sendMessage(userId, "offer已通过,请上传材料 ——此消息来自系统自动发送");
+            messageBoardService.sendMessage(userId, "offer已通过,请上传材料 —此消息来自系统自动发送");
         }
         offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
                 .set(TDOffers::getOffersStatus, status));

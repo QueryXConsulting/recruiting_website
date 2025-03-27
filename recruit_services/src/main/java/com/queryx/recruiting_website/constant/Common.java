@@ -60,7 +60,7 @@ public class Common {
     // 信息录入相关常量
     public static final String INPUT_STATUS_NOT_INPUT = "0";// 待发送
     public static final String INPUT_STATUS_SEND = "1";// 已发送
-
+    public static final String REGISTRATION_REJECTED = "3";
 
     @Value("${server.port}")
     public void setPort(String serverPort) {
@@ -97,7 +97,7 @@ public class Common {
         Common.signPath = signPath;
     }
 
-
+    public static final String USER_MENU_TYPE="U";
     public static final String READ = "1";
     public static final String COMPANY_TYPE = "1";
     public static final String USER_TYPE = "0";
@@ -153,6 +153,7 @@ public class Common {
 
     public static final String RESUME_ONLINE = "0";
 
+    public static final String REGISTRATION_OK = "2";
 
     public static final String RESUME_ATTACHMENTS = "1";
 
@@ -176,7 +177,7 @@ public class Common {
      * @param appendCode 追加字符
      * @return 上传文件夹名称
      */
-    public static String getLastPath(String src, String splitCode, String appendCode){
+    public static String getLastPath(String src, String splitCode, String appendCode) {
         String[] strings = src.split(splitCode);
         return strings[strings.length - 1] + appendCode;
     }
@@ -189,7 +190,7 @@ public class Common {
      * @param splitCode 分隔符
      * @return 上传文件夹路径
      */
-    public static String getSplitPath(String src, String splitCode){
+    public static String getSplitPath(String src, String splitCode) {
         String folderName = Common.getLastPath(src, splitCode, "");
         return src.replace("/" + folderName, "");
     }

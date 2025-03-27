@@ -11,4 +11,5 @@ public class SendInterviewDto {
     private String interviewRegion;
     private String interviewType;
     private int interviewTime;
+    private String interviewUrl;
 }

@@ -42,19 +42,18 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     public IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName,
                                                  String jobName, String jobReview, String status, String jobCategory, String jobNature) {
         List<Long> targetCompanyIds = null;
-        if (StringUtils.hasText(companyName)) {
-            LambdaQueryWrapper<TDCompanyInfo> companyQueryWrapper = new LambdaQueryWrapper<>();
-            companyQueryWrapper.like(TDCompanyInfo::getCompanyInfoName, companyName)
-                    .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
 
-            List<TDCompanyInfo> companies = companyInfoService.list(companyQueryWrapper);
-            if (companies.isEmpty()) {
-                return new Page<>(page, size);
-            }
-            targetCompanyIds = companies.stream()
-                    .map(TDCompanyInfo::getCompanyInfoId)
-                    .collect(Collectors.toList());
+        LambdaQueryWrapper<TDCompanyInfo> companyQueryWrapper = new LambdaQueryWrapper<>();
+        companyQueryWrapper.like(StringUtils.hasText(companyName), TDCompanyInfo::getCompanyInfoName, companyName)
+                .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
+        List<TDCompanyInfo> companies = companyInfoService.list(companyQueryWrapper);
+        if (companies.isEmpty()) {
+            return new Page<>(page, size);
         }
+        targetCompanyIds = companies.stream()
+                .map(TDCompanyInfo::getCompanyInfoId)
+                .collect(Collectors.toList());
+
 
         LambdaQueryWrapper<TDJob> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(jobName), TDJob::getJobPosition, jobName)
@@ -62,10 +61,9 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .eq(StringUtils.hasText(jobReview), TDJob::getJobReview, jobReview)
                 .like(StringUtils.hasText(jobCategory), TDJob::getJobCategory, jobCategory)
                 .eq(TDJob::getDelFlag, Common.NOT_DELETE)
-                .like(StringUtils.hasText(jobNature), TDJob::getJobNature, jobNature);
-        if (targetCompanyIds != null) {
-            wrapper.in(TDJob::getCompanyId, targetCompanyIds);
-        }
+                .like(StringUtils.hasText(jobNature), TDJob::getJobNature, jobNature)
+                .in(TDJob::getCompanyId, targetCompanyIds);
+
         Page<TDJob> pageVO = new Page<>(page, size);
         IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVO, wrapper);
         if (jobPage.getRecords().isEmpty()) {
@@ -92,7 +90,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         resultPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
             JobCompanyListVO vo = new JobCompanyListVO();
             BeanUtils.copyProperties(tdJob, vo);
-            vo.setCompanyName(companyNames.getOrDefault(tdJob.getCompanyId(), ""));
+            vo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
             return vo;
         }).collect(Collectors.toList()));
 
@@ -177,7 +175,8 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     }
 
     @Override
-    public Object selectCompanyJobList(Integer page, Integer size, String jobName, String jobReview, String jobCategory) {
+    public Object selectCompanyJobList(Integer page, Integer size, String jobName, String jobReview, String
+            jobCategory) {
         Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
         LambdaQueryWrapper<TDJob> tdJobLambdaQueryWrapper = new LambdaQueryWrapper<>();
         tdJobLambdaQueryWrapper.eq(TDJob::getCompanyId, companyInfoId)

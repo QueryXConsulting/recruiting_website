@@ -151,7 +151,9 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
 
         // 判断是否是超级管理员
         if (roleId.equals(Common.SUPER_ADMIN)) {
+            wrapper.in(TPMenu::getMenuType, "C", "M");
             menuList = menuMapper.selectList(wrapper);
+
         } else {
             LambdaQueryWrapper<TPRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
             roleMenuWrapper.eq(TPRoleMenu::getRoleId, roleId);

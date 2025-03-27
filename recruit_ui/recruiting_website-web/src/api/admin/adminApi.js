@@ -32,7 +32,7 @@ const API = {
   MENU_ADD: '/admin/addMenu',
   MENU_UPDATE: '/admin/updateMenu',
   MENU_DELETE: '/admin/delMenu',
-  CATEGORY_LIST: '/admin/selectCategory',
+  CATEGORY_LIST: '/admin/selectCategoryList',
   CATEGORY_ADD: '/admin/addCategory',
   CATEGORY_UPDATE: '/admin/updateCategory',
   CATEGORY_DELETE: '/admin/delCategory',
@@ -46,6 +46,7 @@ const API = {
   JOBNATURE_UPDATE: '/admin/updateJobNature',
   JOBNATURE_ADD: '/admin/addJobNature',
   JOBNATURE_DELETE: '/admin/delJobNature',
+  ADMIN_LOG: '/admin/getLog'
 }
 
 export const adminLogin = (adminLoginDto) => request.post(API.LOGIN_URL, adminLoginDto)
@@ -173,4 +174,17 @@ export const adminAdd = (params) => request.post(API.ADMIN_ADD_URL, params)
 export const adminUpdate = (params) => request.put(API.ADMIN_UPDATE_URL, params)
 export const adminDelete = (id) => request.delete(`${API.ADMIN_DELETE_URL}/${id}`)
 export const adminUpdateAvatar = (dto) => request.post(API.ADMIN_UPDATE_AVATAR_URL, dto)
-
+// 获取操作日志列表
+export function getOperateLog(params) {
+  return request({
+    url: API.ADMIN_LOG,
+    method: 'get',
+    params: {
+      page: params.pageNum,
+      size: params.pageSize,
+      operateName: params.operateName,
+      startTime: params.startTime,
+      endTime: params.endTime
+    }
+  })
+}

@@ -58,7 +58,7 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         Page<Object> registrationListVOPage = new Page<>(registrationPage.getCurrent(), registrationPage.getSize(), registrationPage.getTotal());
         registrationListVOPage.setRecords(
                 registrationPage.getRecords().stream().map(registration -> {
-                    if ("2".equals(status)) {
+                    if (Common.REGISTRATION_OK.equals(status)) {
                         ReservationListVO reservationListVO = new ReservationListVO();
                         BeanUtils.copyProperties(registration, reservationListVO);
                         return reservationListVO;
@@ -79,15 +79,19 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
 
         TDRegistration tdRegistration = getById(registrationId);
         TDOffers offers = offersMapper.selectById(tdRegistration.getOfferId());
-        if ("2".equals(status)){
-            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过 ——此消息来自系统自动发送");
+        if (Common.REGISTRATION_OK.equals(status)) {
+            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过 —此消息来自系统自动发送");
         }
 
-        if (date != null) {
-            updateWrapper.set(TDRegistration::getReservationStatus, "1")
-                    .set(TDRegistration::getHireDate, date);
-            messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 ——此消息来自系统自动发送");
+        if (Common.REGISTRATION_REJECTED.equals(status)){
+            messageBoardService.sendMessage(offers.getUserId(), "您的入职信息未通过审核请重新提交 —此消息来自系统自动发送");
         }
+
+            if (date != null) {
+                updateWrapper.set(TDRegistration::getReservationStatus, "1")
+                        .set(TDRegistration::getHireDate, date);
+                messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 —此消息来自系统自动发送");
+            }
 
         update(updateWrapper);
         return null;
@@ -96,7 +100,7 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
     @Override
     public byte[] downloadPdf(Long id) {
         TDRegistration registration = getById(id);
-        String inputPath = "D:/maven/offer_files/1741588126573_18.pdf";// TODO 后续添加入职信息模板进行修改
+        String inputPath = "D:/maven/offer_Template/registration.pdf";// TODO 后续添加入职信息模板进行修改
         String fontPath = "C:\\Windows\\Fonts\\STXIHEI.TTF";// +1
 
         try (PDDocument document = Loader.loadPDF(new File(inputPath))) {
@@ -138,10 +142,20 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
 
             // 设置表单域的值 TODO 后面有模板后对此进行修改
             Map<String, String> fieldValues = new HashMap<>();
-            fieldValues.put("Text1", "听不懂思密达");
-            fieldValues.put("Text2", "不是哥们");
-            fieldValues.put("Text3", "对3");
-            fieldValues.put("Text4",registration.getUserName());
+            // 动态生成表单域值映射
+            fieldValues.put("name", registration.getUserName()); // 姓名
+            fieldValues.put("gender", registration.getGender()); // 性别
+            fieldValues.put("birthDate", registration.getBirthDate().toString()); // 出生日期
+            fieldValues.put("idCardNumber", registration.getIdCardNumber()); // 身份证号
+            fieldValues.put("phoneNumber", registration.getPhoneNumber()); // 手机号码
+            fieldValues.put("email", registration.getEmail()); // 邮箱地址
+            fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
+            fieldValues.put("position", registration.getPosition()); // 职位
+            fieldValues.put("educationLevel", registration.getEducationLevel()); // 学历
+            fieldValues.put("schoolName", registration.getSchoolName()); // 毕业学校
+            fieldValues.put("bankAccount", registration.getBankAccount()); // 银行账号
+            fieldValues.put("emergencyContact", registration.getEmergencyContact()); // 紧急联系人
+            fieldValues.put("address", registration.getAddress()); // 家庭地址
 
             // 批量设置表单域的值
             for (Map.Entry<String, String> entry : fieldValues.entrySet()) {
@@ -170,7 +184,7 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         try {
             PDTextField field = (PDTextField) acroForm.getField(fieldName);
             if (field != null) {
-                field.setDefaultAppearance("/" + fontName + " 12 Tf 0 g");
+                field.setDefaultAppearance("/" + fontName + " 10 Tf 0 g");
                 // 设置字段值
                 field.setValue(value);
                 field.setReadOnly(true);

@@ -65,8 +65,9 @@
         </el-table-column>
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="primary" link @click="handlePreviewFiles(row)">查看资质</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="row.companyInfoReview != null">编辑</el-button>
+            <el-button type="primary" link @click="handlePreviewFiles(row)"
+              v-if="row.enterpriseReview != null">查看资质</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -312,7 +313,7 @@ const getReviewStatusText = (status) => {
     '1': '审核通过',
     '2': '打回修改'
   }
-  return statusMap[status] || '未知状态'
+  return statusMap[status] || '待提交'
 }
 
 const getReviewTagType = (status) => {
@@ -478,7 +479,7 @@ const getEnterpriseReviewStatusText = (status) => {
     '2': '打回修改',
     '': '未提交'
   }
-  return statusMap[status] || '未知状态'
+  return statusMap[status] || '待提交'
 }
 
 const getEnterpriseReviewTagType = (status) => {

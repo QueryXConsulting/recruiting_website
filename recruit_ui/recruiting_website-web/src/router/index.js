@@ -113,6 +113,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = userStore()
 
+  // TODO 暂时注释
   // if (to.path.startsWith('/users/')) {
   //   return next()
   // }

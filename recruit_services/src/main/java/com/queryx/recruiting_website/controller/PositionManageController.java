@@ -63,7 +63,7 @@ public class PositionManageController {
         return CommonResp.success(jobService.addJob(jobDto));
     }
 
-    @GetMapping("/selectCategory")
+    @GetMapping("/selectCategoryList")
     @Operation(summary = "工种分类列表查询")
     public CommonResp selectCategoryList(Integer page,Integer size,String categoryName,String status) {
         return CommonResp.success(categoryService.selectCategoryList(page,size,categoryName,status));
