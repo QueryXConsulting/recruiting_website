@@ -22,7 +22,7 @@ public class CompanyInfoDto {
     @Schema(name = "账号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoUsername;
 
-    @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "密码", implementation = String.class)
     private String companyInfoPassword;
 
     @Schema(name = "公司LOGO", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)

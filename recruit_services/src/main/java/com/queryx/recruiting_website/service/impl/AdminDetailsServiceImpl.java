@@ -63,7 +63,10 @@ public class AdminDetailsServiceImpl implements UserDetailsService {
         }
         List<String> perms;
         if (tdAdmin.getRoleId() == 1) {
-            perms = menuService.list().stream()
+            perms = menuService.list(
+                    new LambdaQueryWrapper<TPMenu>().eq(TPMenu::getStatus, Common.STATUS_ENABLE)
+                            .eq(TPMenu::getDelFlag, Common.NOT_DELETE)
+                    ).stream()
                     .map(TPMenu::getPerms)
                     .filter(StringUtils::hasText)
                     .toList();

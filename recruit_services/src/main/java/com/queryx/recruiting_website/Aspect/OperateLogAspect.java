@@ -6,6 +6,7 @@ import com.queryx.recruiting_website.service.IOperateLogService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -47,18 +48,19 @@ public class OperateLogAspect {
     public void doAfterReturning(JoinPoint joinPoint, Object returnValue) {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String requestUrl = requestAttributes.getRequest().getRequestURI();
-
+        if (requestUrl.contains("getLog") || requestUrl.contains("List")) {
+            return;
+        }
         // 获取方法签名
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-
-        String methodName = method.getName();
+        // 获取方法描述，以及参数等
+        Operation operation = signature.getMethod().getAnnotation(Operation.class);
         Object[] args = joinPoint.getArgs();
         String params = Arrays.toString(args);
 
         OperateLog operateLog = new OperateLog();
         operateLog.setOperateUser(String.valueOf(SecurityUtils.getLoginAdmin().getTdAdmin().getAdminId()));
-        operateLog.setOperateName("执行方法: " + methodName);
+        operateLog.setOperateName(operation.summary());
         operateLog.setMethodName(requestUrl);
         operateLog.setParams(params);
         // 处理返回值
