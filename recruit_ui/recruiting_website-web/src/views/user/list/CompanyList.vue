@@ -1,30 +1,39 @@
 <script setup>
 import WBList from '@/components/WBList.vue'
 import { reactive, ref, watchEffect } from 'vue'
-import useSearchStore from '@/store/searchStore'
+import { useSearchStore } from '@/store/searchStore'
 import { companyList } from '@/api/user/UserApi'
+import { ElMessage } from 'element-plus';
 
 
 // 列表数据
 const pagination = reactive({}); // 分页数据
 const result = ref(useSearchStore().getResult);
-const condition = ref(useSearchStore().getConditions("COMPANY"));
+const props = defineProps({
+    condition: { type: Object, default: {} }
+});
 
 // 获取列表数据
 const getCompanyList = async (condition) => {
     const data = await companyList(condition.keyword, condition.page, condition.size, condition.isAsc);
     // 分页数据赋值
-    pagination.current = data.content.current;
-    pagination.pages = data.content.pages;
-    pagination.size = data.content.size;
-    pagination.total = data.content.total;
-    // 列表数据赋值    
-    result.value = data.content.records;
+    try {
+        pagination.current = data.content.current;
+        pagination.pages = data.content.pages;
+        pagination.size = data.content.size;
+        pagination.total = data.content.total;
+        // 列表数据赋值    
+        result.value = data.content.records;
+        useSearchStore().setResult('COMPANY', data.content.records);
+    } catch (error) { 
+        ElMessage.warning('请输入关键字！');
+    }
 }
+
+
 // 监听搜索条件变化
 watchEffect(() => {
-    console.log('监听搜索条件变化');
-    getCompanyList(condition.value);
+    getCompanyList(props.condition);
 });
 
 // 跳转到详情页
@@ -47,11 +56,11 @@ const handleSizeChange = (pageSize) => {
 <template>
     <div class="companys-container">
         <!-- 列表 -->
-        <WBList :list="result" v-model:current-page="pagination.current"
+        <WBList v-if="result.length" :list="result" v-model:current-page="pagination.current"
             v-model:page-size="pagination.size" :background="true" :total="pagination.total"
             @update:page-size="handleSizeChange" @update:current-page="handleCurrentChange">
             <template #item-prepend>
-                <el-image style="width: 100px; height: 100px;" :src="result.companyLogo" fit="fill" >
+                <el-image style="width: 100px; height: 100px;" :src="result.companyLogo" fit="fill">
                     <template #error="">
                         <img src="../../../../public/company.png" alt="">
                     </template>
@@ -67,6 +76,7 @@ const handleSizeChange = (pageSize) => {
                 <p class="companys-create_date">&emsp;</p>
             </template>
         </WBList>
+        <el-empty v-else description="没有内容"></el-empty>
     </div>
 </template>
 
@@ -85,5 +95,4 @@ h3 {
     // margin: 10px;
     // border: 1px solid #ccc;
 }
-
 </style>

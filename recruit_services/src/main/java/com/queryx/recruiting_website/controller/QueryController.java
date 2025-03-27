@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.controller;
 
+import com.queryx.recruiting_website.domain.TDJobNature;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +40,7 @@ public class QueryController {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "485", description = "用户不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "472", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/resume/all")
     public CommonResp<AllResumeVO> queryAllResume() {
@@ -55,7 +56,7 @@ public class QueryController {
     @Operation(summary = "查询用户在线简历", responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "423", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/resume/online")
     public CommonResp<ResumeVO> queryOnlineResume() {
@@ -83,7 +84,7 @@ public class QueryController {
     @Operation(summary = "查询用户所有附件简历", responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "423", description = "简历不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/resume/attachments")
     public CommonResp<List<AttachmentsResumeVO>> queryResumeAttachments() {
@@ -112,7 +113,7 @@ public class QueryController {
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("job")
     public CommonResp<JobVO> queryJob(@RequestParam("id") String id) {
@@ -142,7 +143,7 @@ public class QueryController {
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PostMapping("/search")
     public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
@@ -166,23 +167,31 @@ public class QueryController {
     @Operation(summary = "查询招聘岗位列表", parameters = {
             @Parameter(name = "keyword", description = "关键字", schema = @Schema(implementation = String.class), required = true),
             @Parameter(name = "page", description = "页码", schema = @Schema(implementation = Integer.class), required = true),
-            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
+            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true),
+            @Parameter(name = "isAsc", description = "是否升序", schema = @Schema(implementation = boolean.class), required = true),
+            @Parameter(name = "education", description = "学历", schema = @Schema(implementation = String.class), required = true),
+            @Parameter(name = "nature", description = "性质", schema = @Schema(implementation = String.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
     public CommonResp<Page<SearchJobVO>> queryJobList(
             @RequestParam("keyword") String keyword,
             @RequestParam("page") Integer page,
             @RequestParam("pageSize") Integer pageSize,
-            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
+            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc,
+            @RequestParam(value = "education", required = false) String education,
+            @RequestParam(value = "nature", required = false) String nature
+    ) {
         // 校验参数
-        if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
+        if (keyword == null || keyword.isEmpty()) {
+            return CommonResp.success(null);
+        }
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize, isAsc);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize, isAsc, education, nature);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
@@ -203,7 +212,7 @@ public class QueryController {
             @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/companyList")
     public CommonResp<Page<SearchCompanyVO>> queryCompanyList(
@@ -212,9 +221,26 @@ public class QueryController {
             @RequestParam("pageSize") Integer pageSize,
             @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
         // 校验参数
-        if (keyword == null) return CommonResp.fail(AppHttpCodeEnum.KEYWORD_NOT_NULL, null);
+        if (keyword == null || keyword.isEmpty()) {
+            return CommonResp.success(null);
+        }
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
         return queryUserInfo.getCompanyList(keyword, page, pageSize, isAsc);
+    }
+
+    /**
+     * 查询工作性质列表
+     *
+     * @return 工作性质列表
+     */
+    @Operation(summary = "查询公司列表", responses = {
+            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    @GetMapping("/jobNatureList")
+    public CommonResp<List<JobNatureVO>> queryJobNatureList() {
+        // 查询工作性质列表
+        return queryUserInfo.getJobNatureList();
     }
 }

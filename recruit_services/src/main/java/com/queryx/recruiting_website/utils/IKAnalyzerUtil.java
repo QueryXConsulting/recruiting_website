@@ -1,13 +1,15 @@
 package com.queryx.recruiting_website.utils;
 
-import org.wltea.analyzer.core.IKSegmenter;
+import lombok.extern.slf4j.Slf4j;
 import org.wltea.analyzer.core.Lexeme;
+import org.wltea.analyzer.core.IKSegmenter;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.io.StringReader;
 
+@Slf4j
 public class IKAnalyzerUtil {
     public static List<String> cut(String keyword) {
         List<String> strings = new ArrayList<>();
@@ -15,10 +17,10 @@ public class IKAnalyzerUtil {
             IKSegmenter segment = new IKSegmenter(reader, true);
             Lexeme lexeme;
             while ((lexeme = segment.next()) != null) {
-                strings.add(String.valueOf(lexeme));
+                strings.add(lexeme.getLexemeText());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("IK分词异常，", e);
         }
         return strings;
     }

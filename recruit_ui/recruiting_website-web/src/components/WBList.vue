@@ -59,7 +59,7 @@ const handleClick = (item) => {
 }
 
 .item {
-    padding: 20px;
+    padding: 10px;
     margin: 0px auto 10px;
     border-radius: 20px;
     background: #fff;

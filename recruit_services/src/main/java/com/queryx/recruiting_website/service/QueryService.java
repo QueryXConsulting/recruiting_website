@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.domain.TDJobNature;
 import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
@@ -50,9 +51,12 @@ public interface QueryService {
      * @param keyword  关键字
      * @param page     页码
      * @param pageSize 页大小
+     * @param isAsc    是否升序
+     * @param education 学历
+     * @param nature 工作性质
      * @return 职位列表
      */
-    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc);
+    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature);
 
     /**
      * 查询职位列表
@@ -72,4 +76,10 @@ public interface QueryService {
      */
     CommonResp<AllResumeVO> getAllResume(Long id);
 
+    /**
+     * 查询所有职位性质
+     *
+     * @return 职位性质列表
+     */
+    CommonResp<List<JobNatureVO>> getJobNatureList();
 }
