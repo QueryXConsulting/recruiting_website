@@ -18,6 +18,7 @@ const isShow = ref(false); // 简历详情抽屉
 const isResumeDisabled = ref(useResumeListStore().getResumeListScreenParams.resumeStatusOption); // 简历禁用状态
 const isShowDeleteDialog = ref(false); // 删除确认弹窗
 const isOnlineResume = ref(useResumeListStore().getResumeListScreenParams.resumeTypeOption); // 简历类型选择
+let $isOnlineResume = isOnlineResume.value;
 const isShowDeleteBtn = ref(isOnlineResume.value); // 删除按钮显示控制
 
 // 简历类型选项
@@ -39,12 +40,15 @@ const resumeReviewOptions = [
 ];
 // 表格列定义
 const columns = [
-    { prop: 'resumeId', label: '简历ID', value: '' },
-    { prop: 'userName', label: '用户名', value: '' },
-    { prop: 'resumeType', label: '简历类型', value: '', option: resumeTypeOptions },
-    { prop: 'resumeReview', label: '审核状态', value: '', option: resumeReviewOptions },
-    { prop: 'resumeStatus', label: '启用状态', value: '', option: resumeStatusOptions },
+    { prop: 'resumeId', label: '简历ID', tag: '0, 1' },
+    { prop: 'userName', label: '用户名', tag: '0, 1' },
+    { prop: 'resumeType', label: '简历类型', tag: '0, 1', option: resumeTypeOptions },
+    { prop: 'resumeReview', label: '审核状态', tag: '0, 1', option: resumeReviewOptions },
+    { prop: 'resumeStatus', label: '启用状态', tag: '0', option: resumeStatusOptions },
 ];
+const filteredColumns = (val) => {
+    return columns.filter((i) => i.tag.includes(val));
+}
 // 定义在线简历表单项
 const infoItems = reactive({
     resumeReview: "审核状态",
@@ -91,28 +95,13 @@ const handleEdit = (index, row) => {
     resumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType }).then(res => {
         if (typeof res.content === 'object') {
             // 在线简历
-            console.log(111111);
             res.content.resumeReview = row.resumeReview;
             info.value = res.content;
         } else {
-            // 附件简历
-            console.log(222222);
-            // getFilePath(res.content);
+            // TODO PDF简历预览
         }
     });
-    // queryResumeInfo()
-    //     .then((filePath) => {
-    // TODO PDF简历预览
-    // if (typeof filePath === 'string') {
-    //     const a = document.createElement('a');
-    //     filePath = filePath.replaceAll('\\', '/');
-    //     a.href = `/${filePath}`;
-    //     console.log('filePath', filePath);
-    //     a.click();
-    //     return;
-    // }
     isShow.value = !isShow.value;
-    // });
 }
 
 /* 处理删除按钮 */
@@ -163,6 +152,7 @@ const handleSearch = () => {
         resumeTypeOption: queryObj.resumeType,
         resumeStatusOption: queryObj.resumeStatus
     });
+    $isOnlineResume = isOnlineResume.value;
     queryResume(queryObj);
 }
 
@@ -181,6 +171,9 @@ const handleCurrentChange = (val) => {
 /* tag颜色处理 */
 // 获得标签颜色
 const getTagType = (o, val) => {
+    if (!val) {
+        return;
+    }
     const op = columns.find((item) => item.prop === o).option;
     return op.find((item) => item.value === val).tag;
 }
@@ -198,7 +191,6 @@ const handleDrawerConfirm = async () => {
     // 发送请求修改审核状态
     if (queryObj.resumeType === '0') { // 在线简历
         // 表单校验方法
-        // infoForm.value.validate((valid) => {if (!valid) return;})
         await resumeReview(info.value.resumeReview, info.value.resumeId, queryObj.resumeType)
         queryResume(queryObj);// 更新列表
         return;
@@ -211,9 +203,9 @@ const handleDrawerConfirm = async () => {
 <template>
     <div>
         <div class="container">
-            <WBTable v-model:table-data="result.records" :table-columns="columns" v-model:current-page="result.current"
-                v-model:page-size="result.size" :total="result.total" @update:page-size="handleSizeChange"
-                @update:current-page="handleCurrentChange" border>
+            <WBTable v-model:table-data="result.records" :table-columns="filteredColumns($isOnlineResume)"
+                v-model:current-page="result.current" v-model:page-size="result.size" :total="result.total"
+                @update:page-size="handleSizeChange" @update:current-page="handleCurrentChange" border>
                 <!-- 头部 -->
                 <template #header>
                     <WBTableHeader v-model:input="input" @click-search="handleSearch">
@@ -251,7 +243,7 @@ const handleDrawerConfirm = async () => {
                 </template>
                 <!-- 操作按钮 -->
                 <template #operation="scope">
-                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
+                    <el-button v-if="$isOnlineResume === '0'" size="small" @click="handleEdit(scope.$index, scope.row)">
                         查看
                     </el-button>
                     <el-button v-if="isShowDeleteBtn === '1'" size="small" type="danger"

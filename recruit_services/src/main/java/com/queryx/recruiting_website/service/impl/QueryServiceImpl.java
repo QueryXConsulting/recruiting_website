@@ -8,11 +8,12 @@ import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.utils.CommonResp;
+import com.queryx.recruiting_website.utils.IKAnalyzerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.service.QueryService;
@@ -38,6 +39,9 @@ public class QueryServiceImpl implements QueryService {
 
     @Autowired
     private TDJobMapper jobInfoMapper;
+
+    @Autowired
+    private TDJobNatureMapper jobNatureMapper;
 
     @Autowired
     private TDCompanyInfoMapper companyInfoMapper;
@@ -88,8 +92,10 @@ public class QueryServiceImpl implements QueryService {
     public CommonResp<Page<?>> getSearchList(SearchDTO searchDTO) {
         Page<?> result = null;
         switch (searchDTO.getSearchType()) {
-            case JOB ->
-                    result = getJobList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc());
+            case JOB -> result = getJobList(
+                    searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(),
+                    searchDTO.getIsAsc(), searchDTO.getEducation(), searchDTO.getNature()
+            );
             case COMPANY ->
                     result = getCompanyList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
             default -> {
@@ -115,13 +121,28 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
+    @Cacheable(value = "jobList", key = "#keyword + #page + #pageSize + #isAsc + #education + #nature")
+    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(keyword != null, TDJob::getJobPosition, StrUtil.trim(keyword));
         queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
         queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
+
+        queryWrapper.nested(i -> {
+            boolean firstCondition = true; // 用于标记是否是第一个条件，以避免在第一个条件前添加多余的"OR"
+            for (String s : IKAnalyzerUtil.cut(StrUtil.trim(keyword))) {
+                if (firstCondition) {
+                    i.like(TDJob::getJobPosition, s);
+                    firstCondition = false;
+                } else {
+                    i.or().like(TDJob::getJobPosition, s);
+                }
+            }
+        });
+
+        queryWrapper.eq(nature != null && !nature.isEmpty(), TDJob::getJobNature, StrUtil.trim(nature));
+        queryWrapper.eq(education != null && !education.isEmpty(), TDJob::getJobEducation, StrUtil.trim(education));
         queryWrapper.orderBy(true, isAsc, TDJob::getJobTime);
         // 构建分页对象
         Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
@@ -138,14 +159,28 @@ public class QueryServiceImpl implements QueryService {
         return resPage.setRecords(list);
     }
 
+
     @Override
+    @Cacheable(value = "companyList", key = "#keyword + #page + #pageSize + #isAsc")
     public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(keyword != null, TDCompanyInfo::getCompanyInfoName, StrUtil.trim(keyword));
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getEnterpriseReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
+
+        queryWrapper.nested(i -> {
+            boolean firstCondition = true;
+            for (String s : IKAnalyzerUtil.cut(StrUtil.trim(keyword))) {
+                if (firstCondition) {
+                    i.like(TDCompanyInfo::getCompanyInfoName, s);
+                    firstCondition = false;
+                } else {
+                    i.or().like(TDCompanyInfo::getCompanyInfoName, s);
+                }
+            }
+        });
+
         queryWrapper.orderBy(true, isAsc, TDCompanyInfo::getCompanyRegisterTime);
         // 构建分页对象
         Page<TDCompanyInfo> company = companyInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
@@ -202,6 +237,28 @@ public class QueryServiceImpl implements QueryService {
             allResumeVO.getAttachmentsResumes().add(attachmentsResumeVO1);
         }
         return CommonResp.success(allResumeVO);
+    }
+
+
+    @Override
+    @Cacheable(value = "jobNatureList", key = "#root.methodName")
+    public CommonResp<List<JobNatureVO>> getJobNatureList() {
+        // 构建SQL语句，查询职位性质信息
+        final LambdaQueryWrapper<TDJobNature> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TDJobNature::getNatureStatus, Common.STATUS_ENABLE);
+        final List<TDJobNature> natures = jobNatureMapper.selectList(queryWrapper);
+        if (natures == null || natures.isEmpty()) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        }
+        // 封装职位性质信息
+        ArrayList<JobNatureVO> jobNatureVOS = new ArrayList<>();
+        for (TDJobNature nature : natures) {
+            JobNatureVO jobNatureVO = new JobNatureVO();
+            jobNatureVO.setNatureId(nature.getNatureId());
+            jobNatureVO.setNatureName(nature.getJobNatureName());
+            jobNatureVOS.add(jobNatureVO);
+        }
+        return CommonResp.success(jobNatureVOS);
     }
 
 

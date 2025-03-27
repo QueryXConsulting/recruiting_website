@@ -1,59 +1,59 @@
 import { defineStore } from 'pinia';
 
-const useSearchStore = defineStore('search', {
+export class SearchCondition {
+    constructor(keyword = '', page = 1, size = 10, isAsc = false, education = null, nature = null) {
+        this.keyword = keyword; // 搜索关键字
+        this.page = page; // 当前页
+        this.size = size; // 每页显示条数
+        this.isAsc = isAsc; // 排序方式
+        this.education = education; // 学历
+        this.nature = nature; // 性质
+    }
+}
+
+
+
+export const useSearchStore = defineStore('search', {
     state: () => {
         return {
             type: 'JOB', // 默认搜索类型
             conditions: {
                 JOB: {
-                    keyword: '', // 搜索关键字
-                    page: 1, // 当前页
-                    size: 10, // 每页显示条数
-                    isAsc: false, // 排序方式
+                    ...new SearchCondition()
                 },
                 COMPANY: {
-                    keyword: '', // 搜索关键字
-                    page: 1, // 当前页
-                    size: 10, // 每页显示条数
-                    isAsc: false, // 排序方式
+                    ...new SearchCondition()
                 },
             },
-            result: [], // 列表数据
+            result: {
+                JOB: [], // 职位列表数据
+                COMPANY: [], // 公司列表数据
+            },
         }
     },
     actions: {
         setType(type) {
             this.type = type;
         },
+
         setConditions(type, condition) {
-            switch (type) {
-                case 'JOB':
-                    this.conditions.JOB = condition;
-                    break;
-                case 'COMPANY':
-                    this.conditions.COMPANY = condition;
-                    break;
-            }
+            return this.conditions[type] = condition;
         },
         getConditions(type) {
-            switch (type) {
-                case 'JOB':
-                    return this.conditions.JOB;
-                case 'COMPANY':
-                    return this.conditions.COMPANY;
-            }
+            return this.conditions[type];
         },
-        setResult(res) {
-            this.result = res;
+        
+        setResult(type, res) {
+            this.result[type] = res;
+        },
+        getResult(type) {
+            return this.result[type];
         }
     },
     getters: {
         getType() {
             return this.type;
         },
-        getResult() {
-            return this.result;
-        }
     },
     persist: {
         key: 'search',
@@ -62,4 +62,3 @@ const useSearchStore = defineStore('search', {
     }
 });
 
-export default useSearchStore;

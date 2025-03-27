@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import { interviewList, interviewAccept, interviewDate, postMessage } from '@/api/user/UserApi';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { ArrowRight, ArrowDown } from '@element-plus/icons-vue'
 
 const currentPage = ref(1);// 当前页
@@ -97,7 +97,7 @@ const tableOperation = [
     { type: 'warning', text: '取消' },
     { type: 'danger', text: '拒绝' },
     { type: 'success', text: '接受' },
-    // { type: 'primary', text: '开始面试' },
+    { type: 'primary', text: '复制链接' },
 ]
 let filteredOperation = tableOperation;
 
@@ -154,6 +154,15 @@ const handleClick = async (obj, row, $index) => {
             }
             companyId = Number(row.companyInfoId);
             jobName = row.interviewJob;
+            break;
+        case '复制链接': // 复制链接
+            navigator.clipboard.writeText(row.interviewUrl)
+                .then(() => {
+                    ElMessage.success('腾讯会议链接已成功复制到剪贴板！链接：' + row.interviewUrl);
+                })
+                .catch(err => {
+                    ElMessageBox.confirm('腾讯会议链接复制失败，请手动复制！链接：' + row.interviewUrl);
+                });
             break;
         case '开始面试': // 开始面试
             if (row.interviewStatus) {
@@ -216,11 +225,11 @@ const submitTime = async () => {
     const d = String(time.getDate()).padStart(2, '0');
     time = new Date(`${y}-${m}-${d} ${interviewTime.value}`);
     await isAcceptInterview($interviewId, 1, time);
-    if (!(companyId && jobName)){
+    if (!(companyId && jobName)) {
         ElMessage.error('未知错误，请联系管理员');
         return;
     }
-    await postMessage({userId: companyId, content: `您发布的${jobName}岗位有新的面试邀请。 ——此消息由系统自动发送，请勿回复。`})
+    await postMessage({ userId: companyId, content: `您发布的${jobName}岗位有新的面试邀请。 ——此消息由系统自动发送，请勿回复。` })
     cancelTime();// 重置弹窗数据
 }
 // 取消选择时间

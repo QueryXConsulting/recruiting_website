@@ -1,30 +1,39 @@
 <script setup>
-import { reactive, ref, watchEffect } from 'vue'
 import router from '@/router/index'
 import WBList from '@/components/WBList.vue'
-import useSearchStore from '@/store/searchStore'
 import { jobList } from '@/api/user/UserApi'
+import { reactive, ref, watchEffect } from 'vue'
+import { useSearchStore } from '@/store/searchStore'
+import { ElMessage } from 'element-plus'
 
 
 // 列表数据
-const condition = ref(useSearchStore().getConditions("JOB"));
-const result = ref(useSearchStore().getResult);
+const props = defineProps({
+    condition: { type: Object, default: {} }
+});
+
+const result = ref(useSearchStore().getResult('JOB') || []);
 const pagination = reactive({}); // 分页数据
 
 // 获取列表数据
 const getJobList = async (condition) => {
-    const data = await jobList(condition.keyword, condition.page, condition.size, condition.isAsc);
+    const data = await jobList(condition.keyword, condition.page, condition.size, condition.isAsc, condition.education, condition.nature);
     // 分页数据赋值
-    pagination.current = data.content.current;
-    pagination.pages = data.content.pages;
-    pagination.size = data.content.size;
-    pagination.total = data.content.total;
-    // 列表数据赋值    
-    result.value = data.content.records;
+    try {
+        pagination.current = data.content.current;
+        pagination.pages = data.content.pages;
+        pagination.size = data.content.size;
+        pagination.total = data.content.total;
+        // 列表数据赋值
+        result.value = data.content.records;
+        useSearchStore().setResult('JOB', data.content.records);
+    } catch (error) { 
+        ElMessage.warning('请输入关键字！');
+    }
 }
 // 监听搜索条件变化
 watchEffect(() => {
-    getJobList(condition.value);
+    getJobList(props.condition);
 });
 
 // 跳转到详情页
@@ -50,7 +59,7 @@ const handleSizeChange = (pageSize) => {
 <template>
     <div class="jobs-container">
         <!-- 列表 -->
-        <WBList :list="result" @click="viewDetail" v-model:current-page="pagination.current"
+        <WBList v-if="result.length" :list="result" @click="viewDetail" v-model:current-page="pagination.current"
             v-model:page-size="pagination.size" :background="true" :total="pagination.total"
             @update:page-size="handleSizeChange" @update:current-page="handleCurrentChange">
             <template #default="item">
@@ -72,6 +81,7 @@ const handleSizeChange = (pageSize) => {
                 <p class="jobs-create_date">创建日期：{{ item.jobTime }}</p>
             </template>
         </WBList>
+        <el-empty v-else description="没有内容"></el-empty>
     </div>
 </template>
 
@@ -82,7 +92,7 @@ h3 {
     font: none;
     font-size: 24px;
     font-weight: bold;
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
 }
 
 .search-container {

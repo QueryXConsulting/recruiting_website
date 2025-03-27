@@ -46,14 +46,16 @@ const API = {
   MESSAGE_LIST_URL: '/api/message/list',
   MESSAGE_SEND_URL: '/api/message/send',
   MESSAGE_INFO_URL: '/api/message/info',
+  // 工作性质相关接口
+  JOB_NATURE_URL: '/api/query/jobNatureList',
 }
 
 // 用户相关
 export const userRegister = (dto) => request.post(API.USER_REGISTER_URL, dto)
 export const uploadAvatar = (image) => request.post(API.UPLOAD_AVATAR_URL, image)
 // 职位相关
-export const jobList = (keyword, page, size, asc = false) =>
-  request.get(API.JOB_LIST_URL, { params: { keyword: keyword, page: page, pageSize: size, isAsc: asc } })
+export const jobList = (keyword, page, size, asc = false, education, nature) =>
+  request.get(API.JOB_LIST_URL, { params: { keyword: keyword, page: page, pageSize: size, isAsc: asc, education: education, nature: nature } })
 export const jobInfo = (id) => request.get(API.JOB_INFO_URL, { params: { id: id } })
 // 简历相关
 export const resumeDeliver = (dto) => request.post(API.RESUME_DELIVER_URL, dto)
@@ -92,6 +94,8 @@ export const search = (dto) => request.post(API.SEARCH_URL, dto)
 export const getLastMessage = () => request.get(API.MESSAGE_LIST_URL)
 export const getMessageData = (id) => request.get(API.MESSAGE_INFO_URL, { params: { id: id } })
 export const postMessage = (dto) => request.post(API.MESSAGE_SEND_URL,dto)
+// 工作性质相关
+export const jobNature = () => request.get(API.JOB_NATURE_URL)
 
 
 

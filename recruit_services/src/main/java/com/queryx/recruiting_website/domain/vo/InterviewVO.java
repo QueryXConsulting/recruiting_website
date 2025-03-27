@@ -52,4 +52,7 @@ public class InterviewVO {
      * 0代表拒绝,1代表接受
      */
     private String interviewStatus;
+
+    // 面试链接
+    private String interviewUrl;
 }

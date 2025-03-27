@@ -113,9 +113,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = userStore()
 
-  if (to.path.startsWith('/users/')) {
-    return next()
-  }
+  // if (to.path.startsWith('/users/')) {
+  //   return next()
+  // }
 
   if (store.token && to.path === '/auth/login') {
     return next('/users/index')
