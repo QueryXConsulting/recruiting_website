@@ -159,7 +159,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { companyInfo as getCompanyInfoApi, companyInfoUpdate } from '@/api/company/companyApi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userStore from '@/store/user'
-import { Document, UploadFilled, Plus, Delete, CircleCheck, Warning, CircleClose, InfoFilled } from '@element-plus/icons-vue'
+import { Document, UploadFilled, Plus, Delete, InfoFilled } from '@element-plus/icons-vue'
 
 const companyData = ref({
   companyInfoId: '',

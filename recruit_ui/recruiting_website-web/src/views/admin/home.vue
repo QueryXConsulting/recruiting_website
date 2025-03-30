@@ -105,15 +105,13 @@ const route = useRoute()
 
 const store = userStore()
 let menus = ref();
-let flag = ref({})
+
 onMounted(() => {
-  menus.value = filterMenus(store.menuTree);
+  menus.value = store.menuTree;
 
 })
 
-watch(() => store.menuTree, (newVal) => {
-  menus.value = filterMenus(newVal);
-}, { deep: true })
+
 
 const activeMenu = ref(route.path)
 
@@ -142,23 +140,7 @@ const handleLogout = () => {
   }).catch(() => { })
 }
 
-const filterMenus = (menus) => {
 
-  if (store.role !== null) {
-    return menus;
-  }
-
-  return menus.map(menu => {
-    const filteredMenu = { ...menu };
-
-    if (filteredMenu.children && filteredMenu.children.length) {
-      filteredMenu.children = filteredMenu.children.filter(child => child.menuType !== 'U');
-      filteredMenu.children = filterMenus(filteredMenu.children);
-    }
-
-    return filteredMenu;
-  });
-}
 
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 

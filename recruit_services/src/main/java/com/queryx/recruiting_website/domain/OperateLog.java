@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -16,7 +17,7 @@ public class OperateLog {
     private String params;
     private String returnValue;
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date gmtCreate;
-
 
 }

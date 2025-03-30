@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -42,9 +43,6 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     private TDUserMapper userMapper;
 
 
-
-
-
     @Override
     public CompanyInfoDto selectCompanyInfo(Long companyId) {
         LambdaQueryWrapper<TDCompanyInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -70,12 +68,15 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 
         TDCompanyInfo tdCompanyInfo = new TDCompanyInfo();
         BeanUtils.copyProperties(companyInfoDto, tdCompanyInfo);
+        // 未修改密码前端会传一个空字符串进来
         if (StringUtils.hasText(companyInfoDto.getCompanyInfoPassword())) {
             tdCompanyInfo.setCompanyInfoPassword(passwordEncoder.encode(tdCompanyInfo.getCompanyInfoPassword()));
+        } else {
+            tdCompanyInfo.setCompanyInfoPassword(null);
         }
 
-        UpdateWrapper<TDCompanyInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("company_info_id", companyInfoDto.getCompanyInfoId());
+        LambdaUpdateWrapper<TDCompanyInfo> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(TDCompanyInfo::getCompanyInfoId, companyInfoDto.getCompanyInfoId());
         tdCompanyInfo.setCompanyInfoStatus(companyInfoDto.getCompanyInfoStatus());
         tdCompanyInfo.setCompanyInfoReview(companyInfoDto.getCompanyInfoReview());
         if (companyInfoDto.getEnterpriseReview() != null) {

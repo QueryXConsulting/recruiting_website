@@ -205,7 +205,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
         if (Common.DELIVER_RESUME_DELETE_SQUARE_PEG.equals(resumeDelete)){
             Long userId = jobResumeService.getById(jobResumeId).getUserId();
-            messageBoardService.sendMessage(userId, "对不起,经过仔细评估您的简历不合适 ——此消息来自系统自动发送");
+            messageBoardService.sendMessage(userId, "对不起,经过仔细评估您不太合适。愿您早日找到心仪工作 —此消息来自系统自动发送");
         }
         return null;
     }

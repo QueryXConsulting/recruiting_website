@@ -54,4 +54,7 @@ public class InterviewListVo {
 
     @Schema(name = "简历名称", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String ResumeName;
+
+    @Schema(name = "面试链接", implementation = String.class)
+    private String interviewUrl;
 }
