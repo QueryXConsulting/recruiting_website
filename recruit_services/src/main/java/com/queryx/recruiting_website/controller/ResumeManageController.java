@@ -36,5 +36,4 @@ public class ResumeManageController {
         return CommonResp.success(resumeService.resumeReview(review, resumeId, resumeType));
     }
 
-
 }

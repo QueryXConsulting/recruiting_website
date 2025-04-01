@@ -9,7 +9,7 @@ const size = defineModel('size', { type: Number, default: 10 });
 const props = defineProps({
     list: { type: Array, default: () => [] },
     total: { type: Number, default: 0 },
-    pageSizes: { type: Array, default: () => [2, 20, 30, 40, 50] },
+    pageSizes: { type: Array, default: () => [10, 20, 30, 40, 50] },
     layout: { type: String, default: 'total, sizes, prev, pager, next, jumper, ->' },
 })
 

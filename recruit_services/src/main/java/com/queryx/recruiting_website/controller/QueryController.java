@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.controller;
 
-import com.queryx.recruiting_website.domain.TDJobNature;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -115,7 +114,7 @@ public class QueryController {
             @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("job")
+    @GetMapping("/job")
     public CommonResp<JobVO> queryJob(@RequestParam("id") String id) {
         JobVO resp;
         try {
