@@ -48,7 +48,7 @@ onMounted(async () => {
 const condition = ref(useSearchStore().getConditions(searchType.value));
 // 搜索
 const handleSearch = simpleThrottle(async () => {
-    const regex = /[\u3000-\u303F|\uFF00-\uFFEF|~<>～|0-9]+/g;
+    const regex = /[\u3000-\u303F|\uFF00-\uFFEF|~<>～]+/g;
     if (regex.test(inputVal.value)) {
         // 输入符合要求，继续执行搜索逻辑           
         ElMessage.error('搜索关键字只能包含中文汉字、英文') // 这里可以添加你的搜索逻辑 
@@ -316,11 +316,6 @@ const handleCommand = (command) => {
     .search-other {
         display: flex;
         justify-content: start;
-
-        .search-other-filter {
-            // gap: 10px;
-            // width: 50%;
-        }
     }
 }
 </style>

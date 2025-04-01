@@ -89,19 +89,32 @@ const queryResume = (obj) => {
 queryResume(queryObj)
 
 
+const isShowPreview = ref(false);// 详情弹窗是否显示
+const pdfUrl = ref(''); // PDF预览地址
 // 处理查看按钮
 const handleEdit = (index, row) => {
     // 请求简历详情
     resumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType }).then(res => {
+        console.log(res);
         if (typeof res.content === 'object') {
             // 在线简历
             res.content.resumeReview = row.resumeReview;
             info.value = res.content;
+            isShow.value = !isShow.value;
         } else {
             // TODO PDF简历预览
+            const raw = window.atob(res.content);
+            const rawLength = raw.length;
+            const uInt8Array = new Uint8Array(rawLength);
+            for (let i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            const blob = new Blob([uInt8Array], { type: 'application/pdf' });
+            pdfUrl.value = URL.createObjectURL(blob);
+            isShowPreview.value = true;
         }
     });
-    isShow.value = !isShow.value;
 }
 
 /* 处理删除按钮 */
@@ -243,7 +256,7 @@ const handleDrawerConfirm = async () => {
                 </template>
                 <!-- 操作按钮 -->
                 <template #operation="scope">
-                    <el-button v-if="$isOnlineResume === '0'" size="small" @click="handleEdit(scope.$index, scope.row)">
+                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
                         查看
                     </el-button>
                     <el-button v-if="isShowDeleteBtn === '1'" size="small" type="danger"
@@ -274,6 +287,12 @@ const handleDrawerConfirm = async () => {
             title="删除附件简历">
             <span>确认删除该简历？</span>
         </WBDialog>
+
+        <!-- pdf预览弹窗 -->
+        <WBDialog v-model="isShowPreview" fullscreen title="offer预览">
+            <iframe :src="pdfUrl" class="pdf-preview" frameborder="0"></iframe>
+            <template #footer><i></i></template>
+        </WBDialog>
     </div>
 </template>
 
@@ -294,45 +313,24 @@ const handleDrawerConfirm = async () => {
 
 .container {
     height: 100vh;
-    // box-sizing: border-box;
-
-    .tableLab {
-        width: 100%;
-        margin-top: 2vh;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-
-        .search {
-            display: flex;
-
-            .search-input {
-                width: 80%;
-                margin-right: .5vw;
-            }
-        }
-
-
-
-    }
-
-    .tableBox {
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 2vh auto;
-
-        .page {
-            margin-top: 4vh;
-        }
-    }
 }
 
-.drawer-main-form {
-    display: flex;
-    justify-content: center;
+/* 为iframe设置一些基本样式 */
+.pdf-preview {
+    width: 100%;
+    /* 以适应其父容器 */
+    height: 100vh;
+    /* 高度可以根据需要调整 */
+    border: none;
+    /* 去掉边框 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 添加阴影效果 */
+    margin: 5px auto;
+    /* 上下外边距为20px，左右自动居中 */
+    display: block;
+    /* 将iframe显示为块级元素 */
+    background-color: #f5f5f5;
+    /* 背景颜色，当PDF加载失败时会显示 */
+
 }
 </style>

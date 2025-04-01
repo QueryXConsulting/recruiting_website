@@ -25,10 +25,8 @@ public interface MessageBoardService extends IService<TDMessageBoard> {
     Object lastMessage();
 
     /**
-     * 发送留言
-     * @param userId 用户id
-     * @param content 留言内容
-     * @return 留言数据
+     * 查询用户所有留言记录
+     * @return 留言记录
      */
     List<LastMessageVO> queryMessageListAndLastMessage();
 

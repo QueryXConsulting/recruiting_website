@@ -87,7 +87,7 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
 
         // 留言标记已读
         for (TDMessageBoard messageBoard : messageBoards) {
-            messageBoard.setIsRead(Common.READ);
+            messageBoard.setApplicantReadStatus(Common.READ);
         }
         updateBatchById(messageBoards);
         // 按时间排序
@@ -178,7 +178,6 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
         tdMessageBoard.setUserId(SecurityUtils.getLoginUser().getTdUser().getUserId());
         tdMessageBoard.setOwnerUser(Common.USER_TYPE);
         tdMessageBoard.setContent(content);
-        tdMessageBoard.setIsRead(Common.NOT_READ);
         tdMessageBoard.setApplicantReadStatus(Common.READ);
         return save(tdMessageBoard);
     }

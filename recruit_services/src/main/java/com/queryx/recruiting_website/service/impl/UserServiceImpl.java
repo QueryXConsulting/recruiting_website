@@ -61,10 +61,10 @@ public class UserServiceImpl implements UserService {
         if (users > 0) return AppHttpCodeEnum.PHONE_EXIST;
         if (resumes > 0) return AppHttpCodeEnum.EMAIL_EXIST;
         // 复制属性
-        user.setResumeId(userResume.getResumeId());
-        user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         BeanUtils.copyProperties(registerDTO, user);
         BeanUtils.copyProperties(registerDTO, userResume);
+        user.setResumeId(userResume.getResumeId());
+        user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         // 设置默认值
         userResume.setResumeName(registerDTO.getUserName());
         user.setUserPhone(registerDTO.getResumePhone());
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
         // 插入用户
         resumeMapper.insert(userResume);
         userMapper.insert(user);
-        // 向用户表中插入在线简历表id
+        // TODO 用户注册：待测试，向用户表中插入在线简历表id
         user.setResumeId(userResume.getResumeId());
         userMapper.updateById(user);
         // 返回JWT
