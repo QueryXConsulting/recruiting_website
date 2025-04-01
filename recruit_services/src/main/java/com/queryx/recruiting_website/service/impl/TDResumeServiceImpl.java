@@ -7,9 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.*;
-import com.queryx.recruiting_website.domain.dto.AddInterviewDto;
 import com.queryx.recruiting_website.domain.dto.SelectResumeDto;
-import com.queryx.recruiting_website.domain.vo.JobResumeVO;
 import com.queryx.recruiting_website.domain.vo.ResumeListVO;
 import com.queryx.recruiting_website.domain.vo.ResumeManageVO;
 import com.queryx.recruiting_website.domain.vo.ResumeVO;
@@ -23,7 +21,6 @@ import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

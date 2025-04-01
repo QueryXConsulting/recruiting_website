@@ -57,13 +57,13 @@ public class DeliverController {
     }
 
     /**
-     * 简历列表
+     * 查询投递记录
      *
      * @param pageNum  页码
      * @param pageSize 每页大小
      * @return 简历列表
      */
-    @Operation(summary = "简历列表", parameters = {
+    @Operation(summary = "查询投递记录", parameters = {
             @Parameter(name = "pageNum", description = "页码", required = true, schema = @Schema(type = "integer", defaultValue = "1")),
             @Parameter(name = "pageSize", description = "每页大小", required = true, schema = @Schema(type = "integer", defaultValue = "10"))
     }, responses = {

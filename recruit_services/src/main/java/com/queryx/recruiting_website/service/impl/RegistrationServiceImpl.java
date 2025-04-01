@@ -44,7 +44,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     // 数据库字段由公司端创建
     private Integer registrationId;// 信息录入id
-//    private Integer registrationId;// 信息录入id
 
     @Override
     public CommonResp<RegistrationStatusVO> queryRegistrationStatus() {

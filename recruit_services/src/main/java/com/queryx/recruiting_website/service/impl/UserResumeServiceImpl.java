@@ -63,9 +63,6 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setFileName(file.getOriginalFilename());
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
             tdRS.setUploadDate(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
-//            String[] strings = filePath.split("/");
-//            String s = strings[strings.length - 1] + "/";
-//            tdRS.setFilePath(s + resumeFile.getName());
             // TODO 附件简历路径
             tdRS.setFilePath("/" + Common.getLastPath(filePath, "/", resumeFile.getName()));
             tdRS.setAttachmentsReview(Common.REVIEW_OK);
@@ -92,8 +89,6 @@ public class UserResumeServiceImpl implements UserResumeService {
         }
         // TODO 获取文件路径,待测试
         String path = resumeAttachment.getFilePath();
-//        int lastIndex = filePath.lastIndexOf("/", filePath.length() - 2);
-//        path = path.substring(0, lastIndex);
         path = Common.getSplitPath(filePath, "/") + path;
         // 删除本地文件
         File file = new File(path);
@@ -117,4 +112,5 @@ public class UserResumeServiceImpl implements UserResumeService {
                 .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
                 .eq(TDResume::getResumeId, resumeDTO.getResumeId()));
     }
+
 }
