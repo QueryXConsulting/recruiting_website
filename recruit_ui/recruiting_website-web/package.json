@@ -16,7 +16,7 @@
     "@onlyoffice/document-editor-vue": "^1.4.0",
     "axios": "^1.7.9",
     "docx-preview": "^0.3.4",
-    "element-plus": "^2.9.0",
+    "element-plus": "^2.9.7",
     "fabric": "^6.6.1",
     "fabric-pure-browser": "^5.1.0",
     "konva": "^9.3.18",

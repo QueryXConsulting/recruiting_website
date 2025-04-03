@@ -230,6 +230,6 @@ const handleCommand = (command) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; // 确保 CardLogin 在父容器中垂直居中
+  height: 100%;
 }
 </style>
