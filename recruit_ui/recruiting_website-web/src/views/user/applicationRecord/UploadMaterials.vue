@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import WBForm from '@/components/WBForm.vue';
 import { materialStatus, materialUpload, materialOtherUpload } from '@/api/user/UserApi';
-import { Delete, Plus, ZoomIn, WarningFilled } from '@element-plus/icons-vue'
+import { Delete, Plus, ZoomIn } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus';
 
 

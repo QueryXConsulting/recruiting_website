@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
@@ -59,6 +60,7 @@ public class QueryServiceImpl implements QueryService {
         }
         // 封装简历返回信息
         BeanUtils.copyProperties(tdResume, resumeVO);
+
         if (resumeVO.getResumeId() == null) {
             return null;
         }
@@ -71,7 +73,6 @@ public class QueryServiceImpl implements QueryService {
         // 构建SQL语句，查询附件简历信息
         attachmentsMapper.selectList(
                 new LambdaQueryWrapper<TDResumeAttachments>().eq(TDResumeAttachments::getUserId, id)
-                        // TODO 查询附件简历列表：目前审核状态为未通过，且未删除
                         .eq(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
                         .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE),
                 // 消费查询结果集，并封装简历附件信息（该方法一个入参，无返回值）
@@ -82,6 +83,8 @@ public class QueryServiceImpl implements QueryService {
                     final AttachmentsResumeVO attachmentsResumeListVO = new AttachmentsResumeVO();
                     final TDResumeAttachments attachments = resultContext.getResultObject();
                     BeanUtils.copyProperties(attachments, attachmentsResumeListVO);
+                    String filePath = attachments.getFilePath().replaceAll("\\\\", "/");
+                    attachmentsResumeListVO.setFilePath(Common.getBaseURL() + filePath);
                     list.add(attachmentsResumeListVO);
                 }
         );

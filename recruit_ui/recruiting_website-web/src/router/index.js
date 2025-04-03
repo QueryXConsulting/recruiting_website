@@ -57,7 +57,7 @@ const routes = [
   },
   {
     path: '/users/search',
-    component: () => import('../views/user/Search.vue'),
+    component: () => import('../views/user/search.vue'),
   },
   {
     path: '/users/message',

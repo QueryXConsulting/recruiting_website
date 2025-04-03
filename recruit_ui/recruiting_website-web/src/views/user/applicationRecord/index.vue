@@ -1,5 +1,4 @@
 <script setup>
-import { reactive, ref } from 'vue';
 import { defineStore } from 'pinia';
 import ApplicationRecord from './ApplicationRecord.vue';
 import AppointmentInterview from './AppointmentInterview.vue';

@@ -1,7 +1,7 @@
 <script lang="js" setup>
 import { roleList } from '@/api/admin/RoleApi'
 import { adminList, adminInfo, adminUpdate, adminAdd, adminDelete, adminUpdateAvatar } from '@/api/admin/adminApi';
-import { ref, computed, reactive, defineEmits } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import useAdminStore from '@/store/adminStore'
 import { ElMessage } from 'element-plus';
 import WBDialog from '@/components/WBDialog.vue';
@@ -58,16 +58,6 @@ const getColumnLabels = (tag) => {
         return acc;
     }, {})
 }
-// 根据tag获得所以value
-// const getColumnValues = (tag) => {
-//     const _item = filteredResponse(tag);
-//     const keys = _item.flatMap((i) => i.prop);
-//     const values = _item.flatMap((i) => i.value);
-//     return keys.reduce((acc, key, index) => {
-//         acc[key] = values[index];
-//         return acc;
-//     }, {})
-// }
 
 // 定义防抖函数
 const debounce = (func, delay) => {
@@ -94,15 +84,7 @@ const handleOperation = debounce((index, row, i) => {
         default:
             break;
     }
-
 }, 100);
-
-// 新增弹窗表单
-// const addResponse = computed(() => response.filter(item => item.prop !== 'adminId'));
-// 表格列配置
-const tableColumns = computed(() => {
-    return filteredResponse('table');
-});
 
 const searchObj = useAdminStore().getQueryParams;
 // 请求用户列表
@@ -156,7 +138,6 @@ const handleDeleteRequest = () => {
 
 // 用户新增和修改信息对象
 const editInfo = reactive({});
-// const editInfo = reactive(getColumnValues('edit'));
 // 角色列表请求
 const roleListRequest = async () => {
     const data = await roleList();
@@ -207,7 +188,6 @@ const updateAvatar = (file) => {
 
 /* 编辑相关函数 */
 const isShowDialogEdit = ref(false);// 编辑弹窗控制
-const roleSelectValue = ref('');// 角色选择值
 const editForm = ref(null);// 编辑表单实例
 let editId = '';// 记录管理员id
 // 编辑用户信息
@@ -288,7 +268,6 @@ const handleAddRequest = () => {
             return;
         }
         isShowDialogAdd.value = false;// 关闭弹窗
-        console.log('add', editInfo);
         adminAdd(editInfo).then(res => {
             getListResult(searchObj);// 刷新用户列表
         });
@@ -333,17 +312,15 @@ const updateStatus = () => {
 
 /* 分页相关 */
 // 处理显示行数
-const handleSizeChange = (val) => {
-    console.log('handleSizeChange', val);
-    // searchObj.size = val;
-    // getListResult(searchObj);
-}
+const handleSizeChange = debounce((val) => {
+    searchObj.size = val;
+    getListResult(searchObj);
+}, 300);
 // 处理翻页
-const handleCurrentChange = (val) => {
-    console.log('handleCurrentChange', val);
-    // searchObj.page = val;
-    // getListResult(searchObj);
-}
+const handleCurrentChange = debounce((val) => {
+    searchObj.page = val;
+    getListResult(searchObj);
+}, 300);
 
 const btnObj = [
     { text: '编辑', type: 'primary' },
@@ -455,12 +432,7 @@ const btnObj = [
 
 <style lang="scss" scoped>
 main {
-    // padding: 10px;
     background: #fff;
 }
 
-// .info-form {
-//     display: flex;
-//     justify-content: center;
-// }
 </style>

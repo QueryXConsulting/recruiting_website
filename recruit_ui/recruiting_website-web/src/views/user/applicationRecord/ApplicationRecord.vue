@@ -63,12 +63,6 @@ const getOptionLabel = (options, value) => {
     const option = options.find((item) => item.value === value);
     return option ? option.label : value;
 }
-// 获取tag类型
-const getTagType = (options, value) => {
-    const option = options.find((item) => item.value === value);
-    return option ? option.tag : 'default';
-}
-
 
 // 应聘状态选项
 const statusOptions = [
@@ -109,16 +103,12 @@ const handleClick = async (row, _) => {
 
 // 一页条数变化时触发
 const handleSizeChange = (size) => {
-    // console.log('update:page-size', size)
     pageSize.value = size
 }
 // 当前页码变化时触发
 const handleCurrentChange = (page) => {
-    // console.log('update:current-page', page)
     currentPage.value = page
 }
-
-
 </script>
 
 <template>
@@ -135,9 +125,6 @@ const handleCurrentChange = (page) => {
                     :active="+scope.row.resumeStatus" finish-status="success" align-center>
                     <el-step class="step-item" v-for="(item, index) in statusOptions" :description="item.label"
                         :key="index">
-                        <!-- <template #icon>
-                            <i class="step-icon"></i>
-                        </template> -->
                     </el-step>
                 </el-steps>
             </template>
@@ -166,14 +153,5 @@ const handleCurrentChange = (page) => {
 .form-detail {
     display: flex;
     justify-content: center;
-}
-
-
-.step-icon {
-    border-radius: 50%;
-    border: 2px solid rgb(168, 171, 178);
-    width: 24px;
-    height: 24px;
-    background: transparent;
 }
 </style>

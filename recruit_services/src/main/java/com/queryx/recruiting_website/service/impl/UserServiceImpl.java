@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
         // 有 -> 删除
-        if (user.getUserAvatar() != null && user.getUserAvatar().trim().isEmpty()) {
+        if (user.getUserAvatar() != null && !user.getUserAvatar().isEmpty()) {
             File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
             if (!(oldFile.exists() && oldFile.delete())) {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
             }
             // 更新数据库
-            path = "/" + Common.getLastPath(uploadPathAvatar, "/", newFileName);
+            path = "/" + Common.getLastPath(uploadPathAvatar, "/", "/" + newFileName);
             user.setUserAvatar(path);
             userMapper.updateById(user);
         } catch (Exception e) {

@@ -56,6 +56,14 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据库连接池配置
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      pool-name: MyHikariCP
 
 # MyBatis Plus配置
 mybatis-plus:
@@ -66,5 +74,6 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     # SQL语句等日志信息输出在控制台
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 
 

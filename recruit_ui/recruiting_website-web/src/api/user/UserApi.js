@@ -4,7 +4,7 @@ import request from '@/utils/request'
 const API = {
   // 用户相关接口
   USER_REGISTER_URL: '/api/register',
-  UPLOAD_AVATAR_URL: '/api/uploadAvatar',
+  UPLOAD_AVATAR_URL: '/api/user/uploadAvatar',
   // 简历相关接口
   RESUME_DELIVER_URL: '/api/deliver/resume',
   USER_INFO_URL: '/api/query/resume/online',

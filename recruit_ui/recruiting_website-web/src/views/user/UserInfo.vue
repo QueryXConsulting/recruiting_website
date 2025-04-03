@@ -84,9 +84,12 @@ onMounted(async () => {
     const res = await userInfo();
     // 工资赋值
     salaryRange.length = 0;// 清空工资范围
-    for (let m of res.content.resumeSalary.split('-')) {
+
+    const salary = res.content.resumeSalary;
+    for (let m of salary.split('-')) {
         salaryRange.push(m);
     }
+
     formData.value = res.content;
 
     // 获取附件简历
@@ -101,6 +104,7 @@ createObject('label', formDisplay, (i) => {
     delete i.resumeId;
     delete i.resumeName;
     delete i.resumeSkill;
+    delete i.resumeExperience;
     delete i.resumeIntroduction;
 })
 
@@ -110,6 +114,24 @@ const formRef = ref(null);// 表单实例
 const notEdit = ref(true);// 是否编辑状态
 // 表单确认按钮点击事件
 const editInfo = async () => {
+    for (let [key, value] of Object.entries(formData.value)) {
+        if (!value) {
+            ElMessage.error('请填写完整信息');
+            return;
+        }
+        if (key === 'resumeSalary') {
+            if ((salaryRange[0] === '' || !salaryRange[0]) || (salaryRange[1] === '' || !salaryRange[1])) {
+                ElMessage.error('请填写完整工资范围');
+                return;
+            }
+            if (parseInt(salaryRange[0]?.split('k')[0]) > parseInt(salaryRange[1]?.split('k')[0])) {
+                ElMessage.error('工资范围错误');
+                return;
+            }
+            formData.value[key] = salaryRange.join('-');
+        }
+    }
+    
     notEdit.value = true;
     formData.value.resumeName = document.querySelector('.user-name').innerText;
     await resumeUpdate(formData.value).then((res) => {
@@ -117,7 +139,14 @@ const editInfo = async () => {
     });
 }
 
-
+const experience = ref(false);// 工作经验编辑状态
+// 工作经验编辑按钮点击事件
+const handleExperienceEdit = async () => {
+    experience.value = false;
+    await resumeUpdate(formData.value).then((res) => {
+        ElMessage.success(res.message);
+    });
+}
 
 const skillEdit = ref(false);// 个人技能编辑状态
 // 个人技能编辑按钮点击事件
@@ -141,10 +170,6 @@ const handleIntroductionEdit = async () => {
 const changeAvater = ref(false);// 头像更换状态
 const imgUrl = ref('');// 头像上传地址
 const newAvatar = ref(null);// 头像上传文件
-// 头像更换点击事件
-// const sendUploadAvatar = () => {
-//     changeAvater.value = true;
-// }
 // 头像上传预览
 const handlePreview = (image) => {
     const reader = new FileReader();
@@ -189,6 +214,13 @@ const deleteAttachment = async (id) => {
     const resp = await attachmentList();
     attachments.value = resp.content;
 }
+
+const isShowPreview = ref(false);// 详情弹窗是否显示
+const pdfUrl = ref('');// pdf地址
+const previewAttachmentResume = (url) => {
+    pdfUrl.value = url;
+    isShowPreview.value = true;
+};
 </script>
 
 <template>
@@ -199,15 +231,15 @@ const deleteAttachment = async (id) => {
             <header class="user-info-header">
                 <span class="user-avatar">
                     <el-tooltip content="点击更换头像">
-                        <el-avatar :size="100" @click="changeAvater = true"
-                            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+                        <el-avatar :size="100" @click="changeAvater = true" :src="formData.userAvatar" @error="() => { }">
+                            <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="头像">
+                        </el-avatar>
                     </el-tooltip>
                     <el-tooltip content="这里可以修改姓名" :visible="!notEdit">
                         <p class="user-name" :contenteditable='!notEdit'>
-                            {{ formData.resumeName }}仇嘉琦
+                            {{ formData.resumeName }}
                         </p>
                     </el-tooltip>
-
                 </span>
             </header>
             <!-- 主体内容 -->
@@ -270,8 +302,9 @@ const deleteAttachment = async (id) => {
                                             :value="item.range"></el-option>
                                     </el-select>
                                     <em style="color: #999;margin: 0 15px;vertical-align: sub;font-size: 20px;">至</em>
-                                    <el-select v-model="salaryRange[1]" placeholder="请选择" size="large" :disabled="notEdit"
-                                        class="user-info-input" :style="{ width: '100px' }">
+                                    <el-select v-model="salaryRange[1]" placeholder="请选择" size="large"
+                                        :disabled="notEdit || salaryRange[0] === '面议'" class="user-info-input"
+                                        :style="{ width: '100px' }">
                                         <el-option v-for="(item, i) in salaryOptions" :key="i" :label="item.range"
                                             :value="item.range"></el-option>
                                     </el-select>
@@ -300,7 +333,7 @@ const deleteAttachment = async (id) => {
                         </span>
                     </h3>
                     <p v-if="!skillEdit">
-                        {{ formData.resumeSkills }}gsegaeefag
+                        {{ formData.resumeSkills }}
                     </p>
                     <el-row v-else>
                         <el-input v-model="formData.resumeSkills" type="textarea"></el-input>
@@ -310,9 +343,32 @@ const deleteAttachment = async (id) => {
                         </label>
                     </el-row>
                 </div>
+
                 <div>
                     <h3>
-                        个人简介{{ introductionEdit }}
+                        工作经验
+                        <span v-show="!experience" @click="experience = true" class="user-info-other-edit-btn">
+                            <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
+                                <Edit />
+                            </el-icon>
+                            编辑
+                        </span>
+                    </h3>
+                    <p v-if="!experience">
+                        {{ formData.resumeExperience }}
+                    </p>
+                    <el-row v-else>
+                        <el-input v-model="formData.resumeExperience" type="textarea"></el-input>
+                        <label class="user-info-submit-btn">
+                            <el-button @click="experience = false" size="large">取消</el-button>
+                            <el-button type="primary" size="large" @click="handleExperienceEdit">确认</el-button>
+                        </label>
+                    </el-row>
+                </div>
+
+                <div>
+                    <h3>
+                        个人简介
                         <span v-show="!introductionEdit" @click="introductionEdit = true" class="user-info-other-edit-btn">
                             <el-icon style="margin: 0 3px 0 0;">
                                 <Edit />
@@ -363,7 +419,8 @@ const deleteAttachment = async (id) => {
                     <!-- 文件 -->
                     <span class="user-upload-resume-other">
                         <p class="user-upload-resume-name">
-                            <a href="javascript:void(0)">{{ item.fileName }}</a>
+                            <a href="javascript:void(0)" @click="previewAttachmentResume(item.filePath)">{{ item.fileName
+                            }}</a>
                         </p>
                         <p class="user-upload-resume-desc">
                             <span class="user-upload-resume-size">{{ item.fileSize }}KB&nbsp;</span>
@@ -389,6 +446,13 @@ const deleteAttachment = async (id) => {
                 <Plus />
             </el-icon>
         </el-upload>
+    </WBDialog>
+
+
+    <!-- pdf预览弹窗 -->
+    <WBDialog v-model="isShowPreview" fullscreen title="offer预览">
+        <iframe :src="pdfUrl" class="pdf-preview" frameborder="0"></iframe>
+        <template #footer><i></i></template>
     </WBDialog>
 </template>
 
@@ -544,9 +608,7 @@ h3 {
 }
 
 .user-upload-resume-other {
-    // width: 60%;
     padding: 0 0 0 10px;
-    // margin: 5px 0 0 10px;
 }
 
 .user-upload-resume-desc {
@@ -582,5 +644,24 @@ h3 {
     width: 178px;
     height: 178px;
     text-align: center;
+}
+
+/* 为iframe设置一些基本样式 */
+.pdf-preview {
+    width: 100%;
+    /* 以适应其父容器 */
+    height: 600px;
+    /* 高度可以根据需要调整 */
+    border: none;
+    /* 去掉边框 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 添加阴影效果 */
+    margin: 5px auto;
+    /* 上下外边距为20px，左右自动居中 */
+    display: block;
+    /* 将iframe显示为块级元素 */
+    background-color: #f5f5f5;
+    /* 背景颜色，当PDF加载失败时会显示 */
+
 }
 </style>

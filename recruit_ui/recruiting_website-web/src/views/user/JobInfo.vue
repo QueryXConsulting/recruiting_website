@@ -60,7 +60,7 @@ const submitDeliver = async () => {
         ElMessage.error('未知错误，请联系管理员');
         return;
     }
-    await postMessage({userId: companyId, content: `您发布的${jobName}岗位有新的简历投递，请注意查看。 ——此消息由系统自动发送，请勿回复。`});
+    await postMessage({ userId: companyId, content: `您发布的${jobName}岗位有新的简历投递，请注意查看。 ——此消息由系统自动发送，请勿回复。` });
 };
 
 </script>
@@ -86,12 +86,11 @@ const submitDeliver = async () => {
             <ul>
                 <li>
                     <h3 class="job-content-title">岗位信息</h3>
-                    <p class="job-company">所属机构：{{}}南京分行</p>
+                    <p class="job-company">所属机构：{{}}</p>
                     <p class="job-location">工作地点：{{ jobDetail.jobArea }}</p>
                     <p class="job-category">工作分类：{{ jobDetail.jobCategory }}</p>
                     <p class="job-person-num">招聘人数：{{ jobDetail.jobPersonNumber }}</p>
                     <p class="job-contact">联系人名称：{{ jobDetail.jobContact }}</p>
-                    <p>截止时间：{{}}2025-06-10</p>
                 </li>
                 <li>
                     <h3 class="job-content-title">岗位描述</h3>
@@ -181,7 +180,6 @@ p {
 
 .info-container {
     background: #fff;
-    /* padding: 20px; */
 }
 
 .info-header {
@@ -221,7 +219,6 @@ p {
     vertical-align: middle;
 }
 
-// .job-other {}
 
 .job-salary {
     color: #f26d49;
