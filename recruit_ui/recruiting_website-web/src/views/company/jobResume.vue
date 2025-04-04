@@ -116,9 +116,8 @@
                 <el-table-column label="简历名称" prop="resumeName" width="150" align="center" />
                 <el-table-column label="时间" prop="interviewDate" width="150" align="center" />
                 <el-table-column label="地点" prop="interviewRegion" width="160" align="center"
-                  v-if="interviewType == '0'" />
-                  <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center"
-                  v-else />
+                  v-if="interviewType == '1'" />
+                <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center" v-else />
                 <el-table-column label="类型" prop="interviewType" width="90" align="center">
                   <template #default="scope">
                     <el-tag :type="scope.row.interviewType == '0' ? 'success' : 'primary'">
@@ -453,15 +452,57 @@
       </el-dialog>
 
 
-      <el-dialog v-model="pdfEditDialogVisible" title="pdf编辑" width="90%" :destroy-on-close="true"
-        :close-on-click-modal="false">
-        <div class="pdf-edit-container">
-          <DocumentEditor ref="docEditor" v-if="documentConfig" :id="'docEditor'" :documentServerUrl="documentServerUrl"
-            :config="documentConfig" :events_onDocumentReady="onDocumentReady" :events_onError="onDocumentError"
-            :events_onDocumentStateChange="onDocumentStateChange" />
+      >
+      <el-dialog v-model="pdfEditDialogVisible" title="offer信息填写" :fullscreen="true" :destroy-on-close="true"
+        :close-on-click-modal="false" class="offer-dialog fullscreen-dialog">
+        <div class="offer-edit-container">
+          <div class="offer-form-section">
+            <el-form :model="offerForm" ref="offerFormRef" label-width="120px" size="large">
+              <el-form-item label="公司名称" prop="companyName">
+                <el-input v-model="offerForm.companyName" placeholder="请输入公司名称" />
+              </el-form-item>
+              <el-form-item label="求职者名称" prop="userName">
+                <el-input v-model="offerForm.userName" placeholder="请输入求职者名称" />
+              </el-form-item>
+              <el-form-item label="工作时间" prop="workTime">
+                <el-input v-model="offerForm.workTime" placeholder="请输入工作时间" />
+              </el-form-item>
+              <el-form-item label="职位" prop="position">
+                <el-input v-model="offerForm.position" placeholder="请输入职位" />
+              </el-form-item>
+              <el-form-item label="薪资" prop="salary">
+                <el-input v-model="offerForm.salary" placeholder="请输入薪资" />
+              </el-form-item>
+              <el-form-item label="福利待遇" prop="welfare">
+                <el-input v-model="offerForm.welfare" placeholder="请输入福利待遇" />
+              </el-form-item>
+              <el-form-item label="工作地点" prop="workLocation">
+                <el-input v-model="offerForm.workLocation" placeholder="请输入工作地点" />
+              </el-form-item>
+              <el-form-item label="报道材料" prop="material">
+                <el-input type="textarea" v-model="offerForm.material" placeholder="请输入报道材料" :rows="6" />
+              </el-form-item>
+            </el-form>
+          </div>
+          <div class="offer-preview-section">
+            <div class="preview-header">
+              <span>模板预览</span>
+            </div>
+            <div class="preview-content">
+              <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
+                height="100%" frameborder="0"></iframe>
+              <div v-else class="no-preview">
+                <el-icon>
+                  <Document />
+                </el-icon>
+                <span>暂无预览</span>
+              </div>
+            </div>
+          </div>
         </div>
         <template #footer>
-          <el-button @click="handleBeforeClose">发送</el-button>
+          <el-button @click="pdfEditDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitOffer">发送</el-button>
         </template>
       </el-dialog>
 
@@ -679,58 +720,18 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf, postMessage } from '@/api/company/companyApi'
-import { DocumentEditor } from '@onlyoffice/document-editor-vue'
-import userStore from '@/store/user'
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf, postMessage, sendOffer } from '@/api/company/companyApi'
+
 
 
 
 
 const currentOfferId = ref(null)
 const currentUserId = ref(null)
-const documentConfig = ref({
-  width: "100%",
-  height: "100%",
-  type: "desktop",
-  document: {
-    fileType: "pdf",
-    key: "",
-    title: "",
-    url: "",
-    permissions: {
-      edit: false,
-      download: true,
-      print: true,
-      fillForms: true,
-      review: false
-    }
-  },
-  editorConfig: {
-    mode: "fillForms",
-    lang: "zh-CN",
-    location: "cn",
-    user: {
-      id: userStore().userInfo.companyInfoId,
-      name: userStore().userInfo.userName
-    },
-    customization: {
-      autosave: true,
-      comments: false,
-      chat: false,
-      compactToolbar: true,
-      feedback: false,
-      forcesave: true,
-      help: true,
-      hideRightMenu: false,
-      toolbarNoTabs: true,
-      plugins: true
-    },
-    callbackUrl: ""
-  }
-})
+
 
 const pdfEditDialogVisible = ref(false)
 
@@ -1252,123 +1253,21 @@ const selectTemplate = () => {
 
 
 const confirmTemplate = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: '加载模板中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  })
-
-  try {
-    const template = templateList.value.find(t => t.id === selectedTemplate.value)
-    if (!template) {
-      ElMessage.error('请选择模板')
-      loading.close()
-      return
-    }
-
-    templateDialogVisible.value = false
-    pdfEditDialogVisible.value = true
-
-    documentConfig.value = {
-      ...documentConfig.value,
-      document: {
-        ...documentConfig.value.document,
-        key: `template-${template.id}-${Date.now()}`,
-        title: template.name,
-        url: template.fileUrl,
-        fileType: "pdf",
-        permissions: {
-          edit: false,
-          download: true,
-          print: true,
-          fillForms: true,
-          review: false
-        }
-      },
-      editorConfig: {
-        ...documentConfig.value.editorConfig,
-        mode: "fillForms",
-        customization: {
-          autosave: false,
-          forcesave: false,
-          comments: false,
-          chat: false,
-          compactToolbar: true,
-          feedback: false,
-          help: true,
-          hideRightMenu: false,
-          toolbarNoTabs: true,
-          plugins: true,
-          saveAs: false,
-          save: true
-        }
-      }
-    }
-
-    documentConfig.value.editorConfig.callbackUrl = 'http://127.0.0.1:8080/company/offer/save?offerId=' + currentOfferId.value
-    console.log('offerId:', currentOfferId.value);
-
-    loading.close()
-  } catch (error) {
-    console.error('加载模板失败:', error)
-    ElMessage.error('加载模板失败')
-    loading.close()
+  const template = templateList.value.find(t => t.id === selectedTemplate.value)
+  if (!template) {
+    ElMessage.error('请选择模板')
+    return
   }
+
+  templateDialogVisible.value = false
+  selectedTemplateUrl.value = template.fileUrl
+  pdfEditDialogVisible.value = true
 }
 
 
 
-const documentServerUrl = ref('http://127.0.0.1')
 
-const onDocumentReady = () => {
-  console.log('Document is ready')
-  editor.value = window.DocEditor
-}
 
-const onDocumentError = (event) => {
-  console.error('Document error:', event)
-  if (event.data) {
-    ElMessage.error(`文档加载失败：${event.data}`)
-  }
-}
-
-const onDocumentStateChange = (event) => {
-  if (event.data) {
-    const payload = event.data
-
-    console.log('Document state changed:', payload)
-
-    if (payload.status === 2) {
-      ElMessage.success('文档保存成功')
-    }
-  }
-}
-const handleBeforeClose = async () => {
-
-  pdfEditDialogVisible.value = false
-  const loading = ElLoading.service({
-    lock: true,
-    text: '发送中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  });
-
-  try {
-
-    postMessage({
-      userId: currentUserId.value,
-      content: "您的offer已发送,请及时查收 —此消息来自系统自动发送"
-    })
-    handleOfferStatus(currentOfferId.value, '4', jobId)
-    pdfEditDialogVisible.value = false;
-    ElMessage.success('offer已发送');
-    getOffersList();
-  } catch (error) {
-    console.error('保存文档失败:', error);
-    ElMessage.error(error.message || '保存文档失败');
-  } finally {
-    loading.close();
-  }
-}
 
 const signatureDialogVisible = ref(false)
 const currentSignature = ref('')
@@ -1816,12 +1715,8 @@ const openCheckinDialog = (row) => {
 }
 
 
-// 提交入职日期
+
 const submitCheckin = async () => {
-  if (!checkinForm.value.checkinDate) {
-    ElMessage.warning('请选择入职日期')
-    return
-  }
 
   try {
 
@@ -1905,6 +1800,71 @@ const downloadRegistrationFile = async (row) => {
     ElMessage.error('下载文件失败')
   }
 }
+
+// 添加新的响应式变量
+const offerForm = ref({
+  companyName: '',
+  userName: '',
+  workTime: '',
+  position: '',
+  salary: '',
+  welfare: '',
+  workLocation: '',
+  material: ''
+})
+const offerFormRef = ref(null)
+const selectedTemplateUrl = ref('')
+
+// 添加提交offer方法
+const submitOffer = async () => {
+  if (!offerFormRef.value) return
+
+  try {
+    await offerFormRef.value.validate()
+
+
+    const offerData = {
+      ...offerForm.value,
+      offerId: currentOfferId.value,
+      templatePath: selectedTemplateUrl.value
+    }
+    let resule = await sendOffer(offerData)
+    if (resule.code === 200) {
+      // 发送消息
+      postMessage({
+        userId: currentUserId.value,
+        content: "您的offer已发送,请及时查收 —此消息来自系统自动发送"
+      })
+
+      // 更新offer状态
+      handleOfferStatus(currentOfferId.value, '4', jobId)
+      ElMessage.success('offer发送成功')
+      getOffersList()
+    }
+    pdfEditDialogVisible.value = false
+  } catch (error) {
+    console.error('提交offer失败:', error)
+    ElMessage.error('提交失败，请检查表单')
+  }
+}
+
+const handleUploadError = (error) => {
+  console.error('上传失败:', error)
+  ElMessage.error('文件上传失败')
+}
+
+const handleUploadSuccess = (response) => {
+  if (response.code === 200) {
+    ElMessage.success('文件上传成功')
+    getOffersList()
+    uploadOfferDialogVisible.value = false
+  } else {
+    ElMessage.error(response.msg || '上传失败')
+  }
+}
+
+
+const interviewType = ref('')
 
 </script>
 
@@ -2511,5 +2471,209 @@ const downloadRegistrationFile = async (row) => {
 
 :deep(.el-descriptions__row:last-child) {
   border-bottom: none;
+}
+
+.offer-edit-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.offer-form-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.offer-preview-section {
+  flex: 1;
+}
+
+.preview-header {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.preview-content {
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.no-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #909399;
+  font-size: 14px;
+}
+
+.offer-dialog :deep(.el-dialog) {
+  min-width: 1200px;
+  margin: 0 auto;
+}
+
+.offer-dialog :deep(.el-dialog__body) {
+  padding: 30px;
+  height: calc(100vh - 180px);
+  /* 增加高度，减去header和footer的高度 */
+}
+
+.offer-edit-container {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  gap: 30px;
+}
+
+.offer-form-section {
+  flex: 0 0 400px;
+  /* 固定宽度 */
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 240px);
+  /* 设置最大高度，确保可以滚动 */
+}
+
+.offer-preview-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 240px);
+  /* 增加高度 */
+  min-width: 0;
+}
+
+.preview-content {
+  flex: 1;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  height: 100%;
+}
+
+.preview-content iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.no-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #909399;
+  gap: 10px;
+}
+
+.no-preview .el-icon {
+  font-size: 48px;
+}
+
+.no-preview span {
+  font-size: 16px;
+}
+
+.fullscreen-dialog :deep(.el-dialog) {
+  margin: 0 !important;
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.fullscreen-dialog :deep(.el-dialog__body) {
+  flex: 1;
+  padding: 20px;
+  height: calc(100vh - 120px);
+  /* 减去header和footer的高度 */
+  overflow: hidden;
+}
+
+.fullscreen-dialog :deep(.el-dialog__header) {
+  padding: 20px;
+  margin: 0;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.fullscreen-dialog :deep(.el-dialog__footer) {
+  padding: 20px;
+  border-top: 1px solid #e4e7ed;
+}
+
+.offer-edit-container {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  gap: 30px;
+}
+
+.offer-form-section {
+  flex: 0 0 500px;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+.offer-form-section :deep(.el-form-item) {
+  margin-bottom: 30px;
+}
+
+.offer-form-section :deep(.el-input__wrapper) {
+  padding: 8px 15px;
+}
+
+.offer-preview-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* 防止内容溢出 */
+}
+
+.preview-header {
+  margin-bottom: 15px;
+  padding: 0 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.preview-content {
+  flex: 1;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.preview-content iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.no-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #909399;
+  gap: 15px;
+}
+
+.no-preview .el-icon {
+  font-size: 64px;
+}
+
+.no-preview span {
+  font-size: 18px;
 }
 </style>

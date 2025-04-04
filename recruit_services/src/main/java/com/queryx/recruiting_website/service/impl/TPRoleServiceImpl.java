@@ -41,7 +41,6 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
     private TPMenuMapper menuMapper;
 
     @Override
-
     public List<RoleListVO> selectRoleList() {
         Object principal = SecurityUtils.getAuthentication().getPrincipal();
         List<TPRole> roleList = list( new LambdaUpdateWrapper<TPRole>()

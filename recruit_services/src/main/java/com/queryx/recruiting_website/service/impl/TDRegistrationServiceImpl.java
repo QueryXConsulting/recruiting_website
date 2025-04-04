@@ -16,6 +16,7 @@ import com.queryx.recruiting_website.service.MessageBoardService;
 import com.queryx.recruiting_website.service.OfferService;
 import com.queryx.recruiting_website.service.TDRegistrationService;
 
+import com.queryx.recruiting_website.utils.PDFFormUtils;
 import jakarta.annotation.Resource;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
@@ -98,103 +99,28 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
     }
 
     @Override
-    public byte[] downloadPdf(Long id) {
+    public byte[] downloadPdf(Long id) throws IOException {
+        String inputPath = "D:/maven/offer_Template/registration.pdf";
         TDRegistration registration = getById(id);
-        String inputPath = "D:/maven/offer_Template/registration.pdf";// TODO 后续添加入职信息模板进行修改
-        String fontPath = "C:\\Windows\\Fonts\\STXIHEI.TTF";// +1
+        Map<String, String> fieldValues = new HashMap<>();
+        // 动态生成表单域值映射
+        fieldValues.put("name", registration.getUserName()); // 姓名
+        fieldValues.put("gender", registration.getGender()); // 性别
+        fieldValues.put("birthDate", registration.getBirthDate().toString()); // 出生日期
+        fieldValues.put("idCardNumber", registration.getIdCardNumber()); // 身份证号
+        fieldValues.put("phoneNumber", registration.getPhoneNumber()); // 手机号码
+        fieldValues.put("email", registration.getEmail()); // 邮箱地址
+        fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
+        fieldValues.put("position", registration.getPosition()); // 职位
+        fieldValues.put("educationLevel", registration.getEducationLevel()); // 学历
+        fieldValues.put("schoolName", registration.getSchoolName()); // 毕业学校
+        fieldValues.put("bankAccount", registration.getBankAccount()); // 银行账号
+        fieldValues.put("emergencyContact", registration.getEmergencyContact()); // 紧急联系人
+        fieldValues.put("address", registration.getAddress()); // 家庭地址
 
-        try (PDDocument document = Loader.loadPDF(new File(inputPath))) {
-            if (!new File(fontPath).exists()) {
-                throw new FileNotFoundException("找不到字体文件: " + fontPath);
-            }
-
-            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
-            if (acroForm == null) {
-                log.error("PDF文件中没有表单域");
-                return null;
-            }
-
-            // 加载字体
-            PDType0Font font;
-            try (InputStream fontStream = new BufferedInputStream(new FileInputStream(fontPath))) {
-                font = PDType0Font.load(document, fontStream, true);
-            }
-
-            // 创建资源
-            PDResources resources = acroForm.getDefaultResources();
-            if (resources == null) {
-                resources = new PDResources();
-                acroForm.setDefaultResources(resources);
-            }
-
-            // 添加字体到资源
-            String fontName = "F1";
-            resources.put(COSName.getPDFName(fontName), font);
-
-            // 遍历所有表单域并设置字体
-            for (PDField field : acroForm.getFields()) {
-                if (field instanceof PDTextField textField) {
-                    System.out.println("字段名: " + field.getFullyQualifiedName());
-                    textField.setDefaultAppearance("/" + fontName + " 12 Tf 0 g");
-                    textField.setReadOnly(false);
-                }
-            }
-
-            // 设置表单域的值 TODO 后面有模板后对此进行修改
-            Map<String, String> fieldValues = new HashMap<>();
-            // 动态生成表单域值映射
-            fieldValues.put("name", registration.getUserName()); // 姓名
-            fieldValues.put("gender", registration.getGender()); // 性别
-            fieldValues.put("birthDate", registration.getBirthDate().toString()); // 出生日期
-            fieldValues.put("idCardNumber", registration.getIdCardNumber()); // 身份证号
-            fieldValues.put("phoneNumber", registration.getPhoneNumber()); // 手机号码
-            fieldValues.put("email", registration.getEmail()); // 邮箱地址
-            fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
-            fieldValues.put("position", registration.getPosition()); // 职位
-            fieldValues.put("educationLevel", registration.getEducationLevel()); // 学历
-            fieldValues.put("schoolName", registration.getSchoolName()); // 毕业学校
-            fieldValues.put("bankAccount", registration.getBankAccount()); // 银行账号
-            fieldValues.put("emergencyContact", registration.getEmergencyContact()); // 紧急联系人
-            fieldValues.put("address", registration.getAddress()); // 家庭地址
-
-            // 批量设置表单域的值
-            for (Map.Entry<String, String> entry : fieldValues.entrySet()) {
-                setFormFieldValue(acroForm, entry.getKey(), entry.getValue(), fontName);
-            }
-
-            // 设置表单
-            acroForm.setNeedAppearances(true);
-            // 取消表单域设置
-            acroForm.flatten();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            document.save(baos);
-            return baos.toByteArray();
-
-        } catch (IOException e) {
-            log.error("PDF处理失败: ", e);
-            return null;
-        }
+        return  PDFFormUtils.saveToByteArray(PDFFormUtils.fillPDFForm(inputPath, fieldValues, null));
     }
 
-    /**
-     * 设置表单域的值
-     */
-    private void setFormFieldValue(PDAcroForm acroForm, String fieldName, String value, String fontName) {
-        try {
-            PDTextField field = (PDTextField) acroForm.getField(fieldName);
-            if (field != null) {
-                field.setDefaultAppearance("/" + fontName + " 10 Tf 0 g");
-                // 设置字段值
-                field.setValue(value);
-                field.setReadOnly(true);
-                log.warn("字段设置成功: ");
-            } else {
-                log.warn("字段不存在");
-            }
-        } catch (IOException e) {
-            log.error("设置字段失败: ", e);
-        }
-    }
+
 }
 

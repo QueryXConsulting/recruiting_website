@@ -9,6 +9,7 @@ import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDJobResume;
 import com.queryx.recruiting_website.domain.TDOffers;
 import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.dto.OfferDataDto;
 import com.queryx.recruiting_website.domain.vo.OfferTemplateVO;
 import com.queryx.recruiting_website.domain.vo.OffersVO;
 import com.queryx.recruiting_website.mapper.OfferTemplateMapper;
@@ -18,15 +19,19 @@ import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.MessageBoardService;
 import com.queryx.recruiting_website.service.TDOffersService;
 import com.queryx.recruiting_website.utils.CommonResp;
-import com.queryx.recruiting_website.utils.SecurityUtils;
+import com.queryx.recruiting_website.utils.PDFFormUtils;
 import jakarta.annotation.Resource;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -125,6 +130,37 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
         }
         offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
                 .set(TDOffers::getOffersStatus, status));
+        return null;
+    }
+
+    @Override
+    public String saveOffer(OfferDataDto offerDataDto) throws IOException {
+        Map<String, String> fieldValues = new HashMap<>();
+        // 动态生成表单域值映射
+        fieldValues.put("userName", offerDataDto.getUserName()); // 姓名
+        fieldValues.put("workTime", offerDataDto.getWorkTime()); // 工作时间
+        fieldValues.put("salary", offerDataDto.getSalary()); // 工资待遇
+        fieldValues.put("company", offerDataDto.getCompanyName()); // 公司名称
+        fieldValues.put("position", offerDataDto.getPosition()); // 职位
+        fieldValues.put("welfare", offerDataDto.getWelfare()); // 福利
+        fieldValues.put("workLocation", offerDataDto.getWorkLocation()); // 工作地点
+        fieldValues.put("material", offerDataDto.getMaterial()); // 报道材料
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+        fieldValues.put("year", String.valueOf(currentDate.getYear()));
+        fieldValues.put("month", String.valueOf(currentDate.getMonthValue()));
+        fieldValues.put("day", String.valueOf(currentDate.getDayOfMonth()));
+
+        // 填充处理
+        String templatePath = offerDataDto.getTemplatePath();
+        String fileName = templatePath.substring(templatePath.lastIndexOf('/') + 1);
+        PDDocument pdDocument = PDFFormUtils.fillPDFForm(Common.officeTemplatePath + fileName, fieldValues, null);
+        fileName = System.currentTimeMillis() + "_" + offerDataDto.getOfferId() + ".pdf";
+        String officeName = "/offer_files/" + fileName;
+        pdDocument.save(Common.officeFilePath + fileName);
+        pdDocument.close();
+        update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerDataDto.getOfferId())
+                .set(TDOffers::getOffersFilePath, officeName));
         return null;
     }
 

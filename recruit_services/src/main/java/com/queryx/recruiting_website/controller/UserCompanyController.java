@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -225,12 +224,9 @@ public class UserCompanyController {
 
 
     @PostMapping("/offer/save")
-    @Operation(summary = "OnlyOffice回调函数")
-    public ResponseEntity<String> handleCallback(
-            @RequestParam Long offerId,
-            @RequestBody Map<String, Object> callbackData
-    ) throws IOException {
-        return offersService.saveOfferDocument(offerId, callbackData);
+    @Operation(summary = "offer保存")
+    public CommonResp offerSave(@RequestBody OfferDataDto offerDataDto) throws IOException {
+        return CommonResp.success(offersService.saveOffer(offerDataDto));
     }
 
 
@@ -244,7 +240,7 @@ public class UserCompanyController {
 
     @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")
     @Operation(summary = "修改offer状态")
-    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId, @PathVariable("status") String status, @PathVariable("jobId") Long jobId,Long userId) {
+    public CommonResp updateOfferStatus(@PathVariable("offerId") Long offerId, @PathVariable("status") String status, @PathVariable("jobId") Long jobId, Long userId) {
         return CommonResp.success(offersService.updateOfferStatus(offerId, status, jobId, userId));
     }
 

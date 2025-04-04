@@ -6,10 +6,7 @@ import { ElMessage } from 'element-plus'
 const whiteList = [
   '/auth/login',
   '/404',
-  // '/users/index',
-  // '/registerCompany',
-  // '/registerCompany/**',
-  // '/registerCompany/account',
+  '/users/register',
 ]
 
 // 路由配置
