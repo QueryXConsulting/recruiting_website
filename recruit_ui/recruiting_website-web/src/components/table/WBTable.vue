@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits, defineProps, defineModel } from 'vue'
+import { defineEmits, defineProps, defineModel } from 'vue'
 
 // model
 const tableData = defineModel('table-data', { type: Array, default: [] });
@@ -50,7 +50,6 @@ const handleSizeChange = (size) => {
 }
 // 当前页码变化时触发
 const handleCurrentChange = (page) => {
-    console.log(currentPage.value);
     emits('update:current-page', page)
 }
 

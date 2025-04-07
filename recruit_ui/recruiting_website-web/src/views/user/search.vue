@@ -51,7 +51,7 @@ const handleSearch = simpleThrottle(async () => {
     const regex = /[\u3000-\u303F|\uFF00-\uFFEF|~<>～]+/g;
     if (regex.test(inputVal.value)) {
         // 输入符合要求，继续执行搜索逻辑           
-        ElMessage.error('搜索关键字只能包含中文汉字、英文') // 这里可以添加你的搜索逻辑 
+        ElMessage.error('搜索关键字只能包含中文汉字、英文和数字。') // 这里可以添加你的搜索逻辑 
         return;
     }
     const o = new SearchCondition(inputVal.value, searchObj.page, searchObj.size, isAsc.value, searchObj.education, searchObj.nature);
@@ -70,10 +70,6 @@ const handleCurrentChange = (currentPage, type) => {
 const handleSizeChange = (pageSize, type) => {
     searchObj.size = pageSize;
 }
-
-
-
-const hasMessage = ref(false); // 是否有未读消息
 
 
 const handleCommand = (command) => {
@@ -108,16 +104,14 @@ const handleCommand = (command) => {
                 <span class="recruit-text">招聘</span>
             </div>
             <div class="nav-items">
-                <a href="#" class="nav-item active">首页</a>
-                <a href="/users/search" class="nav-item">校园招聘</a>
+                <a href="#" class="nav-item">首页</a>
+                <a href="/users/search" class="nav-item active">校园招聘</a>
                 <a href="#" class="nav-item">社会招聘</a>
                 <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
                 <a href="/users/message" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
                     <el-icon>
                         <component :is="Bell"></component>
                     </el-icon>
-                    <!-- 未读消息提示(小圆点) -->
-                    <i v-if="hasMessage" class="message-flag"></i>
                 </a>
                 <!-- 用户头像 -->
                 <el-dropdown v-if="userStore().token" @command="handleCommand">
@@ -265,15 +259,6 @@ const handleCommand = (command) => {
     width: 100%;
     height: 2px;
     background-color: #e60012;
-}
-
-.message-flag {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    right: 1%;
-    background: #f00;
-    border-radius: 50%;
 }
 
 .login-btn {

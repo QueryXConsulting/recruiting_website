@@ -33,7 +33,6 @@ onMounted(async () => {
     reservationResult.positionName = result.content.position;
     reservationResult.jobArea = result.content.jobArea;
     reservationResult.userName = result.content.userName;
-
 });
 
 // 更新状态
@@ -77,21 +76,6 @@ const updateStatus = async (status) => {
                     </el-row>
                 </template>
             </el-card>
-            <!-- <section class="right">
-                <h3>{{ reservationResult.positionName }}报到</h3>
-                <p class="desc">
-                    &emsp;&emsp;您好，<mark>{{ reservationResult.userName }}</mark>，恭喜您通过<mark>{{ reservationResult.companyName
-                    }}</mark>关于您就任<mark>{{ reservationResult.positionName }}</mark>这一职位的评估请您于
-                    <mark>{{ reservationResult.date }}</mark>报到，请准时到岗。
-                </p>
-                <el-row class="footer" justify="center">
-                    <el-col style="display: flex; justify-content: center; align-items: center;" class="form-item">
-                        <el-button type="danger" size="large" @click="resetForm">拒绝</el-button>
-                        <span style="width: 100px;"></span>
-                        <el-button type="primary" size="large" @click="submitForm">接受</el-button>
-                    </el-col>
-                </el-row>
-            </section> -->
         </main>
 
     </div>
@@ -138,7 +122,6 @@ h3 {
 
         h3 {
             font-size: 30px;
-            // padding: 0 0 40px 0;
         }
 
         .desc {
@@ -151,10 +134,6 @@ h3 {
             }
         }
     }
-
-    // .footer {
-    //     margin: 0px 0px 10px 0px;
-    // }
 }
 
 .reservation-status {

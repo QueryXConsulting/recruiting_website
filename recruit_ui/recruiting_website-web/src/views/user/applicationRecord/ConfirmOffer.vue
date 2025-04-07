@@ -183,8 +183,6 @@ const clearCanvas = () => {
 
 // 表格点击事件
 const handleOperationClick = async (btnIndex, row, text) => {
-    // console.log(row);
-    // return
     switch (text) {
         case '拒绝': // 拒绝
             const _updateResult = await offerStatus(row.offerId, 2);
@@ -212,12 +210,10 @@ const handleOperationClick = async (btnIndex, row, text) => {
 
 // 一页条数变化时触发
 const handleSizeChange = (size) => {
-    // console.log('update:page-size', size)
     pageSize.value = size
 }
 // 当前页码变化时触发
 const handleCurrentChange = (page) => {
-    // console.log('update:current-page', page)
     currentPage.value = page
 }
 

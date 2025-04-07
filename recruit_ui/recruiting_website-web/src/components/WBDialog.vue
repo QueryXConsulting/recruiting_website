@@ -1,5 +1,4 @@
 <script setup>
-import { ref, defineProps, defineModel, defineEmits } from 'vue'
 
 const isShowDialog = defineModel({ default: false, type: Boolean });
 const props = defineProps({

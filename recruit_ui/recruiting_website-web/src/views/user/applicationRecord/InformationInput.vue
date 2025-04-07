@@ -128,7 +128,6 @@ const resetForm = () => {
                     </el-col>
                     <el-col :span="8" class="form-item">
                         <label class="w-50" for="">性别</label>
-                        <!-- <input class="form-input" type="text" v-model="formData.gender" required="true" alt="性别" maxlength="1" minlength="1"> -->
                         <select v-model="formData.gender" name="gender" class="form-input w-50">
                             <option value="">--请选择--</option>
                             <option value="男">男</option>
@@ -173,9 +172,7 @@ const resetForm = () => {
                     </el-col>
                     <el-col :span="12" class="form-item">
                         <label class="w-50" for="">最高学历</label>
-                        <!-- <input class="form-input" type="text" v-model="formData.educationLevel" required="true" alt="最高学历"
-                            maxlength="5" minlength="2"> -->
-                        <select v-model="formData.educationLevel" name="educationLevel" class="form-input w-50">
+                       <select v-model="formData.educationLevel" name="educationLevel" class="form-input w-50">
                             <option value="">--请选择--</option>
                             <option value="高中">高中</option>
                             <option value="大专">大专</option>
@@ -239,7 +236,6 @@ const resetForm = () => {
     width: 80vw;
     min-height: 80vh;
     margin: auto;
-    // border: 2px solid red;
     padding: 5px;
 
     .form-section {

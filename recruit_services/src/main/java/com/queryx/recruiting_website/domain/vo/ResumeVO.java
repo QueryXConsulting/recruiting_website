@@ -72,6 +72,11 @@ public class ResumeVO {
     private String resumeName;
 
     /**
+     * 头像
+     */
+    private String userAvatar;
+
+    /**
      * 在校时间
      */
     private Date resumeEducationDate;

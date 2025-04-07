@@ -26,16 +26,6 @@ const rootData = reactive([
     { prop: "jobResumeId", label: "简历投递id" },
     { prop: "userId", label: "用户ID" }
 ]);
-// 对象数据填充
-const createObject = (val, data, fn) => {
-    const k = rootData.flatMap((item) => item.prop);
-    const v = rootData.flatMap((item) => item[val]);
-    for (let i = 0; i < k.length; i++) {
-        data[k[i]] = v[i];
-    }
-    fn(data);
-    return data;
-}
 
 // 表格列显示
 const tableColumns = reactive([]);
@@ -315,7 +305,6 @@ const cancelTime = () => {
         align-items: center;
     }
 
-    // gap: 10px;
     font-size: 17px;
 }
 </style>

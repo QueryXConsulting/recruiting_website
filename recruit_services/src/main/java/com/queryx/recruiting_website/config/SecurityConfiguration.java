@@ -75,6 +75,7 @@ public class SecurityConfiguration {
                 "/swagger-ui/**",
                 "/v3/**",
                 "/avatar_files/**",
+                "/resume_files/**",
                 "/offer_files/**",
                 "/company/offer/save",
                 "/signature_files/**",

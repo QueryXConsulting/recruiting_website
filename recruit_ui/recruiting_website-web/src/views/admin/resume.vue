@@ -144,6 +144,7 @@ const updateResumeType = (val) => {
 const updateResumeStatus = (val) => {
     if (val === '-1') {
         delete queryObj.resumeStatus;
+        return;
     }
     queryObj.resumeStatus = val;
 }

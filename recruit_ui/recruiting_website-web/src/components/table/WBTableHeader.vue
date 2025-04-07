@@ -1,6 +1,6 @@
 <script setup>
-import { ref, defineModel, defineEmits, defineProps } from 'vue';
 import { Search } from '@element-plus/icons-vue';
+
 // model
 const inputModel = defineModel('input', { type: String, default: '' });
 const selectModel = defineModel('select', { type: String, default: '' });

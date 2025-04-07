@@ -75,6 +75,7 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 "/admin/role",
                 "/avatar_files/**",
                 "/offer_files/**",
+                "/resume_files/**",
                 "/signature_files/**",
                 "/company/registerCompany",
                 "/company/offer/save",

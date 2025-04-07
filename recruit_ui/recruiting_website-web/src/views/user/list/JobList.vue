@@ -95,32 +95,6 @@ h3 {
     margin: 0 0 10px 0;
 }
 
-.search-container {
-    display: flex;
-    margin: 10px;
-    border-radius: 15px;
-    align-items: center;
-    // flex-direction: column;
-    justify-content: center;
-    padding: 20px 10px 20px;
-    background: #fff;
-
-    .search-input {
-        width: 80%;
-        margin: 10px;
-
-        &:hover {
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-        }
-    }
-
-    .search-other {
-        display: flex;
-        justify-content: start;
-    }
-}
-
 .jobs-company {
     margin: 0 0 10px 0;
     font-size: 18px;
@@ -142,7 +116,6 @@ h3 {
     color: #999;
 }
 
-// }
 
 .jobs-other {
     display: flex;

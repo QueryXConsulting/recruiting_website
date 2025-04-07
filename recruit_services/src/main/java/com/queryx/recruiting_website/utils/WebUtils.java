@@ -4,8 +4,6 @@ package com.queryx.recruiting_website.utils;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class WebUtils
 {
