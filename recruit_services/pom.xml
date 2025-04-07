@@ -43,19 +43,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- HikariCP 数据库连接池 -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
-        </dependency>
-
-        <!-- netty -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.50.Final</version>
-        </dependency>
 
         <!--ik分词器-->
         <dependency>
@@ -63,6 +50,8 @@
             <artifactId>ikanalyzer</artifactId>
             <version>2012_u6</version>
         </dependency>
+
+
 
         <!--jwt依赖-->
         <dependency>
@@ -103,6 +92,12 @@
             <version>2.8.0</version>
         </dependency>
 
+        <!-- HikariCP 数据库连接池 -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>com.baomidou</groupId>

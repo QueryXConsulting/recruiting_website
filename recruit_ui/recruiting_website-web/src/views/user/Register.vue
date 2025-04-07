@@ -53,7 +53,7 @@ const educationOptions = [
     { label: '大学以下' },
 ];
 // 工资选项
-const salaryOptions = [ // { range: "--请选择--" }, 
+const salaryOptions = [ // { range: "--请选择--" },
     { range: "面议" }, { range: "1k" }, { range: "2k" }, { range: "3k" },
     { range: "4k" }, { range: "5k" }, { range: "6k" }, { range: "7k" }, { range: "8k" },
     { range: "9k" }, { range: "10k" }, { range: "11k" }, { range: "12k" }, { range: "13k" }
@@ -62,30 +62,41 @@ const salaryRange = reactive([]); // 工资范围(例如：['1k', '5k'])
 
 // 自定义表单验证规则
 const validatePolitical = (rule, val, callback) => {
-    if (val === politicalOptions[0].label) {
-        callback(new Error('请输入选择您的政治面貌'))
+    if (!val || val === '--请选择--') {
+        callback(new Error('请选择您的政治面貌'));
+    } else {
+        callback();
     }
 }
 const validateGender = (rule, value, callback) => {
-    if (value === '') {
+    if (!value) {
         callback(new Error('请选择性别'));
+    } else {
+        callback();
     }
 }
 const validateBirth = (rule, value, callback) => {
-    if (value === '') {
+    if (!value) {
         callback(new Error('请选择出生日期'));
+    } else {
+        callback();
     }
 }
 const validateMarriage = (rule, value, callback) => {
-    if (value === '') {
+    if (!value) {
         callback(new Error('请选择婚姻状况'));
+    } else {
+        callback();
     }
 }
 const validateSalary = (rule, value, callback) => {
-    if (value === '') {
-        callback(new Error('请选择期望薪资'));
+    if (!salaryRange[0] || !salaryRange[1]) {
+        callback(new Error('请选择期望薪资范围'));
+    } else if (parseInt(salaryRange[1].replace('k', '')) < parseInt(salaryRange[0].replace('k', ''))) {
+        callback(new Error('薪资范围上限不能小于下限'));
+    } else {
+        callback();
     }
-    console.log(value);
 }
 
 // 表单数据验证规则
@@ -199,19 +210,15 @@ const formDisplay = reactive({});
 const refForm = ref(null);
 // 表单提交函数
 const handleSubmit = async () => {
-    refForm.value.validate((valid) => {
+    refForm.value.validate(async (valid) => {
         if (!valid) {
             return;
         }
+        formData.resumeSalary = salaryRange.join('-');
+        console.log(formData);
+        const res = await userRegister(formData);
+        ElMessage.success(res.message);
     });
-    if (salaryRange[1].replace('k', '') < salaryRange[0].replace('k', '')) {
-        refForm.value.validateField('resumeSalary');
-        return;
-    }
-    formData.resumeSalary = salaryRange.join('-');
-    console.log(formData);
-    const res = await userRegister(formData);
-    ElMessage.success(res.message);
 }
 // 表单取消函数
 const handleCancel = () => {
