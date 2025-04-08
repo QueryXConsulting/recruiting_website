@@ -1,12 +1,12 @@
 package com.queryx.recruiting_website.service;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
-import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.utils.CommonResp;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
+
     /**
      * 用户注册
      *

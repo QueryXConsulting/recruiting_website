@@ -34,7 +34,7 @@ public class RegistrationController {
     @GetMapping("/status/query")
     @Operation(summary = "信息录入状态查询", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<RegistrationStatusVO> getRegistrationStatus() {
         return registrationService.queryRegistrationStatus();
@@ -44,7 +44,7 @@ public class RegistrationController {
     @GetMapping("/position")
     @Operation(summary = "查询入职职位", description = "查询信息录入页面职位", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<InfoInputVO> getInfoInputPosition() {
         return registrationService.queryInfoInputPosition();
@@ -56,7 +56,7 @@ public class RegistrationController {
             @Parameter(name = "registrationDTO", description = "候选人信息", schema = @Schema(implementation = RegistrationDTO.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<Boolean> insertRegistrationInfo(@RequestBody RegistrationDTO registrationDTO) {
         if (registrationDTO == null) {
@@ -69,7 +69,7 @@ public class RegistrationController {
     @GetMapping("/reservation")
     @Operation(summary = "查询候选人信息", description = "查询候选人信息", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<ReservationRegistrationVO> getReservationRegistrationInfo() {
         return registrationService.queryRegistrationInfo();
@@ -77,9 +77,11 @@ public class RegistrationController {
 
 
     @PutMapping("/status/update")
-    @Operation(summary = "修改报到状态", description = "修改候选人报到状态", responses = {
+    @Operation(summary = "修改报到状态", parameters = {
+            @Parameter(name = "status", description = "状态", schema = @Schema(implementation = String.class), required = true)
+    }, description = "修改候选人报到状态", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<Boolean> setReservationRegistrationStatus(@RequestBody String status) {
         return registrationService.insertReservationStatus(status);

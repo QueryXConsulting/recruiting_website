@@ -42,7 +42,6 @@ onMounted(async () => {
     windowStatusMessage.value = windowStatusOptions.find(item => item.status === resultStatus)?.description || '';
     if (windowStatus.value === 0 || windowStatus.value === 3) {
         const res2 = await registrationInfo();
-        //    hireDate.value = res2.content.hireDate;
         position.value = res2.content.position;
     }
 })

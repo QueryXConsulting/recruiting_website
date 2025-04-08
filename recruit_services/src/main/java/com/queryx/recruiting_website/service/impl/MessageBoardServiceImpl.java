@@ -96,7 +96,7 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
         return messageBoards.stream().map(messageBoard -> {
             MessageDataVO messageDataVO = new MessageDataVO();
             BeanUtils.copyProperties(messageBoard, messageDataVO);
-            if ("0".equals(messageBoard.getOwnerUser())) {
+            if (Common.USER_TYPE.equals(messageBoard.getOwnerUser())) {
                 String userName = userService.getById(userId).getUserName();
                 messageDataVO.setUser(userName);
             } else {
@@ -148,7 +148,7 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
                 .collect(Collectors.toMap(TDMessageBoard::getCompanyId, Function.identity()
                         , BinaryOperator.maxBy(Comparator.comparing(TDMessageBoard::getCreateTime))))
                 .values());
-        // TODO 留言列表：id和名字对应关系待确认
+
         return latestMessageBoards.stream().map(messageBoard -> {
             LastMessageVO lastMessageVO = new LastMessageVO();
             BeanUtils.copyProperties(messageBoard, lastMessageVO);

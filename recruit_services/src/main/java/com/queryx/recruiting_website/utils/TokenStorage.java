@@ -10,10 +10,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 
-
 public class TokenStorage {
     private static final ConcurrentHashMap<String, Map.Entry<Object, Long>> TOKEN_MAP = new ConcurrentHashMap<>();
-    private static  final long EXPIRATION_TIME = 8 * 60 * 60 * 1000L;
+    private static final long EXPIRATION_TIME = 8 * 60 * 60 * 1000L;
+
     public static void addToken(String token, Object object) {
         long expiration = System.currentTimeMillis() + EXPIRATION_TIME;
         TOKEN_MAP.put(token, new AbstractMap.SimpleEntry<>(object, expiration));
@@ -38,7 +38,7 @@ public class TokenStorage {
 
     // 初始化
     @PostConstruct
-    public void init(){
+    public void init() {
         scheduleTokenCleanup();
     }
 

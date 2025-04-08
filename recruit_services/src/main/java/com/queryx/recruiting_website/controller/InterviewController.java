@@ -28,14 +28,15 @@ public class InterviewController {
     /**
      * 查询用户面试信息
      *
+     * @param interviewId 面试id
      * @return 面试信息
      */
     @Operation(summary = "查询用户面试信息", parameters = {
             @Parameter(name = "interviewId", description = "面试id", schema = @Schema(implementation = Long.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "425", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "477", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/info")
     public CommonResp<InterviewVO> queryInterview(@RequestParam("interviewId") Long interviewId) {
@@ -53,6 +54,7 @@ public class InterviewController {
             @Parameter(name = "companyId", description = "公司id", schema = @Schema(implementation = Long.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/date")
     public CommonResp<List<InterviewDateVO>> getInterviewDate(@RequestParam("companyId") Long companyId) {
@@ -71,6 +73,7 @@ public class InterviewController {
             @Parameter(name = "pageSize", description = "一页显示的条数", schema = @Schema(implementation = Integer.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/list")
     public CommonResp<Page<InterviewVO>> queryInterviews(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -92,12 +95,12 @@ public class InterviewController {
     }, responses = {
             @ApiResponse(responseCode = "200", description = "接受成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "477", description = "面试不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "482", description = "确少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "485", description = "用户不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/isAccept")
-    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept, @RequestBody() Date date) {
+    public CommonResp<Boolean> handleAcceptInterview(@RequestParam("interviewId") Long interviewId, @RequestParam("isAccept") String isAccept, @RequestBody(required = false) Date date) {
         if (interviewId == null || isAccept == null) {
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }

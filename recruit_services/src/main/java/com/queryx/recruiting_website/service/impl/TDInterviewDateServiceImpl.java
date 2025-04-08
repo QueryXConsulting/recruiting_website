@@ -14,8 +14,6 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class TDInterviewDateServiceImpl extends ServiceImpl<TDInterviewDateMapper, TDInterviewDate> implements TDInterviewDateService {
     @Resource

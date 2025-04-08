@@ -3,7 +3,6 @@ package com.queryx.recruiting_website.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * 用户登录数据传输对象

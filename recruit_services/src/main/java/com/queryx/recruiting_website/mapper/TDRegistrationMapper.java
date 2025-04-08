@@ -3,7 +3,6 @@ package com.queryx.recruiting_website.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import com.queryx.recruiting_website.domain.TDRegistration;
-import com.queryx.recruiting_website.domain.dto.RegistrationDTO;
 import com.queryx.recruiting_website.domain.vo.ReservationRegistrationVO;
 
 /**

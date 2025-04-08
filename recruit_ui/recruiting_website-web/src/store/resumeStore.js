@@ -9,7 +9,6 @@ const useResumeListStore = defineStore('resumeList', {
         size: 10,
         userName: '',
         resumeType: 0
-        // ,
         // resumeReview: 1,
         // resumeStatus: 0
       },

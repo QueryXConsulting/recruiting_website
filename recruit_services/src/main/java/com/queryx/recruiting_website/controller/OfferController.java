@@ -28,14 +28,12 @@ public class OfferController {
     private OfferService offerService;
 
 
-
-
     @Operation(summary = "offer列表", parameters = {
             @Parameter(name = "page", description = "页面", schema = @Schema(implementation = Integer.class), required = true),
             @Parameter(name = "size", description = "条数", schema = @Schema(implementation = Integer.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @RequestMapping("/list")
     public CommonResp<Page<OffersVO>> queryOffers(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
@@ -50,7 +48,7 @@ public class OfferController {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "486", description = "offer不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/detail")
     public CommonResp<String> queryOfferFilePath(@RequestParam("offerId") Long offerId) {
@@ -64,16 +62,15 @@ public class OfferController {
             @Parameter(name = "status", description = "offer状态", schema = @Schema(implementation = String.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "486", description = "offer不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/status")
     public CommonResp<Boolean> setOfferStatus(@RequestParam("offerId") Long offerId, @RequestParam("status") String status) {
         if (offerId == null || status == null) return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         return offerService.setOfferStatus(offerId, status);
     }
-
-
 
 
     @Operation(summary = "签名图片上传", parameters = {

@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.Aspect;
 
-import com.queryx.recruiting_website.domain.LoginAdmin;
 import com.queryx.recruiting_website.domain.OperateLog;
 import com.queryx.recruiting_website.service.IOperateLogService;
 import com.queryx.recruiting_website.utils.CommonResp;
@@ -14,14 +13,12 @@ import org.aspectj.lang.annotation.Aspect;
 
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Aspect

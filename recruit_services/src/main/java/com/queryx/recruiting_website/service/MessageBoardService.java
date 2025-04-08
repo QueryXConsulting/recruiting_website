@@ -13,10 +13,11 @@ import java.util.List;
  */
 public interface MessageBoardService extends IService<TDMessageBoard> {
 
-    Object getMessageData(Integer page,Integer size,Long userId);
+    Object getMessageData(Integer page, Integer size, Long userId);
 
     /**
      * 查询用户与公司留言数据
+     *
      * @param companyId 公司id
      * @return 留言数据
      */
@@ -26,6 +27,7 @@ public interface MessageBoardService extends IService<TDMessageBoard> {
 
     /**
      * 查询用户所有留言记录
+     *
      * @return 留言记录
      */
     List<LastMessageVO> queryMessageListAndLastMessage();
@@ -34,13 +36,12 @@ public interface MessageBoardService extends IService<TDMessageBoard> {
 
     /**
      * 发送留言
+     *
      * @param companyId 公司id
-     * @param content 留言内容
-     * @return 留言数据
+     * @param content   留言内容
+     * @return 留言数据保存结果
      */
     Boolean saveMessage(Long companyId, String content);
-
-
 
 
 }

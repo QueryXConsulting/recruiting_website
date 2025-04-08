@@ -1,4 +1,3 @@
-import router from '@/router'
 import userStore from '@/store/user'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
@@ -31,7 +30,6 @@ request.interceptors.request.use((config) => {
 
   // 用户端测试专用
   if(baseUrl.startsWith('/api')){
-    // config.url = baseUrl.replace('/api', '')
     return config;
   }
 

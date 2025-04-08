@@ -173,7 +173,7 @@ const postMessage = async () => {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .message-board-container {
   display: flex;
   height: 100%;

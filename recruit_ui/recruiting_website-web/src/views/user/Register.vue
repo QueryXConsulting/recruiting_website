@@ -1,6 +1,6 @@
 <script setup>
 import WBForm from "@/components/WBForm.vue";
-import { ref, reactive, computed } from "vue";
+import { ref, reactive } from "vue";
 import { userRegister } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 
@@ -53,7 +53,7 @@ const educationOptions = [
     { label: '大学以下' },
 ];
 // 工资选项
-const salaryOptions = [ // { range: "--请选择--" },
+const salaryOptions = [
     { range: "面议" }, { range: "1k" }, { range: "2k" }, { range: "3k" },
     { range: "4k" }, { range: "5k" }, { range: "6k" }, { range: "7k" }, { range: "8k" },
     { range: "9k" }, { range: "10k" }, { range: "11k" }, { range: "12k" }, { range: "13k" }
@@ -174,10 +174,8 @@ const formRules = {
 // 表单数据对象填充函数
 const createObject = (data, fn) => {
     const k = formItems.flatMap((item) => item.prop);
-    // const v = formItems.flatMap((item) => item.value);
     for (let i = 0; i < k.length; i++) {
         data[k[i]] = null;
-        // data[k[i]] = v[i];
     }
     fn(data);
     return data;
@@ -300,7 +298,4 @@ const handleCancel = () => {
     position: relative;
 }
 
-// .register-btn {
-
-// }
 </style>

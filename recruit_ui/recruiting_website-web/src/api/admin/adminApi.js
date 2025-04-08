@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import Company from '@/views/company/company.vue'
 
 const API = {
   USER_LIST_URL: '/admin/selectUserList',
@@ -18,7 +17,6 @@ const API = {
   ADMIN_INFO: '/admin/getInfo',
   COMPANY_LIST: '/admin/companyList',
   COMPANY_ENTERPRISEFILES: '/admin/enterpriseFiles',
-  // COMPANY_DETAIL: '/admin/companyDetail',
   COMPANY_UPDATE: '/admin/updateCompanyInfo',
   ROUTER_URL: '/api/user/getRouters',
   ROLE_LIST: '/admin/selectRoleList',

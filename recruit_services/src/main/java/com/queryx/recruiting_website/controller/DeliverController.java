@@ -36,8 +36,8 @@ public class DeliverController {
             @Parameter(name = "deliverResumeDTO", description = "简历投递信息", schema = @Schema(implementation = DeliverResumeDTO.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(type = "object", implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "421", description = "投递简历失败", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "470", description = "投递简历失败", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
     })
     @PostMapping("/resume")
     public CommonResp<Integer> deliverResume(@RequestBody DeliverResumeDTO deliverResumeDTO) {
@@ -68,8 +68,7 @@ public class DeliverController {
             @Parameter(name = "pageSize", description = "每页大小", required = true, schema = @Schema(type = "integer", defaultValue = "10"))
     }, responses = {
             @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(type = "object", implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "421", description = "分页不能为空", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
     })
     @GetMapping("/list")
     public CommonResp<Page<JobResumeVO>> queryJobResumeList(@RequestParam("page") Integer pageNum, @RequestParam("pageSize") Integer pageSize) {

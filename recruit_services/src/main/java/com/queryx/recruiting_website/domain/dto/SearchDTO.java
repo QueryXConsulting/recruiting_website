@@ -12,9 +12,9 @@ public class SearchDTO {
     // 关键字
     private String keyword;
     // 页码
-    private int page;
+    private Integer page;
     // 每页显示条数
-    private int size;
+    private Integer size;
     // 搜索类型
     private SearchType searchType;
     // 排序类型

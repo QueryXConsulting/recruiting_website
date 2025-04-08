@@ -62,7 +62,7 @@ const handleSizeChange = (pageSize) => {
             <template #item-prepend>
                 <el-image style="width: 100px; height: 100px;" :src="result.companyLogo" fit="fill">
                     <template #error="">
-                        <img src="../../../../public/company.png" alt="">
+                        <img src="../../../../public/company.png" alt="默认公司logo">
                     </template>
                 </el-image>
             </template>
@@ -90,9 +90,4 @@ h3 {
     margin: 0 0 15px 0;
 }
 
-
-.companys-desc {
-    // margin: 10px;
-    // border: 1px solid #ccc;
-}
 </style>

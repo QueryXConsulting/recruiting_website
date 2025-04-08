@@ -1,7 +1,7 @@
 <script lang="js" setup>
 import { roleList } from '@/api/admin/RoleApi'
 import { userDelete, userList, userAdd, userInfo, userUpdate, userAvatarUpload } from '@/api/admin/UserApi';
-import { ref, computed, reactive, defineEmits } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import useUserListStore from '@/store/userListQueryParmesStore'
 import { ElMessage } from 'element-plus';
 import WBDialog from '@/components/WBDialog.vue';
@@ -431,9 +431,6 @@ const handleCurrentChange = (val) => {
     .tableLab {
         display: flex;
         align-content: center;
-
-        // flex-direction: column;
-        // cursor: pointer;
         .search {
             position: relative;
             display: flex;
