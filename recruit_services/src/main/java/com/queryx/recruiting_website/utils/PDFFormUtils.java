@@ -20,10 +20,9 @@ public class PDFFormUtils {
     private static final int DEFAULT_FONT_SIZE = 12;
 
 
-    public static PDDocument fillPDFForm(String templatePath, Map<String, String> formData, String fontPath) throws IOException {
+    public static PDDocument fillPDFForm(String templatePath, Map<String, String> formData, String fontPath, Integer sendFont) throws IOException {
         fontPath = StringUtils.hasText(fontPath) ? fontPath : DEFAULT_FONT_PATH;
-
-
+        int fontSize = sendFont == null ? DEFAULT_FONT_SIZE : sendFont;
         PDDocument document = Loader.loadPDF(new File(templatePath));
         if (!new File(fontPath).exists()) {
             throw new FileNotFoundException("不存在的路径: " + fontPath);
@@ -40,7 +39,7 @@ public class PDFFormUtils {
         PDResources resources = setupResources(acroForm, font);
 
 
-        configureFormFields(acroForm, formData);
+        configureFormFields(acroForm, formData, fontSize);
 
         acroForm.setNeedAppearances(true);
         acroForm.flatten();
@@ -66,7 +65,7 @@ public class PDFFormUtils {
         return resources;
     }
 
-    private static void configureFormFields(PDAcroForm acroForm, Map<String, String> formData) {
+    private static void configureFormFields(PDAcroForm acroForm, Map<String, String> formData,Integer fontSize) {
         formData.forEach((fieldName, value) -> {
             List<PDField> fields = acroForm.getFields();
             for (PDField field : fields) {
@@ -75,7 +74,7 @@ public class PDFFormUtils {
                     if (field instanceof PDTextField) {
                         PDTextField textField = (PDTextField) field;
                         try {
-                            textField.setDefaultAppearance("/" + DEFAULT_FONT_NAME + " " + DEFAULT_FONT_SIZE + " Tf 0 g");
+                            textField.setDefaultAppearance("/" + DEFAULT_FONT_NAME + " " + fontSize + " Tf 0 g");
                             textField.setValue(value != null ? value : "");
                             textField.setReadOnly(true);
                         } catch (IOException e) {
@@ -83,7 +82,6 @@ public class PDFFormUtils {
                         }
                         textField.setReadOnly(true);
                     }
-
                     break;
                 }
 

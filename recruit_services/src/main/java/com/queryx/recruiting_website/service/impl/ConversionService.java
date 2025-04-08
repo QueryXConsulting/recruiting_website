@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
-public class OnlyOfficeConversionService {
+public class ConversionService {
 
     @Resource
     private OfferTemplateMapper offerTemplateMapper;

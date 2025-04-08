@@ -3,8 +3,8 @@
     <!-- 导航栏 -->
     <nav class="nav-header">
       <div class="logo-container">
-        <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Google"
-          class="google-logo">
+        <img src="/public/logo.png" alt="Google"
+          class="logo">
         <span class="workspace-text">问呗</span>
       </div>
     </nav>
@@ -19,13 +19,13 @@
           <div class="form-group">
             <input v-model="formData.companyName" type="text" class="form-input" :class="{ error: errors.companyName }"
               placeholder=" ">
-            <label>企业名称</label>
+            <label style="color: #FF7427;">企业名称</label>
           </div>
 
           <div class="form-group">
             <input v-model="formData.region" type="text" class="form-input" :class="{ error: errors.region }"
               placeholder=" ">
-            <label>所在城市</label>
+            <label  style="color: #FF7427;">所在城市</label>
           </div>
 
           <div class="button-group">
@@ -103,12 +103,12 @@ const handleNext = () => {
   gap: 4px;
 }
 
-.google-logo {
-  height: 24px;
+.logo {
+  height: 36px;
 }
 
 .workspace-text {
-  color: #5f6368;
+  color: #FF7427;
   font-size: 22px;
   font-weight: 400;
   margin-left: 4px;
@@ -143,6 +143,7 @@ const handleNext = () => {
   line-height: 2.5rem;
   /* margin: 0; */
   margin-bottom: 36px;
+  color: #FF7427;
 }
 
 .subtitle {
@@ -159,14 +160,14 @@ const handleNext = () => {
 .form-input {
   width: 100%;
   padding: 16px 12px;
-  border: 2px solid #dadce0;
+  border: 2px solid #EEE8AA;
   border-radius: 4px;
   font-size: 16px;
   transition: all 0.2s;
 }
 
 .form-input:focus {
-  border-color: #1a73e8;
+  border-color: #FF7427;
   border-width: 2px;
   outline: none;
 }
@@ -203,7 +204,7 @@ const handleNext = () => {
 }
 
 .next-button {
-  background-color: #1a73e8;
+  background-color: #FF7427;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -214,7 +215,7 @@ const handleNext = () => {
 }
 
 .next-button:hover {
-  background-color: #1557b0;
+  background-color: #FFAA66;
 }
 
 .footer {

@@ -70,6 +70,7 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
                 ));
 
         Page<OffersVO> offersVOPage = new Page<>(tdOffersPage.getCurrent(), tdOffersPage.getSize(), tdOffersPage.getTotal());
+        // 数据转化
         offersVOPage.setRecords(tdOffersPage.getRecords().stream().map(tdOffer -> {
             OffersVO offersVO = new OffersVO();
             BeanUtils.copyProperties(tdOffer, offersVO);
@@ -141,20 +142,22 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
         fieldValues.put("workTime", offerDataDto.getWorkTime()); // 工作时间
         fieldValues.put("salary", offerDataDto.getSalary()); // 工资待遇
         fieldValues.put("company", offerDataDto.getCompanyName()); // 公司名称
+        fieldValues.put("company_1", offerDataDto.getCompanyName()); // 公司名称
         fieldValues.put("position", offerDataDto.getPosition()); // 职位
         fieldValues.put("welfare", offerDataDto.getWelfare()); // 福利
         fieldValues.put("workLocation", offerDataDto.getWorkLocation()); // 工作地点
         fieldValues.put("material", offerDataDto.getMaterial()); // 报道材料
         // 获取当前日期
         LocalDate currentDate = LocalDate.now();
-        fieldValues.put("year", String.valueOf(currentDate.getYear()));
-        fieldValues.put("month", String.valueOf(currentDate.getMonthValue()));
-        fieldValues.put("day", String.valueOf(currentDate.getDayOfMonth()));
+        fieldValues.put("date", currentDate.getYear() + "年"
+                + currentDate.getMonthValue() + "月"
+                + currentDate.getDayOfMonth() + "日");
+
 
         // 填充处理
         String templatePath = offerDataDto.getTemplatePath();
         String fileName = templatePath.substring(templatePath.lastIndexOf('/') + 1);
-        PDDocument pdDocument = PDFFormUtils.fillPDFForm(Common.officeTemplatePath + fileName, fieldValues, null);
+        PDDocument pdDocument = PDFFormUtils.fillPDFForm(Common.officeTemplatePath + fileName, fieldValues, null, null);
         fileName = System.currentTimeMillis() + "_" + offerDataDto.getOfferId() + ".pdf";
         String officeName = "/offer_files/" + fileName;
         pdDocument.save(Common.officeFilePath + fileName);

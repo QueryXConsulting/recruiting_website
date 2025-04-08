@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <nav class="nav-bar">
       <div class="logo">
-        <img src="" alt="问呗" class="logo-img">
+        <img src="/public/logo.png" alt="问呗" class="logo-img">
         <span class="divider">|</span>
         <span class="recruit-text">招聘</span>
       </div>
@@ -48,9 +48,10 @@
       </div>
     </nav>
 
-    <!-- 主横幅区域 -->
-    <div class="banner">
+      <!-- 主横幅区域 -->
+      <div class="banner">
       <div class="banner-content">
+        <!-- <div class="banner-image"></div> -->
         <div class="banner-buttons">
           <button class="primary-btn" @click="router.push('/users/search')">校园招聘</button>
           <button class="primary-btn" @click="router.push('/users/registerCompany')">企业入驻</button>
@@ -69,6 +70,24 @@
         </div>
       </div>
     </section>
+
+
+
+    <!-- 公司优势区域 -->
+    <section class="advantages-section">
+      <h2>公司优势</h2>
+      <div class="advantages-grid">
+        <div class="advantage-item" v-for="(item, index) in advantageItems" :key="index">
+          <div class="advantage-icon">
+            <el-icon size="32px">
+              <component :is="item.icon" />
+            </el-icon>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -76,9 +95,9 @@
 import router from '@/router';
 import userStore from '@/store/user';
 import { ref } from 'vue';
-import { Bell } from '@element-plus/icons-vue';
+import { Bell, Medal, Opportunity, Place, School } from '@element-plus/icons-vue';
 import { iconMapping } from '@/utils/iconList';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { userLogout } from '@/api/company/companyApi';
 
 
@@ -130,6 +149,29 @@ const cultureItems = ref([
 
 ])
 
+const advantageItems = ref([
+  {
+    icon: Opportunity,
+    title: '发展空间',
+    description: '提供广阔的职业发展平台和晋升机会'
+  },
+  {
+    icon: Medal,
+    title: '具有竞争力的薪资',
+    description: '提供行业内具有竞争力的薪资待遇'
+  },
+  {
+    icon: School,
+    title: '培训体系',
+    description: '完善的培训体系，助力个人成长'
+  },
+  {
+    icon: Place,
+    title: '工作环境',
+    description: '舒适的办公环境，良好的团队氛围'
+  }
+]);
+
 
 </script>
 
@@ -144,13 +186,14 @@ const cultureItems = ref([
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 4rem;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.95);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .logo {
@@ -165,12 +208,12 @@ const cultureItems = ref([
 
 .divider {
   margin: 0 10px;
-  color: #666;
+  color: #FF7427;
 }
 
 .recruit-text {
   font-size: 16px;
-  color: #333;
+  color: #FF7427;
 }
 
 .nav-items {
@@ -189,7 +232,7 @@ const cultureItems = ref([
 
 .nav-item:hover,
 .nav-item.active {
-  color: #e60012;
+  color: #FF7427;
 }
 
 .nav-item.active::after {
@@ -199,7 +242,7 @@ const cultureItems = ref([
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #e60012;
+  background-color: #FF7427;
 }
 
 .message-flag {
@@ -207,12 +250,12 @@ const cultureItems = ref([
   width: 5px;
   height: 5px;
   right: 1%;
-  background: #f00;
+  background: #FF7427;
   border-radius: 50%;
 }
 
 .login-btn {
-  background: #e60012;
+  background: #FF7427;
   color: white;
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
@@ -221,26 +264,20 @@ const cultureItems = ref([
 }
 
 .login-btn:hover {
-  background: #cc0000;
+  background: #FFAA66;
 }
 
-.banner {
-  height: 100vh;
-  background: linear-gradient(45deg, #e60012, #ff4d4d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: white;
-}
 
 .culture-section {
-  padding: 4rem 0;
+  padding: 6rem 0;
   text-align: center;
+  background: rgba(255, 255, 255, 0.98);
 
   h2 {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: bold;
+    margin-bottom: 3rem;
+    color: #333;
   }
 }
 
@@ -252,15 +289,16 @@ const cultureItems = ref([
 }
 
 .culture-item {
-  background: #f5f5f5;
-  padding: 2rem;
-  border-radius: 8px;
+  background: rgba(245, 245, 245, 0.9);
+  padding: 2.5rem;
+  border-radius: 12px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .culture-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .stories-section {
@@ -281,10 +319,12 @@ const cultureItems = ref([
 }
 
 .primary-btn {
-  background: #e60012;
+  background: rgba(255, 116, 39, 0.9);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
   color: white;
-  border: none;
-  padding: 0.8rem 2rem;
   border-radius: 4px;
   margin: 0 1rem;
   cursor: pointer;
@@ -292,7 +332,8 @@ const cultureItems = ref([
 }
 
 .primary-btn:hover {
-  background: #cc0000;
+  background: rgba(255, 170, 102, 0.95);
+  transform: translateY(-2px);
 }
 
 .icon-placeholder {
@@ -324,4 +365,99 @@ const cultureItems = ref([
   vertical-align: middle;
   margin-right: 8px;
 }
+
+.banner {
+  height: 80vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-image: url('/public/index.png');
+  background-position: top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  justify-content: center;
+  text-align: center;
+  color: white;
+
+
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-buttons {
+  margin-top: 120px;
+  margin-right: 160px;
+  /* position: relative;
+  z-index: 2;
+  margin-top: 20px; */
+}
+
+
+.advantages-section {
+  padding: 6rem 0;
+  background-color: rgba(248, 249, 250, 0.97);
+  text-align: center;
+
+  h2 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 3rem;
+    color: #333;
+  }
+}
+
+.advantages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding: 2rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.advantage-item {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  h3 {
+    margin: 1rem 0;
+    color: #333;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.6;
+  }
+}
+
+.advantage-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 245, 240, 0.9);
+  border-radius: 50%;
+  color: #FF7427;
+}
+
+
 </style>

@@ -84,6 +84,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     public UserLoginVO login(AdminLoginDto adminLoginDto) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                 = new UsernamePasswordAuthenticationToken(adminLoginDto.getUsername(), adminLoginDto.getUserPassword());
+        // 交给框架进行校验
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         // 判断是否验证通过
         if (Objects.isNull(authenticate)) {
@@ -100,7 +101,6 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     @Override
     public AdminUserInfoVO getInfo() {
-
         LoginAdmin loginAdmin = SecurityUtils.getLoginAdmin();
         TDAdmin tdAdmin = loginAdmin.getTdAdmin();
         List<String> perms = selectPermsByRoleId(tdAdmin.getRoleId());

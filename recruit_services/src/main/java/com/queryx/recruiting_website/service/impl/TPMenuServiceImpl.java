@@ -81,6 +81,7 @@ public class TPMenuServiceImpl extends ServiceImpl<TPMenuMapper, TPMenu> impleme
 
 
     private List<MenuListVO> buildMenuTreeVO(List<TPMenu> menuList, Long parentId) {
+        // 构建菜单树
         return menuList.stream()
                 .filter(menu -> menu.getParentId().equals(parentId))
                 .map(menu -> {

@@ -62,6 +62,7 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
         return messageBoards.stream().map(messageBoard -> {
             MessageDataVO messageDataVO = new MessageDataVO();
             BeanUtils.copyProperties(messageBoard, messageDataVO);
+            // 根据用户角色不同设置对应的用户名
             if (Common.COMPANY_TYPE.equals(messageBoard.getOwnerUser())) {
                 String companyInfoName = companyInfoService.getById(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId()).getCompanyInfoName();
                 messageDataVO.setUser(companyInfoName);
@@ -117,12 +118,14 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
             return null;
         }
         List<Long> userId = messageBoards.stream().map(TDMessageBoard::getUserId).toList();
-        Map<Long, String> userNameMap = userService.listByIds(userId).stream().collect(Collectors.toMap(TDUser::getUserId, TDUser::getUserName));
-
+        // <userid,username>
+        Map<Long, String> userNameMap = userService.listByIds(userId).stream()
+                .collect(Collectors.toMap(TDUser::getUserId, TDUser::getUserName));
+        // 排序拿到最新的数据
         List<TDMessageBoard> latestMessageBoards = new ArrayList<>(messageBoards.stream()
                 .collect(Collectors.toMap(TDMessageBoard::getUserId, Function.identity()
-                        , BinaryOperator.maxBy(Comparator.comparing(TDMessageBoard::getCreateTime))))
-                .values());
+                        , BinaryOperator
+                                .maxBy(Comparator.comparing(TDMessageBoard::getCreateTime)))).values());
 
         return latestMessageBoards.stream().map(messageBoard -> {
             LastMessageVO lastMessageVO = new LastMessageVO();

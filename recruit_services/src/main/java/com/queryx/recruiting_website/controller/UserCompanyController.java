@@ -5,7 +5,7 @@ import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.*;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.service.*;
-import com.queryx.recruiting_website.service.impl.OnlyOfficeConversionService;
+import com.queryx.recruiting_website.service.impl.ConversionService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +47,7 @@ public class UserCompanyController {
     @Resource
     private TDRegistrationService registrationService;
     @Resource
-    private OnlyOfficeConversionService onlyOfficeConversionService;
+    private ConversionService conversionService;
 
 
     @GetMapping("/selectCategory")
@@ -235,7 +235,7 @@ public class UserCompanyController {
     public CommonResp uploadWithThumbnail(
             @RequestParam("file") MultipartFile pdfFile,
             @RequestParam("offerId") String offerId) throws IOException {
-        return CommonResp.success(onlyOfficeConversionService.convertPdfToImage(pdfFile, offerId));
+        return CommonResp.success(conversionService.convertPdfToImage(pdfFile, offerId));
     }
 
     @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")

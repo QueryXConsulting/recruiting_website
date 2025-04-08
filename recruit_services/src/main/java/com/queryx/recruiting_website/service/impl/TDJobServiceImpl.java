@@ -41,22 +41,24 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     @Override
     public IPage<JobCompanyListVO> selectJobList(Integer page, Integer size, String companyName,
                                                  String jobName, String jobReview, String status, String jobCategory, String jobNature) {
-        List<Long> targetCompanyIds = null;
-
+        // 查询符合条件的公司
         LambdaQueryWrapper<TDCompanyInfo> companyQueryWrapper = new LambdaQueryWrapper<>();
         companyQueryWrapper.like(StringUtils.hasText(companyName), TDCompanyInfo::getCompanyInfoName, companyName)
                 .eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
         List<TDCompanyInfo> companies = companyInfoService.list(companyQueryWrapper);
+
         if (companies.isEmpty()) {
             return new Page<>(page, size);
         }
-        targetCompanyIds = companies.stream()
+
+        // 提取公司 ID 列表
+        List<Long> targetCompanyIds = companies.stream()
                 .map(TDCompanyInfo::getCompanyInfoId)
                 .collect(Collectors.toList());
 
-
-        LambdaQueryWrapper<TDJob> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.hasText(jobName), TDJob::getJobPosition, jobName)
+        // 查询符合条件的职位
+        LambdaQueryWrapper<TDJob> jobWrapper = new LambdaQueryWrapper<>();
+        jobWrapper.like(StringUtils.hasText(jobName), TDJob::getJobPosition, jobName)
                 .eq(StringUtils.hasText(status), TDJob::getJobStatus, status)
                 .eq(StringUtils.hasText(jobReview), TDJob::getJobReview, jobReview)
                 .like(StringUtils.hasText(jobCategory), TDJob::getJobCategory, jobCategory)
@@ -64,35 +66,32 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
                 .like(StringUtils.hasText(jobNature), TDJob::getJobNature, jobNature)
                 .in(TDJob::getCompanyId, targetCompanyIds);
 
+        // 分页查询职位
         Page<TDJob> pageVO = new Page<>(page, size);
-        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVO, wrapper);
-        if (jobPage.getRecords().isEmpty()) {
-            return new Page<>(page, size);
-        }
+        IPage<TDJob> jobPage = tdJobMapper.selectPage(pageVO, jobWrapper);
 
-
-        List<Long> companyIds = jobPage.getRecords().stream()
-                .map(TDJob::getCompanyId)
-                .distinct()
-                .collect(Collectors.toList());
-        List<TDCompanyInfo> tdCompanyInfos = companyInfoService.listByIds(companyIds);
-        Map<Long, String> companyNames = tdCompanyInfos.stream()
+        // 查询公司名称映射
+        Map<Long, String> companyNames = companies.stream()
                 .collect(Collectors.toMap(
                         TDCompanyInfo::getCompanyInfoId,
                         TDCompanyInfo::getCompanyInfoName,
-                        (k1, k2) -> k1));
+                        (k1, k2) -> k1)); // 避免键冲突
+
+        // 构造结果
         IPage<JobCompanyListVO> resultPage = new Page<>(
                 jobPage.getCurrent(),
                 jobPage.getSize(),
                 jobPage.getTotal()
         );
 
-        resultPage.setRecords(jobPage.getRecords().stream().map(tdJob -> {
-            JobCompanyListVO vo = new JobCompanyListVO();
-            BeanUtils.copyProperties(tdJob, vo);
-            vo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
-            return vo;
-        }).collect(Collectors.toList()));
+        resultPage.setRecords(jobPage.getRecords().stream()
+                .map(tdJob -> {
+                    JobCompanyListVO vo = new JobCompanyListVO();
+                    BeanUtils.copyProperties(tdJob, vo);
+                    vo.setCompanyName(companyNames.get(tdJob.getCompanyId()));
+                    return vo;
+                })
+                .collect(Collectors.toList()));
 
         return resultPage;
     }
@@ -139,7 +138,6 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
 
     @Override
     public Object deleteJob(Long jobId) {
-
         if (tdJobMapper.update(new LambdaUpdateWrapper<TDJob>().eq(TDJob::getJobId, jobId)
                 .set(TDJob::getDelFlag, Common.DELETE)) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
