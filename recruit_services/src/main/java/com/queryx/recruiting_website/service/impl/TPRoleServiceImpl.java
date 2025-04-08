@@ -69,6 +69,7 @@ public class TPRoleServiceImpl extends ServiceImpl<TPRoleMapper, TPRole> impleme
         tpRole.setUpdateTime(new Date());
         roleMapper.update(tpRole, updateWrapper);
 
+        // 删除旧的权限
         LambdaUpdateWrapper<TPRoleMenu> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(TPRoleMenu::getRoleId, roleInfoDto.getRoleId());
         roleMenuMapper.delete(wrapper);

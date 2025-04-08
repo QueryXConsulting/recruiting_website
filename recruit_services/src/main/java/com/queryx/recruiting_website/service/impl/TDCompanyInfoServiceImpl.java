@@ -56,6 +56,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     @Override
     public CompanyInfoDto updateCompanyInfo(CompanyInfoDto companyInfoDto, MultipartFile applyFiles, List<MultipartFile> pdfFiles) {
         String companyInfoUsername = companyInfoDto.getCompanyInfoUsername();
+        // 校验用户名是否有相同的
         if (StringUtils.hasText(companyInfoUsername)) {
             LambdaQueryWrapper<TDCompanyInfo> QueryWrapper = new LambdaQueryWrapper<>();
             QueryWrapper.eq(TDCompanyInfo::getCompanyInfoUsername, companyInfoUsername);
@@ -81,6 +82,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             tdCompanyInfo.setEnterpriseReview(companyInfoDto.getEnterpriseReview());
         }
         try {
+            // 资质上传
             handlePdfFiles(pdfFiles, tdCompanyInfo, companyInfoDto.getCompanyInfoId());
             handleApplyFile(applyFiles, tdCompanyInfo, companyInfoDto.getCompanyInfoId());
 
@@ -108,7 +110,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             validateAndSaveFile(pdf, Common.enterpriseFilePath, currentTimeMillis, fileName);
             appendFilePathToBuilder(enterpriseFiles, currentTimeMillis, fileName);
         }
-
+        // 删除以前的
         deleteOldEnterpriseFiles(companyInfoId);
         tdCompanyInfo.setEnterpriseFile(enterpriseFiles.toString());
     }
@@ -121,8 +123,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 
         validateAndSaveFile(applyFiles, Common.uploadPath, currentTimeMillis, fileName);
         tdCompanyInfo.setCompanyLogo("/avatar_files/" + currentTimeMillis + "_" + fileName);
-
-
+        // 删除以前的图片
         deleteOldCompanyLogo(companyInfoId);
     }
 
@@ -180,6 +181,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             return null;
         }
         Page<CompanyInfoVO> companyInfoVOPage = new Page<>(tdCompanyInfoPage.getCurrent(), tdCompanyInfoPage.getSize(), tdCompanyInfoPage.getTotal());
+        // 数据类型转化
         List<CompanyInfoVO> companyInfoVOList = tdCompanyInfoPage.getRecords().stream().map(tdCompanyInfo -> {
             CompanyInfoVO companyInfoVO = new CompanyInfoVO();
             BeanUtils.copyProperties(tdCompanyInfo, companyInfoVO);
@@ -244,7 +246,6 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
                 .eq(TDUser::getUserEmail, registerCompanyDto.getUserEmail()));
         boolean phoneExists = userMapper.exists(new LambdaQueryWrapper<TDUser>()
                 .eq(TDUser::getUserPhone, registerCompanyDto.getUserPhone()));
-
         if (emailExists) {
             throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
         }
@@ -262,8 +263,10 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         TDUser tdUser = new TDUser();
         tdUser.setCompanyInfoId(tdCompanyInfo.getCompanyInfoId());
         BeanUtils.copyProperties(registerCompanyDto, tdUser);
+        // 设置为公司角色boss
         tdUser.setUserRole("4");
         tdUser.setUserRegisterTime(new Date());
+        // 设置为首次登录
         tdUser.setIsFirstLogin("1");
         tdUser.setUserPassword(passwordEncoder.encode(registerCompanyDto.getCompanyInfoPassword()));
         userMapper.insert(tdUser);

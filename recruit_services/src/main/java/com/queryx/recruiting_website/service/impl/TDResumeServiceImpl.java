@@ -156,6 +156,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
         // 查找附件简历
         List<Long> userIds = users.stream().map(TDUser::getUserId).toList();
+        // 提取userid以及用户名的map
         Map<Long, String> usersNameMap = users.stream().collect(Collectors.toMap(TDUser::getUserId, TDUser::getUserName));
         LambdaQueryWrapper<TDResumeAttachments> attachmentsWrapper = new LambdaQueryWrapper<>();
         attachmentsWrapper.in(TDResumeAttachments::getUserId, userIds)
@@ -163,6 +164,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                 .eq(TDResumeAttachments::getIsDeleted, Common.NOT_DELETE);
         Page<TDResumeAttachments> attachments = tdResumeAttachmentsMapper.selectPage(new Page<>(page, size), attachmentsWrapper);
         Page<ResumeManageVO> attachmentVOs = new Page<>(attachments.getCurrent(), attachments.getSize(), attachments.getTotal());
+        // 数据转化
         attachmentVOs.setRecords(attachments.getRecords().stream().map(attachment -> {
             ResumeManageVO resumeManageVO = new ResumeManageVO();
             resumeManageVO.setResumeId(attachment.getResumeAttachmentId());

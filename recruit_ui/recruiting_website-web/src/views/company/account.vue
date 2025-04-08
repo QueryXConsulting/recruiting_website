@@ -6,7 +6,7 @@
         <i class="arrow left"></i>
       </div>
       <div class="logo-container">
-        <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Google"
+        <img src="/public/logo.png" alt="Google"
           class="google-logo">
         <span class="workspace-text">问呗</span>
       </div>
@@ -23,14 +23,14 @@
           <div class="form-group">
             <input v-model="formData.email" type="email" class="form-input" :class="{ 'error': errors.email }"
               placeholder=" ">
-            <label>企业电子邮件地址</label>
+            <label style="color: #FF7427;">企业电子邮件地址</label>
             <span v-if="errors.email" class="error-message">请输入企业电子邮件地址</span>
           </div>
 
           <div class="form-group">
             <input v-model="formData.password" type="password" class="form-input" :class="{ 'error': errors.password }"
               placeholder=" ">
-            <label>密码</label>
+            <label style="color: #FF7427;">密码</label>
             <span v-if="errors.password" class="error-message">请输入密码</span>
           </div>
 
@@ -128,11 +128,11 @@ const handleRegister = () => {
 }
 
 .google-logo {
-  height: 24px;
+  height: 36px;
 }
 
 .workspace-text {
-  color: #5f6368;
+  color: #FF7427;
   font-size: 22px;
   font-weight: 400;
   margin-left: 4px;
@@ -156,14 +156,14 @@ const handleRegister = () => {
 
 .title {
   font-size: 24px;
-  color: #202124;
+  color: #FF7427;
   margin-bottom: 8px;
   font-weight: 400;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #5f6368;
+  color: #FF7427;
   margin-bottom: 32px;
 }
 
@@ -175,14 +175,14 @@ const handleRegister = () => {
 .form-input {
   width: 100%;
   padding: 16px 12px;
-  border: 2px solid #dadce0;
+  border: 2px solid #EEE8AA;
   border-radius: 4px;
   font-size: 16px;
   transition: all 0.2s;
 }
 
 .form-input:focus {
-  border-color: #1a73e8;
+  border-color: #FF7427;
   border-width: 2px;
   outline: none;
 }
@@ -194,7 +194,7 @@ const handleRegister = () => {
   transform: translateY(-50%);
   background: white;
   padding: 0 4px;
-  color: #5f6368;
+  color: #FF7427;
   transition: all 0.2s;
   pointer-events: none;
 }
@@ -213,7 +213,7 @@ const handleRegister = () => {
 }
 
 .next-button {
-  background-color: #1a73e8;
+  background-color: #FF7427;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -224,7 +224,7 @@ const handleRegister = () => {
 }
 
 .next-button:hover {
-  background-color: #1557b0;
+  background-color: #FFAA66;
 }
 
 .back-arrow {
@@ -236,7 +236,7 @@ const handleRegister = () => {
 
 
 .arrow {
-  border: solid #5f6368;
+  border: solid #FF7427;
   border-width: 0 2px 2px 0;
   display: inline-block;
   padding: 4px;
@@ -252,14 +252,14 @@ const handleRegister = () => {
 }
 
 .form-input.error {
-  border-color: #d93025;
+  border-color: #FF7427;
 }
 
 .error-message {
   position: absolute;
   bottom: -20px;
   left: 12px;
-  color: #d93025;
+  color: #FF7427;
   font-size: 12px;
   margin-top: 4px;
   display: block;

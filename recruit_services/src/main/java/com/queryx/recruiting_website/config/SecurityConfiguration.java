@@ -86,12 +86,11 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)// 取消框架自带login
                 .securityContext(AbstractHttpConfigurer::disable)
                 .anonymous(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(it ->
-                        // TODO 待配置其他路径
                         it.requestMatchers("/user/login", "/user/register", "/user/logout","/company/registerCompany").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
@@ -103,18 +102,14 @@ public class SecurityConfiguration {
                             response.getWriter().write("{\"code\":200,\"message\":\"注销成功\"}");
                         })
                         .permitAll())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))// 配置跨域
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .authenticationEntryPoint(authenticationEntryPoint) // 异常捕获
                         .accessDeniedHandler(accessDeniedHandler)
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));// 取消session
 
-//        httpSecurity
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .anyRequest().permitAll() // 允许所有请求
-//                );
+
         return httpSecurity.build();
     }
 

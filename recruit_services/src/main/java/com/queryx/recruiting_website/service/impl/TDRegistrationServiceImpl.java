@@ -75,15 +75,15 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
             messageBoardService.sendMessage(offers.getUserId(), "您的入职信息已通过 —此消息来自系统自动发送");
         }
 
-        if (Common.REGISTRATION_REJECTED.equals(status)){
+        if (Common.REGISTRATION_REJECTED.equals(status)) {
             messageBoardService.sendMessage(offers.getUserId(), "您的入职信息未通过审核请重新提交 —此消息来自系统自动发送");
         }
 
-            if (date != null) {
-                updateWrapper.set(TDRegistration::getReservationStatus, "1")
-                        .set(TDRegistration::getHireDate, date);
-                messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 —此消息来自系统自动发送");
-            }
+        if (date != null) {
+            updateWrapper.set(TDRegistration::getReservationStatus, "1")
+                    .set(TDRegistration::getHireDate, date);
+            messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 —此消息来自系统自动发送");
+        }
 
         update(updateWrapper);
         return null;
@@ -109,7 +109,7 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         fieldValues.put("emergencyContact", registration.getEmergencyContact()); // 紧急联系人
         fieldValues.put("address", registration.getAddress()); // 家庭地址
 
-        return  PDFFormUtils.saveToByteArray(PDFFormUtils.fillPDFForm(inputPath, fieldValues, null));
+        return PDFFormUtils.saveToByteArray(PDFFormUtils.fillPDFForm(inputPath, fieldValues, null, null));
     }
 
 

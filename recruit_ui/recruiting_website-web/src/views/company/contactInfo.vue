@@ -6,7 +6,7 @@
         <i class="arrow left"></i>
       </div>
       <div class="logo-container">
-        <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Google"
+        <img src="/public/logo.png" alt="Google"
           class="google-logo">
         <span class="workspace-text">问呗</span>
       </div>
@@ -22,21 +22,21 @@
           <div class="form-group">
             <input v-model="formData.name" type="text" class="form-input" :class="{ 'error': errors.name }"
               placeholder=" ">
-            <label>名字</label>
+            <label style="color: #FF7427;">名字</label>
             <span class="error-message" v-if="errors.name">请输入名字</span>
           </div>
 
           <div class="form-group">
             <input v-model="formData.phone" type="text" class="form-input" :class="{ 'error': errors.phone }"
               placeholder=" ">
-            <label>手机号</label>
+            <label style="color: #FF7427;">手机号</label>
             <span class="error-message" v-if="errors.phone">请输入手机号</span>
           </div>
 
           <div class="form-group">
             <input v-model="formData.email" type="email" class="form-input" :class="{ 'error': errors.email }"
               placeholder=" ">
-            <label>当前电子邮件地址</label>
+            <label style="color: #FF7427;">当前电子邮件地址</label>
             <span class="error-message" v-if="errors.email">请输入有效的邮箱地址</span>
           </div>
 
@@ -121,11 +121,11 @@ const handleNext = () => {
 }
 
 .google-logo {
-  height: 24px;
+  height: 36px;
 }
 
 .workspace-text {
-  color: #5f6368;
+  color: #FF7427;
   font-size: 22px;
   font-weight: 400;
   margin-left: 4px;
@@ -155,14 +155,14 @@ const handleNext = () => {
 
 .title {
   font-size: 24px;
-  color: #202124;
+  color: #FF7427;
   margin-bottom: 8px;
   font-weight: 400;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #5f6368;
+  color: #FF7427;
   margin-bottom: 32px;
 }
 
@@ -174,14 +174,14 @@ const handleNext = () => {
 .form-input {
   width: 100%;
   padding: 16px 12px;
-  border: 2px solid #dadce0;
+  border: 2px solid #EEE8AA;
   border-radius: 4px;
   font-size: 16px;
   transition: all 0.2s;
 }
 
 .form-input:focus {
-  border-color: #1a73e8;
+  border-color: #FF7427;
   border-width: 2px;
   outline: none;
 }
@@ -212,7 +212,7 @@ const handleNext = () => {
 }
 
 .next-button {
-  background-color: #1a73e8;
+  background-color: #FF7427;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -223,7 +223,7 @@ const handleNext = () => {
 }
 
 .next-button:hover {
-  background-color: #1557b0;
+  background-color: #FFAA66;
 }
 
 .back-arrow {
@@ -235,7 +235,7 @@ const handleNext = () => {
 
 
 .arrow {
-  border: solid #5f6368;
+  border: solid #FF7427;
   border-width: 0 2px 2px 0;
   display: inline-block;
   padding: 4px;

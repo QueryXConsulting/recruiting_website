@@ -7,6 +7,11 @@ const whiteList = [
   '/auth/login',
   '/404',
   '/users/register',
+  '/users/index',
+  '/users/register',
+  '/users/registerCompany',
+  '/users/registerCompany/contactInfo',
+  '/users/registerCompany/account',
 ]
 
 // 路由配置
@@ -114,6 +119,7 @@ router.beforeEach((to, from, next) => {
   // if (to.path.startsWith('/users/')) {
   //   return next()
   // }
+
 
   if (store.token && to.path === '/auth/login') {
     return next('/users/index')

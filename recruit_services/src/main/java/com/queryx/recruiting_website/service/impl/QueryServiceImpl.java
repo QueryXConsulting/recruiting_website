@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
