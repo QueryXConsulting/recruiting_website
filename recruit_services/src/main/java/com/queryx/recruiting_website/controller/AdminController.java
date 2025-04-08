@@ -4,7 +4,6 @@ package com.queryx.recruiting_website.controller;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 import com.queryx.recruiting_website.service.IOperateLogService;
 import com.queryx.recruiting_website.service.TDAdminService;
-import com.queryx.recruiting_website.service.TPMenuService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

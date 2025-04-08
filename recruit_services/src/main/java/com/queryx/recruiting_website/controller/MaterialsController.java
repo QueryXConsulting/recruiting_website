@@ -35,7 +35,7 @@ public class MaterialsController {
     @GetMapping("/status")
     @Operation(summary = "获取材料上传状态", responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<Integer> getProcessStatus() {
         return materialsService.queryProcessStatus();
@@ -44,10 +44,11 @@ public class MaterialsController {
 
     @PostMapping("/upload")
     @Operation(summary = "材料上传", parameters = {
-            @Parameter(name = "files", description = "所有上传文件", schema = @Schema(implementation = List.class), required = true),
+            @Parameter(name = "files", description = "所有上传文件", schema = @Schema(implementation = Map.class), required = true),
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<Boolean> uploadMaterials(@RequestParam() Map<String, MultipartFile> files) {
         if (files == null || files.isEmpty()) {
@@ -62,7 +63,9 @@ public class MaterialsController {
             @Parameter(name = "files", description = "所有上传文件", schema = @Schema(implementation = List.class), required = true),
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "489", description = "未上传必要的材料", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     public CommonResp<Boolean> uploadOtherMaterials(@RequestParam("files") List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {

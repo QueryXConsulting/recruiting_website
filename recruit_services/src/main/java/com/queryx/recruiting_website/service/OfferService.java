@@ -30,8 +30,9 @@ public interface OfferService {
     CommonResp<Boolean> setOfferStatus(Long offerId, String status);
 
     /**
-     *  预览offer
-     * @Param offerId
+     * 预览offer
+     *
+     * @param offerId offer的Id
      * @return offer文件路径
      */
     CommonResp<String> getOfferFilePath(Long offerId);

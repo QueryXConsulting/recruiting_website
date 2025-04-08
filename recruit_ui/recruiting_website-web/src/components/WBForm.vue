@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, defineModel, defineProps, defineExpose } from 'vue';
+import { ref, defineModel, defineProps, defineExpose } from 'vue';
 
 // model
 const formData = defineModel({ type: Object, default: {} });
@@ -22,9 +22,6 @@ defineExpose(new Proxy({}, {
     get(_target, prop) {
         return formRef.value?.[prop]
     },
-    // set(_target, prop, value) {
-    //     formRef.value?.[prop] = value;
-    // },
     has(_target, prop) {
         return prop in formRef.value
     }
@@ -43,12 +40,6 @@ defineExpose(new Proxy({}, {
                     </el-form-item>
                 </slot>
             </template>
-
-            <!-- <template v-for="(_, name) in $slots" #[name]="slotData">
-                <slot :name="name" v-bind="slotData || {}">
-                </slot>
-
-            </template> -->
         </el-form>
     </div>
 </template>

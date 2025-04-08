@@ -8,8 +8,7 @@ import com.queryx.recruiting_website.domain.LoginUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class SecurityUtils
-{
+public class SecurityUtils {
     public static LoginAdmin getLoginAdmin() {
         return (LoginAdmin) getAuthentication().getPrincipal();
     }

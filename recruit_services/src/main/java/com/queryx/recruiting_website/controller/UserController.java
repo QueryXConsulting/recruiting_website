@@ -45,11 +45,11 @@ public class UserController {
             @Parameter(name = "registerDTO", description = "用户注册信息", schema = @Schema(implementation = RegisterDTO.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "注册成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "402", description = "用户已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "403", description = "邮箱已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "404", description = "手机号已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "424", description = "手机号或邮箱输入不合法", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "451", description = "用户已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "453", description = "邮箱已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "452", description = "手机号已存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "476", description = "手机号或邮箱输入不合法", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
 
     })
     @PostMapping("/register")
@@ -115,7 +115,9 @@ public class UserController {
             @Parameter(name = "image", description = "头像图片", required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "482", description = "缺失参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "482", description = "缺失参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "484", description = "头像上传失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PostMapping("/uploadAvatar")
     public CommonResp<String> uploadAvatar(@RequestParam("image") MultipartFile image) {

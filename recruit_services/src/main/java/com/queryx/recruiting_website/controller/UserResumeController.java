@@ -1,5 +1,8 @@
 package com.queryx.recruiting_website.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.queryx.recruiting_website.domain.TDResumeAttachments;
+import com.queryx.recruiting_website.mapper.TDResumeAttachmentsMapper;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +31,8 @@ public class UserResumeController {
     @Autowired
     private UserResumeService userManagementService;
 
+    @Autowired
+    private TDResumeAttachmentsMapper tdResumeAttachmentsMapper;
     /**
      * 上传附件简历
      *
@@ -35,17 +40,24 @@ public class UserResumeController {
      * @return 返回上传结果
      */
     @Operation(summary = "上传附件简历", parameters = {
-            @Parameter(name = "file", description = "上传的文件", schema = @Schema(implementation = MultipartFile.class), required = true)
+            @Parameter(name = "attachment", description = "上传的文件", schema = @Schema(implementation = MultipartFile.class), required = true)
     },
     responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "408", description = "文件上传失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "457", description = "文件上传失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PostMapping("/upload")
     public CommonResp<Integer> handleResumeUpload(@RequestParam("attachment") MultipartFile file) {
         Integer message = 0;
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
+        LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(TDResumeAttachments::getResumeAttachmentId);
+        wrapper.eq(TDResumeAttachments::getUserId, userId);
+        // 附件简历数量限制
+        if (tdResumeAttachmentsMapper.selectCount(wrapper) > 5) {
+            return CommonResp.fail(AppHttpCodeEnum.NUMBER_OF_ATTACHED_RESUMES_EXCEEDS_THE_LIMIT, null);
+        }
         try {
             message = userManagementService.insertResumeAttachment(userId, file);
             if (message <= 0) return CommonResp.fail(AppHttpCodeEnum.FILE_UPLOAD_ERROR, message);
@@ -67,8 +79,8 @@ public class UserResumeController {
     },
     responses = {
             @ApiResponse(responseCode = "200", description = "删除成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "420", description = "删除失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            @ApiResponse(responseCode = "469", description = "删除失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @DeleteMapping("/delete")
     public CommonResp<Integer> handleResumeDelete(@RequestParam("id") Long raId) {
@@ -98,7 +110,7 @@ public class UserResumeController {
     },
     responses = {
             @ApiResponse(responseCode = "200", description = "更新成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "419", description = "更新失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "468", description = "更新失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/update")

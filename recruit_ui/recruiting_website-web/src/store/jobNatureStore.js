@@ -10,9 +10,7 @@ const useJobNatureStore = defineStore('jobNature', {
     
   },
   // getters 用于定义计算属性。使用方法与调用属性一样，并不是调用方法。
-  getters: {
-    // getter方法，用于获取网络请求参数
-    
+  getters: {    
   },
   persist: {
     key: 'jobNature',

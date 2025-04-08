@@ -38,9 +38,6 @@ public class UserServiceImpl implements UserService {
 
     public static final String PHONE = "(^1[3-9]\\d{9}$)";
     public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-    //    final boolean  =
-    public final String USER_ID = "userId";
-    public final String RESUME_ID = "resumeId";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,7 +60,6 @@ public class UserServiceImpl implements UserService {
         // 复制属性
         BeanUtils.copyProperties(registerDTO, user);
         BeanUtils.copyProperties(registerDTO, userResume);
-        user.setResumeId(userResume.getResumeId());
         user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         // 设置默认值
         userResume.setResumeName(registerDTO.getUserName());
@@ -72,11 +68,9 @@ public class UserServiceImpl implements UserService {
         // 插入用户
         resumeMapper.insert(userResume);
         userMapper.insert(user);
-        // TODO 用户注册：待测试，向用户表中插入在线简历表id
+        // 更新用户简历ID（因为新用户没有简历，简历id为null，插入简历后，获取用户简历ID）
         user.setResumeId(userResume.getResumeId());
         userMapper.updateById(user);
-        // 返回JWT
-//        return JwtUtil.createJWT(Map.of(USER_ID, user.getUserId(), RESUME_ID, userResume.getResumeId()));
         return AppHttpCodeEnum.SUCCESS;
     }
 

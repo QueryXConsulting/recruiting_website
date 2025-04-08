@@ -1,5 +1,6 @@
 package com.queryx.recruiting_website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -47,14 +48,11 @@ public class UserResumeServiceImpl implements UserResumeService {
 
     @Override
     public Integer insertResumeAttachment(Long userId, MultipartFile file) throws IOException {
-        FileOutputStream fileOutputStream = null;
-        try {
-            // 创建本地文件
-            File resumeFile = File.createTempFile(String.format("%d_", System.currentTimeMillis()), file.getOriginalFilename(), new File(filePath));
+        // 创建本地文件
+        File resumeFile = File.createTempFile(String.format("%d_", System.currentTimeMillis()), file.getOriginalFilename(), new File(filePath));
+        try (FileOutputStream fileOutputStream = new FileOutputStream(resumeFile, false);) {
             // 写入文件
-            byte[] fileBytes = file.getBytes();
-            fileOutputStream = new FileOutputStream(resumeFile, false);
-            fileOutputStream.write(fileBytes);
+            fileOutputStream.write(file.getBytes());
             fileOutputStream.flush();// 刷新缓冲区，立即将数据写入文件
             // 装配数据
             final TDResumeAttachments tdRS = new TDResumeAttachments();
@@ -63,41 +61,35 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setFileName(file.getOriginalFilename());
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
             tdRS.setUploadDate(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
-            // TODO 附件简历路径
-            tdRS.setFilePath("/" + Common.getLastPath(filePath, "/", resumeFile.getName()));
-            tdRS.setAttachmentsReview(Common.REVIEW_OK);
+            tdRS.setFilePath("/" + Common.getLastPath(filePath, "/", "/" + resumeFile.getName()));
+            tdRS.setAttachmentsReview(Common.REVIEW_WAIT);
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
             final MybatisBatch<TDResumeAttachments> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, List.of(tdRS));
             final MybatisBatch.Method<TDResumeAttachments> method = new MybatisBatch.Method<>(TDResumeAttachmentsMapper.class);
             // 返回结果
             return mybatisBatch.execute(method.insert()).size();
-        } finally {
-            if (fileOutputStream != null) {
-                fileOutputStream.close();
-            }
         }
     }
 
     @Override
     public Integer deleteResumeAttachment(Long raId) {
         // 获取附件信息
-        TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectById(raId);
+        LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(TDResumeAttachments::getFilePath);
+        wrapper.eq(TDResumeAttachments::getResumeAttachmentId, raId);
+        TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectOne(wrapper);
 
         if (resumeAttachment == null) {
             return 0;
         }
-        // TODO 获取文件路径,待测试
         String path = resumeAttachment.getFilePath();
         path = Common.getSplitPath(filePath, "/") + path;
         // 删除本地文件
         File file = new File(path);
         if (file.exists() && file.delete()) {
             // 再删除数据库字段
-            return TDResumeAttachmentsMapper.delete(new LambdaUpdateWrapper<TDResumeAttachments>()
-                    .set(TDResumeAttachments::getIsDeleted, Common.DELETE)
-                    .set(TDResumeAttachments::getAttachmentsReview, Common.REVIEW_OK)
-                    .eq(TDResumeAttachments::getResumeAttachmentId, raId));
+            return TDResumeAttachmentsMapper.deleteById(raId);
         } else {
             return 0;
         }

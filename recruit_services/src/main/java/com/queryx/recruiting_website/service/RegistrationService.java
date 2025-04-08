@@ -14,18 +14,21 @@ public interface RegistrationService {
 
     /**
      * 查询信息录入的状态
+     *
      * @return 状态码
      */
-    CommonResp<RegistrationStatusVO > queryRegistrationStatus();
+    CommonResp<RegistrationStatusVO> queryRegistrationStatus();
 
     /**
      * 查询信息录入的职位
+     *
      * @return 职位列表
      */
     CommonResp<InfoInputVO> queryInfoInputPosition();
 
     /**
      * 插入注册信息
+     *
      * @param registrationDTO 录入的信息
      * @return 成功与否
      */
@@ -33,12 +36,14 @@ public interface RegistrationService {
 
     /**
      * 查询用户报到确认信息
+     *
      * @return 用户报到确认信息
      */
     CommonResp<ReservationRegistrationVO> queryRegistrationInfo();
 
     /**
      * 更新用户报到状态
+     *
      * @param status 用户报到状态
      * @return 成功与否
      */

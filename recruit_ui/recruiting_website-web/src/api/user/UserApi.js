@@ -3,7 +3,7 @@ import request from '@/utils/request'
 /* 以下接口/api前缀是为了测试，实际使用时应该去掉 */
 const API = {
   // 用户相关接口
-  USER_REGISTER_URL: '/api/register',
+  USER_REGISTER_URL: '/api/user/register',
   UPLOAD_AVATAR_URL: '/api/user/uploadAvatar',
   // 简历相关接口
   RESUME_DELIVER_URL: '/api/deliver/resume',

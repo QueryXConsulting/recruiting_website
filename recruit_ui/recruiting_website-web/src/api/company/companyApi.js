@@ -1,4 +1,3 @@
-import userStore from '@/store/user'
 import request from '@/utils/request'
 
 const API = {

@@ -1,7 +1,5 @@
 package com.queryx.recruiting_website.service.impl;
 
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
@@ -26,7 +24,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-//@Transactional(rollbackFor = Exception.class)
 public class QueryServiceImpl implements QueryService {
 
     @Autowired
@@ -96,11 +93,11 @@ public class QueryServiceImpl implements QueryService {
         Page<?> result = null;
         switch (searchDTO.getSearchType()) {
             case JOB -> result = getJobList(
-                    searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(),
+                    searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(),
                     searchDTO.getIsAsc(), searchDTO.getEducation(), searchDTO.getNature()
             );
             case COMPANY ->
-                    result = getCompanyList(searchDTO.getKeyword(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
+                    result = getCompanyList(searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
             default -> {
                 return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
             }
@@ -134,7 +131,7 @@ public class QueryServiceImpl implements QueryService {
 
         queryWrapper.nested(i -> {
             boolean firstCondition = true; // 用于标记是否是第一个条件，以避免在第一个条件前添加多余的"OR"
-            for (String s : IKAnalyzerUtil.cut(StrUtil.trim(keyword))) {
+            for (String s : IKAnalyzerUtil.cut(keyword)) {
                 if (firstCondition) {
                     i.like(TDJob::getJobPosition, s);
                     firstCondition = false;
@@ -144,8 +141,8 @@ public class QueryServiceImpl implements QueryService {
             }
         });
 
-        queryWrapper.eq(nature != null && !nature.isEmpty(), TDJob::getJobNature, StrUtil.trim(nature));
-        queryWrapper.eq(education != null && !education.isEmpty(), TDJob::getJobEducation, StrUtil.trim(education));
+        queryWrapper.eq(nature != null && !nature.isEmpty(), TDJob::getJobNature, nature);
+        queryWrapper.eq(education != null && !education.isEmpty(), TDJob::getJobEducation, education);
         queryWrapper.orderBy(true, isAsc, TDJob::getJobTime);
         // 构建分页对象
         Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
@@ -174,7 +171,7 @@ public class QueryServiceImpl implements QueryService {
 
         queryWrapper.nested(i -> {
             boolean firstCondition = true;
-            for (String s : IKAnalyzerUtil.cut(StrUtil.trim(keyword))) {
+            for (String s : IKAnalyzerUtil.cut(keyword)) {
                 if (firstCondition) {
                     i.like(TDCompanyInfo::getCompanyInfoName, s);
                     firstCondition = false;

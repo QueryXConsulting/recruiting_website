@@ -20,7 +20,7 @@ import java.util.List;
 
 
 @RestController
-@Tag(name = "用户端留言板功能")
+@Tag(name = "用户端留言板", description = "用户端留言板接口")
 @RequestMapping("/message")
 public class MessageBoardUserController {
 
@@ -34,6 +34,7 @@ public class MessageBoardUserController {
             @Parameter(name = "companyId", description = "公司id", required = true, in = ParameterIn.QUERY)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "成功获取留言板数据", content = @Content(schema = @Schema(implementation = CommonResp.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(schema = @Schema(implementation = CommonResp.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(schema = @Schema(implementation = CommonResp.class), mediaType = "application/json"))
     })
     public CommonResp<List<MessageDataVO>> getMessageData(@RequestParam("id") Long companyId) {

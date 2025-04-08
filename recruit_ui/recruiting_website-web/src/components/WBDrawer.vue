@@ -17,9 +17,6 @@ defineExpose(new Proxy({}, {
     get(_target, prop) {
         return drawerRef.value?.[prop]
     },
-    // set(_target, prop, value) {
-    //     drawerRef.value?.[prop] = value;
-    // },
     has(_target, prop) {
         return prop in drawerRef.value
     }
@@ -29,9 +26,6 @@ defineExpose(new Proxy({}, {
 <template>
     <div class="drawer-container">
         <el-drawer v-model="drawer" v-bind="$attrs" ref="drawerRef">
-            <!-- <template #header>
-                <slot name="header"></slot>
-            </template> -->
             <template v-for="(_, name) in $slots" #[name]="slotData">
                 <slot :name="name" v-bind="slotData || {}"></slot>
             </template>

@@ -13,10 +13,6 @@ import java.util.List;
  */
 @Data
 public class AllResumeVO {
-    // 原属性
-//    private ResumeVO resumeVO;
-//    private List<AttachmentsResumeVO> attachmentsResumeVO;
-
     // 修改属性
     private Long resumeId;// 简历ID
     private Date userRegisterTime;// 用户注册时间

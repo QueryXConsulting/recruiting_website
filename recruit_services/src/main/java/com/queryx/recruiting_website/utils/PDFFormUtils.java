@@ -1,6 +1,5 @@
 package com.queryx.recruiting_website.utils;
 
-import org.apache.commons.logging.Log;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;

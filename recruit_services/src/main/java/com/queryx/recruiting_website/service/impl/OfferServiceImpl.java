@@ -184,7 +184,7 @@ public class OfferServiceImpl implements OfferService {
             if (!(file1.exists() || file1.delete())) {
                 log.warn("删除临时文件失败，文件名: {}", newFileName);
             }
-            throw new RuntimeException(e);
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
         }
         newFileName =  "/" + newFileName;
         offers.setSignaturePath(Common.getLastPath(signaturePath, "/", newFileName));

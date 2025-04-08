@@ -1,5 +1,4 @@
 <script setup>
-// import { ref } from 'vue';
 
 // model
 const page = defineModel('page', { type: Number, default: 1 });
@@ -31,7 +30,6 @@ const handleClick = (item) => {
         <!-- 列表 -->
         <ul class="list">
             <li @click="handleClick(item)" v-for="(item, index) in props.list" :key="index" class="item">
-                <!-- <div class="item-prepend"> -->
                     <slot name="item-prepend" v-bind="item"></slot>
                 <!-- </div> -->
                 <div class="item-left">
@@ -55,7 +53,6 @@ const handleClick = (item) => {
 <style lang="scss" scoped>
 .list {
     margin: 10px;
-    // border: 1px solid #ccc;
 }
 
 .item {
