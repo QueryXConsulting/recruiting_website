@@ -52,7 +52,6 @@ const updateStatus = async (status) => {
 
 <template>
     <div v-if="reservationStatus === 1">
-        <!-- <h1>请选择报到时间</h1> -->
         <main class="container">
             <section class="left">
                 <el-calendar v-model="date" style="height: 40vh;" />

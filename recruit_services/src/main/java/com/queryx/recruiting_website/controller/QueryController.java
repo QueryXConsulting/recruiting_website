@@ -113,7 +113,7 @@ public class QueryController {
             @Parameter(name = "id", description = "岗位id", schema = @Schema(implementation = Long.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "465", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/job")
@@ -163,6 +163,9 @@ public class QueryController {
      * @param keyword  关键字
      * @param page     页码
      * @param pageSize 页大小
+     * @param isAsc 是否升序
+     * @param education 学历
+     * @param nature 性质
      * @return 招聘岗位列表
      */
     @Operation(summary = "查询招聘岗位列表", parameters = {
@@ -174,7 +177,7 @@ public class QueryController {
             @Parameter(name = "nature", description = "性质", schema = @Schema(implementation = String.class), required = true)
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "416", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "465", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/jobs")
@@ -192,7 +195,7 @@ public class QueryController {
         }
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword, page, pageSize, isAsc, education, nature);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword.trim(), page, pageSize, isAsc, education, nature);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
@@ -210,9 +213,11 @@ public class QueryController {
     @Operation(summary = "查询公司列表", parameters = {
             @Parameter(name = "keyword", description = "关键字", schema = @Schema(implementation = String.class), required = true),
             @Parameter(name = "page", description = "页码", schema = @Schema(implementation = Integer.class), required = true),
-            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true)
+            @Parameter(name = "pageSize", description = "页大小", schema = @Schema(implementation = Integer.class), required = true),
+            @Parameter(name = "isAsc", description = "是否升序", schema = @Schema(implementation = Integer.class, defaultValue = "false"))
     }, responses = {
             @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "481", description = "分页不能为空", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @GetMapping("/companyList")
@@ -227,7 +232,7 @@ public class QueryController {
         }
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        return queryUserInfo.getCompanyList(keyword, page, pageSize, isAsc);
+        return queryUserInfo.getCompanyList(keyword.trim(), page, pageSize, isAsc);
     }
 
     /**

@@ -1,12 +1,10 @@
 package com.queryx.recruiting_website.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.queryx.recruiting_website.domain.TDJobNature;
 import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
-import com.queryx.recruiting_website.domain.vo.search.SearchResultVO;
 import com.queryx.recruiting_website.utils.CommonResp;
 
 import java.util.List;

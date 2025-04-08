@@ -52,7 +52,8 @@ public enum AppHttpCodeEnum {
     OFFER_NOT_EXIST(486, "offer不存在"),
     FILE_UPLOAD_FAIL(487, "文件上传失败"),
     FILE_PDF_PAGE(488,"上传页数过多"),
-    REQUIRED_MATERIALS_WERE_NOT_UPLOADED(489, "未上传必要的材料");
+    REQUIRED_MATERIALS_WERE_NOT_UPLOADED(489, "未上传必要的材料"),
+    NUMBER_OF_ATTACHED_RESUMES_EXCEEDS_THE_LIMIT(490, "附件简历数量超过限制");
 
 
     final int code;

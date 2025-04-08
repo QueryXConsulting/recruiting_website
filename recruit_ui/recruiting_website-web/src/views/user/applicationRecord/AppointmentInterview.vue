@@ -154,24 +154,24 @@ const handleClick = async (obj, row, $index) => {
                     ElMessageBox.confirm('腾讯会议链接复制失败，请手动复制！链接：' + row.interviewUrl);
                 });
             break;
-        case '开始面试': // 开始面试
-            if (row.interviewStatus) {
-                const startDate = new Date(row.interviewDate);
-                const currDate = new Date();
-                // js时间比较不能判断相等
-                if (currDate < startDate) {
-                    ElMessage.error('面试已过期！');
-                    return;
-                }
-                if (currDate > startDate) {
-                    ElMessage.error('面试未开始！');
-                    return;
-                }
-                // 路由到面试页面
-                break;
-            }
-            ElMessage.error('出现错误！');
-            return;
+        // case '开始面试': // 开始面试
+        //     if (row.interviewStatus) {
+        //         const startDate = new Date(row.interviewDate);
+        //         const currDate = new Date();
+        //         // js时间比较不能判断相等
+        //         if (currDate < startDate) {
+        //             ElMessage.error('面试已过期！');
+        //             return;
+        //         }
+        //         if (currDate > startDate) {
+        //             ElMessage.error('面试未开始！');
+        //             return;
+        //         }
+        //         // 路由到面试页面
+        //         break;
+        //     }
+        //     ElMessage.error('出现错误！');
+        //     return;
         default:
     }
 }

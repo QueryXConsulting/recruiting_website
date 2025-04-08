@@ -33,9 +33,9 @@ public class TDMessageBoard {
     @Schema(name = "应聘者是否已读(0未读,1已读)", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String applicantReadStatus;
 
-    @Schema(name = "isDeleted", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "删除标志", description = "0:未删除,1:已删除", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer isDeleted;
 
-    @Schema(name = "owner_user", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "留言所属者", description = "0:公司,1:应聘者", implementation = Long.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String ownerUser;
 }

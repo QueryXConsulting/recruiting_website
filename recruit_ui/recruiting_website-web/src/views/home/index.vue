@@ -133,7 +133,7 @@ const cultureItems = ref([
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .home-container {
   width: 100%;
   min-height: 100vh;

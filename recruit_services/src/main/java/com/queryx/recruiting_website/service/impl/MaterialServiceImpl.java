@@ -12,7 +12,6 @@ import com.queryx.recruiting_website.mapper.MaterialMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
 import com.queryx.recruiting_website.service.*;
-import com.queryx.recruiting_website.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
