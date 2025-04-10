@@ -452,7 +452,7 @@
       </el-dialog>
 
 
-      >
+
       <el-dialog v-model="pdfEditDialogVisible" title="offer信息填写" :fullscreen="true" :destroy-on-close="true"
         :close-on-click-modal="false" class="offer-dialog fullscreen-dialog">
         <div class="offer-edit-container">

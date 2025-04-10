@@ -276,8 +276,8 @@ const getJobList = async () => {
     )
 
     if (res.code === 200) {
-      jobList.value = res.content.records
-      total.value = res.content.total
+      jobList.value = res.content?.records
+      total.value = res.content?.total
     } else {
       ElMessage.error(res.msg || '获取职位列表失败')
     }
