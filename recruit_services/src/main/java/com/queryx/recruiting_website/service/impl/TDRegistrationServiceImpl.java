@@ -6,13 +6,16 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.Common;
+import com.queryx.recruiting_website.domain.TDJobResume;
 import com.queryx.recruiting_website.domain.TDOffers;
 import com.queryx.recruiting_website.domain.TDRegistration;
 import com.queryx.recruiting_website.domain.vo.RegistrationListVO;
 import com.queryx.recruiting_website.domain.vo.ReservationListVO;
+import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDOffersMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
 import com.queryx.recruiting_website.service.MessageBoardService;
+import com.queryx.recruiting_website.service.TDJobResumeService;
 import com.queryx.recruiting_website.service.TDRegistrationService;
 
 import com.queryx.recruiting_website.utils.PDFFormUtils;
@@ -36,6 +39,8 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
     private MessageBoardService messageBoardService;
     @Resource
     private TDOffersMapper offersMapper;
+    @Resource
+    private TDJobResumeMapper jobResumeMapper;
 
     @Override
     public Object selectRegistration(Integer page, Integer size, Long jobId, String status) {
@@ -83,6 +88,12 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
             updateWrapper.set(TDRegistration::getReservationStatus, "1")
                     .set(TDRegistration::getHireDate, date);
             messageBoardService.sendMessage(offers.getUserId(), "您的预约时间已发送,请进行确认 —此消息来自系统自动发送");
+            LambdaUpdateWrapper<TDJobResume> resumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            resumeLambdaUpdateWrapper
+                    .eq(TDJobResume::getUserId, offers.getUserId())
+                    .eq(TDJobResume::getJobId, offers.getJobId())
+                    .set(TDJobResume::getResumeStatus, "6");
+            jobResumeMapper.update(resumeLambdaUpdateWrapper);
         }
 
         update(updateWrapper);

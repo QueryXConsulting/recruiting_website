@@ -9,10 +9,10 @@
       </div>
       <div class="nav-items">
         <a href="#" class="nav-item active">首页</a>
-        <a href="/users/search" class="nav-item">校园招聘</a>
-        <a href="#" class="nav-item">社会招聘</a>
-        <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
-        <a href="/users/message" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
+        <a href="/users/search" class="nav-item" v-if="userStore().role == '5'">校园招聘</a>
+        <a href="#" class="nav-item" v-if="userStore().role == '5'">社会招聘</a>
+        <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
+        <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;" alt="留言板">
           <el-icon>
             <component :is="Bell"></component>
           </el-icon>
@@ -20,11 +20,11 @@
           <i v-if="hasMessage" class="message-flag"></i>
         </a>
         <!-- 用户头像 -->
-        <el-dropdown v-if="userStore().token" @command="handleCommand">
+        <el-dropdown v-if="userStore().role == '5'" @command="handleCommand">
           <span class="user-dropdown">
             <el-avatar size="large" :src="userStore().userInfo.userAvatar" @error="() => { }">
               <!-- 头像加载失败时显示默认头像 -->
-              <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="用户头像">
+              <img src="/public/default_user.png" alt="用户头像">
             </el-avatar>
           </span>
           <template #dropdown>
@@ -53,8 +53,8 @@
       <div class="banner-content">
         <!-- <div class="banner-image"></div> -->
         <div class="banner-buttons">
-          <button class="primary-btn" @click="router.push('/users/search')">校园招聘</button>
-          <button class="primary-btn" @click="router.push('/users/registerCompany')">企业入驻</button>
+          <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().role == '5'">校园招聘</button>
+          <button class="primary-btn" @click="router.push('/users/registerCompany')" v-if="userStore().token == null">企业入驻</button>
         </div>
       </div>
     </div>
@@ -367,16 +367,12 @@ const advantageItems = ref([
 }
 
 .banner {
+
   height: 80vh;
-  position: relative;
   display: flex;
+
   align-items: center;
   background-image: url('/public/index.png');
-  background-position: top;
-  background-size: cover;
-  background-repeat: no-repeat;
-  justify-content: center;
-  text-align: center;
   color: white;
 
 
@@ -393,8 +389,8 @@ const advantageItems = ref([
 }
 
 .banner-buttons {
-  margin-top: 120px;
-  margin-right: 160px;
+  margin-top: 130px;
+  margin-right: 30px;
   /* position: relative;
   z-index: 2;
   margin-top: 20px; */

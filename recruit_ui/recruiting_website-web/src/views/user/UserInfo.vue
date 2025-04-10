@@ -56,7 +56,7 @@ const educationOptions = [
     { label: '大学以下' },
 ];
 // 工资选项
-const salaryOptions = [ // { range: "--请选择--" }, 
+const salaryOptions = [ // { range: "--请选择--" },
     { range: "面议" }, { range: "1k" }, { range: "2k" }, { range: "3k" },
     { range: "4k" }, { range: "5k" }, { range: "6k" }, { range: "7k" }, { range: "8k" },
     { range: "9k" }, { range: "10k" }, { range: "11k" }, { range: "12k" }, { range: "13k" }
@@ -131,7 +131,7 @@ const editInfo = async () => {
             formData.value[key] = salaryRange.join('-');
         }
     }
-    
+
     notEdit.value = true;
     formData.value.resumeName = document.querySelector('.user-name').innerText;
     await resumeUpdate(formData.value).then((res) => {
@@ -232,7 +232,7 @@ const previewAttachmentResume = (url) => {
                 <span class="user-avatar">
                     <el-tooltip content="点击更换头像">
                         <el-avatar :size="100" @click="changeAvater = true" :src="formData.userAvatar" @error="() => { }">
-                            <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="头像">
+                            <img src="/public/default_user.png" alt="头像">
                         </el-avatar>
                     </el-tooltip>
                     <el-tooltip content="这里可以修改姓名" :visible="!notEdit">

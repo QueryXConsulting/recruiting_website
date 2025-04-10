@@ -102,7 +102,7 @@ public class SecurityConfiguration {
                             response.getWriter().write("{\"code\":200,\"message\":\"注销成功\"}");
                         })
                         .permitAll())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))// 配置跨域
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))// 配置跨域
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(authenticationEntryPoint) // 异常捕获
                         .accessDeniedHandler(accessDeniedHandler)
