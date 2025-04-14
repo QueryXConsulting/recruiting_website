@@ -3,6 +3,7 @@ package com.queryx.recruiting_website.domain.vo.search;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -13,6 +14,7 @@ import java.util.Date;
  * @since 2025-3-18 16:21:10
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class SearchJobVO extends SearchResultVO {
     // 岗位id
     @JsonSerialize(using = ToStringSerializer.class)

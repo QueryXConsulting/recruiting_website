@@ -197,6 +197,10 @@ const sendUploadAvatar = async () => {
 
 // 上传附件简历
 const uploadResume = async (file) => {
+    if (attachments.value?.length >= 5) {
+        ElMessage.error('最多上传5个附件简历');
+        return;
+    }
     const _formData = new FormData();
     _formData.append('attachment', file.file);
     const res = await uploadAttachment(_formData);
