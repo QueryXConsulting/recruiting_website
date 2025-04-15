@@ -183,7 +183,6 @@ const ids = ref([])
 const handleSelectionChange = (selection) => {
   multiple.value = selection.length === 0
   ids.value = selection.map(item => item.roleId)
-  console.log(ids.value)
 }
 
 // 新增按钮操作

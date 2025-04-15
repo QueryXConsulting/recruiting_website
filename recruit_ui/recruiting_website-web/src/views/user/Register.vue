@@ -213,7 +213,7 @@ const handleSubmit = async () => {
             return;
         }
         formData.resumeSalary = salaryRange.join('-');
-        console.log(formData);
+
         const res = await userRegister(formData);
         ElMessage.success(res.message);
     });

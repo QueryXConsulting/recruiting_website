@@ -188,7 +188,7 @@ const handleOperationClick = async (btnIndex, row, text) => {
   switch (text) {
     case '拒绝': // 拒绝
       const _updateResult = await offerStatus(row.offerId, 2);
-      console.log('拒绝', _updateResult);
+
       if (_updateResult) {
         getOfferList();
       }

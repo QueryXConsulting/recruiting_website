@@ -17,14 +17,14 @@
       <div class="form-section">
         <div class="register-container">
           <h1 class="title">您将如何登录?</h1>
-          <p class="subtitle">您将使用自己的邮箱来创建企业账号。</p>
+          <p class="subtitle">请使用邮箱来创建企业账号。</p>
 
 
           <div class="form-group">
             <input v-model="formData.email" type="email" class="form-input" :class="{ 'error': errors.email }"
               placeholder=" ">
             <label style="color: #FF7427;">企业电子邮件地址</label>
-            <span v-if="errors.email" class="error-message">请输入企业电子邮件地址</span>
+            <span v-if="errors.email" class="error-message">请输入有效的企业电子邮件地址</span>
           </div>
 
           <div class="form-group">
@@ -55,13 +55,18 @@ const router = useRouter()
 const formData = ref({
   email: '',
   password: '',
-
 })
 
 const errors = ref({
   email: false,
   password: false
 })
+
+// 邮箱验证函数
+const validateEmail = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  return emailRegex.test(email)
+}
 
 const handleBack = () => {
   router.push('/users/registerCompany/contactInfo')
@@ -73,16 +78,16 @@ const handleRegister = () => {
     password: false
   }
 
-  if (!formData.value.email) {
+  // 检查邮箱是否为空或格式不正确
+  if (!formData.value.email || !validateEmail(formData.value.email)) {
     errors.value.email = true
   }
+
   if (!formData.value.password) {
     errors.value.password = true
   }
 
-
   if (!errors.value.email && !errors.value.password) {
-    console.log('注册信息：', formData.value)
     registerCompany({
       userEmail: formData.value.email,
       companyInfoName: userStore().registerInfo[0].companyName,

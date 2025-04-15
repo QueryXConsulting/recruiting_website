@@ -79,7 +79,10 @@ public class DynamicSecurityFilter extends OncePerRequestFilter {
                 "/signature_files/**",
                 "/company/registerCompany",
                 "/company/offer/save",
-                "/offer_Template/**"
+                "/offer_Template/**",
+                "/query/jobs",
+                "/query/jobNatureList",
+                "/query/companyList"
         );
 
         String path = request.getRequestURI();

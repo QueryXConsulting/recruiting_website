@@ -35,8 +35,8 @@ public class ConversionService {
         try (PDDocument document = Loader.loadPDF(pdfDestFile)) {
             String img = currentTimeMillis + "_" + offerId + ".png";
             PDFRenderer pdfRenderer = new PDFRenderer(document);
-            String imageDir = Common.uploadPath + img;
-            String imgName = "/avatar_files/" + img;
+            String imageDir = Common.officeTemplatePath + img;
+            String imgName = "/offer_Template/" + img;
             if (document.getNumberOfPages() > 1) {
                 throw new SystemException(AppHttpCodeEnum.FILE_PDF_PAGE);
             }
