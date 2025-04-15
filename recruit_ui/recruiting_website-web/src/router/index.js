@@ -6,6 +6,7 @@ import { ElMessage } from 'element-plus'
 const whiteList = [
   '/auth/login',
   '/404',
+  '/users/search',
   '/users/register',
   '/users/index',
   '/users/register',
@@ -16,6 +17,10 @@ const whiteList = [
 
 // 路由配置
 const routes = [
+  {
+    path: '/',
+    redirect: '/users/index'
+  },
   {
     path: '/404',
     component: () => import('../views/404.vue'),
@@ -65,6 +70,7 @@ const routes = [
     path: '/users/message',
     component: () => import('../views/user/MessageBoard.vue'),
   },
+
   {
     path: '/home',
     name: 'home',

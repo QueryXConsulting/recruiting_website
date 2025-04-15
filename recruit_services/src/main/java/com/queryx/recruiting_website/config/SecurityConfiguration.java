@@ -91,7 +91,8 @@ public class SecurityConfiguration {
                 .anonymous(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(it ->
-                        it.requestMatchers("/user/login", "/user/register", "/user/logout","/company/registerCompany").permitAll()
+                        it.requestMatchers("/user/login", "/user/register", "/user/logout", "/company/registerCompany", "/query/jobs",
+                                        "/query/jobNatureList","/query/companyList").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class)

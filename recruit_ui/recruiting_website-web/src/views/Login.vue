@@ -28,7 +28,7 @@
               登录
             </el-button>
           </el-form-item>
-          <el-form-item><el-link :underline="false" href="/users/register" type="primary">新用户注册</el-link></el-form-item>
+          <el-form-item><el-link :underline="false" href="/users/index" type="primary">忘记密码</el-link></el-form-item>
         </el-form>
       </div>
     </div>
@@ -42,7 +42,7 @@ import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import userStore from '@/store/user'
 import { adminLogin, menuList } from '@/api/admin/adminApi'
-import { getUserInfo } from '@/api/company/companyApi'
+
 
 
 const router = useRouter()
@@ -70,7 +70,6 @@ const perms = async (menus) => {
   menus.forEach((menu) => {
     if (menu.menuType == 'F' || menu.menuType == 'U') {
       store.permissions[menu.path] = menu.perms
-      console.log("permissions", store.permissions)
     }
     if (menu.children.length > 0) {
       perms(menu.children)
@@ -113,7 +112,7 @@ const handleLogin = async () => {
           ElMessage.error(response?.msg || '登录失败')
         }
       } catch (error) {
-        console.log("登录失败", error)
+
         ElMessage.error('登录失败：' + (error.message || '服务器错误'))
       } finally {
         loading.value = false

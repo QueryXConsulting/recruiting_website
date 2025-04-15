@@ -220,7 +220,6 @@ const updateAvatar = (file) => {
 
 // 编辑表单提交
 const confirmEditForm = () => {
-    console.log(new Number(editModel.userId));
     editForm.value.validate(async (valid) => {
         if (!valid) {
             return;

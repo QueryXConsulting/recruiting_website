@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PDFFormUtils {
-    private static final String DEFAULT_FONT_PATH = "C:\\Windows\\Fonts\\STXIHEI.TTF";
+    private static final String DEFAULT_FONT_PATH = "files/font/STXIHEI.TTF";
     private static final String DEFAULT_FONT_NAME = "F1";
     private static final int DEFAULT_FONT_SIZE = 12;
 

@@ -116,7 +116,6 @@ onMounted(() => {
 const activeMenu = ref(route.path)
 
 watch(() => route.path, (newPath) => {
-  console.log(newPath)
   activeMenu.value = newPath
 })
 
@@ -215,6 +214,7 @@ const handleCommand = (command) => {
   background-color: #f0f2f5;
   min-height: 100vh;
   box-sizing: border-box;
+  z-index: -1;
 }
 
 :deep(.el-dropdown-menu__item) {

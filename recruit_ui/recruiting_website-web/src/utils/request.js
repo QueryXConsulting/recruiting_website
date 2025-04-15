@@ -18,6 +18,9 @@ request.interceptors.request.use((config) => {
     '/api/company/',
     '/admin/enterpriseFiles/',
     '/user/logout',
+    '/users/search',
+    // '/query/jobs',
+    // '/query/jobNatureList'
   ]
 
   const token = userStore().token

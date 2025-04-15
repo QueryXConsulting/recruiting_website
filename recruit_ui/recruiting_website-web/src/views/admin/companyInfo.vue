@@ -204,7 +204,6 @@ const handleQuery = async () => {
     total.value = content?.total || 0
 
   } catch (error) {
-    console.error('获取公司列表失败:', error)
     ElMessage.error('获取公司列表失败')
     tableData.value = []
     total.value = 0
