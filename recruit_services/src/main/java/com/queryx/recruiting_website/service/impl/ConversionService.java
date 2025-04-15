@@ -30,7 +30,7 @@ public class ConversionService {
         String pdfName = currentTimeMillis + "_" + offerId + ".pdf";
         String pdfPath = Common.officeTemplatePath + pdfName;
         File pdfDestFile = new File(pdfPath);
-        pdfFile.transferTo(pdfDestFile);
+        pdfFile.transferTo(pdfDestFile.getAbsoluteFile());
         // 加载 PDF 文档
         try (PDDocument document = Loader.loadPDF(pdfDestFile)) {
             String img = currentTimeMillis + "_" + offerId + ".png";

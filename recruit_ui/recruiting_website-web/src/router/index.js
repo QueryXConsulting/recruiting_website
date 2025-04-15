@@ -144,6 +144,8 @@ router.beforeEach((to, from, next) => {
       store.token &&
       (store.userInfo.companyInfoReview != 1 || store.userInfo.enterpriseReview != 1) &&
       to.path != '/info'
+      // TODO: 使用添加动态路由
+      store.addRouters();
     if (needsReview) {
       ElMessage.error('信息审核中，请耐心等待')
       return next('/info')

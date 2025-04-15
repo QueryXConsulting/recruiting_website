@@ -177,7 +177,7 @@ public class OfferServiceImpl implements OfferService {
         String newFileName = System.currentTimeMillis() + file.getOriginalFilename();
         // 保存文件
         try {
-            file.transferTo(new File(signaturePath + newFileName));
+            file.transferTo(new File(signaturePath + newFileName).getAbsoluteFile());
         } catch (IOException e) {
             log.error("上传签名失败 offerId: {} ", offerId, e);
             File file1 = new File(newFileName);

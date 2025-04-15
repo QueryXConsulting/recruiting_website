@@ -105,7 +105,10 @@ const submitDeliver = async () => {
                 </li>
             </ul>
 
-            <el-button type="danger" size="large" @click="handleResumeDeliver">立即投递</el-button>
+            <el-button :disabled="jobDetail.jobIsDelivery" type="danger" size="large" @click="handleResumeDeliver">
+                {{ jobDetail.jobIsDelivery ? '已投递' : '立即投递' }}
+            </el-button>
+
         </el-main>
     </el-container>
 
