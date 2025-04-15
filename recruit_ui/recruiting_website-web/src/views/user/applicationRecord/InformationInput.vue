@@ -65,7 +65,6 @@ createObject('value', formData, (data) => {
 // 提交表单
 const submitForm = async () => {
     // 提交表单
-    console.log(formData);
     for (let [key, _] of Object.entries(formData)) {
         if (!formData[key]) {
             ElMessage.error(`请填写${formRootData.find(item => item.prop === key)?.label}`);

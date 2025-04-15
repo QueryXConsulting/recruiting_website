@@ -33,4 +33,12 @@ public interface UserResumeService {
      */
     Integer updateResume(ResumeDTO resumeDTO);
 
+    /**
+     * 审核简历
+     *
+     * @param id         简历id
+     * @param reviewCode 审核码
+     * @return 审核结果
+     */
+    Boolean updateResumeAttachment(Long id, String reviewCode);
 }

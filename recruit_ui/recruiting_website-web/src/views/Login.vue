@@ -70,7 +70,7 @@ const perms = async (menus) => {
   menus.forEach((menu) => {
     if (menu.menuType == 'F' || menu.menuType == 'U') {
       store.permissions[menu.path] = menu.perms
-      console.log("permissions", store.permissions)
+      // console.log("permissions", store.permissions)
     }
     if (menu.children.length > 0) {
       perms(menu.children)

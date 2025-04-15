@@ -2,6 +2,7 @@ package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -27,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class UserResumeServiceImpl implements UserResumeService {
@@ -41,7 +43,7 @@ public class UserResumeServiceImpl implements UserResumeService {
     private TDResumeMapper resumeMapper;
 
     @Autowired
-    private TDResumeAttachmentsMapper TDResumeAttachmentsMapper;
+    private TDResumeAttachmentsMapper resumeAttachmentsMapper;
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
@@ -78,7 +80,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         LambdaQueryWrapper<TDResumeAttachments> wrapper = new LambdaQueryWrapper<>();
         wrapper.select(TDResumeAttachments::getFilePath);
         wrapper.eq(TDResumeAttachments::getResumeAttachmentId, raId);
-        TDResumeAttachments resumeAttachment = TDResumeAttachmentsMapper.selectOne(wrapper);
+        TDResumeAttachments resumeAttachment = resumeAttachmentsMapper.selectOne(wrapper);
 
         if (resumeAttachment == null) {
             return 0;
@@ -89,7 +91,7 @@ public class UserResumeServiceImpl implements UserResumeService {
         File file = new File(path);
         if (file.exists() && file.delete()) {
             // 再删除数据库字段
-            return TDResumeAttachmentsMapper.deleteById(raId);
+            return resumeAttachmentsMapper.deleteById(raId);
         } else {
             return 0;
         }
@@ -103,6 +105,19 @@ public class UserResumeServiceImpl implements UserResumeService {
         return resumeMapper.update(tdResume, new LambdaUpdateWrapper<TDResume>()
                 .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
                 .eq(TDResume::getResumeId, resumeDTO.getResumeId()));
+    }
+
+    @Override
+    public Boolean updateResumeAttachment(Long id, String reviewCode) {
+        LambdaUpdateWrapper<TDResumeAttachments> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.set(TDResumeAttachments::getAttachmentsReview, reviewCode);
+        wrapper.eq(TDResumeAttachments::getResumeAttachmentId, id);
+        int updated = resumeAttachmentsMapper.update(wrapper);
+        if (updated <= 0) {
+            log.error("附件简历审核失败，附件id:{},reviewCode:{}", id, reviewCode);
+            throw new RuntimeException("附件简历审核失败");
+        }
+        return true;
     }
 
 }

@@ -46,5 +46,7 @@ public class JobVO {
     private Integer jobView;
     // 工作性质
     private String jobNature;
+    // 是否投递
+    private boolean jobIsDelivery = false;
 
 }

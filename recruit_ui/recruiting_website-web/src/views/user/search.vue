@@ -12,7 +12,7 @@ import { jobNature } from '@/api/user/UserApi'
 import { SearchCondition, useSearchStore } from '@/store/searchStore'
 import { ElMessage } from 'element-plus'
 
-
+const router = useRouter();
 const inputVal = ref(null); // 搜索关键字
 const searchType = ref(useSearchStore().getType); // 搜索类型
 const searchObj = useSearchStore().getConditions(searchType.value);

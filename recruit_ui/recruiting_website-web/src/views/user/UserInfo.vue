@@ -412,7 +412,7 @@ const previewAttachmentResume = (url) => {
                 <li v-for="(item, index) in attachments" :key="index" class="user-upload-resume">
                     <!-- 文件图标 -->
                     <span class="user-upload-resume-icon">
-                        <el-image fit="fill" src="../../../public/pdfIcon.png">
+                        <el-image fit="fill" src="/public/pdfIcon.png">
                             <template #error>
                                 <el-icon>
                                     <Picture />

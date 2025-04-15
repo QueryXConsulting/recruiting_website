@@ -1,7 +1,7 @@
 <script setup lang="js">
 import { ref } from 'vue';
 import useResumeListStore from '@/store/resumeStore'
-import { resumeList, resumeInfo, resumeReview, resumeDelete } from '@/api/admin/ResumeApi';
+import { resumeList, resumeInfo, resumeReview, resumeDelete, attachmentResumeReview } from '@/api/admin/ResumeApi';
 import { ElMessage } from 'element-plus';
 import WBDrawer from '@/components/WBDrawer.vue';
 import WBForm from '@/components/WBForm.vue';
@@ -91,11 +91,12 @@ queryResume(queryObj)
 
 const isShowPreview = ref(false);// 详情弹窗是否显示
 const pdfUrl = ref(''); // PDF预览地址
+let attachmentId = null; // 附件简历ID
+
 // 处理查看按钮
 const handleEdit = (index, row) => {
     // 请求简历详情
     resumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType }).then(res => {
-        console.log(res);
         if (typeof res.content === 'object') {
             // 在线简历
             res.content.resumeReview = row.resumeReview;
@@ -113,9 +114,20 @@ const handleEdit = (index, row) => {
             const blob = new Blob([uInt8Array], { type: 'application/pdf' });
             pdfUrl.value = URL.createObjectURL(blob);
             isShowPreview.value = true;
+            attachmentId = row.resumeId;
         }
     });
 }
+
+/* 处理附件简历审核 */
+const reviewResumeAttachment = async (reviewCode) => {
+    const resu = await attachmentResumeReview(attachmentId, reviewCode).then(r => r.content);
+    if (resu) {
+        ElMessage.success('审核成功');
+        queryResume(queryObj);
+    }
+}
+
 
 /* 处理删除按钮 */
 let deleteId = null;
@@ -290,9 +302,9 @@ const handleDrawerConfirm = async () => {
         </WBDialog>
 
         <!-- pdf预览弹窗 -->
-        <WBDialog v-model="isShowPreview" fullscreen title="offer预览">
+        <WBDialog v-model="isShowPreview" @submit="reviewResumeAttachment('1')" @cancel="reviewResumeAttachment('2')" confirm-text="通过审核" cancel-text="打回修改" fullscreen title="offer预览/审核">
             <iframe :src="pdfUrl" class="pdf-preview" frameborder="0"></iframe>
-            <template #footer><i></i></template>
+            <!-- <template #footer><i></i></template> -->
         </WBDialog>
     </div>
 </template>
