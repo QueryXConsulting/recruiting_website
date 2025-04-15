@@ -30,7 +30,7 @@
             <input v-model="formData.phone" type="text" class="form-input" :class="{ 'error': errors.phone }"
               placeholder=" ">
             <label style="color: #FF7427;">手机号</label>
-            <span class="error-message" v-if="errors.phone">请输入手机号</span>
+            <span class="error-message" v-if="errors.phone">请输入有效的11位手机号</span>
           </div>
 
           <div class="form-group">
@@ -60,7 +60,6 @@ const formData = ref({
   name: userStore().registerInfo[1]?.name || '',
   email: userStore().registerInfo[1]?.email || '',
   phone: userStore().registerInfo[1]?.phone || '',
-
 })
 
 const errors = ref({
@@ -69,10 +68,22 @@ const errors = ref({
   phone: false
 })
 
+// 手机号验证函数（中国大陆手机号格式）
+const validatePhone = (phone) => {
+  const phoneRegex = /^1[3-9]\d{9}$/
+  return phoneRegex.test(phone)
+}
+
+// 邮箱验证函数
+const validateEmail = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  return emailRegex.test(email)
+}
+
 const validateForm = () => {
   errors.value.name = !formData.value.name
-  errors.value.phone = !formData.value.phone
-  errors.value.email = !formData.value.email
+  errors.value.phone = !formData.value.phone || !validatePhone(formData.value.phone)
+  errors.value.email = !formData.value.email || !validateEmail(formData.value.email)
 
   return !errors.value.name && !errors.value.phone && !errors.value.email
 }

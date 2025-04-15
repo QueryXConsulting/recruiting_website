@@ -95,7 +95,7 @@ const pdfUrl = ref(''); // PDF预览地址
 const handleEdit = (index, row) => {
     // 请求简历详情
     resumeInfo({ resumeId: row.resumeId, resumeType: row.resumeType }).then(res => {
-        console.log(res);
+
         if (typeof res.content === 'object') {
             // 在线简历
             res.content.resumeReview = row.resumeReview;

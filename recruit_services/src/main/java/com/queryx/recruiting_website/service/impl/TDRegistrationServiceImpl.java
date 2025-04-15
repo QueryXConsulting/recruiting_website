@@ -102,7 +102,7 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
 
     @Override
     public byte[] downloadPdf(Long id) throws IOException {
-        String inputPath = "D:/maven/offer_Template/registration.pdf";
+        String inputPath = "files/font/registration.pdf";
         TDRegistration registration = getById(id);
         Map<String, String> fieldValues = new HashMap<>();
         // 动态生成表单域值映射

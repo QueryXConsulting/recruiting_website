@@ -25,7 +25,7 @@ const windowStatusOptions = [
     { status: 2, description: '通过' },
     { status: 3, description: '拒绝' }
 ];
-const windowStatus = ref(null);// 页面状态 
+const windowStatus = ref(null);// 页面状态
 const windowStatusMessage = ref('');// 页面状态提示信息
 const formData = reactive({});// 表单数据
 
@@ -65,7 +65,6 @@ createObject('value', formData, (data) => {
 // 提交表单
 const submitForm = async () => {
     // 提交表单
-    console.log(formData);
     for (let [key, _] of Object.entries(formData)) {
         if (!formData[key]) {
             ElMessage.error(`请填写${formRootData.find(item => item.prop === key)?.label}`);

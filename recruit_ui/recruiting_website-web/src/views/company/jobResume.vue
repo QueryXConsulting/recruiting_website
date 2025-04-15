@@ -1063,8 +1063,6 @@ const handleInterviewTypeChange = (value) => {
 }
 
 const viewInterview = async (row) => {
-  console.log('当前行数据:', row)
-  console.log('当前行ID:', row.interviewId)
 
   editInterviewData.value = {
     interviewId: row.interviewId,
@@ -1079,7 +1077,7 @@ const viewInterview = async (row) => {
     jobId: row.jobId
   }
 
-  console.log('更新数据:', editInterviewData.value)
+
 
   let result = await updateInterviewList(editInterviewData.value)
   if (result.code === 200) {
@@ -1171,7 +1169,7 @@ const viewOffer = (row) => {
   } else if (row.offersStatus === '1') {
     currentOfferId.value = row.offerId
     currentUserId.value = row.userId
-    console.log("userid", currentUserId.value)
+
     currentSignature.value = row.signaturePath
     signatureDialogVisible.value = true
   } else if (row.offersFilePath) {

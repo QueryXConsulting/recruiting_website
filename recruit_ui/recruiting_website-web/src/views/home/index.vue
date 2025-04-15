@@ -9,8 +9,8 @@
       </div>
       <div class="nav-items">
         <a href="#" class="nav-item active">首页</a>
-        <a href="/users/search" class="nav-item" v-if="userStore().role == '5'">校园招聘</a>
-        <a href="#" class="nav-item" v-if="userStore().role == '5'">社会招聘</a>
+        <a href="/users/search" class="nav-item" >校园招聘</a>
+        <a href="#" class="nav-item" >社会招聘</a>
         <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
         <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;" alt="留言板">
           <el-icon>
@@ -53,6 +53,7 @@
       <div class="banner-content">
         <!-- <div class="banner-image"></div> -->
         <div class="banner-buttons">
+          <button class="primary-btn" @click="router.push('/users/register')" v-if="userStore().token == null">招聘注册</button>
           <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().role == '5'">校园招聘</button>
           <button class="primary-btn" @click="router.push('/users/registerCompany')" v-if="userStore().token == null">企业入驻</button>
         </div>
@@ -327,6 +328,7 @@ const advantageItems = ref([
   color: white;
   border-radius: 4px;
   margin: 0 1rem;
+  margin-right: 90px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
