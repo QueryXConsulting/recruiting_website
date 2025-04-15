@@ -6,7 +6,7 @@ import { ElMessage } from 'element-plus';
 
 // 表单根数据
 const formItems = reactive([
-    { tag: '', prop: 'userName', label: '用户名', value: '' },
+    { tag: '', prop: 'userName', label: '姓名', value: '' },
     { tag: '', prop: 'userPassword', label: '密码', value: '' },
     { tag: '', prop: 'userRole', label: '角色', value: '' },
     { tag: '', prop: 'userAvatar', label: '头像', value: '' },

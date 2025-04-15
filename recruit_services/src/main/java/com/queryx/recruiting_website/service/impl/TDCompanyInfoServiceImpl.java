@@ -137,7 +137,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         if (!destFile.getParentFile().exists()) {
             destFile.getParentFile().mkdirs();
         }
-        file.transferTo(destFile);
+        file.transferTo(destFile.getAbsoluteFile());
     }
 
     private void appendFilePathToBuilder(StringBuilder builder, long timestamp, String fileName) {

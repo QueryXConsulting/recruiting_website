@@ -15,7 +15,6 @@ import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDOffersMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
 import com.queryx.recruiting_website.service.MessageBoardService;
-import com.queryx.recruiting_website.service.TDJobResumeService;
 import com.queryx.recruiting_website.service.TDRegistrationService;
 
 import com.queryx.recruiting_website.utils.PDFFormUtils;

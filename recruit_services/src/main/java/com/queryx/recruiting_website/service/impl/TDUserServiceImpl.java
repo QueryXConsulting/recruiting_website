@@ -307,7 +307,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             if (!destFile.getParentFile().exists()) {
                 destFile.getParentFile().mkdirs();
             }
-            userAvatar.transferTo(destFile);
+            userAvatar.transferTo(destFile.getAbsoluteFile());
             tdUser.setUserAvatar("/avatar_files/" + currentTimeMillis + "_" + fileName);
             // 删除旧的图片
             String oldCompanyLogoURL = getById(tdUser.getUserId()).getUserAvatar();
@@ -357,7 +357,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
             if (!destFile.getParentFile().exists()) {
                 destFile.getParentFile().mkdirs();
             }
-            userAvatar.transferTo(destFile);
+            userAvatar.transferTo(destFile.getAbsoluteFile());
             tdUser.setUserAvatar("/avatar_files/" + currentTimeMillis + "_" + fileName);
         }
         tdUser.setCompanyInfoId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
@@ -440,7 +440,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         String newFileName = System.currentTimeMillis() + "_" + fileName;
         File file = new File(savePath + newFileName);
         try {
-            image.transferTo(file);
+            image.transferTo(file.getAbsoluteFile());
             if (!file.exists()) {
                 return null;
             }

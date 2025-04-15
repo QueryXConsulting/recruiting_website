@@ -10,6 +10,7 @@ import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.UserService;
 import com.queryx.recruiting_website.utils.CommonResp;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -90,6 +92,7 @@ public class UserServiceImpl implements UserService {
         if (user.getUserAvatar() != null && !user.getUserAvatar().isEmpty()) {
             File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
             if (!(oldFile.exists() && oldFile.delete())) {
+                log.warn("头像删除失败，文件路径为：{}", oldFile.getAbsolutePath());
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
             }
         }
@@ -99,8 +102,9 @@ public class UserServiceImpl implements UserService {
         String newFileName = System.currentTimeMillis() + "_" + fileName;
         File file = new File(uploadPathAvatar + newFileName);
         try {
-            image.transferTo(file);
+            image.transferTo(file.getAbsoluteFile());
             if (!file.exists()) {
+                log.error("头像上传失败，文件路径为：{}", file.getAbsolutePath());
                 return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
             }
             // 更新数据库
@@ -108,6 +112,7 @@ public class UserServiceImpl implements UserService {
             user.setUserAvatar(path);
             userMapper.updateById(user);
         } catch (Exception e) {
+            log.error("头像上传失败，原因：", e);
             return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
         }
         return CommonResp.success(Common.getImgURL() + path);

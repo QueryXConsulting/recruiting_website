@@ -139,7 +139,7 @@ public class MaterialsServiceImpl implements MaterialsService {
                 MultipartFile file1 = file.getValue();
                 String fileName = System.currentTimeMillis() + "_" + file1.getOriginalFilename();
                 File target = new File(folder.getAbsolutePath() + File.separator + fileName);
-                file1.transferTo(target);
+                file1.transferTo(target.getAbsoluteFile());
                 if (!target.exists()) {
                     log.error("文件上传失败");
                     return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
@@ -199,7 +199,7 @@ public class MaterialsServiceImpl implements MaterialsService {
                 fileName = OTHER_MATERIAL_PREFIX + System.currentTimeMillis() + "_" + file.getOriginalFilename();
                 File file1 = new File(uploadPath + folderName + fileName);
 
-                file.transferTo(file1);
+                file.transferTo(file1.getAbsoluteFile());
                 if (!file1.exists()) {
                     log.error("其他材料上传失败，用户id：{}", material.getMaterialId());
                     return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);

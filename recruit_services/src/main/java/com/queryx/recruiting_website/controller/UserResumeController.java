@@ -33,20 +33,21 @@ public class UserResumeController {
 
     @Autowired
     private TDResumeAttachmentsMapper tdResumeAttachmentsMapper;
+
     /**
      * 上传附件简历
      *
-     * @param file   上传的文件
+     * @param file 上传的文件
      * @return 返回上传结果
      */
     @Operation(summary = "上传附件简历", parameters = {
             @Parameter(name = "attachment", description = "上传的文件", schema = @Schema(implementation = MultipartFile.class), required = true)
     },
-    responses = {
-            @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "457", description = "文件上传失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "457", description = "文件上传失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            })
     @PostMapping("/upload")
     public CommonResp<Integer> handleResumeUpload(@RequestParam("attachment") MultipartFile file) {
         Integer message = 0;
@@ -55,7 +56,7 @@ public class UserResumeController {
         wrapper.select(TDResumeAttachments::getResumeAttachmentId);
         wrapper.eq(TDResumeAttachments::getUserId, userId);
         // 附件简历数量限制
-        if (tdResumeAttachmentsMapper.selectCount(wrapper) > 5) {
+        if (tdResumeAttachmentsMapper.selectCount(wrapper) >= 5) {
             return CommonResp.fail(AppHttpCodeEnum.NUMBER_OF_ATTACHED_RESUMES_EXCEEDS_THE_LIMIT, null);
         }
         try {
@@ -77,11 +78,11 @@ public class UserResumeController {
     @Operation(summary = "删除用户附件简历", parameters = {
             @Parameter(name = "id", description = "附件简历ID", schema = @Schema(type = "Long", format = "int64"), example = "1", required = true)
     },
-    responses = {
-            @ApiResponse(responseCode = "200", description = "删除成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "469", description = "删除失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "删除成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "469", description = "删除失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            })
     @DeleteMapping("/delete")
     public CommonResp<Integer> handleResumeDelete(@RequestParam("id") Long raId) {
         int deletedRows = 0;
@@ -108,11 +109,11 @@ public class UserResumeController {
     @Operation(summary = "更新用户在线简历信息", parameters = {
             @Parameter(name = "resumeDTO", description = "简历信息", schema = @Schema(type = "object", implementation = ResumeDTO.class), required = true)
     },
-    responses = {
-            @ApiResponse(responseCode = "200", description = "更新成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "468", description = "更新失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "更新成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "468", description = "更新失败", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+                    @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+            })
     @PutMapping("/update")
     public CommonResp<Integer> handleResumeUpdate(@RequestBody ResumeDTO resumeDTO) {
         Integer row = 0;
@@ -125,5 +126,26 @@ public class UserResumeController {
             return CommonResp.fail(AppHttpCodeEnum.UPDATE_RESUME_ERROR, row);
         }
         return CommonResp.success(row);
+    }
+
+
+    @PutMapping("/review")
+    @Operation(summary = "审核用户附件简历", parameters = {
+            @Parameter(name = "id", description = "简历ID", schema = @Schema(implementation = Long.class), required = true),
+            @Parameter(name = "reviewCode", description = "审核结果", schema = @Schema(implementation = String.class), required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "更新成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "482", description = "确实参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+            @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+    })
+    public CommonResp<Boolean> handleAttachmentResumeReview(@RequestParam("id") Long id, @RequestParam("reviewCode") String reviewCode) {
+        if (reviewCode == null || reviewCode.isEmpty()) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, false);
+        }
+        if (id == null  || id <= 0) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, false);
+        }
+        Boolean isOk = userManagementService.updateResumeAttachment(id, reviewCode);
+        return isOk ? CommonResp.success(true) : CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
     }
 }

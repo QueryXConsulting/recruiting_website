@@ -158,13 +158,15 @@ public class Common {
     public static final String RESUME_ATTACHMENTS = "1";
 
     public static String getImgURL() {
-        return "http://" + ip + ":" + port;
+        return "http://" + "47.109.146.152";
+//        return "http://" + ip + ":" + port;
     }
 
 
     // 获取基础 URL
     public static String getBaseURL() {
-        return "http://" + ip + ":" + port;
+        return "http://" + "47.109.146.152";
+//        return "http://" + ip + ":" + port;
     }
 
 

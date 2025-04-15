@@ -38,11 +38,14 @@ const userStore = defineStore('User', {
     addRouters(menus = this.menuTree) {
       if (!menus) return
       if (menus.length > 0) {
+        const modules = import.meta.glob('../views/**.vue')
         menus.forEach((menu) => {
+          const componentPath = '../views/' + menu.component + '.vue'
           const route = {
             path: '/' + menu.path,
             name: menu.menuName,
-            component: () => import('../views/' + menu.component + '.vue'),
+            component: modules[componentPath],
+            // component: () => import('../views/' + menu.component + '.vue'),
           }
           router.addRoute('home', route)
           if (menu.children && menu.children.length > 0) {

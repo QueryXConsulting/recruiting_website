@@ -9,9 +9,11 @@ import AppointmentRegistration from './AppointmentRegistration.vue';
 
 
 const useTabStore = defineStore('tab', {
-    state: () => ({
-        tabIndex: '0',
-    }),
+    state: () => {
+        return {
+            tabIndex: '0',
+        }
+    },
     actions: {
         setTabIndex(index) {
             this.tabIndex = index;
@@ -58,7 +60,7 @@ const cilckTab = (pane, e) => {
             <el-tab-pane name="3" label="上传材料">
                 <component :is="activeName === '3'? UploadMaterials : null"></component>
             </el-tab-pane>
-            
+
             <el-tab-pane name="4" label="信息录入">
                 <component :is="activeName === '4'? InformationInput : null"></component>
             </el-tab-pane>

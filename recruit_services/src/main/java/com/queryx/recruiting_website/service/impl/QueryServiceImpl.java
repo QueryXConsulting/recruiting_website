@@ -11,6 +11,7 @@ import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
 import com.queryx.recruiting_website.mapper.*;
 import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.IKAnalyzerUtil;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,6 +42,9 @@ public class QueryServiceImpl implements QueryService {
 
     @Autowired
     private TDJobNatureMapper jobNatureMapper;
+
+    @Autowired
+    private TDJobResumeMapper jobResumeMapper;
 
     @Autowired
     private TDCompanyInfoMapper companyInfoMapper;
@@ -118,6 +122,13 @@ public class QueryServiceImpl implements QueryService {
         }
         final JobVO jobVO = new JobVO();
         BeanUtils.copyProperties(tdJob, jobVO);
+        // 查询改岗位是否已投递过简历
+        LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(TDJobResume::getJobResumeId);
+        queryWrapper.eq(TDJobResume::getJobId, id);
+        queryWrapper.eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        jobVO.setJobIsDelivery(jobResumeMapper.selectCount(queryWrapper) > 0);
+        // 返回数据
         return jobVO;
     }
 
