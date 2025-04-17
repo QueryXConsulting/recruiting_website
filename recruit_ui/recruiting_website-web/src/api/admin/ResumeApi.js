@@ -5,7 +5,7 @@ const API = {
   RESUME_LIST_URL: '/admin/selectResumeList',
   RESUME_INFO_URL: '/admin/selectResumeInfo',
   RESUME_REVIEW_URL: '/admin/resumeReview',
-  RESUME_DELETE_URL: '/resume/delete',
+  RESUME_DELETE_URL: '/admin/delete',
   ATTACHMENT_REVIEW_URL: '/resume/review',
 }
 

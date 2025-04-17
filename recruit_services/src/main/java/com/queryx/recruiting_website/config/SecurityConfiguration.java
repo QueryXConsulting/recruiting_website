@@ -92,7 +92,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(it ->
                         it.requestMatchers("/user/login", "/user/register", "/user/logout", "/company/registerCompany", "/query/jobs",
-                                        "/query/jobNatureList","/query/companyList").permitAll()
+                                        "/query/jobNatureList","/query/companyList","/query/job").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(dynamicSecurityFilter, AuthenticationFilter.class)

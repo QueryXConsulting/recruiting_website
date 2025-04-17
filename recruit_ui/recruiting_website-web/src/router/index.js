@@ -13,6 +13,7 @@ const whiteList = [
   '/users/registerCompany',
   '/users/registerCompany/contactInfo',
   '/users/registerCompany/account',
+  '/users/jobInfo'
 ]
 
 // 路由配置

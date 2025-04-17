@@ -166,13 +166,31 @@
           <el-row :gutter="30">
             <el-col :span="12">
               <el-form-item label="教育程度" prop="jobEducation">
-                <el-select v-model="formData.jobEducation" placeholder="请选择或输入教育程度" filterable allow-create
-                  default-first-option class="full-width">
-                  <el-option v-for="item in educationOptions" :key="item.value" :label="item.label" :value="item.value">
-                  </el-option>
+                <el-select v-model="formData.jobEducation" placeholder="请选择学历" class="full-width">
+                  <el-option label="高中" value="高中"></el-option>
+                  <el-option label="大专" value="大专"></el-option>
+                  <el-option label="本科" value="本科"></el-option>
+                  <el-option label="硕士" value="硕士"></el-option>
+                  <el-option label="博士" value="博士"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
+            <el-col :span="12">
+              <el-form-item label="工作经验" prop="jobExperience">
+                <el-select v-model="formData.jobExperience" placeholder="请选择工作经验" class="full-width">
+                  <el-option label="应届毕业生" value="应届毕业生"></el-option>
+                  <el-option label="1年以下" value="1年以下"></el-option>
+                  <el-option label="1-3年" value="1-3年"></el-option>
+                  <el-option label="3-5年" value="3-5年"></el-option>
+                  <el-option label="5-10年" value="5-10年"></el-option>
+                  <el-option label="10年以上" value="10年以上"></el-option>
+                  <el-option label="经验不限" value="经验不限"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="30">
             <el-col :span="12">
               <el-form-item label="联系人" prop="jobContact">
                 <el-input v-model="formData.jobContact" placeholder="请输入联系人姓名"></el-input>
@@ -262,6 +280,7 @@ const rules = {
   jobSalary: [{ required: true, message: '请输入薪资', trigger: 'blur' }],
   jobStatus: [{ required: true, message: '请选择职位状态', trigger: 'change' }],
   jobEducation: [{ required: true, message: '请选择教育程度', trigger: 'change' }],
+  jobExperience: [{ required: true, message: '请选择工作经验', trigger: 'change' }],
   jobContact: [{ required: true, message: '请输入联系人姓名', trigger: 'blur' }]
 }
 

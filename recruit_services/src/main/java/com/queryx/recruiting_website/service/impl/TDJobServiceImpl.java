@@ -116,7 +116,9 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
     public JobDetailDto updateJob(JobDetailDto jobDetailDto) {
         TDJob tdJob = new TDJob();
         BeanUtils.copyProperties(jobDetailDto, tdJob);
-
+        if (jobDetailDto.getJobCategory().isEmpty()) {
+            tdJob.setJobCategory(null);
+        }
         tdJobMapper.update(tdJob, new LambdaUpdateWrapper<TDJob>().eq(TDJob::getJobId, jobDetailDto.getJobId()));
         return null;
     }

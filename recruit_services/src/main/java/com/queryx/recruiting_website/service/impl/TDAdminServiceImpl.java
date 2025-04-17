@@ -110,7 +110,7 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         AdminUserInfoVO adminUserInfoVO = new AdminUserInfoVO();
         adminUserInfoVO.setPermissions(perms);
         adminUserInfoVO.setUser(adminInfoVO);
-        if (StringUtils.hasText(loginAdmin.getTdAdmin().getAdminAvatar())){
+        if (StringUtils.hasText(loginAdmin.getTdAdmin().getAdminAvatar())) {
             adminInfoVO.setAdminAvatar(Common.getImgURL() + loginAdmin.getTdAdmin().getAdminAvatar());
         }
         return adminUserInfoVO;
@@ -151,9 +151,14 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     @Override
     public Object updateAdminInfo(AdminDto adminDto) {
+        if (Common.SUPER_ADMIN.equals(adminDto.getAdminId())) {
+            throw new SystemException(AppHttpCodeEnum.SUPER_ADMIN);
+        }
         TDAdmin tdAdmin = new TDAdmin();
         BeanUtils.copyProperties(adminDto, tdAdmin);
-        tdAdmin.setAdminPassword(passwordEncoder.encode(tdAdmin.getAdminPassword()));
+        if (StringUtils.hasText(adminDto.getAdminPassword())) {
+            tdAdmin.setAdminPassword(passwordEncoder.encode(tdAdmin.getAdminPassword()));
+        }
         if (!update(tdAdmin, new LambdaUpdateWrapper<TDAdmin>().eq(TDAdmin::getAdminId, tdAdmin.getAdminId()))) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
@@ -163,7 +168,9 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
 
     @Override
     public Object deleteAdmin(Long adminId) {
-
+        if (Common.SUPER_ADMIN.equals(adminId)) {
+            throw new SystemException(AppHttpCodeEnum.SUPER_ADMIN);
+        }
         if (tdAdminMapper.deleteById(adminId) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }

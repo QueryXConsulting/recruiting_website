@@ -251,6 +251,9 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
                 .eq(TDUser::getDelFlag, Common.NOT_DELETE);
 
         Page<TDUser> tdUserPage = tdUserMapper.selectPage(new Page<>(page, size), wrapper);
+        if (tdUserPage.getRecords().isEmpty()){
+            return null;
+        }
         Page<UserCompanyVO> userCompanyVOPage =
                 new Page<>(tdUserPage.getCurrent(), tdUserPage.getSize(), tdUserPage.getTotal());
         List<Long> roleIds = tdUserPage.getRecords().stream().map(TDUser::getUserRole).map(Long::valueOf).toList();

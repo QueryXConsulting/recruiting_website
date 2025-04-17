@@ -159,7 +159,7 @@ const editRules = {
         { required: true, message: '请输入账号', trigger: 'change' }
     ],
     adminPassword: [
-        { required: true, min: 6, max: 20, message: '密码长度在6到20个字符之间', trigger: 'blur' }
+        { required: false, min: 6, max: 20, message: '密码长度在6到20个字符之间', trigger: 'blur' }
     ],
     adminStatus: [
         { required: true, message: '请选择状态', trigger: 'change' }
