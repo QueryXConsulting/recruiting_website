@@ -200,6 +200,7 @@ const handleCommand = (command) => {
   top: 0;
   bottom: 0;
   overflow-y: auto;
+  z-index: 1;
 }
 
 .el-menu-vertical {
@@ -214,7 +215,7 @@ const handleCommand = (command) => {
   background-color: #f0f2f5;
   min-height: 100vh;
   box-sizing: border-box;
-  z-index: -1;
+  z-index: 0;
 }
 
 :deep(.el-dropdown-menu__item) {

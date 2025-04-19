@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
@@ -15,6 +16,8 @@ import com.queryx.recruiting_website.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.service.QueryService;
@@ -126,7 +129,13 @@ public class QueryServiceImpl implements QueryService {
         LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(TDJobResume::getJobResumeId);
         queryWrapper.eq(TDJobResume::getJobId, id);
-        queryWrapper.eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // 判断用户是否登录
+        if (authentication != null) {
+            queryWrapper.eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        }
+        jobInfoMapper.update(new LambdaUpdateWrapper<TDJob>().eq(TDJob::getJobId, id)
+                .set(TDJob::getJobView, tdJob.getJobView() + 1));
         jobVO.setJobIsDelivery(jobResumeMapper.selectCount(queryWrapper) > 0);
         // 返回数据
         return jobVO;

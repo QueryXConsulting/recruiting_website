@@ -27,7 +27,7 @@
                   <span class="sender-name">{{ msg.user }}</span>
                   <span class="sender-type">{{ msg.ownerUser === '1' ? '招聘者' : '应聘者' }}</span>
                 </div>
-                <div v-if="msg.ownerUser !== '1'" class="message-status" :class="{ 'status-unread': !msg.isRead }">
+                <div v-if="msg.ownerUser == '1'" class="message-status" :class="{ 'status-unread': !msg.isRead }">
                   {{ msg.isRead ? '已读' : '未读' }}
                 </div>
               </div>

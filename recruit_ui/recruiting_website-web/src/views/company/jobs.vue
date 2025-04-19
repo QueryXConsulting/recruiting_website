@@ -151,12 +151,26 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="学历要求" prop="jobEducation">
-              <el-input v-model="jobForm.jobEducation" placeholder="请输入学历要求，如：本科及以上" />
+              <el-select v-model="jobForm.jobEducation" placeholder="请选择学历" class="full-width">
+                <el-option label="高中" value="高中"></el-option>
+                <el-option label="大专" value="大专"></el-option>
+                <el-option label="本科" value="本科"></el-option>
+                <el-option label="硕士" value="硕士"></el-option>
+                <el-option label="博士" value="博士"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="经验要求" prop="jobExperience">
-              <el-input v-model="jobForm.jobExperience" placeholder="请输入经验要求，如：3年以上" />
+              <el-select v-model="jobForm.jobExperience" placeholder="请选择工作经验" class="full-width">
+                <el-option label="应届毕业生" value="应届毕业生"></el-option>
+                <el-option label="1年以下" value="1年以下"></el-option>
+                <el-option label="1-3年" value="1-3年"></el-option>
+                <el-option label="3-5年" value="3-5年"></el-option>
+                <el-option label="5-10年" value="5-10年"></el-option>
+                <el-option label="10年以上" value="10年以上"></el-option>
+                <el-option label="经验不限" value="经验不限"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -443,6 +457,7 @@ const handleSubmit = async () => {
           submitData.jobStatus = '1'
           res = await companyJobAdd(submitData)
         } else {
+
           res = await companyJobUpdate(submitData)
         }
 

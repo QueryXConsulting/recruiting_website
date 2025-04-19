@@ -194,8 +194,8 @@ const fetchUserList = async () => {
       pageSize.value,
       searchForm.value.keyword
     )
-    userList.value = res.content.records
-    total.value = res.content.total
+    userList.value = res.content?.records
+    total.value = res.content?.total
   } catch (error) {
     ElMessage.error('获取用户列表失败')
   }
