@@ -48,7 +48,7 @@ public class ResumeDTO {
     @Schema(name = "学历", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeEducation;
 
-    @Schema(name = "最高学位", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
+    @Schema(name = "工作经验", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeExperience;
 
     @Schema(name = "期望职位", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
@@ -64,7 +64,7 @@ public class ResumeDTO {
     private String resumeProject;
 
     @Schema(name = "在校时间", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
-    private String resumeEducationDate;
+    private Date resumeEducationDate;
 
     @Schema(name = "专业技能", requiredMode = Schema.RequiredMode.REQUIRED, implementation = String.class)
     private String resumeSkills;
