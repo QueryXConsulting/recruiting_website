@@ -1,7 +1,10 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
+import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,9 @@ public class UserResumeServiceImpl implements UserResumeService {
 
     @Autowired
     private TDResumeMapper resumeMapper;
+
+    @Autowired
+    private TDUserMapper userMapper;
 
     @Autowired
     private TDResumeAttachmentsMapper resumeAttachmentsMapper;
@@ -89,22 +95,36 @@ public class UserResumeServiceImpl implements UserResumeService {
         path = Common.getSplitPath(filePath, "/") + path;
         // 删除本地文件
         File file = new File(path);
-        if (file.exists() && file.delete()) {
-            // 再删除数据库字段
-            return resumeAttachmentsMapper.deleteById(raId);
-        } else {
-            return 0;
+        if (file.exists()) {
+            // 删除本地文件
+            if (!file.delete()) {
+                return 0;
+            }
         }
+        // 再删除数据库字段
+        return resumeAttachmentsMapper.deleteById(raId);
     }
 
 
     @Override
-    public Integer updateResume(ResumeDTO resumeDTO) {
+    public Boolean updateResume(ResumeDTO resumeDTO) {
         TDResume tdResume = new TDResume();
         BeanUtils.copyProperties(resumeDTO, tdResume);
-        return resumeMapper.update(tdResume, new LambdaUpdateWrapper<TDResume>()
-                .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
-                .eq(TDResume::getResumeId, resumeDTO.getResumeId()));
+        tdResume.setResumeStatus(Common.STATUS_ENABLE);
+//        tdResume.setResumeReview(Common.REVIEW_WAIT);, new LambdaUpdateWrapper<TDResume>()
+//                .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
+//                .eq(TDResume::getResumeId, resumeDTO.getResumeId())
+        boolean updated = resumeMapper.insertOrUpdate(tdResume);
+        // 更新用户姓名
+        LambdaUpdateWrapper<TDUser> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(TDUser::getUserName, resumeDTO.getResumeName());
+        updateWrapper.eq(TDUser::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        int userUpdated = userMapper.update(updateWrapper);
+        if (!updated || userUpdated <= 0) {
+            log.error("简历更新失败，简历id:{}", resumeDTO.getResumeId());
+            throw new RuntimeException("简历更新失败");
+        }
+        return true;
     }
 
     @Override

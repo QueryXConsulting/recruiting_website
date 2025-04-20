@@ -37,6 +37,14 @@ const response = reactive([
 const filteredResponse = (tagVal) => {
     return response.filter(item => item.tag.includes(tagVal));
 }
+// 表格操作列配置
+const btnObj = [
+    { text: '编辑', type: 'primary' },
+    { text: '查看', type: 'default' },
+    { text: '删除', type: 'danger' },
+]
+let filteredBtnObj = btnObj;// 过滤后的表格操作列配置
+
 // 获得标签颜色
 const getTagType = (o, val, tag) => {
     const op = filteredResponse(tag).find((item) => item.prop === o).option;
@@ -44,6 +52,13 @@ const getTagType = (o, val, tag) => {
 }
 // 获得表格列标签
 const getColumnLabel = (val, prop, tag) => {
+    // 必须有一个超级管理员且不能被修改
+    if (val.adminId === '1') {
+        filteredBtnObj = [];
+    } else {
+        filteredBtnObj = btnObj;
+    }
+    
     const op = filteredResponse(tag).find((item) => item.prop === prop).option
     if (!op) { return val[prop]; }
     return op.find((item) => item.value === val[prop]).label;
@@ -322,11 +337,6 @@ const handleCurrentChange = debounce((val) => {
     getListResult(searchObj);
 }, 300);
 
-const btnObj = [
-    { text: '编辑', type: 'primary' },
-    { text: '查看', type: 'default' },
-    { text: '删除', type: 'danger' },
-]
 
 </script>
 
@@ -335,8 +345,7 @@ const btnObj = [
         <!-- 表格 -->
         <WBTable v-model:tableData="tableData" v-model:current-page="responseData.current"
             v-model:page-size="responseData.size" :total="responseData.total" :table-columns="filteredResponse('table')"
-            @update:current-page="handleCurrentChange" @update:page-size="handleSizeChange"
-            @operation-click="handleOperation" :operation-list="btnObj" border>
+            @update:current-page="handleCurrentChange" @update:page-size="handleSizeChange" border>
             <!-- 顶部搜索栏 -->
             <template #header>
                 <WBTableHeader v-model:input="input" v-model:select="isDisabled" :options="adminStatusOptions"
@@ -352,6 +361,12 @@ const btnObj = [
                 <el-avatar v-else-if="scope.prop === 'adminAvatar'" size="large" :src="tableData[scope.$index][scope.prop]">
                 </el-avatar>
                 <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
+            </template>
+            <template #operation="scope">
+                <el-button v-for="(item, index) in filteredBtnObj" :type="item.type" :key="index" size="small"
+                    @click="handleOperation(scope.$index, scope.row, item.text)">
+                    {{ item.text }}
+                </el-button>
             </template>
         </WBTable>
     </main>
@@ -434,5 +449,4 @@ const btnObj = [
 main {
     background: #fff;
 }
-
 </style>

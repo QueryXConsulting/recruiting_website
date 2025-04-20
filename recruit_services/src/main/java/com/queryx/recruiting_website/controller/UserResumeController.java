@@ -115,15 +115,15 @@ public class UserResumeController {
                     @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
             })
     @PutMapping("/update")
-    public CommonResp<Integer> handleResumeUpdate(@RequestBody ResumeDTO resumeDTO) {
-        Integer row = 0;
+    public CommonResp<Boolean> handleResumeUpdate(@RequestBody ResumeDTO resumeDTO) {
+        Boolean row;
         try {
             row = userManagementService.updateResume(resumeDTO);
-            if (row <= 0) {
+            if (row) {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return CommonResp.fail(AppHttpCodeEnum.UPDATE_RESUME_ERROR, row);
+            return CommonResp.fail(AppHttpCodeEnum.UPDATE_RESUME_ERROR, false);
         }
         return CommonResp.success(row);
     }

@@ -10,6 +10,7 @@ public class UserInfoVO {
     private String userName;
     private String userRole;
     private String userAvatar;
+    private Long resumeId;
     private Integer userInterviews;
     private String isFirstLogin;
     private String enterpriseReview;

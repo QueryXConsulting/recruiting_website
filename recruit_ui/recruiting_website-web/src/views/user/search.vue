@@ -11,6 +11,7 @@ import JobList from '@/views/user/list/JobList.vue'
 import { jobNature } from '@/api/user/UserApi'
 import { SearchCondition, useSearchStore } from '@/store/searchStore'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 const router = useRouter();
 const inputVal = ref(null); // 搜索关键字
