@@ -70,7 +70,7 @@ public class UserResumeServiceImpl implements UserResumeService {
             tdRS.setFileSize((int) (file.getSize() / StorageUnit.KB));
             tdRS.setUploadDate(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
             tdRS.setFilePath("/" + Common.getLastPath(filePath, "/", "/" + resumeFile.getName()));
-            tdRS.setAttachmentsReview(Common.REVIEW_WAIT);
+            tdRS.setAttachmentsReview(Common.REVIEW_OK);
             tdRS.setIsDeleted(Common.NOT_DELETE);
             // 插入数据库
             final MybatisBatch<TDResumeAttachments> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, List.of(tdRS));
