@@ -3,7 +3,6 @@ package com.queryx.recruiting_website.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
-import com.queryx.recruiting_website.domain.TDResume;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +33,9 @@ public class UserServiceImpl implements UserService {
     private TDUserMapper userMapper;
 
     @Autowired
+    private PasswordEncoder passwordEncoder; // 密码加密
+
+    @Autowired
     private TDResumeMapper resumeMapper;
 
     @Value("${file.upload-path-avatar}")
@@ -45,34 +48,29 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public AppHttpCodeEnum insertUser(RegisterDTO registerDTO) {
         // 判断手机号或邮箱是否合法
-        boolean b = registerDTO.getResumePhone().matches(PHONE) && registerDTO.getResumeEmail().matches(EMAIL);
+        boolean b = registerDTO.getUserPhone().matches(PHONE) && registerDTO.getUserEmail().matches(EMAIL);
         if (!b) {
             return AppHttpCodeEnum.PHONE_OR_EMAIL_ILLEGAL;
         }
-        final TDResume userResume = new TDResume();
         final TDUser user = new TDUser();
         // 判断用户是否已注册 TODO 用户注册：待优化，验证码待实现
-        Long users = userMapper.selectCount(new LambdaQueryWrapper<TDUser>()
-                .eq(TDUser::getUserPhone, registerDTO.getResumePhone()));
-        Long resumes = resumeMapper.selectCount(new LambdaQueryWrapper<TDResume>()
-                .eq(TDResume::getResumeEmail, registerDTO.getResumeEmail()));
-        if (users > 0 && resumes > 0) return AppHttpCodeEnum.USER_EXIST;
-        if (users > 0) return AppHttpCodeEnum.PHONE_EXIST;
-        if (resumes > 0) return AppHttpCodeEnum.EMAIL_EXIST;
+        Long phones = userMapper.selectCount(new LambdaQueryWrapper<TDUser>()
+                .select(TDUser::getUserId)
+                .eq(TDUser::getUserPhone, registerDTO.getUserPhone()));
+        Long emails = userMapper.selectCount(new LambdaQueryWrapper<TDUser>()
+                .select(TDUser::getUserId)
+                .eq(TDUser::getUserEmail, registerDTO.getUserEmail()));
+        if (phones > 0) return AppHttpCodeEnum.PHONE_EXIST;
+        if (emails > 0) return AppHttpCodeEnum.EMAIL_EXIST;
         // 复制属性
         BeanUtils.copyProperties(registerDTO, user);
-        BeanUtils.copyProperties(registerDTO, userResume);
         user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
         // 设置默认值
-        userResume.setResumeName(registerDTO.getUserName());
-        user.setUserPhone(registerDTO.getResumePhone());
-        user.setUserEmail(registerDTO.getResumeEmail());
+        user.setUserRole(Common.ROLE_USER);
+        // 加密密码
+        user.setUserPassword(passwordEncoder.encode(registerDTO.getUserPassword()));
         // 插入用户
-        resumeMapper.insert(userResume);
         userMapper.insert(user);
-        // 更新用户简历ID（因为新用户没有简历，简历id为null，插入简历后，获取用户简历ID）
-        user.setResumeId(userResume.getResumeId());
-        userMapper.updateById(user);
         return AppHttpCodeEnum.SUCCESS;
     }
 

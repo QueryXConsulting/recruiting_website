@@ -66,7 +66,6 @@ public class QueryController {
         try {
             resp = queryUserInfo.getOnlineResume(user.getResumeId());
             if (resp == null) {
-                log.error("用户在线简历不存在，简历id={}", user.getResumeId());
                 return CommonResp.fail(AppHttpCodeEnum.RESUME_NOT_EXIST, null);
             }
             resp.setUserAvatar(Common.getBaseURL() + user.getUserAvatar());

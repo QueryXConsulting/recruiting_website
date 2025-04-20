@@ -43,7 +43,7 @@ const columns = [
     { prop: 'resumeId', label: '简历ID', tag: '0, 1' },
     { prop: 'userName', label: '用户名', tag: '0, 1' },
     { prop: 'resumeType', label: '简历类型', tag: '0, 1', option: resumeTypeOptions },
-    { prop: 'resumeReview', label: '审核状态', tag: '0, 1', option: resumeReviewOptions },
+    // { prop: 'resumeReview', label: '审核状态', tag: '0, 1', option: resumeReviewOptions },
     { prop: 'resumeStatus', label: '启用状态', tag: '0', option: resumeStatusOptions },
 ];
 const filteredColumns = (val) => {
@@ -51,7 +51,7 @@ const filteredColumns = (val) => {
 }
 // 定义在线简历表单项
 const infoItems = reactive({
-    resumeReview: "审核状态",
+    // resumeReview: "审核状态",
     resumeId: "简历ID",
     resumeBirth: "生日",
     resumeEducation: "学历",
@@ -91,7 +91,7 @@ queryResume(queryObj)
 
 const isShowPreview = ref(false);// 详情弹窗是否显示
 const pdfUrl = ref(''); // PDF预览地址
-let attachmentId = null; // 附件简历ID
+// let attachmentId = null; // 附件简历ID
 
 // 处理查看按钮
 const handleEdit = (index, row) => {
@@ -114,19 +114,19 @@ const handleEdit = (index, row) => {
             const blob = new Blob([uInt8Array], { type: 'application/pdf' });
             pdfUrl.value = URL.createObjectURL(blob);
             isShowPreview.value = true;
-            attachmentId = row.resumeId;
+            // attachmentId = row.resumeId;
         }
     });
 }
 
 /* 处理附件简历审核 */
-const reviewResumeAttachment = async (reviewCode) => {
-    const resu = await attachmentResumeReview(attachmentId, reviewCode).then(r => r.content);
-    if (resu) {
-        ElMessage.success('审核成功');
-        queryResume(queryObj);
-    }
-}
+// const reviewResumeAttachment = async (reviewCode) => {
+//     const resu = await attachmentResumeReview(attachmentId, reviewCode).then(r => r.content);
+//     if (resu) {
+//         ElMessage.success('审核成功');
+//         queryResume(queryObj);
+//     }
+// }
 
 
 /* 处理删除按钮 */
@@ -285,12 +285,12 @@ const handleDrawerConfirm = async () => {
             size="40%">
             <WBForm :model="info" :rules="rules" :items="infoItems" ref="infoForm">
                 <template #default="scope">
-                    <el-select v-if="scope.key === 'resumeReview'" v-model="info[scope.key]" size="large"
+                    <!-- <el-select v-if="scope.key === 'resumeReview'" v-model="info[scope.key]" size="large"
                         placeholder="审核状态">
                         <el-option v-for="item in resumeReviewOptions" :key="item.value" :label="item.label"
                             :value="item.value" />
-                    </el-select>
-                    <el-input v-else :value="info[scope.key]" size="large" readonly />
+                    </el-select>v-else  -->
+                    <el-input :value="info[scope.key]" size="large" readonly />
                 </template>
             </WBForm>
         </WBDrawer>
@@ -301,8 +301,8 @@ const handleDrawerConfirm = async () => {
             <span>确认删除该简历？</span>
         </WBDialog>
 
-        <!-- pdf预览弹窗 -->
-        <WBDialog v-model="isShowPreview" @submit="reviewResumeAttachment('1')" @cancel="reviewResumeAttachment('2')" confirm-text="通过审核" cancel-text="打回修改" fullscreen title="offer预览/审核">
+        <!-- pdf预览弹窗  @submit="reviewResumeAttachment('1')" @cancel="reviewResumeAttachment('2')" confirm-text="通过审核" cancel-text="打回修改"-->
+        <WBDialog v-model="isShowPreview" fullscreen title="offer预览/审核">
             <iframe :src="pdfUrl" class="pdf-preview" frameborder="0"></iframe>
             <!-- <template #footer><i></i></template> -->
         </WBDialog>

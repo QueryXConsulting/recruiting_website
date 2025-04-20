@@ -24,9 +24,11 @@ const formItems = reactive([
     { tag: '', prop: 'resumeSalary', label: '期望薪资', value: '' },
     { tag: '', prop: 'resumeCollege', label: '毕业院校', value: '' },
     { tag: '', prop: 'resumeMarriage', label: '婚姻状况', value: '' },
-    { tag: '', prop: 'resumePolitical', label: '政治背景', value: '' },
+    { tag: '', prop: 'resumePolitical', label: '政治面貌', value: '' },
     { tag: '', prop: 'resumeExperience', label: '工作经验', value: '' },
+    { tag: '', prop: 'resumeEmploymentHistory', label: '工作经历', value: '' },
     { tag: '', prop: 'resumeSkill', label: '专业技能', value: '' },
+    { tag: '', prop: 'resumeProject', label: '项目经验', value: '' },
     { tag: '', prop: 'resumeIntroduction', label: '个人简介', value: '' },
 ]);
 // 政治面貌选项
@@ -82,6 +84,13 @@ const formData = ref({});// 表单数据
 onMounted(async () => {
     // 获取用户在线简历
     const res = await userInfo();
+    // 获取附件简历
+    const resp = await attachmentList();
+    attachments.value = resp.content;
+    // TODO 用户简历带修改
+    if (!res.hasOwnProperty('content')) {
+        return;
+    }
     // 工资赋值
     salaryRange.length = 0;// 清空工资范围
 
@@ -92,9 +101,6 @@ onMounted(async () => {
 
     formData.value = res.content;
 
-    // 获取附件简历
-    const resp = await attachmentList();
-    attachments.value = resp.content;
 })
 
 
@@ -104,8 +110,9 @@ createObject('label', formDisplay, (i) => {
     delete i.resumeId;
     delete i.resumeName;
     delete i.resumeSkill;
-    delete i.resumeExperience;
+    delete i.resumeProject;
     delete i.resumeIntroduction;
+    delete i.resumeEmploymentHistory;
 })
 
 
@@ -114,11 +121,14 @@ const formRef = ref(null);// 表单实例
 const notEdit = ref(true);// 是否编辑状态
 // 表单确认按钮点击事件
 const editInfo = async () => {
+    // console.log(formData.value);
+    // return;
     for (let [key, value] of Object.entries(formData.value)) {
         if (!value) {
             ElMessage.error('请填写完整信息');
             return;
         }
+            console.log();
         if (key === 'resumeSalary') {
             if ((salaryRange[0] === '' || !salaryRange[0]) || (salaryRange[1] === '' || !salaryRange[1])) {
                 ElMessage.error('请填写完整工资范围');
@@ -131,9 +141,18 @@ const editInfo = async () => {
             formData.value[key] = salaryRange.join('-');
         }
     }
-
+    return;
     notEdit.value = true;
     formData.value.resumeName = document.querySelector('.user-name').innerText;
+    await resumeUpdate(formData.value).then((res) => {
+        ElMessage.success(res.message);
+    });
+}
+
+const project = ref(false);// 项目经验编辑状态
+// 项目经验编辑按钮点击事件
+const handleProjectEdit = async () => {
+    project.value = false;
     await resumeUpdate(formData.value).then((res) => {
         ElMessage.success(res.message);
     });
@@ -203,7 +222,7 @@ const uploadResume = async (file) => {
     }
     const _formData = new FormData();
     _formData.append('attachment', file.file);
-    const res = await uploadAttachment(_formData);
+    await uploadAttachment(_formData);
     ElMessage.info('上传成功');
     // 获取附件简历
     const resp = await attachmentList();
@@ -235,13 +254,13 @@ const previewAttachmentResume = (url) => {
             <header class="user-info-header">
                 <span class="user-avatar">
                     <el-tooltip content="点击更换头像">
-                        <el-avatar :size="100" @click="changeAvater = true" :src="formData.userAvatar" @error="() => { }">
+                        <el-avatar :size="100" @click="changeAvater = true" :src="formData?.userAvatar" @error="() => { }">
                             <img src="/public/default_user.png" alt="头像">
                         </el-avatar>
                     </el-tooltip>
                     <el-tooltip content="这里可以修改姓名" :visible="!notEdit">
                         <p class="user-name" :contenteditable='!notEdit'>
-                            {{ formData.resumeName }}
+                            {{ formData?.resumeName }}
                         </p>
                     </el-tooltip>
                 </span>
@@ -275,8 +294,8 @@ const previewAttachmentResume = (url) => {
                                 <!-- 选择部分 -->
                                 <el-select v-else-if="index === 'resumePolitical' ||
                                     index === 'resumeEducation' ||
-                                    index === 'resumeMarriage'" v-model="formData[index]" class="user-info-input"
-                                    placeholder="请选择" size="large" :style="{ width: '260px' }">
+                                    index === 'resumeMarriage'" :disabled="notEdit" v-model="formData[index]"
+                                    class="user-info-input" placeholder="请选择" size="large" :style="{ width: '240px' }">
                                     <!-- 政治背景 -->
                                     <template v-if="index === 'resumePolitical'">
                                         <el-option v-for="(item, i1) in politicalOptions" :key="i1" :label="item.label"
@@ -296,16 +315,16 @@ const previewAttachmentResume = (url) => {
                                 <!-- 生日 -->
                                 <el-date-picker v-else-if="index === 'resumeBirth'" v-model="formData[index]" type="date"
                                     placeholder="选择出生日期" :disabled="notEdit"
-                                    :style="{ width: '260px', margin: '10px 0 0 0' }" size="large"
+                                    :style="{ width: '240px', margin: '10px 0 0 0' }" size="large"
                                     class="user-info-input" />
                                 <!-- 期待薪资 -->
-                                <span v-else-if="index === 'resumeSalary'">
+                                <span v-else-if="index === 'resumeSalary'" style="display: flex;justify-content: space-between;">
                                     <el-select v-model="salaryRange[0]" placeholder="请选择" size="large" :disabled="notEdit"
                                         class="user-info-input" :style="{ width: '100px' }">
                                         <el-option v-for="(item, i) in salaryOptions" :key="i" :label="item.range"
                                             :value="item.range"></el-option>
                                     </el-select>
-                                    <em style="color: #999;margin: 0 15px;vertical-align: sub;font-size: 20px;">至</em>
+                                    <em style="color: #999;margin: 0 15px;vertical-align: sub;font-size: 20px;line-height: 50px;">至</em>
                                     <el-select v-model="salaryRange[1]" placeholder="请选择" size="large"
                                         :disabled="notEdit || salaryRange[0] === '面议'" class="user-info-input"
                                         :style="{ width: '100px' }">
@@ -313,8 +332,11 @@ const previewAttachmentResume = (url) => {
                                             :value="item.range"></el-option>
                                     </el-select>
                                 </span>
+                                <!-- 工作经验 -->
+                                <el-input v-else-if="index === 'resumeExperience'" v-model.number="formData[index]"
+                                    :readonly="notEdit" size="large" class="user-info-input" />
                                 <!-- 其他 -->
-                                <el-input v-else v-model="formData[index]" :readonly="notEdit" size="large"
+                                <el-input v-else v-model="formData[index]" :readonly="notEdit" size="large" style="width: 240px;"
                                     class="user-info-input" />
                             </el-col>
                             <!-- 提交按钮 -->
@@ -337,7 +359,7 @@ const previewAttachmentResume = (url) => {
                         </span>
                     </h3>
                     <p v-if="!skillEdit">
-                        {{ formData.resumeSkills }}
+                        {{ formData?.resumeSkills }}
                     </p>
                     <el-row v-else>
                         <el-input v-model="formData.resumeSkills" type="textarea"></el-input>
@@ -350,7 +372,29 @@ const previewAttachmentResume = (url) => {
 
                 <div>
                     <h3>
-                        工作经验
+                        项目经历
+                        <span v-show="!project" @click="project = true" class="user-info-other-edit-btn">
+                            <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
+                                <Edit />
+                            </el-icon>
+                            编辑
+                        </span>
+                    </h3>
+                    <p v-if="!project">
+                        {{ formData?.resumeProject }}
+                    </p>
+                    <el-row v-else>
+                        <el-input v-model="formData.resumeProject" type="textarea"></el-input>
+                        <label class="user-info-submit-btn">
+                            <el-button @click="project = false" size="large">取消</el-button>
+                            <el-button type="primary" size="large" @click="handleProjectEdit">确认</el-button>
+                        </label>
+                    </el-row>
+                </div>
+
+                <div>
+                    <h3>
+                        工作经历
                         <span v-show="!experience" @click="experience = true" class="user-info-other-edit-btn">
                             <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
                                 <Edit />
@@ -359,7 +403,7 @@ const previewAttachmentResume = (url) => {
                         </span>
                     </h3>
                     <p v-if="!experience">
-                        {{ formData.resumeExperience }}
+                        {{ formData?.resumeExperience }}
                     </p>
                     <el-row v-else>
                         <el-input v-model="formData.resumeExperience" type="textarea"></el-input>
@@ -381,7 +425,7 @@ const previewAttachmentResume = (url) => {
                         </span>
                     </h3>
                     <p v-if="!introductionEdit">
-                        {{ formData.resumeIntroduction }}
+                        {{ formData?.resumeIntroduction }}
                     </p>
                     <el-row v-else>
                         <el-input v-model="formData.resumeIntroduction" type="textarea"></el-input>
@@ -412,13 +456,7 @@ const previewAttachmentResume = (url) => {
                 <li v-for="(item, index) in attachments" :key="index" class="user-upload-resume">
                     <!-- 文件图标 -->
                     <span class="user-upload-resume-icon">
-                        <el-image fit="fill" src="/public/pdfIcon.png">
-                            <template #error>
-                                <el-icon>
-                                    <Picture />
-                                </el-icon>
-                            </template>
-                        </el-image>
+                        <img src="/public/pdfIcon.png" alt="图标">
                     </span>
                     <!-- 文件 -->
                     <span class="user-upload-resume-other">

@@ -15,6 +15,7 @@ public class Common {
 
 
     public static final String DELIVER_RESUME_STATUS_TO_BE_SEEN = "0";
+    public static final String ROLE_USER = "5";// 用户角色
 
     public static String uploadPath;
 
@@ -27,7 +28,6 @@ public class Common {
     public static String officeTemplatePath;
 
     public static String signPath;
-    public static String port;
     public static String ip;
 
 
@@ -62,10 +62,6 @@ public class Common {
     public static final String INPUT_STATUS_SEND = "1";// 已发送
     public static final String REGISTRATION_REJECTED = "3";
 
-    @Value("${server.port}")
-    public void setPort(String serverPort) {
-        Common.port = serverPort;
-    }
 
     @Value("${server.address}")
     public void setIp(String serverIp) {
@@ -159,14 +155,12 @@ public class Common {
 
     public static String getImgURL() {
         return "http://" + "47.109.146.152";
-//        return "http://" + ip + ":" + port;
     }
 
 
     // 获取基础 URL
     public static String getBaseURL() {
         return "http://" + "47.109.146.152";
-//        return "http://" + ip + ":" + port;
     }
 
 

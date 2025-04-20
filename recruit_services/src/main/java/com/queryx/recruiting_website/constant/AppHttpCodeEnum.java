@@ -34,7 +34,7 @@ public enum AppHttpCodeEnum {
     DELETE_RESUME_ERROR(469, "删除简历失败"),
     DELIVER_RESUME_FAIL(470, "投递简历失败"),
     NO_USER(471, "不允许修改该用户"),
-    RESUME_NOT_EXIST(472, "简历不存在"),
+    RESUME_NOT_EXIST(472, "简历不存在，请补充简历"),
 
     LOGIN_EXPIRED(473, "token已过期"),
     PHONE_NULL(474, "手机号不能为空"),
