@@ -6,7 +6,7 @@
         <i class="arrow left"></i>
       </div>
       <div class="logo-container">
-        <img src="/public/logo.png" alt="Google"
+        <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
           class="google-logo">
         <span class="workspace-text">问呗</span>
       </div>
@@ -32,15 +32,8 @@
             <label style="color: #FF7427;">手机号</label>
             <span class="error-message" v-if="errors.phone">请输入有效的11位手机号</span>
           </div>
-
-          <div class="form-group">
-            <input v-model="formData.email" type="email" class="form-input" :class="{ 'error': errors.email }"
-              placeholder=" ">
-            <label style="color: #FF7427;">当前电子邮件地址</label>
-            <span class="error-message" v-if="errors.email">请输入有效的邮箱地址</span>
-          </div>
-
           <div class="button-group">
+            <button class="next-button" @click="router.go(-1)">上一步</button>
             <button class="next-button" @click="handleNext">下一步</button>
           </div>
         </div>
@@ -74,16 +67,10 @@ const validatePhone = (phone) => {
   return phoneRegex.test(phone)
 }
 
-// 邮箱验证函数
-const validateEmail = (email) => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  return emailRegex.test(email)
-}
 
 const validateForm = () => {
   errors.value.name = !formData.value.name
   errors.value.phone = !formData.value.phone || !validatePhone(formData.value.phone)
-  errors.value.email = !formData.value.email || !validateEmail(formData.value.email)
 
   return !errors.value.name && !errors.value.phone && !errors.value.email
 }

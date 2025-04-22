@@ -6,10 +6,17 @@
       <div class="header-right">
         <el-dropdown @command="handleCommand">
           <span class="user-dropdown">
-            <el-avatar :size="32" :src="store.userInfo.userAvatar || store.userInfo.user.adminAvatar || defaultAvatar" />
+            <el-avatar :size="32"
+              :src="store.userInfo?.userAvatar || store.userInfo.user?.adminAvatar || defaultAvatar" />
           </span>
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item command="index" v-if="store.role != null && store.role != 5">
+                <el-icon>
+                  <component :is="iconMapping['house']" />
+                </el-icon>
+                首页
+              </el-dropdown-item>
               <el-dropdown-item command="userInfo" v-if="store.role != null && store.role != 5">
                 <el-icon>
                   <component :is="iconMapping[
@@ -100,6 +107,7 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import { userLogout } from '@/api/company/companyApi';
 import CardLogin from '@/components/company/cardLogin.vue';
 
+
 const router = useRouter()
 const route = useRoute()
 
@@ -148,6 +156,8 @@ const handleCommand = (command) => {
     handleLogout()
   } else if (command === 'userInfo') {
     router.push('/home/userInfo')
+  } else if (command === 'index') {
+    router.push('/users/index')
   }
 }
 

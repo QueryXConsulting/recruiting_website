@@ -46,7 +46,7 @@ const submitDeliver = async () => {
     }
     // 准备数据
     const dto = {
-        jobId: +router.currentRoute.value.query.jobId,
+        jobId: router.currentRoute.value.query.jobId,
         resumeId: radioModel.value.resumeId,
         resumeType: radioModel.value.type
     }

@@ -41,13 +41,12 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
     private MessageBoardService messageBoardService;
 
 
-
     @Override
-    public Object selectMaterial(Integer page, Integer size,Long jobId) {
+    public Object selectMaterial(Integer page, Integer size, Long jobId) {
         Page<TDMaterial> materialPage = materialMapper.selectPage(new Page<>(page, size),
                 new LambdaQueryWrapper<TDMaterial>()
-                .eq(TDMaterial::getJobId,jobId));
-        if (materialPage.getRecords().isEmpty()){
+                        .eq(TDMaterial::getJobId, jobId));
+        if (materialPage.getRecords().isEmpty()) {
             return null;
         }
         List<Long> userList = materialPage.getRecords().stream().map(TDMaterial::getUserId).toList();
@@ -81,15 +80,18 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
         materialDetailVO.setIdentityCard(Common.getBaseURL() + materialDetailVO.getIdentityCard());
         materialDetailVO.setIdentificationPhoto(Common.getBaseURL() + materialDetailVO.getIdentificationPhoto());
         materialDetailVO.setPhysicalExamination(Common.getBaseURL() + materialDetailVO.getPhysicalExamination());
-        materialDetailVO.setQualificationCertificate(Common.getBaseURL() + materialDetailVO.getQualificationCertificate());
-        materialDetailVO.setResignCertificate(Common.getBaseURL() + materialDetailVO.getResignCertificate());
-
+        if (StringUtils.hasText(materialDetailVO.getQualificationCertificate())) {
+            materialDetailVO.setQualificationCertificate(Common.getBaseURL() + materialDetailVO.getQualificationCertificate());
+        }
+        if (StringUtils.hasText(materialDetailVO.getResignCertificate())) {
+            materialDetailVO.setResignCertificate(Common.getBaseURL() + materialDetailVO.getResignCertificate());
+        }
         return materialDetailVO;
     }
 
     @Override
     public Object updateMaterialStatus(Long materialId, String status) {
-        if (status.equals("1")){
+        if (status.equals("1")) {
             TDMaterial material = getById(materialId);
             TDOffers offer = offersService.getById(material.getOfferId());
             TDJob job = jobService.getById(offer.getJobId());
@@ -105,8 +107,8 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
             registrationMapper.insert(tdRegistration);
 
             LambdaUpdateWrapper<TDJobResume> tdJobResumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-            tdJobResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId,material.getJobId())
-                    .eq(TDJobResume::getUserId,material.getUserId()).set(TDJobResume::getResumeStatus,"5");
+            tdJobResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId, material.getJobId())
+                    .eq(TDJobResume::getUserId, material.getUserId()).set(TDJobResume::getResumeStatus, "5");
             jobResumeMapper.update(tdJobResumeLambdaUpdateWrapper);
             TDMaterial tdMaterial = getById(materialId);
 

@@ -91,6 +91,11 @@
 
         <div class="detail-info-section">
           <el-form :model="companyData" label-width="120px">
+            <el-form-item label="公司介绍">
+              <el-input v-model="companyData.companyInfoProfile" type="textarea" :rows="4"
+                :disabled="companyData.companyInfoReview === '0'"
+                placeholder="请输入公司介绍内容" />
+            </el-form-item>
             <el-form-item label="经营范围">
               <el-input v-model="companyData.companyInfoScope" type="textarea" :rows="3"
                 :disabled="companyData.companyInfoReview === '0'" />

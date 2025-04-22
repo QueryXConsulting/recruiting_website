@@ -53,7 +53,10 @@ public enum AppHttpCodeEnum {
     FILE_UPLOAD_FAIL(487, "文件上传失败"),
     FILE_PDF_PAGE(488,"上传页数过多"),
     REQUIRED_MATERIALS_WERE_NOT_UPLOADED(489, "未上传必要的材料"),
-    NUMBER_OF_ATTACHED_RESUMES_EXCEEDS_THE_LIMIT(490, "附件简历数量超过限制");
+    NUMBER_OF_ATTACHED_RESUMES_EXCEEDS_THE_LIMIT(490, "附件简历数量超过限制"),
+    COMPANY_EMAIL_EXIST(490, "企业邮箱已存在"),
+    COMPANY_PASSWORD_CONFIRM(491, "两次密码不一致"),
+    COMPANY_SIZE_NOT_NULL(492, "公司规模不能为空");
 
 
     final int code;

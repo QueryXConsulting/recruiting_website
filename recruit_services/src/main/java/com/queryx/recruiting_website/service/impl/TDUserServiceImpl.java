@@ -346,6 +346,9 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
                 throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
             }
         }
+        if (StringUtils.hasText(userDto.getUserPassword())) {
+            userDto.setUserPassword(passwordEncoder.encode(userDto.getUserPassword()));
+        }
 
         TDUser tdUser = new TDUser();
         BeanUtils.copyProperties(userDto, tdUser);
@@ -365,6 +368,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         }
         tdUser.setCompanyInfoId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
         tdUser.setUserRegisterTime(new Date());
+
         save(tdUser);
         return null;
     }

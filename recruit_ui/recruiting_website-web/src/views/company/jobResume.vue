@@ -348,7 +348,7 @@
 
       <!-- 添加PDF预览对话框 -->
       <el-dialog v-model="pdfDialogVisible" title="简历预览" width="80%" :destroy-on-close="true"
-        :close-on-click-modal="false">
+        :close-on-click-modal="false" :style="{marginLeft:'15%'}">
         <div class="pdf-container">
           <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="600px" frameborder="0"></iframe>
         </div>
@@ -453,8 +453,9 @@
 
 
 
-      <el-dialog v-model="pdfEditDialogVisible" title="offer信息填写" :fullscreen="true" :destroy-on-close="true"
-        :close-on-click-modal="false" class="offer-dialog fullscreen-dialog">
+      <el-dialog v-model="pdfEditDialogVisible" title="offer信息填写" :fullscreen="false" width="85%"
+        :destroy-on-close="true" :close-on-click-modal="false" class="offer-dialog"
+        :style="{ marginLeft: '14%', marginTop: '10vh' }">
         <div class="offer-edit-container">
           <div class="offer-form-section">
             <el-form :model="offerForm" ref="offerFormRef" label-width="120px" size="large">
@@ -484,21 +485,21 @@
               </el-form-item>
             </el-form>
           </div>
-          <div class="offer-preview-section">
-            <div class="preview-header">
-              <span>模板预览</span>
-            </div>
-            <div class="preview-content">
-              <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
-                height="100%" frameborder="0"></iframe>
-              <div v-else class="no-preview">
-                <el-icon>
-                  <Document />
-                </el-icon>
-                <span>暂无预览</span>
+            <div class="offer-preview-section">
+              <div class="preview-header">
+                <span>模板预览</span>
+              </div>
+              <div class="preview-content">
+                <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
+                  height="100%" frameborder="0"></iframe>
+                <div v-else class="no-preview">
+                  <el-icon>
+                    <Document />
+                  </el-icon>
+                  <span>暂无预览</span>
+                </div>
               </div>
             </div>
-          </div>
         </div>
         <template #footer>
           <el-button @click="pdfEditDialogVisible = false">取消</el-button>
@@ -2509,7 +2510,6 @@ const interviewType = ref('')
 
 .offer-dialog :deep(.el-dialog) {
   min-width: 1200px;
-  margin: 0 auto;
 }
 
 .offer-dialog :deep(.el-dialog__body) {
@@ -2673,5 +2673,13 @@ const interviewType = ref('')
 
 .no-preview span {
   font-size: 18px;
+}
+
+:deep(.offer-dialog .el-dialog) {
+  z-index: 3000 !important;
+}
+
+:deep(.el-overlay) {
+  z-index: 2999 !important;
 }
 </style>

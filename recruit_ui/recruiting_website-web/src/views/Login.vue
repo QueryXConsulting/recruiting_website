@@ -1,8 +1,15 @@
 <template>
   <div class="login-container">
     <div class="login-box">
+      <div class="back-arrow">
+        <el-link :underline="false" href="/" type="info">
+          <el-icon class="arrow-icon">
+            <ArrowLeft />
+          </el-icon>
+        </el-link>
+      </div>
       <div class="login-form">
-        <h2 class="login-title">登录</h2>
+        <img src="/public/logo.png" alt="问呗" class="logo-img" style="height: 50px; display: block; margin: 0 auto;">
         <el-form :model="loginForm" :rules="rules" ref="formRef" class="form-content">
           <el-form-item prop="username">
             <el-input v-model="loginForm.username" placeholder="请输入手机号或邮箱  " size="large" maxlength="20">
@@ -28,7 +35,11 @@
               登录
             </el-button>
           </el-form-item>
-          <el-form-item><el-link :underline="false" href="/users/index" type="primary">忘记密码</el-link></el-form-item>
+          <div class="bottom">
+            <el-link :underline="false" href="/users/index" type="primary"
+              class="link-text">忘记密码</el-link>
+            <el-link :underline="false" href="/users/register" type="primary" class="link-text">注册</el-link>
+          </div>
         </el-form>
       </div>
     </div>
@@ -38,7 +49,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, Lock } from '@element-plus/icons-vue'
+import { User, Lock, ArrowLeft } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import userStore from '@/store/user'
 import { adminLogin, menuList } from '@/api/admin/adminApi'
@@ -135,6 +146,7 @@ const handleLogin = async () => {
 }
 
 .login-box {
+  position: relative;
   width: 460px;
   padding: 40px;
   background: rgba(255, 255, 255, 0.95);
@@ -150,6 +162,7 @@ const handleLogin = async () => {
 
 .login-title {
   text-align: center;
+  margin-bottom: 40px;
   margin-bottom: 40px;
   font-weight: 600;
   font-size: 28px;
@@ -173,8 +186,25 @@ const handleLogin = async () => {
   background-color: #fff;
 }
 
+.back-arrow {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.arrow-icon {
+  font-size: 20px;
+  color: var(--el-color-info);
+  transition: transform 0.3s ease;
+}
+
+.arrow-icon:hover {
+  transform: translateX(-5px);
+  color: #FF8C00;
+}
+
 :deep(.el-input__wrapper.is-focus) {
-  border-color: var(--el-primary-color);
+  border-color: #FF8C00;
   background-color: #fff;
 }
 
@@ -183,7 +213,13 @@ const handleLogin = async () => {
   color: #909399;
 }
 
+:deep(.el-input__wrapper:hover) {
+  border-color: #FFA940;
+  background-color: #fff;
+}
+
 .login-button {
+  background-color: #FF8C00;
   width: 100%;
   height: 44px;
   font-size: 16px;
@@ -192,6 +228,12 @@ const handleLogin = async () => {
   font-weight: 500;
   letter-spacing: 1px;
 }
+
+.login-button:hover {
+  background-color: #FFEFD5;
+  border-color: #FF8C00;
+}
+
 
 @keyframes fadeIn {
   from {
@@ -212,4 +254,19 @@ const handleLogin = async () => {
 :deep(.el-input__inner) {
   height: 44px;
 }
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+}
+
+.link-text {
+  color: #FF8C00;
+  transition: color 0.3s ease;
+}
+
+.link-text:hover {
+  color: #FFA940;
+}
+
 </style>

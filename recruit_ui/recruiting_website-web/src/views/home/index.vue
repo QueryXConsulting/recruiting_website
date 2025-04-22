@@ -1,7 +1,8 @@
 <template>
   <div class="home-container">
     <!-- 顶部导航栏 -->
-    <nav class="nav-bar">
+     <div style="height: 73px;width: 100%;">
+      <nav class="nav-bar">
       <div class="logo">
         <img src="/public/logo.png" alt="问呗" class="logo-img">
         <span class="divider">|</span>
@@ -9,8 +10,8 @@
       </div>
       <div class="nav-items">
         <a href="#" class="nav-item active">首页</a>
-        <a href="/users/search" class="nav-item" >校园招聘</a>
-        <a href="#" class="nav-item" >社会招聘</a>
+        <a href="/users/search" class="nav-item">校园招聘</a>
+        <a href="#" class="nav-item">社会招聘</a>
         <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
         <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;" alt="留言板">
           <el-icon>
@@ -20,7 +21,7 @@
           <i v-if="hasMessage" class="message-flag"></i>
         </a>
         <!-- 用户头像 -->
-        <el-dropdown v-if="userStore().role == '5'" @command="handleCommand">
+        <el-dropdown v-if="userStore().token != null" @command="handleCommand">
           <span class="user-dropdown">
             <el-avatar size="large" :src="userStore().userInfo.userAvatar" @error="() => { }">
               <!-- 头像加载失败时显示默认头像 -->
@@ -29,7 +30,14 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="userInfo">
+              <el-dropdown-item command="index" v-if="userStore().role != '5' && userStore().role != null">
+                <el-icon>
+                  <component :is="iconMapping['house']" />
+                </el-icon>
+                公司端
+              </el-dropdown-item>
+
+              <el-dropdown-item command="userInfo" v-if="userStore().role == '5'">
                 <el-icon>
                   <component :is="iconMapping['user']" />
                 </el-icon>
@@ -47,21 +55,28 @@
         <router-link to="/auth/login" class="login-btn" v-else-if="userStore().token == null">登录</router-link>
       </div>
     </nav>
+     </div>
 
-      <!-- 主横幅区域 -->
-      <div class="banner">
+
+    <!-- 主横幅区域 -->
+    <div class="banner">
       <div class="banner-content">
         <!-- <div class="banner-image"></div> -->
         <div class="banner-buttons">
-          <button class="primary-btn" @click="router.push('/users/register')" v-if="userStore().token == null">招聘注册</button>
-          <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().role == '5'">校园招聘</button>
-          <button class="primary-btn" @click="router.push('/users/registerCompany')" v-if="userStore().token == null">企业入驻</button>
+          <button class="primary-btn" @click="router.push('/users/search')"
+            v-if="userStore().token == null">招聘浏览</button>
+          <button class="primary-btn" @click="router.push('/users/search')"
+            v-if="userStore().token != null">校园招聘</button>
+          <button class="primary-btn" @click="router.push('/users/search')"
+            v-if="userStore().token != null">社会招聘</button>
+          <button class="primary-btn" @click="router.push('/users/registerCompany')"
+            v-if="userStore().token == null">企业入驻</button>
         </div>
       </div>
     </div>
 
     <!-- 文化区域 -->
-    <section class="culture-section">
+    <section class="culture-section" v-if="false">
       <h2>文化</h2>
       <div class="culture-grid">
         <div class="culture-item" v-for="(item, index) in cultureItems" :key="index">
@@ -75,7 +90,7 @@
 
 
     <!-- 公司优势区域 -->
-    <section class="advantages-section">
+    <section class="advantages-section" v-if="false">
       <h2>公司优势</h2>
       <div class="advantages-grid">
         <div class="advantage-item" v-for="(item, index) in advantageItems" :key="index">
@@ -122,6 +137,8 @@ const handleCommand = (command) => {
     }).catch(() => { })
   } else if (command === 'userInfo') {
     router.push('/users/userInfo');
+  }else if (command === 'index') {
+    router.push('/home');
   }
 }
 
@@ -326,11 +343,13 @@ const advantageItems = ref([
   padding: 1rem 2.5rem;
   font-size: 1.1rem;
   color: white;
-  border-radius: 4px;
-  margin: 0 1rem;
-  margin-right: 90px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 30%;
+  max-width: 200px;
+  margin: 0;
+  text-align: center;
 }
 
 .primary-btn:hover {
@@ -369,21 +388,23 @@ const advantageItems = ref([
 }
 
 .banner {
-
   height: 80vh;
   display: flex;
-
   align-items: center;
+  justify-content: center;
   background-image: url('/public/index.png');
+  background-size: cover;
+  background-position: center;
   color: white;
-
-
+  position: relative;
+  width: 100%;
 }
 
 .banner-content {
   position: relative;
   z-index: 2;
   width: 100%;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -391,13 +412,13 @@ const advantageItems = ref([
 }
 
 .banner-buttons {
-  margin-top: 130px;
-  margin-right: 30px;
-  /* position: relative;
-  z-index: 2;
-  margin-top: 20px; */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10%;
+  flex-wrap: wrap;
+  gap: 20px;
 }
-
 
 .advantages-section {
   padding: 6rem 0;
@@ -456,6 +477,4 @@ const advantageItems = ref([
   border-radius: 50%;
   color: #FF7427;
 }
-
-
 </style>
