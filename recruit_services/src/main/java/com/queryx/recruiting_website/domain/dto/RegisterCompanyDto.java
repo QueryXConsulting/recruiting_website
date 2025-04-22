@@ -14,6 +14,8 @@ public class RegisterCompanyDto {
 
     @Schema(name = "密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoPassword;
+    @Schema(name = "确认密码", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String confirmPassword;
 
     @Schema(name = "企业名",implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoName;
@@ -24,7 +26,6 @@ public class RegisterCompanyDto {
     @Schema(name = "手机号", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userPhone;
 
-    @Schema(name = "邮箱", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private String userEmail;
-
+    @Schema(name = "公司规模", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String companySize;
 }

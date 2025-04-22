@@ -236,14 +236,16 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
 
     @Override
     public Object registerCompany(RegisterCompanyDto registerCompanyDto) {
+        if (!registerCompanyDto.getCompanyInfoPassword().equals(registerCompanyDto.getConfirmPassword())) {
+            throw new SystemException(AppHttpCodeEnum.COMPANY_PASSWORD_CONFIRM);
+        }
 
-        if (count(new LambdaQueryWrapper<TDCompanyInfo>()
-                .eq(TDCompanyInfo::getCompanyInfoUsername, registerCompanyDto.getCompanyInfoUsername())) > 0) {
-            throw new SystemException(AppHttpCodeEnum.EMAIL_EXIST);
+        if (registerCompanyDto.getCompanySize() == null) {
+            throw new SystemException(AppHttpCodeEnum.COMPANY_SIZE_NOT_NULL);
         }
 
         boolean emailExists = userMapper.exists(new LambdaQueryWrapper<TDUser>()
-                .eq(TDUser::getUserEmail, registerCompanyDto.getUserEmail()));
+                .eq(TDUser::getUserEmail, registerCompanyDto.getCompanyInfoUsername()));
         boolean phoneExists = userMapper.exists(new LambdaQueryWrapper<TDUser>()
                 .eq(TDUser::getUserPhone, registerCompanyDto.getUserPhone()));
         if (emailExists) {
@@ -263,6 +265,7 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         TDUser tdUser = new TDUser();
         tdUser.setCompanyInfoId(tdCompanyInfo.getCompanyInfoId());
         BeanUtils.copyProperties(registerCompanyDto, tdUser);
+        tdUser.setUserEmail(registerCompanyDto.getCompanyInfoUsername());
         // 设置为公司角色boss
         tdUser.setUserRole("4");
         tdUser.setUserRegisterTime(new Date());

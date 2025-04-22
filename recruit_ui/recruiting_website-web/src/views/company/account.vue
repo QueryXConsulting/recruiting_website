@@ -6,7 +6,7 @@
         <i class="arrow left"></i>
       </div>
       <div class="logo-container">
-        <img src="/public/logo.png" alt="Google"
+        <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
           class="google-logo">
         <span class="workspace-text">问呗</span>
       </div>
@@ -33,8 +33,15 @@
             <label style="color: #FF7427;">密码</label>
             <span v-if="errors.password" class="error-message">请输入密码</span>
           </div>
+          <div class="form-group">
+            <input v-model="formData.confirmPassword" type="password" class="form-input" :class="{ 'error': errors.password }"
+              placeholder=" ">
+            <label style="color: #FF7427;">请确认密码</label>
+            <span v-if="errors.password" class="error-message">请确认密码</span>
+          </div>
 
           <div class="button-group">
+            <button class="next-button" @click="router.go(-1)">上一步</button>
             <button class="next-button" @click="handleRegister">注册</button>
           </div>
         </div>
@@ -55,6 +62,7 @@ const router = useRouter()
 const formData = ref({
   email: '',
   password: '',
+  confirmPassword:''
 })
 
 const errors = ref({
@@ -89,13 +97,14 @@ const handleRegister = () => {
 
   if (!errors.value.email && !errors.value.password) {
     registerCompany({
-      userEmail: formData.value.email,
       companyInfoName: userStore().registerInfo[0].companyName,
       companyInfoUsername: formData.value.email,
       userPhone: userStore().registerInfo[1].phone,
       companyInfoArea: userStore().registerInfo[0].region,
       companyInfoPassword: formData.value.password,
       userName: userStore().registerInfo[1].name,
+      confirmPassword: formData.value.confirmPassword,
+      companySize: userStore().registerInfo[0].companySize,
     }).then(res => {
       if (res.code == 200) {
         ElMessage.success('注册成功')

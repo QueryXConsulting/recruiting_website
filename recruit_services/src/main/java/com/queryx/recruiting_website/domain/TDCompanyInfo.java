@@ -58,5 +58,8 @@ public class TDCompanyInfo {
 
     @Schema(name = "公司所在地区", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyInfoArea;
+
+    @Schema(name = "公司规模", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String companySize;
 }
 
