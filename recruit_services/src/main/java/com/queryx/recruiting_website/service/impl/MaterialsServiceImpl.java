@@ -65,6 +65,9 @@ public class MaterialsServiceImpl implements MaterialsService {
         jrQueryWrapper.eq(TDJobResume::getUserId, userId);
         jrQueryWrapper.ne(TDJobResume::getResumeDelete, Common.DELIVER_RESUME_DELETE_SQUARE_PEG);
         TDJobResume jobResume = jobResumeMapper.selectOne(jrQueryWrapper);
+        if (jobResume == null) {
+            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        }
         int resultStatus = Integer.parseInt(jobResume.getResumeStatus());
         int step = Integer.parseInt(Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
         // 状态大于该环节，说明已经材料上传审核通过

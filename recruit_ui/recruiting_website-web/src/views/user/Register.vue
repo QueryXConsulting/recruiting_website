@@ -3,9 +3,12 @@ import WBForm from "@/components/WBForm.vue";
 import { ref, reactive } from "vue";
 import { userRegister } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
+import userStore from '@/store/user';
+import router from '@/router';
 
-const router = useRouter();
+// const router = useRouter();
+const store = userStore();
 // 表单根数据
 const formItems = reactive([
     { tag: '', prop: 'userName', label: '姓名', value: '' },
@@ -68,18 +71,22 @@ const handleSubmit = async () => {
             return;
         }
         const res = await userRegister(formData);
-        ElMessage.success(res.message);
-        if (res.message === '操作成功') {
-            router.push('/auth/login');
+        ElMessage.success('操作成功');
+        if (res?.content?.token) {
+            console.log(res.content);
+            store.token = res.content.token
+            store.role = res.content?.userInfoVO?.userRole
+            store.userInfo = res.content.userInfoVO
+            router.push('/');
         }
     });
 
 
 }
 // 表单取消函数
-const handleCancel = () => {
-    refForm.value.resetFields();
-}
+// const handleCancel = () => {
+//     refForm.value.resetFields();
+// }
 
 </script>
 
@@ -98,9 +105,7 @@ const handleCancel = () => {
             <i style="height: 10px;">&nbsp;</i>
             <!-- 按钮 -->
             <el-row justify="center" class="register-btn">
-                <el-button size="large" @click="handleCancel">重置</el-button>
-                <i style="width: 50px;">&nbsp;</i>
-                <el-button size="large" type="primary" @click="handleSubmit">提交</el-button>
+                <el-button size="large" type="primary" @click="handleSubmit">注册</el-button>
             </el-row>
         </div>
     </div>

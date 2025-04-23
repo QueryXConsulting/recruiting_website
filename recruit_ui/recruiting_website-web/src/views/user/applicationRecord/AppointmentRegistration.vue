@@ -81,7 +81,7 @@ const updateStatus = async (status) => {
 
     <!-- 页面状态提示-待发送(待审核) -->
     <div v-if="reservationStatus === 0" class="reservation-status">
-        <el-result icon="warning" :title="reservationStatusMessage"></el-result>
+        <el-result icon="info" :title="reservationStatusMessage"></el-result>
     </div>
     <!-- 页面状态提示-接受(通过) -->
     <div v-if="reservationStatus === 2" class="reservation-status">
@@ -89,7 +89,11 @@ const updateStatus = async (status) => {
     </div>
     <!-- 页面状态提示-拒绝 -->
     <div v-if="reservationStatus === 3" class="reservation-status">
-        <el-result icon="error" :title="reservationStatusMessage"></el-result>
+        <el-result icon="warning" :title="reservationStatusMessage"></el-result>
+    </div>
+    <!-- 页面状态提示-错误 -->
+    <div v-if="!reservationStatus" class="reservation-status">
+        <el-result icon="error" title="错误！请投递简历"></el-result>
     </div>
 </template>
 

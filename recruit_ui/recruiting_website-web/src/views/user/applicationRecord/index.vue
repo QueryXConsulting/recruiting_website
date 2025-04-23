@@ -10,12 +10,12 @@ import UploadMaterials from './UploadMaterials.vue';
 import InformationInput from './InformationInput.vue';
 import AppointmentRegistration from './AppointmentRegistration.vue';
 
-const store = userStore();
-const router = useRouter();
-if (!store.userInfo.resumeId){
-    ElMessage.error('请先补充简历');
-    router.push('/users/userInfo');
-}
+// const store = userStore();
+// const router = useRouter();
+// if (!store.userInfo.resumeId){
+//     ElMessage.error('请先补充简历');
+//     router.push('/users/userInfo');
+// }
 const useTabStore = defineStore('tab', {
     state: () => {
         return {

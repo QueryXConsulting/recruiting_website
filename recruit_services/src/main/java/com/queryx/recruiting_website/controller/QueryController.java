@@ -189,9 +189,6 @@ public class QueryController {
             @RequestParam(value = "nature", required = false) String nature
     ) {
         // 校验参数
-        if (keyword == null || keyword.isEmpty()) {
-            return CommonResp.success(null);
-        }
         if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
         Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword.trim(), page, pageSize, isAsc, education, nature);
