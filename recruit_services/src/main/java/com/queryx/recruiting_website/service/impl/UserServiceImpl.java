@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.service.UserService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TDResumeMapper resumeMapper;
 
+    @Autowired
+    private TDUserService adminUserService;
+
     @Value("${file.upload-path-avatar}")
     private String uploadPathAvatar;
 
@@ -46,11 +52,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AppHttpCodeEnum insertUser(RegisterDTO registerDTO) {
+    public CommonResp<UserLoginVO> insertUser(RegisterDTO registerDTO) {
         // 判断手机号或邮箱是否合法
         boolean b = registerDTO.getUserPhone().matches(PHONE) && registerDTO.getUserEmail().matches(EMAIL);
         if (!b) {
-            return AppHttpCodeEnum.PHONE_OR_EMAIL_ILLEGAL;
+            return CommonResp.fail(AppHttpCodeEnum.PHONE_OR_EMAIL_ILLEGAL, null);
         }
         final TDUser user = new TDUser();
         // 判断用户是否已注册 TODO 用户注册：待优化，验证码待实现
@@ -60,8 +66,8 @@ public class UserServiceImpl implements UserService {
         Long emails = userMapper.selectCount(new LambdaQueryWrapper<TDUser>()
                 .select(TDUser::getUserId)
                 .eq(TDUser::getUserEmail, registerDTO.getUserEmail()));
-        if (phones > 0) return AppHttpCodeEnum.PHONE_EXIST;
-        if (emails > 0) return AppHttpCodeEnum.EMAIL_EXIST;
+        if (phones > 0) return CommonResp.fail(AppHttpCodeEnum.PHONE_EXIST, null);
+        if (emails > 0) return CommonResp.fail(AppHttpCodeEnum.EMAIL_EXIST, null);
         // 复制属性
         BeanUtils.copyProperties(registerDTO, user);
         user.setUserRegisterTime(Date.from(ZonedDateTime.now(ZoneId.of(timeZone)).toInstant()));
@@ -71,7 +77,12 @@ public class UserServiceImpl implements UserService {
         user.setUserPassword(passwordEncoder.encode(registerDTO.getUserPassword()));
         // 插入用户
         userMapper.insert(user);
-        return AppHttpCodeEnum.SUCCESS;
+
+        // 注册成功后，自动登录
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUsername(registerDTO.getUserPhone());
+        loginDTO.setUserPassword(registerDTO.getUserPassword());
+        return CommonResp.success(adminUserService.login(loginDTO));
     }
 
 

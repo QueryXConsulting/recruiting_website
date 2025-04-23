@@ -4,6 +4,7 @@ import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.dto.AdminLoginDto;
 import com.queryx.recruiting_website.domain.dto.LoginDTO;
 import com.queryx.recruiting_website.domain.dto.RegisterDTO;
+import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.service.TDUserService;
 import com.queryx.recruiting_website.service.TPMenuService;
@@ -35,6 +36,7 @@ public class UserController {
     private TDAdminService tdAdminService;
     @Resource
     private TPMenuService menuService;
+
     /**
      * 用户注册
      *
@@ -53,26 +55,11 @@ public class UserController {
 
     })
     @PostMapping("/register")
-    public CommonResp<String> register(@RequestBody RegisterDTO registerDTO) {
-        AppHttpCodeEnum code;
-        try {
-            code = userService.insertUser(registerDTO);
-            if (code == null) {
-                throw new Exception("注册返回为null");
-            }
-            switch (code) {
-//                case USER_EXIST:
-                case EMAIL_EXIST:
-                case PHONE_EXIST:
-                case PHONE_OR_EMAIL_ILLEGAL: {
-                    return CommonResp.fail(code, null);
-                }
-            }
-        } catch (Exception e) {
-            log.error("用户注册失败, {}", e.getMessage());
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+    public CommonResp<UserLoginVO> register(@RequestBody RegisterDTO registerDTO) {
+        if (registerDTO == null) {
+            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }
-        return CommonResp.success(null);
+        return userService.insertUser(registerDTO);
     }
 
 
