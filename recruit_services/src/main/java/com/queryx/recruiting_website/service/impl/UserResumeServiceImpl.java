@@ -1,9 +1,11 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.mapper.TDResumeMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
+import com.queryx.recruiting_website.utils.CommonResp;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -107,24 +109,43 @@ public class UserResumeServiceImpl implements UserResumeService {
 
 
     @Override
-    public Boolean updateResume(ResumeDTO resumeDTO) {
+    public String updateResume(ResumeDTO resumeDTO) {
+        // 校验原简历状态
+        if (resumeDTO.getResumeId() != null) {
+            LambdaQueryWrapper<TDResume> wrapper = new LambdaQueryWrapper<>();
+            wrapper.select(TDResume::getResumeId, TDResume::getResumeStatus);
+            wrapper.eq(TDResume::getResumeId, resumeDTO.getResumeId());
+            TDResume oldResume = resumeMapper.selectOne(wrapper);
+            if (oldResume == null) {
+                log.error("简历更新,查询原简历失败，简历id:{}", resumeDTO.getResumeId());
+                CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            }
+            assert oldResume != null;
+            if (Common.STATUS_DISABLE.equals(oldResume.getResumeStatus())) {
+                log.error("简历更新失败，原简历已禁用，简历id:{}", resumeDTO.getResumeId());
+                CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            }
+        }
         TDResume tdResume = new TDResume();
         BeanUtils.copyProperties(resumeDTO, tdResume);
         tdResume.setResumeStatus(Common.STATUS_ENABLE);
-//        tdResume.setResumeReview(Common.REVIEW_WAIT);, new LambdaUpdateWrapper<TDResume>()
-//                .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
-//                .eq(TDResume::getResumeId, resumeDTO.getResumeId())
+        tdResume.setResumeReview(Common.REVIEW_OK);
         boolean updated = resumeMapper.insertOrUpdate(tdResume);
         // 更新用户姓名
         LambdaUpdateWrapper<TDUser> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(TDUser::getUserName, resumeDTO.getResumeName());
+        updateWrapper.set(TDUser::getUserPhone, resumeDTO.getResumePhone());
+        updateWrapper.set(TDUser::getUserEmail, resumeDTO.getResumeEmail());
+        updateWrapper.set(TDUser::getResumeId, tdResume.getResumeId());
         updateWrapper.eq(TDUser::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
         int userUpdated = userMapper.update(updateWrapper);
         if (!updated || userUpdated <= 0) {
             log.error("简历更新失败，简历id:{}", resumeDTO.getResumeId());
             throw new RuntimeException("简历更新失败");
         }
-        return true;
+        // 更新登录用户简历id
+        SecurityUtils.getLoginUser().getTdUser().setResumeId(tdResume.getResumeId());
+        return tdResume.getResumeId().toString();
     }
 
     @Override

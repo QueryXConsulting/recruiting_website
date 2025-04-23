@@ -112,17 +112,17 @@ public class UserResumeController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/update")
-    public CommonResp<Boolean> handleResumeUpdate(@RequestBody ResumeDTO resumeDTO) {
-        Boolean row;
+    public CommonResp<String> handleResumeUpdate(@RequestBody ResumeDTO resumeDTO) {
+        String resumeId;
         try {
-            row = userManagementService.updateResume(resumeDTO);
-            if (row) {
+            resumeId = userManagementService.updateResume(resumeDTO);
+            if (resumeId == null || resumeId.isEmpty()) {
                 throw new Exception();
             }
         } catch (Exception e) {
-            return CommonResp.fail(AppHttpCodeEnum.UPDATE_RESUME_ERROR, false);
+            return CommonResp.fail(AppHttpCodeEnum.UPDATE_RESUME_ERROR, null);
         }
-        return CommonResp.success(row);
+        return CommonResp.success(resumeId);
     }
 
 

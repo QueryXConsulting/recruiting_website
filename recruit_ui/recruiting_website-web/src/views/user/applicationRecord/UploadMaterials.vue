@@ -48,7 +48,7 @@ const handleUpload = async () => {
             return;
         }
     }
-    
+
     const length = iterationObject.length - 1;
     const formData1 = new FormData();
     for (let i = 0; i < fileList.value.length; i++) {
@@ -173,6 +173,11 @@ const handlePreview = (file) => {
     <!-- 已上传，等待审核 -->
     <div v-if="windowStatus === 0" class="upload-status">
         <el-result icon="success" :title="windowStatusMessage"></el-result>
+    </div>
+
+    <!-- 页面状态提示-错误 -->
+    <div v-if="!windowStatus" class="info-status">
+        <el-result icon="error" title="错误！请先投递简历"></el-result>
     </div>
 </template>
 

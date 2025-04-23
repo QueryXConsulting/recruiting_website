@@ -125,18 +125,23 @@ public class QueryServiceImpl implements QueryService {
         }
         final JobVO jobVO = new JobVO();
         BeanUtils.copyProperties(tdJob, jobVO);
-        // 查询改岗位是否已投递过简历
-        LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(TDJobResume::getJobResumeId);
-        queryWrapper.eq(TDJobResume::getJobId, id);
+        // 查询该岗位是否已投递过简历
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // 判断用户是否登录
         if (authentication != null) {
+            LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.select(TDJobResume::getJobResumeId);
+            queryWrapper.eq(TDJobResume::getJobId, id);
             queryWrapper.eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+            // 查询该用户是否投递过该岗位
+            jobVO.setJobIsDelivery(jobResumeMapper.selectCount(queryWrapper) > 0);
+        } else {
+            // 用户未登录，默认未投递
+            jobVO.setJobIsDelivery(false);
         }
+        // 更新岗位浏览量
         jobInfoMapper.update(new LambdaUpdateWrapper<TDJob>().eq(TDJob::getJobId, id)
                 .set(TDJob::getJobView, tdJob.getJobView() + 1));
-        jobVO.setJobIsDelivery(jobResumeMapper.selectCount(queryWrapper) > 0);
         // 返回数据
         return jobVO;
     }
@@ -150,17 +155,19 @@ public class QueryServiceImpl implements QueryService {
         queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
 
-        queryWrapper.nested(i -> {
-            boolean firstCondition = true; // 用于标记是否是第一个条件，以避免在第一个条件前添加多余的"OR"
-            for (String s : IKAnalyzerUtil.cut(keyword)) {
-                if (firstCondition) {
-                    i.like(TDJob::getJobPosition, s);
-                    firstCondition = false;
-                } else {
-                    i.or().like(TDJob::getJobPosition, s);
+        if (!(keyword == null || keyword.isEmpty())) {
+            queryWrapper.nested(i -> {
+                boolean firstCondition = true; // 用于标记是否是第一个条件，以避免在第一个条件前添加多余的"OR"
+                for (String s : IKAnalyzerUtil.cut(keyword)) {
+                    if (firstCondition) {
+                        i.like(TDJob::getJobPosition, s);
+                        firstCondition = false;
+                    } else {
+                        i.or().like(TDJob::getJobPosition, s);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         queryWrapper.eq(nature != null && !nature.isEmpty(), TDJob::getJobNature, nature);
         queryWrapper.eq(education != null && !education.isEmpty(), TDJob::getJobEducation, education);
