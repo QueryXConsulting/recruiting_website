@@ -31,7 +31,7 @@ public interface UserResumeService {
      * @param resumeDTO 简历dto
      * @return 更新结果
      */
-    Boolean updateResume(ResumeDTO resumeDTO);
+    String updateResume(ResumeDTO resumeDTO);
 
     /**
      * 审核简历
