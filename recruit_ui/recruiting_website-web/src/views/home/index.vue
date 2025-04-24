@@ -1,61 +1,61 @@
 <template>
   <div class="home-container">
     <!-- 顶部导航栏 -->
-     <div style="height: 73px;width: 100%;">
+    <div style="height: 73px;width: 100%;">
       <nav class="nav-bar">
-      <div class="logo">
-        <img src="/public/logo.png" alt="问呗" class="logo-img">
-        <span class="divider">|</span>
-        <span class="recruit-text">招聘</span>
-      </div>
-      <div class="nav-items">
-        <a href="#" class="nav-item active">首页</a>
-        <a href="/users/search" class="nav-item">校园招聘</a>
-        <a href="#" class="nav-item">社会招聘</a>
-        <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
-        <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;" alt="留言板">
-          <el-icon>
-            <component :is="Bell"></component>
-          </el-icon>
-          <!-- 未读消息提示(小圆点) -->
-          <i v-if="hasMessage" class="message-flag"></i>
-        </a>
-        <!-- 用户头像 -->
-        <el-dropdown v-if="userStore().token != null" @command="handleCommand">
-          <span class="user-dropdown">
-            <el-avatar size="large" :src="userStore().userInfo.userAvatar" @error="() => { }">
-              <!-- 头像加载失败时显示默认头像 -->
-              <img src="/public/default_user.png" alt="用户头像">
-            </el-avatar>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="index" v-if="userStore().role != '5' && userStore().role != null">
-                <el-icon>
-                  <component :is="iconMapping['house']" />
-                </el-icon>
-                公司端
-              </el-dropdown-item>
+        <div class="logo">
+          <img src="/public/logo.png" alt="问呗" class="logo-img">
+          <span class="divider">|</span>
+          <span class="recruit-text">招聘</span>
+        </div>
+        <div class="nav-items">
+          <a href="#" class="nav-item active">首页</a>
+          <a href="/users/search" class="nav-item">校园招聘</a>
+          <a href="#" class="nav-item">社会招聘</a>
+          <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
+          <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;" alt="留言板">
+            <el-icon>
+              <component :is="Bell"></component>
+            </el-icon>
+            <!-- 未读消息提示(小圆点) -->
+            <i v-if="hasMessage" class="message-flag"></i>
+          </a>
+          <!-- 用户头像 -->
+          <el-dropdown v-if="userStore().token != null" @command="handleCommand">
+            <span class="user-dropdown">
+              <el-avatar size="large" :src="userStore().userInfo.userAvatar" @error="() => { }">
+                <!-- 头像加载失败时显示默认头像 -->
+                <img src="/public/default_user.png" alt="用户头像">
+              </el-avatar>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="index" v-if="userStore().role != '5' && userStore().role != null">
+                  <el-icon>
+                    <component :is="iconMapping['house']" />
+                  </el-icon>
+                  公司端
+                </el-dropdown-item>
 
-              <el-dropdown-item command="userInfo" v-if="userStore().role == '5'">
-                <el-icon>
-                  <component :is="iconMapping['user']" />
-                </el-icon>
-                个人信息
-              </el-dropdown-item>
-              <el-dropdown-item command="logout" divided>
-                <el-icon>
-                  <component :is="iconMapping['switch']" />
-                </el-icon>
-                退出登录
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <router-link to="/auth/login" class="login-btn" v-else-if="userStore().token == null">登录</router-link>
-      </div>
-    </nav>
-     </div>
+                <el-dropdown-item command="userInfo" v-if="userStore().role == '5'">
+                  <el-icon>
+                    <component :is="iconMapping['user']" />
+                  </el-icon>
+                  个人信息
+                </el-dropdown-item>
+                <el-dropdown-item command="logout" divided>
+                  <el-icon>
+                    <component :is="iconMapping['switch']" />
+                  </el-icon>
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <router-link to="/auth/login" class="login-btn" v-else-if="userStore().token == null">登录</router-link>
+        </div>
+      </nav>
+    </div>
 
 
     <!-- 主横幅区域 -->
@@ -63,12 +63,9 @@
       <div class="banner-content">
         <!-- <div class="banner-image"></div> -->
         <div class="banner-buttons">
-          <button class="primary-btn" @click="router.push('/users/search')"
-            v-if="userStore().token == null">招聘浏览</button>
-          <button class="primary-btn" @click="router.push('/users/search')"
-            v-if="userStore().token != null">校园招聘</button>
-          <button class="primary-btn" @click="router.push('/users/search')"
-            v-if="userStore().token != null">社会招聘</button>
+          <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().token == null">招聘浏览</button>
+          <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().token != null">校园招聘</button>
+          <button class="primary-btn" @click="router.push('/users/search')" v-if="userStore().token != null">社会招聘</button>
           <button class="primary-btn" @click="router.push('/users/registerCompany')"
             v-if="userStore().token == null">企业入驻</button>
         </div>
@@ -137,7 +134,7 @@ const handleCommand = (command) => {
     }).catch(() => { })
   } else if (command === 'userInfo') {
     router.push('/users/userInfo');
-  }else if (command === 'index') {
+  } else if (command === 'index') {
     router.push('/home');
   }
 }

@@ -16,14 +16,9 @@ public class SearchDTO {
     // 每页显示条数
     private Integer size;
     // 搜索类型
-    private SearchType searchType;
+//    private SearchType searchType;
     // 排序类型
     private Boolean isAsc;
-    // 学历
-    private String education;
-    // 工作性质
-    private String nature;
-
 
 
 

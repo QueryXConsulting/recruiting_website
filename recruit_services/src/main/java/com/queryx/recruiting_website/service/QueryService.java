@@ -1,7 +1,9 @@
 package com.queryx.recruiting_website.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.queryx.recruiting_website.domain.dto.SearchCompanyDTO;
 import com.queryx.recruiting_website.domain.dto.SearchDTO;
+import com.queryx.recruiting_website.domain.dto.SearchJobDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
@@ -33,7 +35,7 @@ public interface QueryService {
      * @param searchDTO 搜索条件
      * @return 职位列表
      */
-    CommonResp<Page<?>> getSearchList(SearchDTO searchDTO);
+//    CommonResp<Page<?>> getSearchList(SearchDTO searchDTO);
 
     /**
      * 查询职位信息
@@ -54,7 +56,8 @@ public interface QueryService {
      * @param nature 工作性质
      * @return 职位列表
      */
-    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature);
+    Page<SearchJobVO> getJobList(SearchJobDTO jobDTO);
+//    Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature);
 
     /**
      * 查询职位列表
@@ -64,7 +67,8 @@ public interface QueryService {
      * @param pageSize 页大小
      * @return 职位列表
      */
-    CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc);
+    CommonResp<Page<SearchCompanyVO>> getCompanyList(SearchCompanyDTO companyDTO);
+//    CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc);
 
     /**
      * 查询所有简历信息

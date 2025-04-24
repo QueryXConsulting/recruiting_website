@@ -39,8 +39,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private TDJobMapper jobMapper;
     @Autowired
     private MessageBoardService messageBoardService;
-    private final String INPUT_INFO_MESSAGE_CONTENT = "您发布的%s岗位入职信息已经录入完成，请及时处理。 ——此消息由系统自动发送，请勿回复。";
-    private final String RESERVATION_MESSAGE_CONTENT = "您发布的%s岗位报到已经预约完成，请及时处理。 ——此消息由系统自动发送，请勿回复。";
+    private final String INPUT_INFO_MESSAGE_CONTENT = "我已经录入完成了您发布的%s岗位的入职信息，请及时处理。 ——此消息由系统自动发送，请勿回复。";
+    private final String RESERVATION_MESSAGE_CONTENT = "我已经预约完成了您发布的%s岗位的报到时间，请注意查收。 ——此消息由系统自动发送，请勿回复。";
 
     // 数据库字段由公司端创建
     private Integer registrationId;// 信息录入id

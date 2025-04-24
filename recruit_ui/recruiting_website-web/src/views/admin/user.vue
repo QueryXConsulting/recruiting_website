@@ -66,7 +66,7 @@ const response = reactive([
     { tag: 'add, edit, table', prop: 'userRole', label: '角色', value: '' },
     { tag: 'add, edit, table', prop: 'userStatus', label: '状态', value: '', option: userStatusOptions },
     { tag: 'table', prop: 'userInterviews', label: '面试数', value: '' },
-    { tag: 'edit, info', prop: 'resumeId', label: '简历ID', value: '' },
+    { tag: '', prop: 'resumeId', label: '简历ID', value: '' },
     { tag: 'add, edit, info', prop: 'userAvatar', label: '头像', value: '' },
 
 ]);
@@ -93,7 +93,7 @@ const searchObj = useUserListStore().getUserListQueryParams;
 
 function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         const context = this;
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), wait);
@@ -146,9 +146,9 @@ const handleUserAdd = (index, row) => {
     // 初始化新增表单数据
     const d = response.filter((item) => item.tag.includes('add'));
     const k = d.flatMap(item => item.prop);
-    const v = d.flatMap(item => item.value);
+    // const v = d.flatMap(item => item.value);
     for (let i = 0; i < k.length; i++) {
-        userAddForm[k[i]] = v[i];
+        userAddForm[k[i]] = null;
     }
 }
 
@@ -283,8 +283,16 @@ const handleAddRequest = () => {
     addForm.value.validate((valid) => {
         if (!valid) return;
         isShowDialogAdd.value = false;// 关闭弹窗
+        userAddForm.userAvatar = null;// 头像上传后再赋值
         userAdd(userAddForm).then(res => {
-            getUserListResult(searchObj);// 刷新用户列表
+            if (avatarFile && res.content) {
+                const formData = new FormData();
+                formData.append('userId', res.content);
+                formData.append('image', avatarFile);
+                userAvatarUpload(formData).then(res => {
+                    getUserListResult(searchObj);// 刷新用户列表
+                });
+            }
         });
     });
 
@@ -370,6 +378,16 @@ const handleCurrentChange = (val) => {
                 <el-select v-else-if="scope.key === 'userRole'" v-model="userAddForm[scope.key]" placeholder="用户角色">
                     <el-option v-for="(val, index) in roles" :key="index" :label="val.roleName" :value="val.roleId" />
                 </el-select>
+                <!-- 用户头像 -->
+                <span v-else-if="scope.key === 'userAvatar'" style="display: flex;align-items: center;">
+                    <el-avatar size="large" :src="userAddForm[scope.key]">
+                    </el-avatar>
+                    <i style="width: 20px;"></i>
+                    <el-upload :show-file-list="false" :http-request="updateAvatar" ref="avatarUpload" :limit="1"
+                        accept="'image/*'">
+                        <el-button size="small" type="primary" @click="_userInfo = userAddForm">点击上传</el-button>
+                    </el-upload>
+                </span>
                 <el-input v-else v-model="userAddForm[scope.key]" placeholder="请输入"></el-input>
             </template>
         </WBForm>
@@ -407,6 +425,7 @@ const handleCurrentChange = (val) => {
                         <el-button size="small" type="primary" @click="_userInfo = editModel">点击上传</el-button>
                     </el-upload>
                 </span>
+                <el-input v-else-if="scope.key === 'userId' || scope.key === 'resumeId'" v-model="editModel[scope.key]" readonly placeholder="请输入"></el-input>
                 <el-input v-else v-model="editModel[scope.key]" placeholder="请输入"></el-input>
             </template>
         </WBForm>
@@ -430,6 +449,7 @@ const handleCurrentChange = (val) => {
     .tableLab {
         display: flex;
         align-content: center;
+
         .search {
             position: relative;
             display: flex;

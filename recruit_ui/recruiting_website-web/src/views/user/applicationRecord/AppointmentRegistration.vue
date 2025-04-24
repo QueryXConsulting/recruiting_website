@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus';
 const reservationStatus = ref(null);// 预约状态
 const reservationStatusMessage = ref(null);// 页面状态提示信息
 const reservationResult = reactive({});// 报到信息
-let date = null;
+const date = ref(null);
 
 // 0待发送  1已发送 2已接受 3拒绝
 const reservationStatusOptions = [
@@ -27,8 +27,8 @@ onMounted(async () => {
         ElMessage.error(result.message);
         return;
     }
-    date = new Date(result.content.hireDate);
-    reservationResult.date = date.toLocaleDateString();
+    date.value = new Date(result.content.hireDate);
+    reservationResult.date = date.value.toLocaleDateString();
     reservationResult.companyName = result.content.companyInfoName;
     reservationResult.positionName = result.content.position;
     reservationResult.jobArea = result.content.jobArea;
@@ -146,4 +146,9 @@ h3 {
     justify-content: center;
     align-items: center;
 }
+
+:deep(.el-calendar-table .current.is-selected) {
+    background-color: #f6a97fda;
+}
+
 </style>
