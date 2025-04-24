@@ -267,26 +267,36 @@ const handleUpdate = async (row) => {
 // 删除按钮操作
 const handleDelete = async (row) => {
   try {
-
     await ElMessageBox.confirm('确认要删除选中的角色吗？', '警告', {
       type: 'warning',
       cancelButtonText: '取消',
       confirmButtonText: '确定',
     })
 
-    if (ids.value.length === 0) {
-      ids.value.push(row.roleId)
+    // 确保 ids 是数组格式
+    let roleIdsToDelete = [];
+
+    if (row && row.roleId) {
+      // 如果是单个删除（点击行上的删除按钮）
+      roleIdsToDelete = [row.roleId];
+    } else if (ids.value && ids.value.length > 0) {
+      // 如果是批量删除（选择多个后点击顶部删除按钮）
+      roleIdsToDelete = ids.value;
+    } else {
+      ElMessage.warning('请选择要删除的角色');
+      return;
     }
-    const result = await roleDelete(ids.value)
+
+    const result = await roleDelete(roleIdsToDelete);
 
     if (result.code === 200) {
-      ElMessage.success('删除成功')
-      await getList()
+      ElMessage.success('删除成功');
+      await getList();
     } else {
-      ElMessage.error('删除失败')
+      ElMessage.error(result.message || '删除失败');
     }
   } catch (error) {
-    console.error('删除角色失败:', error)
+    console.error('删除角色失败:', error);
   }
 }
 

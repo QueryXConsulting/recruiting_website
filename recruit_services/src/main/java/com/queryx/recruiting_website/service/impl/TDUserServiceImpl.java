@@ -348,6 +348,8 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         }
         if (StringUtils.hasText(userDto.getUserPassword())) {
             userDto.setUserPassword(passwordEncoder.encode(userDto.getUserPassword()));
+        }else{
+            userDto.setUserPassword(passwordEncoder.encode(Common.DEFAULT_PASSWORD));
         }
 
         TDUser tdUser = new TDUser();
@@ -369,8 +371,12 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         tdUser.setCompanyInfoId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
         tdUser.setUserRegisterTime(new Date());
 
-        save(tdUser);
-        return null;
+        if (save(tdUser)) {
+            return "success";
+        }else {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+
     }
 
 

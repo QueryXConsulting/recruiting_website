@@ -13,7 +13,7 @@
       <template #extra>
         <el-button
           type="primary"
-          @click="$router.push('/home')"
+          @click="$router.push('/users/index')"
         >
           回到首页
         </el-button>

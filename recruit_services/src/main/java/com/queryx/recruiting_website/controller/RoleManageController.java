@@ -50,7 +50,7 @@ public class RoleManageController {
 
     @DeleteMapping("/delRole/{roleId}")
     @Operation(summary = "删除角色")
-    public CommonResp delRole(@PathVariable("roleId") List<Long> roleId) {
+    public CommonResp delRole(@PathVariable List<Long> roleId) {
         return CommonResp.success(tpRoleService.delRole(roleId));
     }
 

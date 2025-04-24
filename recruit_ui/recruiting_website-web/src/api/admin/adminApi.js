@@ -59,12 +59,8 @@ export const roleStatus = (roleId, roleStatus) =>
   request.put(`${API.ROLE_STATUS}/${roleId}/${roleStatus}`)
 
 export const roleDelete = (roleIds) => {
-  if (roleIds.length === 1) {
-    return request.delete(`${API.ROLE_DELETE}/${roleIds[0]}`)
-  } else {
-    const idsString = roleIds.join(',')
-    return request.delete(`${API.ROLE_DELETE}/${idsString}`)
-  }
+  let roleId = roleIds.join(',');
+  return request.delete(`${API.ROLE_DELETE}/${roleId}`);
 }
 
 // 用户相关

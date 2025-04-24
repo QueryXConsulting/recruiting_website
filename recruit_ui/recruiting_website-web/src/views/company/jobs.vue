@@ -129,14 +129,23 @@
             <el-form-item label="工作性质" prop="jobNature">
               <el-select v-model="jobForm.jobNature" placeholder="请选择工作性质" class="w-full">
                 <el-option label="全职" value="全职" />
-
                 <el-option label="实习" value="实习" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="薪资范围" prop="jobSalary">
-              <el-input v-model="jobForm.jobSalary" placeholder="例如：15k-25k" />
+              <el-select v-model="jobForm.jobSalary" placeholder="请选择薪资范围">
+                <el-option label="1k-2k" value="1k-2k"></el-option>
+                <el-option label="3k-5k" value="3k-5k"></el-option>
+                <el-option label="5k-8k" value="5k-8k"></el-option>
+                <el-option label="8k-10k" value="8k-10k"></el-option>
+                <el-option label="10k-15k" value="10k-15k"></el-option>
+                <el-option label="15k-20k" value="15k-20k"></el-option>
+                <el-option label="20k-30k" value="20k-30k"></el-option>
+                <el-option label="30k以上" value="30k+"></el-option>
+                <el-option label="面议" value="面议"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">

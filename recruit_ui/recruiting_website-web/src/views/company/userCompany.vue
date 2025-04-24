@@ -4,7 +4,7 @@
     <div class="search-bar">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item>
-          <el-input v-model="searchForm.keyword" placeholder="搜索用户名" clearable @keyup.enter="handleSearch"
+          <el-input v-model="searchForm.keyword" placeholder="搜索姓名" clearable @keyup.enter="handleSearch"
             class="search-input">
             <template #prefix>
               <el-icon>
@@ -20,8 +20,16 @@
       </el-form>
     </div>
 
+
     <!-- 用户列表 -->
     <div class="table-container">
+      <el-alert
+          title="提示: 新增用户不填写密码将使用默认密码：00000000,编辑员工账号 不填写密码和角色不会进行修改"
+          type="info"
+          :closable="false"
+          show-icon
+          style="margin-bottom: 15px;"
+        />
       <el-table :data="userList" style="width: 100%" v-loading="loading" :border="false" stripe highlight-current-row
         class="custom-table">
         <el-table-column type="index" label="序号" width="80" align="center" />
@@ -83,22 +91,23 @@
         <el-form-item label="用户名" prop="userName">
           <el-input v-model="userForm.userName" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="userEmail">
+        <!-- <el-form-item label="邮箱" prop="userEmail">
           <el-input v-model="userForm.userEmail" />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="手机号" prop="userPhone">
           <el-input v-model="userForm.userPhone" />
         </el-form-item>
         <el-form-item label="角色" prop="userRole">
-          <el-select v-model="userForm.userRole" placeholder="请选择角色(未选择则不修改)">
+          <el-select v-model="userForm.userRole" placeholder="请选择角色">
             <el-option v-for="role in roleList" :key="role.roleId" :label="role.roleName"
               :value="role.roleId.toString()" />
           </el-select>
         </el-form-item>
+
         <el-form-item label="密码" prop="userPassword">
-          <el-input v-model="userForm.userPassword" type="password" show-password placeholder="未输入则不修改" />
+          <el-input v-model="userForm.userPassword" type="password" show-password placeholder="请输入密码" />
         </el-form-item>
-        <el-form-item label="头像" prop="userAvatar">
+        <!-- <el-form-item label="头像" prop="userAvatar">
           <el-upload class="avatar-uploader" :auto-upload="false" :show-file-list="false"
             :on-change="handleAvatarChange" accept=".jpg,.jpeg,.png">
             <img v-if="userForm.userAvatar" :src="userForm.userAvatar" class="avatar" />
@@ -106,7 +115,7 @@
               <Plus />
             </el-icon>
           </el-upload>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="用户状态" prop="userStatus">
           <el-radio-group v-model="userForm.userStatus">
             <el-radio value="0">启用</el-radio>
@@ -160,10 +169,10 @@ const userForm = ref({
 // 表单验证规则
 const rules = {
   userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  userEmail: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
-  ],
+  // userEmail: [
+  //   { required: true, message: '请输入邮箱', trigger: 'blur' },
+  //   { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  // ],
   userPhone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
@@ -320,26 +329,26 @@ const handleCurrentChange = (val) => {
 }
 
 // 修改头像上传相关方法
-const handleAvatarChange = (file) => {
-  const isJPG = file.raw.type === 'image/jpeg' || file.raw.type === 'image/png'
-  const isLt2M = file.raw.size / 1024 / 1024 < 2
+// const handleAvatarChange = (file) => {
+//   const isJPG = file.raw.type === 'image/jpeg' || file.raw.type === 'image/png'
+//   const isLt2M = file.raw.size / 1024 / 1024 < 2
 
-  if (!isJPG) {
-    ElMessage.error('头像只能是 JPG 或 PNG 格式!')
-    return false
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过 2MB!')
-    return false
-  }
+//   if (!isJPG) {
+//     ElMessage.error('头像只能是 JPG 或 PNG 格式!')
+//     return false
+//   }
+//   if (!isLt2M) {
+//     ElMessage.error('头像大小不能超过 2MB!')
+//     return false
+//   }
 
-  // 创建 FileReader 对象来读取文件
-  const reader = new FileReader()
-  reader.readAsDataURL(file.raw)
-  reader.onload = (e) => {
-    userForm.value.userAvatar = e.target.result
-  }
-}
+//   // 创建 FileReader 对象来读取文件
+//   const reader = new FileReader()
+//   reader.readAsDataURL(file.raw)
+//   reader.onload = (e) => {
+//     userForm.value.userAvatar = e.target.result
+//   }
+// }
 
 // 角色列表
 const roleList = ref([])

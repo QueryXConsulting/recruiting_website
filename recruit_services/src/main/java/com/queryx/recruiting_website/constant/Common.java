@@ -93,7 +93,8 @@ public class Common {
         Common.signPath = signPath;
     }
 
-    public static final String USER_MENU_TYPE="U";
+    public static final String DEFAULT_PASSWORD = "00000000";
+    public static final String USER_MENU_TYPE = "U";
     public static final String READ = "1";
     public static final String COMPANY_TYPE = "1";
     public static final String USER_TYPE = "0";

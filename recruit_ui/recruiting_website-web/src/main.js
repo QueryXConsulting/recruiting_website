@@ -8,6 +8,9 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import pinia from './store/store'
 import userStore from './store/user'
 
+
+
+
 const app = createApp(App)
 app.use(ElementPlus, {
   locale: zhCn,

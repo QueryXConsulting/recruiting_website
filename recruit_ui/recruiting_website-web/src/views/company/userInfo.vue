@@ -30,11 +30,13 @@
               <div class="info-row">
                 <div class="info-label">邮箱账号</div>
                 <div class="info-value">
-                  <el-input v-model="userInfo.userEmail" placeholder="请输入邮箱" />
+                  <el-input v-model="userInfo.userEmail" placeholder="请输入邮箱" @blur="validateEmail(userInfo.userEmail)" />
+                  <div v-if="emailError" class="error-message">{{ emailError }}</div>
                 </div>
                 <div class="info-label">手机号</div>
                 <div class="info-value">
-                  <el-input v-model="userInfo.userPhone" placeholder="请输入手机号" />
+                  <el-input v-model="userInfo.userPhone" placeholder="请输入手机号" @blur="validatePhone(userInfo.userPhone)" />
+                  <div v-if="phoneError" class="error-message">{{ phoneError }}</div>
                 </div>
               </div>
               <div class="info-row">
@@ -60,6 +62,7 @@
 import { ref, onMounted } from 'vue'
 import { getUserInfo, updateUserCompany, } from '@/api/company/companyApi'
 import { ElMessage } from 'element-plus'
+import userStore from '@/store/user'
 
 const userInfo = ref({
   userId: '',
@@ -73,13 +76,45 @@ const userInfo = ref({
 })
 
 const passwordInput = ref('')
+const emailError = ref('')
+const phoneError = ref('')
+
+// 验证邮箱格式
+const validateEmail = (email) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!email) {
+    emailError.value = '邮箱不能为空'
+    return false
+  }
+  if (!emailRegex.test(email)) {
+    emailError.value = '请输入有效的邮箱地址'
+    return false
+  }
+  emailError.value = ''
+  return true
+}
+
+// 验证手机号格式
+const validatePhone = (phone) => {
+  const phoneRegex = /^1[3456789]\d{9}$/
+  if (!phone) {
+    phoneError.value = '手机号不能为空'
+    return false
+  }
+  if (!phoneRegex.test(phone)) {
+    phoneError.value = '请输入有效的手机号码'
+    return false
+  }
+  phoneError.value = ''
+  return true
+}
 
 const getUserInfoData = async () => {
   try {
     let result = await getUserInfo()
     if (result.code === 200) {
       userInfo.value = result.content
-
+      userStore().userInfo.userAvatar = result.content.userAvatar
     }
   } catch (error) {
     console.error('获取用户信息失败：', error)
@@ -93,6 +128,14 @@ const handleAvatarChange = (file) => {
 
 const handleSave = async () => {
   try {
+    // 验证邮箱和手机号
+    const isEmailValid = validateEmail(userInfo.value.userEmail)
+    const isPhoneValid = validatePhone(userInfo.value.userPhone)
+
+    if (!isEmailValid || !isPhoneValid) {
+      return
+    }
+
     const formData = new FormData()
     const currentUserInfo = await getUserInfo()
 
@@ -123,8 +166,8 @@ const handleSave = async () => {
 
     if (result.code === 200) {
       ElMessage.success('保存成功')
-
       await getUserInfoData()
+
     } else {
       ElMessage.error(result.message || '保存失败')
     }
@@ -227,7 +270,8 @@ onMounted(() => {
   padding: 16px;
   color: #303133;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   flex: 1;
   min-width: 0;
 }
@@ -289,5 +333,12 @@ onMounted(() => {
 
 .avatar-uploader {
   margin-top: 12px;
+}
+
+.error-message {
+  color: #f56c6c;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1;
 }
 </style>

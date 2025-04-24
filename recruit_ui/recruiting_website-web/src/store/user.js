@@ -58,7 +58,7 @@ const userStore = defineStore('User', {
   getters: {},
   persist: {
     key: 'userStore',
-    storage: sessionStorage,
+    storage: localStorage,
     paths: ['token', 'menuTree', 'permissions', 'role', 'userInfo'],
   },
 })

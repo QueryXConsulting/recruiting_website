@@ -27,9 +27,9 @@ request.interceptors.request.use((config) => {
   if (token != null) {
     config.headers['token'] = `${token}`
   }
-
+  const regex = /^\/[^\/]+\/[^\/]+/;
   // 获取当前请求的基础URL（移除动态参数）
-  const baseUrl = config.url.replace(/\/\d+/g, '')
+  const baseUrl = config.url.match(regex)[0]
 
   // 用户端测试专用
   if(baseUrl.startsWith('/api')){

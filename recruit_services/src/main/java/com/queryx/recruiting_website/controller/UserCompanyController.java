@@ -58,7 +58,8 @@ public class UserCompanyController {
 
     @PostMapping("/updateUserCompany")
     @Operation(summary = "公司员工修改")
-    public CommonResp updateUserCompany(@RequestParam(value = "dtoJson") String jsonDto, @RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
+    public CommonResp updateUserCompany(@RequestParam(value = "dtoJson") String jsonDto
+            , @RequestParam(value = "userAvatar", required = false) MultipartFile userAvatar) throws IOException {
         UserDto userDto = JSON.parseObject(jsonDto, UserDto.class);
         return CommonResp.success(tdUserService.updateUserCompany(userDto, userAvatar));
     }

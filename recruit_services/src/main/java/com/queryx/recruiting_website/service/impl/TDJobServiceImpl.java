@@ -23,6 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +131,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         tdJob.setCompanyId(SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId());
         tdJob.setJobReview(Common.REVIEW_WAIT);
         tdJob.setJobStatus(Common.STATUS_CLOSE);
-        tdJob.setJobTime(new Date());
+        tdJob.setJobTime(LocalDateTime.now());
 
         if (tdJobMapper.insert(tdJob) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
@@ -154,7 +155,7 @@ public class TDJobServiceImpl extends ServiceImpl<TDJobMapper, TDJob> implements
         BeanUtils.copyProperties(jobDto, tdJob);
         tdJob.setJobReview(Common.REVIEW_OK);
         tdJob.setJobStatus(Common.STATUS_PUBLISH);
-        tdJob.setJobTime(new Date());
+        tdJob.setJobTime(LocalDateTime.now());
 
         if (tdJobMapper.insert(tdJob) < 1) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
