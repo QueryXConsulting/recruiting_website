@@ -3,7 +3,7 @@ import WBForm from "@/components/WBForm.vue";
 import { ref, reactive } from "vue";
 import { userRegister } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
-// import { useRouter } from 'vue-router';
+import { ArrowLeft } from '@element-plus/icons-vue';
 import userStore from '@/store/user';
 import router from '@/router';
 
@@ -94,6 +94,13 @@ const handleSubmit = async () => {
     <div class="register-container">
 
         <div class="register-form">
+            <div class="back-arrow">
+                <el-link :underline="false" href="/" type="info">
+                    <el-icon size="large" class="arrow-icon">
+                        <ArrowLeft />
+                    </el-icon>
+                </el-link>
+            </div>
             <h2 class="register-title">注册</h2>
             <WBForm :model="formData" ref="refForm" :items="formDisplay" :rules="formRules">
                 <template #default="scope">
@@ -102,11 +109,13 @@ const handleSubmit = async () => {
                     <el-input v-else v-model="formData[scope.key]" placeholder="请输入信息"></el-input>
                 </template>
             </WBForm>
-            <i style="height: 10px;">&nbsp;</i>
+            <!-- <i style="height: 10px;">&nbsp;</i> -->
             <!-- 按钮 -->
-            <el-row justify="center" class="register-btn">
-                <el-button size="large" type="primary" @click="handleSubmit">注册</el-button>
-            </el-row>
+            <div style="display: flex; justify-content: center;">
+                <el-button size="large" @click="handleSubmit" class="register-btn">注&emsp;册</el-button>
+            </div>
+            <!-- <br> -->
+            <el-link :underline="false" href="/auth/login" type="primary" class="link-text">去登录</el-link>
         </div>
     </div>
 </template>
@@ -115,6 +124,12 @@ const handleSubmit = async () => {
 <style lang="scss" scoped>
 .register-container {
     padding: 15vh 0px 0px 0px;
+}
+
+.back-arrow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .register-form {
@@ -133,5 +148,22 @@ const handleSubmit = async () => {
     font-weight: bold;
     text-align: center;
     margin-bottom: 40px;
+}
+
+.register-btn {
+    background-color: #FF8C00;
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+    // margin-top: 10px;   
+    border-radius: 6px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.register-btn:hover {
+    background-color: #FFEFD5;
+    border-color: #FF8C00;
 }
 </style>

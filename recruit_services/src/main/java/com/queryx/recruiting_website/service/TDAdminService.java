@@ -12,7 +12,7 @@ import com.queryx.recruiting_website.domain.vo.UserLoginVO;
 
 public interface TDAdminService extends IService<TDAdmin> {
 
-    AdminDto addAdmin(AdminDto adminDto);
+    String addAdmin(AdminDto adminDto);
 
     UserLoginVO login(AdminLoginDto adminLoginDto);
 

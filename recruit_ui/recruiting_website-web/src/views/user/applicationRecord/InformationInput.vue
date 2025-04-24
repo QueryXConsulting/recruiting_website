@@ -107,7 +107,7 @@ const resetForm = () => {
 </script>
 
 <template>
-    <div v-if="windowStatus === 3">
+    <div v-if="windowStatus === 3 || windowStatus === 0">
         <main class="form-container">
             <h1 class="form-title">个人信息录入</h1>
             <el-alert v-if="windowStatus === 3" title="信息为通过审核，请重新提交" type="warning" center show-icon  />

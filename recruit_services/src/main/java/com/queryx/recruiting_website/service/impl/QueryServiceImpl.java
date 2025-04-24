@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
+import com.queryx.recruiting_website.domain.dto.SearchCompanyDTO;
 import com.queryx.recruiting_website.domain.dto.SearchDTO;
+import com.queryx.recruiting_website.domain.dto.SearchJobDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
 import com.queryx.recruiting_website.domain.vo.search.SearchJobVO;
@@ -96,22 +98,22 @@ public class QueryServiceImpl implements QueryService {
         return list.isEmpty() ? null : list;
     }
 
-    @Override
-    public CommonResp<Page<?>> getSearchList(SearchDTO searchDTO) {
-        Page<?> result = null;
-        switch (searchDTO.getSearchType()) {
-            case JOB -> result = getJobList(
-                    searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(),
-                    searchDTO.getIsAsc(), searchDTO.getEducation(), searchDTO.getNature()
-            );
-            case COMPANY ->
-                    result = getCompanyList(searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
-            default -> {
-                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-            }
-        }
-        return CommonResp.success(result);
-    }
+//    @Override
+//    public CommonResp<Page<?>> getSearchList(SearchDTO searchDTO) {
+//        Page<?> result = null;
+//        switch (searchDTO.getSearchType()) {
+//            case JOB -> result = getJobList(
+//                    searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(),
+//                    searchDTO.getIsAsc(), searchDTO.getEducation(), searchDTO.getNature()
+//            );
+//            case COMPANY ->
+//                    result = getCompanyList(searchDTO.getKeyword().trim(), searchDTO.getPage(), searchDTO.getSize(), searchDTO.getIsAsc()).getContent();
+//            default -> {
+//                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+//            }
+//        }
+//        return CommonResp.success(result);
+//    }
 
     @Override
     public JobVO getJob(Long id) {
@@ -147,18 +149,19 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @Cacheable(value = "jobList", key = "#keyword + #page + #pageSize + #isAsc + #education + #nature")
-    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature) {
+    @Cacheable(value = "jobList", key = "#jobDTO.getKeyword() + #jobDTO.getPage() + #jobDTO.getSize() + #jobDTO.getIsAsc() + #jobDTO.getEducation() + #jobDTO.getNature() + #jobDTO.getArea() + #jobDTO.getSalary()")
+    public Page<SearchJobVO> getJobList(SearchJobDTO jobDTO) {
+//    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
         queryWrapper.eq(TDJob::getDelFlag, Common.NOT_DELETE);
         queryWrapper.eq(TDJob::getJobStatus, Common.JOB_STATUS_ENABLE_OK);
 
-        if (!(keyword == null || keyword.isEmpty())) {
+        if (!(jobDTO.getKeyword() == null || jobDTO.getKeyword().trim().isEmpty())) {
             queryWrapper.nested(i -> {
                 boolean firstCondition = true; // 用于标记是否是第一个条件，以避免在第一个条件前添加多余的"OR"
-                for (String s : IKAnalyzerUtil.cut(keyword)) {
+                for (String s : IKAnalyzerUtil.cut(jobDTO.getKeyword())) {
                     if (firstCondition) {
                         i.like(TDJob::getJobPosition, s);
                         firstCondition = false;
@@ -169,11 +172,13 @@ public class QueryServiceImpl implements QueryService {
             });
         }
 
-        queryWrapper.eq(nature != null && !nature.isEmpty(), TDJob::getJobNature, nature);
-        queryWrapper.eq(education != null && !education.isEmpty(), TDJob::getJobEducation, education);
-        queryWrapper.orderBy(true, isAsc, TDJob::getJobTime);
+        queryWrapper.eq(jobDTO.getNature() != null && !jobDTO.getNature().isEmpty(), TDJob::getJobNature, jobDTO.getNature());
+        queryWrapper.eq(jobDTO.getEducation() != null && !jobDTO.getEducation().isEmpty(), TDJob::getJobEducation, jobDTO.getEducation());
+        queryWrapper.like(jobDTO.getArea() != null && !jobDTO.getArea().isEmpty(), TDJob::getJobArea, jobDTO.getArea());
+        queryWrapper.eq(jobDTO.getSalary() != null && !jobDTO.getSalary().isEmpty(), TDJob::getJobSalary, jobDTO.getSalary());
+        queryWrapper.orderBy(true, jobDTO.getIsAsc(), TDJob::getJobTime);
         // 构建分页对象
-        Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
+        Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(jobDTO.getPage(), jobDTO.getSize()), queryWrapper);
         if (jobPage == null) return null;
         Page<SearchJobVO> resPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
         List<SearchJobVO> list = new ArrayList<>();
@@ -189,29 +194,32 @@ public class QueryServiceImpl implements QueryService {
 
 
     @Override
-    @Cacheable(value = "companyList", key = "#keyword + #page + #pageSize + #isAsc")
-    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
+    @Cacheable(value = "companyList", key = "#companyDTO.getKeyword() + #companyDTO.getPage() + #companyDTO.getSize() + #companyDTO.getIsAsc()")
+    public CommonResp<Page<SearchCompanyVO>> getCompanyList(SearchCompanyDTO companyDTO) {
+//    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getEnterpriseReview, Common.REVIEW_OK);
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoStatus, Common.STATUS_ENABLE);
 
-        queryWrapper.nested(i -> {
-            boolean firstCondition = true;
-            for (String s : IKAnalyzerUtil.cut(keyword)) {
-                if (firstCondition) {
-                    i.like(TDCompanyInfo::getCompanyInfoName, s);
-                    firstCondition = false;
-                } else {
-                    i.or().like(TDCompanyInfo::getCompanyInfoName, s);
+        if (!(companyDTO.getKeyword() == null || companyDTO.getKeyword().trim().isEmpty())) {
+            queryWrapper.nested(i -> {
+                boolean firstCondition = true;
+                for (String s : IKAnalyzerUtil.cut(companyDTO.getKeyword())) {
+                    if (firstCondition) {
+                        i.like(TDCompanyInfo::getCompanyInfoName, s);
+                        firstCondition = false;
+                    } else {
+                        i.or().like(TDCompanyInfo::getCompanyInfoName, s);
+                    }
                 }
-            }
-        });
+            });
+        }
 
-        queryWrapper.orderBy(true, isAsc, TDCompanyInfo::getCompanyRegisterTime);
+        queryWrapper.orderBy(true, companyDTO.getIsAsc(), TDCompanyInfo::getCompanyRegisterTime);
         // 构建分页对象
-        Page<TDCompanyInfo> company = companyInfoMapper.selectPage(new Page<>(page, pageSize), queryWrapper);
+        Page<TDCompanyInfo> company = companyInfoMapper.selectPage(new Page<>(companyDTO.getPage(), companyDTO.getSize()), queryWrapper);
         if (company == null) {
             return CommonResp.success(null);
         }

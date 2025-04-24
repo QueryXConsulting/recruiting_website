@@ -60,18 +60,19 @@ const handleUpload = async () => {
             continue;
         }
         formData1.append(iterationObject[i].prop, file[0].raw);
-
     }
     const res1 = await materialUpload(formData1);
     if (!res1.content) {
         ElMessage.error(res1.message);
         return;
     }
-    if (!fileList.value[length]) {
+    ElMessage.success(`必须材料：${res1.message}`);
+
+    // 其他资料上传
+    if (!fileList[iterationObject.length - 1]) {
         return;
     }
 
-    // 其他资料上传
     const formData2 = new FormData();
     for (let i = 0; i < fileList.value[length].length; i++) {
         const file = fileList.value[length][i];
@@ -82,6 +83,9 @@ const handleUpload = async () => {
         ElMessage.error(res2.message);
         return;
     }
+    ElMessage.success(`其它材料：${res2.message}`);
+    // 刷新页面
+    window.location.reload();
 }
 
 const handleRemove = (file) => {

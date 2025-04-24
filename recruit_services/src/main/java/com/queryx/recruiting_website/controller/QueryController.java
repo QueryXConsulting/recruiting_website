@@ -2,6 +2,8 @@ package com.queryx.recruiting_website.controller;
 
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDUser;
+import com.queryx.recruiting_website.domain.dto.SearchCompanyDTO;
+import com.queryx.recruiting_website.domain.dto.SearchJobDTO;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -138,33 +140,33 @@ public class QueryController {
      * @param searchDTO 搜索条件
      * @return 搜索结果
      */
-    @Operation(summary = "用户搜索接口", parameters = {
-            @Parameter(name = "searchDTO", description = "搜索条件", schema = @Schema(implementation = SearchDTO.class), required = true)
-    }, responses = {
-            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
-            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
-    })
-    @PostMapping("/search")
-    public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
-        // 校验参数
-        if (searchDTO == null) {
-            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
-        }
-        // 查询岗位列表
-        return queryUserInfo.getSearchList(searchDTO);
-    }
+//    @Operation(summary = "用户搜索接口", parameters = {
+//            @Parameter(name = "searchDTO", description = "搜索条件", schema = @Schema(implementation = SearchDTO.class), required = true)
+//    }, responses = {
+//            @ApiResponse(responseCode = "200", description = "查询成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+//            @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
+//            @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
+//    })
+//    @PostMapping("/search")
+//    public CommonResp<Page<?>> querySearch(@RequestBody SearchDTO searchDTO) {
+//        // 校验参数
+//        if (searchDTO == null) {
+//            return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+//        }
+//        // 查询岗位列表
+//        return queryUserInfo.getSearchList(searchDTO);
+//    }
 
 
     /**
      * 查询招聘岗位列表
      *
-     * @param keyword  关键字
-     * @param page     页码
-     * @param pageSize 页大小
-     * @param isAsc 是否升序
+     * @param keyword   关键字
+     * @param page      页码
+     * @param pageSize  页大小
+     * @param isAsc     是否升序
      * @param education 学历
-     * @param nature 性质
+     * @param nature    性质
      * @return 招聘岗位列表
      */
     @Operation(summary = "查询招聘岗位列表", parameters = {
@@ -179,19 +181,21 @@ public class QueryController {
             @ApiResponse(responseCode = "465", description = "招聘岗位不存在", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("/jobs")
+    @PostMapping("/jobs")
     public CommonResp<Page<SearchJobVO>> queryJobList(
-            @RequestParam("keyword") String keyword,
-            @RequestParam("page") Integer page,
-            @RequestParam("pageSize") Integer pageSize,
-            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc,
-            @RequestParam(value = "education", required = false) String education,
-            @RequestParam(value = "nature", required = false) String nature
+            @RequestBody SearchJobDTO jobDTO
+//            @RequestParam("keyword") String keyword,
+//            @RequestParam("page") Integer page,
+//            @RequestParam("pageSize") Integer pageSize,
+//            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc,
+//            @RequestParam(value = "education", required = false) String education,
+//            @RequestParam(value = "nature", required = false) String nature
     ) {
         // 校验参数
-        if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
+        if (jobDTO.getPage() == null || jobDTO.getSize() == null)
+            return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        Page<SearchJobVO> jobList = queryUserInfo.getJobList(keyword.trim(), page, pageSize, isAsc, education, nature);
+        Page<SearchJobVO> jobList = queryUserInfo.getJobList(jobDTO);
         // 校验结果
         if (jobList == null) return CommonResp.fail(AppHttpCodeEnum.JOB_NOT_EXIST, null);
         return CommonResp.success(jobList);
@@ -216,19 +220,19 @@ public class QueryController {
             @ApiResponse(responseCode = "481", description = "分页不能为空", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    @GetMapping("/companyList")
+    @PostMapping("/companyList")
     public CommonResp<Page<SearchCompanyVO>> queryCompanyList(
-            @RequestParam("keyword") String keyword,
-            @RequestParam("page") Integer page,
-            @RequestParam("pageSize") Integer pageSize,
-            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc) {
+            @RequestBody SearchCompanyDTO companyDTO
+//            @RequestParam("keyword") String keyword,
+//            @RequestParam("page") Integer page,
+//            @RequestParam("pageSize") Integer pageSize,
+//            @RequestParam(value = "isAsc", required = false, defaultValue = "false") boolean isAsc
+    ) {
         // 校验参数
-        if (keyword == null || keyword.isEmpty()) {
-            return CommonResp.success(null);
-        }
-        if (page == null || pageSize == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
+        if (companyDTO.getPage() == null || companyDTO.getSize() == null) return CommonResp.fail(AppHttpCodeEnum.PAGINATION_NOT_NULL, null);
         // 查询岗位列表
-        return queryUserInfo.getCompanyList(keyword.trim(), page, pageSize, isAsc);
+        return queryUserInfo.getCompanyList(companyDTO);
+//        return queryUserInfo.getCompanyList(keyword.trim(), page, pageSize, isAsc);
     }
 
     /**

@@ -21,7 +21,7 @@ public interface MessageBoardService extends IService<TDMessageBoard> {
      * @param companyId 公司id
      * @return 留言数据
      */
-    List<MessageDataVO> queryMessageData(Long companyId);
+    List<MessageDataVO> queryMessageData(Integer page, Integer size, Long companyId);
 
     Object lastMessage();
 

@@ -102,7 +102,6 @@ onMounted(async () => {
     const resp = await attachmentList();
 
     if (store.userInfo?.resumeId) {
-        console.log('用户简历带修改', store.userInfo);
         formData.value.resumeId = store.userInfo.resumeId;
     }
     if (typeof res === "undefined" || !res.hasOwnProperty('content')) {
@@ -155,6 +154,10 @@ const editInfo = async () => {
         if (key === 'resumeId') continue;
         // 校验工资
         if (key === 'resumeSalary') {
+            if (salaryRange[0] === '面议') {
+                formData.value[key] = salaryRange.join('-');
+                continue;
+            }
             if ((salaryRange[0] === '' || !salaryRange[0]) || (salaryRange[1] === '' || !salaryRange[1])) {
                 ElMessage.error('请填写完整工资范围');
                 return;
@@ -185,10 +188,8 @@ const editInfo = async () => {
     }
     notEdit.value = true;
     await resumeUpdate(formData.value).then((res) => {
-        //console.log(res);
         // 使用 Object.assign
         store.userInfo = Object.assign({}, store.userInfo, { resumeId: res.content });
-
         ElMessage.success(res.message);
         // window.location.reload();
     });
@@ -324,7 +325,7 @@ const hasMessage = ref(false); // 是否有未读消息
                 <span class="recruit-text">招聘</span>
             </div>
             <div class="nav-items">
-                <a href="#" class="nav-item">首页</a>
+                <a href="/users/index" class="nav-item">首页</a>
                 <a href="/users/search" class="nav-item">校园招聘</a>
                 <a href="#" class="nav-item">社会招聘</a>
                 <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
@@ -438,7 +439,8 @@ const hasMessage = ref(false); // 是否有未读消息
                                 <span v-else-if="index === 'resumeSalary'"
                                     style="display: flex;justify-content: space-between;">
                                     <el-select v-model="salaryRange[0]" placeholder="请选择" size="large" :disabled="notEdit"
-                                        class="user-info-input" :style="{ width: '100px' }">
+                                        class="user-info-input" :style="{ width: '100px' }"
+                                        @change="(val) => { if (val === '面议') { salaryRange[1] = '' } else { salaryRange[1] = val } }">
                                         <el-option v-for="(item, i) in salaryOptions" :key="i" :label="item.range"
                                             :value="item.range"></el-option>
                                     </el-select>

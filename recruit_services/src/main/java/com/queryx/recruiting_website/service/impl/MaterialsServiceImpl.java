@@ -51,7 +51,7 @@ public class MaterialsServiceImpl implements MaterialsService {
     @Autowired
     private MaterialsMapper materialsMapper;
 
-    private final String SEND_MESSAGE_CONTENT = "您发布的%s岗位入职材料以上传，请及时查看。 ——此消息由系统自动发送，请勿回复。";
+    private final String SEND_MESSAGE_CONTENT = "我已经上传了您发布的%s岗位的入职材料，请及时查看。 ——此消息由系统自动发送，请勿回复。";
     @Autowired
     private MessageBoardService messageBoardService;
 

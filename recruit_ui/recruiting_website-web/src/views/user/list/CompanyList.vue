@@ -1,7 +1,7 @@
 <script setup>
 import WBList from '@/components/WBList.vue'
 import { reactive, ref, watchEffect } from 'vue'
-import { useSearchStore } from '@/store/searchStore'
+import { useSearchStore, SearchCondition } from '@/store/searchStore'
 import { companyList } from '@/api/user/UserApi'
 import { ElMessage } from 'element-plus';
 
@@ -15,7 +15,8 @@ const props = defineProps({
 
 // 获取列表数据
 const getCompanyList = async (condition) => {
-    const data = await companyList(condition.keyword, condition.page, condition.size, condition.isAsc);
+    const data = await companyList(new SearchCondition(condition.keyword, condition.page, condition.size, condition.isAsc));
+    // const data = await companyList(condition.keyword, condition.page, condition.size, condition.isAsc);
     // 分页数据赋值
     try {
         pagination.current = data.content.current;
@@ -69,7 +70,7 @@ const handleSizeChange = (pageSize) => {
             <template #default="item">
                 <span class="companys-desc">
                     <h1>{{ item.companyInfoName }}</h1>
-                    <p>{{ item.companyInfoScope }}</p>
+                    <p>{{ item.companyInfoProfile }}</p>
                 </span>
             </template>
             <template #item-right>

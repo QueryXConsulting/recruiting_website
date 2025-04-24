@@ -3,9 +3,9 @@ import router from '@/router/index'
 import WBList from '@/components/WBList.vue'
 import { jobList } from '@/api/user/UserApi'
 import { reactive, ref, watchEffect } from 'vue'
-import { useSearchStore } from '@/store/searchStore'
-import { ElMessage } from 'element-plus'
-
+import { useSearchStore, SearchCondition } from '@/store/searchStore'
+import { ElMessage } from 'element-plus';
+import { ElLoading } from 'element-plus';
 
 // 列表数据
 const props = defineProps({
@@ -17,7 +17,8 @@ const pagination = reactive({}); // 分页数据
 
 // 获取列表数据
 const getJobList = async (condition) => {
-    const data = await jobList(condition.keyword, condition.page, condition.size, condition.isAsc, condition.education, condition.nature);
+    const data = await jobList(condition);
+    // const data = await jobList(condition.keyword, condition.page, condition.size, condition.isAsc, condition.education, condition.nature);
     // 分页数据赋值
     try {
         pagination.current = data.content.current;
@@ -38,7 +39,16 @@ watchEffect(() => {
 
 // 跳转到详情页
 const viewDetail = (val) => {
-    router.push({ name: 'JobInfo', query: { jobId: val.jobId } })
+    const loading = ElLoading.service({
+        lock: false,
+        text: '加载中……',
+        background: 'rgba(0, 0, 0, 0.7)',
+    })
+    router.push({ name: 'JobInfo', query: { jobId: val.jobId } }).then(() => {
+        loading.close();
+    }).catch(() => {
+        ElMessage.error('网络繁忙，请稍后再试！');
+    });
 }
 
 

@@ -34,7 +34,7 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
     private TDCompanyInfoService companyInfoService;
 
     @Override
-    public Object getMessageData(Integer page,Integer size,Long userId) {
+    public Object getMessageData(Integer page, Integer size, Long userId) {
         // 设置分页参数，获取最后一页，每页4条数据
         Page<TDMessageBoard> pageData = new Page<>(page, size);
         LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
@@ -75,16 +75,29 @@ public class MessageBoardServiceImpl extends ServiceImpl<MessageBoardMapper, TDM
     }
 
     @Override
-    public List<MessageDataVO> queryMessageData(Long companyId) {
+    public List<MessageDataVO> queryMessageData(Integer page, Integer size, Long companyId) {
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
-        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TDMessageBoard::getUserId, userId);
-        queryWrapper.eq(TDMessageBoard::getCompanyId, companyId);
-        queryWrapper.eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
-        List<TDMessageBoard> messageBoards = list(queryWrapper);
-        if (messageBoards == null || messageBoards.isEmpty()) {
+        Page<TDMessageBoard> pageData = new Page<>(page, size);
+        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<TDMessageBoard>()
+                .eq(TDMessageBoard::getUserId, userId)
+                .eq(TDMessageBoard::getCompanyId, companyId)
+                .eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE)
+                .orderByDesc(TDMessageBoard::getCreateTime);
+
+        Page<TDMessageBoard> messageBoardPage = page(pageData, queryWrapper);
+
+        List<TDMessageBoard> messageBoards = messageBoardPage.getRecords();
+        if (messageBoards.isEmpty()) {
             return null;
         }
+//        LambdaQueryWrapper<TDMessageBoard> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(TDMessageBoard::getUserId, userId);
+//        queryWrapper.eq(TDMessageBoard::getCompanyId, companyId);
+//        queryWrapper.eq(TDMessageBoard::getIsDeleted, Common.NOT_DELETE);
+//        List<TDMessageBoard> messageBoards = list(queryWrapper);
+//        if (messageBoards == null || messageBoards.isEmpty()) {
+//            return null;
+//        }
 
         // 留言标记已读
         for (TDMessageBoard messageBoard : messageBoards) {
