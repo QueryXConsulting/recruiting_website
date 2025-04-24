@@ -24,15 +24,21 @@ import com.queryx.recruiting_website.service.TDAdminService;
 import com.queryx.recruiting_website.utils.JwtUtil;
 import com.queryx.recruiting_website.utils.SecurityUtils;
 import com.queryx.recruiting_website.utils.TokenStorage;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,8 +57,11 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
     @Resource
     private TPRoleMapper roleMapper;
 
+    @Value("${file.upload-path-avatar}")
+    private String uploadPathAvatar;
+
     @Override
-    public AdminDto addAdmin(AdminDto adminDto) {
+    public String addAdmin(AdminDto adminDto) {
         if (!StringUtils.hasText(adminDto.getAdminUsername())) {
             throw new SystemException(AppHttpCodeEnum.USERNAME_NOT_NULL);
         }
@@ -71,13 +80,14 @@ public class TDAdminServiceImpl extends ServiceImpl<TDAdminMapper, TDAdmin> impl
         adminDto.setAdminPassword(password);
         TDAdmin tdAdmin = new TDAdmin();
         BeanUtils.copyProperties(adminDto, tdAdmin);
+
         tdAdmin.setAdminStatus(Common.STATUS_ENABLE);
         tdAdmin.setAdminCreateTime(new Date());
         if (!save(tdAdmin)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
 
-        return null;
+        return tdAdmin.getAdminId().toString();
     }
 
     @Override

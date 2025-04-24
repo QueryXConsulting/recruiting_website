@@ -37,11 +37,11 @@ public class MessageBoardUserController {
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(schema = @Schema(implementation = CommonResp.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(schema = @Schema(implementation = CommonResp.class), mediaType = "application/json"))
     })
-    public CommonResp<List<MessageDataVO>> getMessageData(@RequestParam("id") Long companyId) {
+    public CommonResp<List<MessageDataVO>> getMessageData(@RequestParam("page") Integer page,@RequestParam("size") Integer size, @RequestParam("id") Long companyId) {
         if (companyId == null) {
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }
-        return CommonResp.success(messageBoardService.queryMessageData(companyId));
+        return CommonResp.success(messageBoardService.queryMessageData(page, size, companyId));
     }
 
 

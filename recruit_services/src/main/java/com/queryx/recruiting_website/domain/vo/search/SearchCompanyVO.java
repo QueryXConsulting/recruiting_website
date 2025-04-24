@@ -13,8 +13,8 @@ public class SearchCompanyVO extends SearchResultVO{
     private String companyLogo;
     // 公司名称
     private String companyInfoName;
-    // 公司经营范围
-    private String companyInfoScope;
+    // 公司介绍
+    private String companyInfoProfile;
 
 
 

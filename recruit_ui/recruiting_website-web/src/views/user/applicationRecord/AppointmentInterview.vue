@@ -53,6 +53,9 @@ onMounted(async () => {
 
 // 获取选项label
 const getOptionLabel = (options, value) => {
+    if (!value) {
+        value = '-';
+    }
     const option = options.find((item) => item.value === value);
     return option ? option.label : value;
 }
@@ -91,14 +94,25 @@ const tableOperation = [
 ]
 let filteredOperation = tableOperation;
 
+// 面试类型过滤
+const getTypeOptionsLabel = (val) => {
+    // 表格右侧操作栏根据面试类型过滤
+
+    if (val.interviewType === "1" && val.interviewStatus === "1") {
+        // 线下面试
+        filteredOperation = tableOperation.filter((item) => item.text === '取消');
+    }
+    return getOptionLabel(typeOptions, val.interviewType);
+}
+// 面试状态过滤
 const getStatusOptionsLabel = (val) => {
-    // 表格右侧操作栏根据面试状态过滤
+    // 表格右侧操作栏根据面试状态过滤   
     if (val === "1") {
-        // 接受面试则只显示取消按钮
+        // 接受面试
         filteredOperation = tableOperation.filter((item) => item.text !== '拒绝' && item.text !== '接受');
     } else if (val === "0" || val === "3") {
         // 拒绝或反悔面试则不显示按钮
-        filteredOperation = [];
+        filteredOperation = null;
     } else if (val === "2") {
         // 未选择面试则显示接受和取消按钮
         filteredOperation = tableOperation.filter((item) => item.text === '接受' || item.text === '拒绝');
@@ -146,13 +160,18 @@ const handleClick = async (obj, row, $index) => {
             jobName = row.interviewJob;
             break;
         case '复制链接': // 复制链接
-            navigator.clipboard.writeText(row.interviewUrl)
-                .then(() => {
-                    ElMessage.success('腾讯会议链接已成功复制到剪贴板！链接：' + row.interviewUrl);
-                })
-                .catch(err => {
-                    ElMessageBox.confirm('腾讯会议链接复制失败，请手动复制！链接：' + row.interviewUrl);
-                });
+            try {
+                navigator.clipboard.writeText(row.interviewUrl)
+                    .then(() => {
+                        ElMessage.success('腾讯会议链接已成功复制到剪贴板！链接：' + row.interviewUrl);
+                    })
+                    .catch(err => {
+                        ElMessageBox.confirm('腾讯会议链接复制失败，请手动复制！链接：' + row.interviewUrl);
+                    });
+            } catch (e) {
+                ElMessageBox.confirm('腾讯会议链接复制失败，请手动复制！链接：' + row.interviewUrl);
+            }
+
             break;
         // case '开始面试': // 开始面试
         //     if (row.interviewStatus) {
@@ -219,8 +238,10 @@ const submitTime = async () => {
         ElMessage.error('未知错误，请联系管理员');
         return;
     }
-    await postMessage({ userId: companyId, content: `您发布的${jobName}岗位有新的面试邀请。 ——此消息由系统自动发送，请勿回复。` })
+    await postMessage({ userId: companyId, content: `我同意了您发布的${jobName}岗位的面试邀请。 ——此消息由系统自动发送，请勿回复。` })
     cancelTime();// 重置弹窗数据
+    // 刷新页面
+    window.location.reload();
 }
 // 取消选择时间
 const cancelTime = () => {
@@ -249,8 +270,8 @@ const cancelTime = () => {
                     {{ getStatusOptionsLabel(tableData[scope.$index][scope.prop]) }}
                 </el-tag>
                 <span v-else-if="scope.prop === 'interviewType'">
-                    {{ getOptionLabel(typeOptions, tableData[scope.$index][scope.prop]) }}</span>
-                <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
+                    {{ getTypeOptionsLabel(tableData[scope.$index]) }}</span>
+                <span v-else>{{ tableData[scope.$index][scope.prop] ? tableData[scope.$index][scope.prop] : '-' }}</span>
             </template>
             <!-- 表格右侧操作栏 -->
             <template #operation="scope">
