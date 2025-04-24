@@ -9,7 +9,7 @@ public enum AppHttpCodeEnum {
     SUCCESS(200, "操作成功"),
 
     // 服务端错误
-    SYSTEM_ERROR(512, "出现错误"),
+    SYSTEM_ERROR(512, "出现系统错误"),
 
     // 客户端错误
     NEED_LOGIN(450, "需要登录后操作"),

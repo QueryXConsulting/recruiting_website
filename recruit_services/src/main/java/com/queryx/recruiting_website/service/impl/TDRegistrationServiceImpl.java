@@ -111,7 +111,9 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         fieldValues.put("idCardNumber", registration.getIdCardNumber()); // 身份证号
         fieldValues.put("phoneNumber", registration.getPhoneNumber()); // 手机号码
         fieldValues.put("email", registration.getEmail()); // 邮箱地址
-        fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
+        if (registration.getHireDate() != null) {
+            fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
+        }
         fieldValues.put("position", registration.getPosition()); // 职位
         fieldValues.put("educationLevel", registration.getEducationLevel()); // 学历
         fieldValues.put("schoolName", registration.getSchoolName()); // 毕业学校

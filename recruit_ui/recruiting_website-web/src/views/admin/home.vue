@@ -37,8 +37,8 @@
     </div>
 
     <div class="menu">
-      <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#304156" text-color="#bfcbd9"
-        active-text-color="#409EFF" :router="false" @select="handleSelect">
+      <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#424242" text-color="#FFEA00"
+        active-text-color="#FFFF00" :router="false" @select="handleSelect">
         <template v-for="menu in menus" :key="menu.menuId">
           <!-- 一级菜单 -->
           <el-sub-menu v-if="menu.children && menu.children.length" :index="'/' + menu.path"
@@ -176,7 +176,7 @@ const handleCommand = (command) => {
   right: 0;
   height: 50px;
   padding: 0 20px;
-  background: white;
+  background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   z-index: 100;
   width: calc(100% - 200px);
@@ -204,13 +204,14 @@ const handleCommand = (command) => {
 
 .menu {
   width: 200px;
-  background-color: #304156;
+  background-color: #424242;
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
   overflow-y: auto;
   z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .el-menu-vertical {
@@ -222,7 +223,7 @@ const handleCommand = (command) => {
   margin-left: 200px;
   margin-top: 30px;
   padding: 20px;
-  background-color: #f0f2f5;
+  background-color: #f5f5f5;
   min-height: 100vh;
   box-sizing: border-box;
   z-index: 0;

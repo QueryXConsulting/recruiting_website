@@ -2,6 +2,9 @@
   <div class="resume-detail">
     <el-card class="resume-card">
       <div class="resume-header">
+        <div class="back-button" @click="goBack">
+          <el-icon><ArrowLeft /></el-icon>
+        </div>
         <h1>个人简历</h1>
       </div>
 
@@ -141,12 +144,24 @@
 <script setup>
 
 import { selectResume } from '@/api/company/companyApi'
+import router from '@/router'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 
 const route = useRoute()
 const resumeData = ref({})
+
+
+onMounted(() => {
+  getResumeDetail()
+})
+
+const goBack = () => {
+  router.go(-1)
+}
+
 
 const getResumeDetail = async () => {
   try {
@@ -375,12 +390,12 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-/* 如果是单数项，让最后一项占据整行 */
+
 .edu-item:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
-/* 优化打印样式 */
+
 @media print {
   .resume-detail {
     padding: 0;
@@ -402,4 +417,31 @@ onMounted(() => {
     padding: 15px 0;
   }
 }
+
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #409EFF;
+  font-size: 20px;
+  transition: transform 0.3s ease;
+}
+
+.back-button:hover {
+  transform: translateX(-5px);
+}
+
+
 </style>

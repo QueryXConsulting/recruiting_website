@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -54,8 +55,9 @@ public class TDJob {
     private String jobContact;
 
 
-    @Schema(name = "发布时间", implementation = Date.class, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Date jobTime;
+    @Schema(name = "发布时间", implementation =
+            LocalDateTime.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private LocalDateTime jobTime;
 
     @Schema(name = "浏览量", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer jobView;

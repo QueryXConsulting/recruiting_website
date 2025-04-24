@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>公司信息管理</span>
-          <el-button type="primary" @click="handleAdd">新增公司</el-button>
+          <!-- <el-button type="primary" @click="handleAdd">新增公司</el-button> -->
         </div>
       </template>
 
@@ -145,7 +145,7 @@
 
 
       <el-dialog v-model="previewVisible" :title="currentFile?.name" width="80%" :before-close="handleClosePreview"
-        class="pdf-preview-dialog" :destroy-on-close="true">
+        class="pdf-preview-dialog" :destroy-on-close="true" :style="{ marginLeft: '15%', marginTop: '10vh' }">
         <div class="pdf-preview-container">
           <embed v-if="previewUrl" :src="previewUrl + '#toolbar=0&navpanes=0&scrollbar=0'" type="application/pdf"
             width="100%" height="100%" class="pdf-preview-embed" />
@@ -153,7 +153,7 @@
       </el-dialog>
 
 
-      <el-dialog v-model="filesListVisible" title="企业资质文件" width="500px">
+      <el-dialog v-model="filesListVisible" title="企业资质文件" width="500px" >
         <div class="pdf-list" v-if="qualificationFiles.length">
           <div v-for="(file, index) in qualificationFiles" :key="index" class="pdf-item" @click="previewPdf(file)">
             <div class="pdf-content">
@@ -347,18 +347,13 @@ const handleLogoChange = (file) => {
   if (beforeLogoUpload(file.raw)) {
     logoFile.value = file.raw
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      form.companyLogo = e.target.result
-    }
-    reader.readAsDataURL(file.raw)
+    form.companyLogo = URL.createObjectURL(file.raw)
   }
 }
 
 // 修改提交表单方法
 const submitForm = async () => {
   if (!formRef.value) return
-
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
@@ -366,7 +361,6 @@ const submitForm = async () => {
 
         if (logoFile.value) {
           formData.append('applyFiles', logoFile.value)
-          formData.append('companyLogo', form.companyLogo)
         }
 
         Object.keys(form).forEach(key => {
@@ -385,6 +379,11 @@ const submitForm = async () => {
         ElMessage.success('保存成功')
         dialogVisible.value = false
         handleQuery()
+
+
+        if (form.companyLogo && form.companyLogo.startsWith('blob:')) {
+          URL.revokeObjectURL(form.companyLogo)
+        }
 
         logoFile.value = null
       } catch (error) {
@@ -848,6 +847,7 @@ onBeforeUnmount(() => {
 }
 
 .pdf-content {
+
   display: flex;
   align-items: center;
   width: 100%;

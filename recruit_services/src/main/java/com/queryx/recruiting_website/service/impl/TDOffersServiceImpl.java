@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDJobResume;
 import com.queryx.recruiting_website.domain.TDOffers;
@@ -12,6 +13,7 @@ import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.OfferDataDto;
 import com.queryx.recruiting_website.domain.vo.OfferTemplateVO;
 import com.queryx.recruiting_website.domain.vo.OffersVO;
+import com.queryx.recruiting_website.exception.SystemException;
 import com.queryx.recruiting_website.mapper.OfferTemplateMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
 import com.queryx.recruiting_website.mapper.TDOffersMapper;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +122,9 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
 
     @Override
     public CommonResp updateOfferStatus(Long offerId, String status, Long jobId, Long userId) {
+        LambdaUpdateWrapper<TDOffers> offersLambdaUpdateWrapper = new LambdaUpdateWrapper<TDOffers>();
+        offersLambdaUpdateWrapper.eq(TDOffers::getOfferId, offerId)
+                .set(TDOffers::getOffersStatus, status);
         if (status.equals("6")) {
             // 更新简历流程状态
             LambdaUpdateWrapper<TDJobResume> resumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
@@ -128,9 +134,13 @@ public class TDOffersServiceImpl extends ServiceImpl<TDOffersMapper, TDOffers> i
                     .set(TDJobResume::getResumeStatus, "4");
             jobResumeMapper.update(resumeLambdaUpdateWrapper);
             messageBoardService.sendMessage(userId, "offer已通过,请上传材料 —此消息来自系统自动发送");
+        } else if (Common.OFFER_STATUS_SEND.equals(status)) {
+            offersLambdaUpdateWrapper.set(TDOffers::getOffersDate, new Date());
         }
-        offersMapper.update(new LambdaUpdateWrapper<TDOffers>().eq(TDOffers::getOfferId, offerId)
-                .set(TDOffers::getOffersStatus, status));
+
+        if (offersMapper.update(offersLambdaUpdateWrapper) < 0) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
         return null;
     }
 

@@ -66,7 +66,8 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
         tdInterview.setJobResumeId(tdJobResume.getJobResumeId());
         save(tdInterview);
 
-        messageBoardService.sendMessage(sendInterviewDto.getUserId(), SecurityUtils.getLoginUser().getUsername() + " 向您发起了面试邀约");
+        messageBoardService.sendMessage(sendInterviewDto.getUserId()
+                , SecurityUtils.getLoginUser().getTdUser().getUserName() + " 向您发起了面试邀约 -此消息由系统自动发送");
         return null;
     }
 
@@ -115,7 +116,7 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
             offersMapper.insert(tdOffers);
             tdInterview.setJobId(null);
             tdInterview.setUserId(null);
-            messageBoardService.sendMessage(updateInterviewDto.getUserId(), "恭喜您通过面试");
+            messageBoardService.sendMessage(updateInterviewDto.getUserId(), "恭喜您通过面试 -此消息来自系统自动发送");
         } else if (tdInterview.getInterviewStatus().equals("3")) {
             BeanUtils.copyProperties(updateInterviewDto, tdInterview);
         }

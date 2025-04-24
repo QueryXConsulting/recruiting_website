@@ -138,7 +138,17 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="薪资" prop="jobSalary">
-                <el-input v-model="formData.jobSalary" placeholder="请输入薪资范围"></el-input>
+                <el-select v-model="formData.jobSalary" placeholder="请选择薪资范围" class="full-width">
+                  <el-option label="1k-2k" value="1k-2k"></el-option>
+                  <el-option label="3k-5k" value="3k-5k"></el-option>
+                  <el-option label="5k-8k" value="5k-8k"></el-option>
+                  <el-option label="8k-10k" value="8k-10k"></el-option>
+                  <el-option label="10k-15k" value="10k-15k"></el-option>
+                  <el-option label="15k-20k" value="15k-20k"></el-option>
+                  <el-option label="20k-30k" value="20k-30k"></el-option>
+                  <el-option label="30k以上" value="30k+"></el-option>
+                  <el-option label="面议" value="面议"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>

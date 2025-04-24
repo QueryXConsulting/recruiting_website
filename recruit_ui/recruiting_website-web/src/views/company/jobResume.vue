@@ -95,7 +95,7 @@
                           </el-button>
                         </template>
                         <el-button type="danger" link @click="handleUnsuitable(scope.row)"
-                          v-if="scope.row.resumeDelete !== '0' & scope.row.resumeStatus !== '0' & scope.row.resumeStatus != '1'">
+                          v-if="scope.row.resumeDelete !== '0' & scope.row.resumeStatus !== '0' & scope.row.resumeStatus != '1'&scope.row.resumeStatus != '6'">
                           不合适
                         </el-button>
                       </div>
@@ -115,9 +115,8 @@
               <el-table :data="interviewList" border stripe class="custom-table" row-key="interviewId">
                 <el-table-column label="简历名称" prop="resumeName" width="150" align="center" />
                 <el-table-column label="时间" prop="interviewDate" width="150" align="center" />
-                <el-table-column label="地点" prop="interviewRegion" width="160" align="center"
-                  v-if="interviewType == '1'" />
-                <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center" v-else />
+                <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center" />
+                <el-table-column label="地点" prop="interviewRegion" width="160" align="center"/>
                 <el-table-column label="类型" prop="interviewType" width="90" align="center">
                   <template #default="scope">
                     <el-tag :type="scope.row.interviewType == '0' ? 'success' : 'primary'">
@@ -150,13 +149,13 @@
                 <el-table-column label="操作" width="180" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-button type="primary" link @click="editInterview(scope.row)" :disabled="scope.row.interviewStatus != '1' &&
-                        scope.row.interviewStatus != '2'">
+                      <el-button type="primary" link @click="editInterview(scope.row)"
+                        v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == '0'">
                         修改
                       </el-button>
 
                       <el-button type="danger" link @click="viewInterview(scope.row)"
-                        v-if="scope.row.interviewStatus != '3' && scope.row.interviewResult == '0' && scope.row.interviewStatus != '0'">
+                        v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == '0'">
                         取消
                       </el-button>
                     </div>
@@ -171,6 +170,8 @@
             </div>
           </el-tab-pane>
           <el-tab-pane label="offer发放" name="offer">
+            <el-alert title="提示: offer发送后，应聘者进行签字确认，方可生效。然后等待材料发送进行审核" type="info" :closable="false" show-icon
+              style="margin-bottom: 15px;" />
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="offersList" border stripe class="custom-table" row-key="offerId">
                 <el-table-column label="序号" type="index" width="100" align="center" />
@@ -348,7 +349,7 @@
 
       <!-- 添加PDF预览对话框 -->
       <el-dialog v-model="pdfDialogVisible" title="简历预览" width="80%" :destroy-on-close="true"
-        :close-on-click-modal="false" :style="{marginLeft:'15%'}">
+        :close-on-click-modal="false" :style="{ marginLeft: '15%' }">
         <div class="pdf-container">
           <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="600px" frameborder="0"></iframe>
         </div>
@@ -404,6 +405,7 @@
           </el-form-item>
           <el-form-item label="结果" prop="interviewResult">
             <el-select v-model="editInterviewData.interviewResult" placeholder="请选择结果">
+              <el-option label="待定" value="0" />
               <el-option label="通过" value="1" />
               <el-option label="未通过" value="2" />
             </el-select>
@@ -485,21 +487,21 @@
               </el-form-item>
             </el-form>
           </div>
-            <div class="offer-preview-section">
-              <div class="preview-header">
-                <span>模板预览</span>
-              </div>
-              <div class="preview-content">
-                <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
-                  height="100%" frameborder="0"></iframe>
-                <div v-else class="no-preview">
-                  <el-icon>
-                    <Document />
-                  </el-icon>
-                  <span>暂无预览</span>
-                </div>
+          <div class="offer-preview-section">
+            <div class="preview-header">
+              <span>模板预览</span>
+            </div>
+            <div class="preview-content">
+              <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
+                height="100%" frameborder="0"></iframe>
+              <div v-else class="no-preview">
+                <el-icon>
+                  <Document />
+                </el-icon>
+                <span>暂无预览</span>
               </div>
             </div>
+          </div>
         </div>
         <template #footer>
           <el-button @click="pdfEditDialogVisible = false">取消</el-button>
@@ -1047,7 +1049,7 @@ const submitInterview = async () => {
     let result = await sendInvitationData(interviewData.value);
     if (result.code === 200) {
       getResumeList()
-      ElMessage.success('发送邀约成功')
+      ElMessage.success('发送邀约成功,面试时间请及时设置')
       interviewDialogVisible.value = false
     } else {
       ElMessage.error('发送邀约失败')

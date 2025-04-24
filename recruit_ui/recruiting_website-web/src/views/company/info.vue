@@ -19,17 +19,10 @@
         <div class="profile-section">
           <div class="avatar-section">
             <div class="logo-upload-container">
-              <el-upload class="logo-uploader" :show-file-list="false" :auto-upload="false"
-                :on-change="handleLogoChange" accept="image/jpeg,image/png,image/jpg"
-                :disabled="companyData.companyInfoReview === '0'">
-                <img v-if="companyData.companyLogo" :src="companyData.companyLogo" class="logo-preview-img" />
-                <div v-else class="upload-placeholder">
-                  <el-icon>
-                    <Plus />
-                  </el-icon>
-                  <span>点击上传LOGO</span>
-                </div>
-              </el-upload>
+              <div class="upload">
+                <img v-if="companyData.companyLogo" :src="companyData.companyLogo" class="logo-preview-img" @click="openUpload" />
+                <el-icon v-else class="avatar-uploader-icon" @click="openUpload"><Plus /></el-icon>
+              </div>
 
               <div class="upload-tip">
                 <el-icon>
@@ -140,12 +133,60 @@
                 :title="companyData.companyInfoReview === '0' ? '企业信息审核中，暂时无法修改' : ''">
                 保存修改
               </el-button>
+              <el-button type="success" @click="saveTempForm">临时保存</el-button>
+              <el-button type="warning" @click="restoreTempForm" v-if="hasTempFormSave">还原</el-button>
               <el-button type="warning" @click="cancelReview" v-if="companyData.companyInfoReview === '0'">
                 撤销审核
               </el-button>
             </el-form-item>
           </el-form>
         </div>
+
+        <!-- 图片裁剪对话框 -->
+        <el-dialog v-model="uploadDialog" title="裁剪Logo图片" width="500px" :before-close="handleCloseUpload">
+          <div class="cropper-container">
+            <div v-if="cropperImage" class="cropper-wrapper">
+              <vue-cropper
+                ref="cropperRef"
+                :key="cropperKey"
+                :src="cropperImage"
+                :aspect-ratio="1"
+                :view-mode="1"
+                :auto-crop-area="0.8"
+                :background="false"
+                :zoomable="true"
+                :center="true"
+                :guides="true"
+                :highlight="false"
+                :responsive="true"
+                :restore="false"
+                class="cropper-img"
+              ></vue-cropper>
+            </div>
+            <div v-else class="upload-placeholder" @click="chooseImage">
+              <div>点击上传图片</div>
+            </div>
+
+            <div class="cropper-controls" v-if="cropperImage">
+              <div class="status-text">{{ fileName ? `已选择: ${fileName}` : '' }}</div>
+              <div class="cropper-tools">
+                <el-button @click="rotateImage(-90)" size="small">左旋转</el-button>
+                <el-button @click="rotateImage(90)" size="small">右旋转</el-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 隐藏的文件上传输入框 -->
+          <input v-show="false" ref="fileRef" type="file" accept="image/png, image/jpeg, image/jpg" @change="getImageInfo" />
+
+          <template #footer>
+            <p class="upload-tips">{{ uploadTips }}</p>
+            <div class="dialog-footer">
+              <el-button @click="handleCloseUpload">取消</el-button>
+              <el-button type="primary" @click="submitImage" :disabled="!cropperImage">确定</el-button>
+            </div>
+          </template>
+        </el-dialog>
 
         <!-- PDF预览对话框 -->
         <el-dialog v-model="previewVisible" :title="currentFile?.name" width="80%" :before-close="handleClosePreview"
@@ -154,17 +195,27 @@
             :src="previewUrl + '#pagemode=none&scrollbar=0&toolbar=0&statusbar=1&messages=0&scrollbar=0'"
             frameborder="0" class="pdf-preview-iframe"></iframe>
         </el-dialog>
+
+        <!-- 添加一个全局的临时保存状态提示 -->
+        <div v-if="hasTempFormSave" class="temp-save-indicator">
+          <el-tag type="success">
+            <el-icon><Check /></el-icon>
+            <span>表单已临时保存 ({{ tempSavedData?.timestamp }})</span>
+          </el-tag>
+        </div>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { companyInfo as getCompanyInfoApi, companyInfoUpdate } from '@/api/company/companyApi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userStore from '@/store/user'
-import { Document, UploadFilled, Plus, Delete, InfoFilled } from '@element-plus/icons-vue'
+import { Document, UploadFilled, Plus, Delete, InfoFilled, Check } from '@element-plus/icons-vue'
+import 'cropperjs/dist/cropper.css'
+import VueCropper from 'vue-cropperjs'
 
 const companyData = ref({
   companyInfoId: '',
@@ -187,6 +238,26 @@ const previewUrl = ref('')
 const currentFile = ref(null)
 const logoFile = ref(null)
 
+// 裁剪相关变量
+const uploadDialog = ref(false)
+const uploadTips = ref('支持 jpg/png 格式，大小不超过2MB')
+const cropperImage = ref('')
+const cropperRef = ref(null)
+const fileRef = ref(null)
+const fileName = ref('')
+const cropperKey = ref(0)
+const tempSavedImage = ref(null)
+const hasTempSave = ref(false)
+
+// 添加表单临时保存相关变量
+const tempSavedData = ref(null) // 临时保存的整个表单数据
+const hasTempFormSave = ref(false) // 是否有临时保存的表单
+
+// 在 script setup 下，引入 ref 等之后，添加存储原始数据的变量
+const originalCompanyData = ref(null)
+const originalFileList = ref([])
+const originalLogoFile = ref(null)
+
 const getReviewStatusType = (status) => {
   const statusMap = {
     'null': 'info',
@@ -207,7 +278,7 @@ const getReviewStatusText = (status) => {
   return statusMap[status] || '待提交'
 }
 
-// 获取企业信息
+// 获取企业信息，修改此函数以保存原始数据
 const getCompanyInfo = async () => {
   try {
     const res = await getCompanyInfoApi(userStore().userInfo.companyInfoId)
@@ -216,6 +287,14 @@ const getCompanyInfo = async () => {
       companyData.value.companyInfoPassword = null
       userStore().userInfo.companyInfoReview = res.content.companyInfoReview
       userStore().userInfo.enterpriseReview = res.content.enterpriseReview
+
+      // 保存原始数据
+      originalCompanyData.value = JSON.parse(JSON.stringify(res.content))
+      originalCompanyData.value.companyInfoPassword = null
+      if (fileList.value.length) {
+        originalFileList.value = [...fileList.value]
+      }
+      originalLogoFile.value = logoFile.value
     }
   } catch (error) {
     ElMessage.error('获取企业信息失败')
@@ -289,28 +368,118 @@ const handleClosePreview = () => {
   currentFile.value = null
 }
 
-const handleLogoChange = (file) => {
-  const isValid = beforeLogoUpload(file.raw)
-  if (!isValid) {
+// 打开裁剪对话框
+const openUpload = () => {
+  if (companyData.value.companyInfoReview === '0') {
+    ElMessage.warning('企业信息审核中，暂时无法修改')
     return
   }
-  logoFile.value = file.raw
-  companyData.value.companyLogo = URL.createObjectURL(file.raw)
+  uploadDialog.value = true
 }
 
-const beforeLogoUpload = (file) => {
-  const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg'
-  const isPNG = file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isJPG && !isPNG) {
-    ElMessage.error('只能上传JPG/PNG格式的图片!')
+// 关闭裁剪对话框
+const handleCloseUpload = () => {
+  if (hasTempSave.value) {
+    ElMessageBox.confirm(
+      '您有未提交的临时保存，关闭后将丢失这些更改。确定要关闭吗？',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      uploadDialog.value = false
+      cropperImage.value = ''
+      // 不清除临时保存，以便下次可以恢复
+    }).catch(() => {
+      // 取消关闭
+    })
+  } else {
+    uploadDialog.value = false
+    cropperImage.value = ''
+  }
+}
+
+// 选择图片
+const chooseImage = () => {
+  fileRef.value.click()
+}
+
+// 获取文件信息
+const getImageInfo = (e) => {
+  // 上传的文件
+  const file = e.target.files[0]
+  if (!file) return
+
+  const fileSize = (file.size / 1024 / 1024).toFixed(2)
+  if (fileSize > 2) {
+    ElMessage.warning('图片大小必须在2MB以内！')
     return false
   }
-  if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
-    return false
+
+  fileName.value = file.name
+
+  // 清理旧的URL
+  if (cropperImage.value && cropperImage.value.startsWith('blob:')) {
+    URL.revokeObjectURL(cropperImage.value)
+    cropperImage.value = ''
   }
-  return true
+
+
+  cropperKey.value++
+
+
+  const URL = window.URL || window.webkitURL
+
+
+  setTimeout(() => {
+    cropperImage.value = URL.createObjectURL(file)
+  }, 50)
+
+  e.target.value = ''
+}
+
+
+const rotateImage = (angle) => {
+  if (cropperRef.value) {
+    cropperRef.value.rotate(angle)
+  }
+}
+
+// 确认裁剪
+const submitImage = () => {
+  if (!cropperRef.value || !cropperImage.value) {
+    ElMessage.warning('请先上传图片')
+    return
+  }
+
+  const canvas = cropperRef.value.getCroppedCanvas({
+    width: 200,
+    height: 200,
+    minWidth: 100,
+    minHeight: 100,
+    maxWidth: 2000,
+    maxHeight: 2000,
+    fillColor: '#fff',
+    imageSmoothingEnabled: true,
+    imageSmoothingQuality: 'high',
+  })
+
+  canvas.toBlob(function (blob) {
+    // 创建文件对象用于上传
+    const file = new File([blob], fileName.value || 'company-logo.png', { type: 'image/png' })
+    logoFile.value = file
+
+    // 更新预览
+    companyData.value.companyLogo = URL.createObjectURL(blob)
+
+    // 关闭裁剪对话框
+    uploadDialog.value = false
+    cropperImage.value = ''
+
+    ElMessage.success('Logo裁剪成功')
+  }, 'image/png')
 }
 
 // 修改邮箱验证函数
@@ -371,6 +540,12 @@ const submitForm = async () => {
 
     await companyInfoUpdate(formData)
     ElMessage.success('保存成功')
+
+    // 清除临时保存状态
+    hasTempFormSave.value = false
+    tempSavedData.value = null
+
+    // 重新获取数据，更新原始数据
     await getCompanyInfo()
   } catch (error) {
     console.error('保存失败:', error)
@@ -411,8 +586,110 @@ const cancelReview = async () => {
   }
 }
 
+
+
+// 修改还原功能，恢复到修改前的原始数据
+const restoreTempForm = () => {
+  if (!originalCompanyData.value) {
+    ElMessage.warning('没有可还原的原始数据')
+    return
+  }
+
+  ElMessageBox.confirm(
+    '确定要还原为修改前的数据吗？当前所有未保存的修改将会丢失。',
+    '还原数据',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    // 还原表单数据
+    companyData.value = JSON.parse(JSON.stringify(originalCompanyData.value))
+
+    // 还原Logo文件
+    logoFile.value = originalLogoFile.value
+
+    // 如果当前有新的Logo图片URL，释放它
+    if (companyData.value.companyLogo && companyData.value.companyLogo.startsWith('blob:')
+        && originalCompanyData.value.companyLogo !== companyData.value.companyLogo) {
+      URL.revokeObjectURL(companyData.value.companyLogo)
+      companyData.value.companyLogo = originalCompanyData.value.companyLogo
+    }
+
+    // 还原文件列表
+    // 先释放当前fileList中的blob URLs
+    fileList.value.forEach(file => {
+      if (file.url && file.url.startsWith('blob:')) {
+        URL.revokeObjectURL(file.url)
+      }
+    })
+    fileList.value = originalFileList.value.length ? [...originalFileList.value] : []
+
+    // 清除临时保存
+    hasTempFormSave.value = false
+    tempSavedData.value = null
+
+    ElMessage.success('已还原为修改前的数据')
+  }).catch(() => {
+    // 取消操作
+  })
+}
+
+
+// 临时保存表单数据
+const saveTempForm = () => {
+  // 先验证邮箱
+  if (!validateEmail()) {
+    return
+  }
+
+  // 保存Logo图片
+  let logoBlob = null
+  let logoUrl = null
+
+  const saveData = async () => {
+    // 创建临时保存对象
+    tempSavedData.value = {
+      formData: JSON.parse(JSON.stringify(companyData.value)), // 深拷贝表单数据
+      logoFile: logoFile.value, // 保存Logo文件
+      logoUrl: logoUrl, // 保存Logo URL
+      fileList: [...fileList.value], // 保存文件列表
+      timestamp: new Date().toLocaleString() // 保存时间戳
+    }
+
+    hasTempFormSave.value = true
+    ElMessage.success(`表单数据已临时保存 (${tempSavedData.value.timestamp})`)
+  }
+
+  // 如果有logoFile，需要特殊处理保存blob
+  if (logoFile.value) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      logoBlob = new Blob([e.target.result], { type: logoFile.value.type })
+      logoUrl = companyData.value.companyLogo
+      saveData()
+    }
+    reader.readAsArrayBuffer(logoFile.value)
+  } else {
+    saveData()
+  }
+}
+
+// 页面关闭前提示
+const handleBeforeUnload = (e) => {
+  if (hasTempFormSave.value) {
+    e.preventDefault()
+    e.returnValue = '您有未提交的临时保存数据，关闭页面将丢失这些更改！'
+    return e.returnValue
+  }
+}
+
 onMounted(() => {
   getCompanyInfo()
+
+  // 添加页面关闭提示
+  window.addEventListener('beforeunload', handleBeforeUnload)
 })
 
 onBeforeUnmount(() => {
@@ -421,6 +698,22 @@ onBeforeUnmount(() => {
       URL.revokeObjectURL(file.url)
     }
   })
+
+  if (cropperImage.value && cropperImage.value.startsWith('blob:')) {
+    URL.revokeObjectURL(cropperImage.value)
+  }
+
+  if (companyData.value.companyLogo && companyData.value.companyLogo.startsWith('blob:')) {
+    URL.revokeObjectURL(companyData.value.companyLogo)
+  }
+
+  // 清理临时保存的资源
+  if (tempSavedImage.value && tempSavedImage.value.url.startsWith('blob:')) {
+    URL.revokeObjectURL(tempSavedImage.value.url)
+  }
+
+  // 移除页面关闭提示
+  window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 </script>
 
@@ -478,23 +771,30 @@ onBeforeUnmount(() => {
   gap: 24px;
 }
 
+.upload {
+  cursor: pointer;
+}
+
 .logo-preview-img {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ebeef5;
+  cursor: pointer;
 }
 
-.upload-placeholder {
+:deep(.el-icon.avatar-uploader-icon) {
+  font-size: 28px;
+  color: #8c939d;
   width: 120px;
   height: 120px;
+  text-align: center;
+  border: 1px dashed var(--el-border-color);
   border-radius: 50%;
-  border: 2px dashed #dcdfe6;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
 }
 
@@ -868,5 +1168,140 @@ onBeforeUnmount(() => {
 .upload-tip .el-icon {
   font-size: 14px;
   color: #909399;
+}
+
+/* 添加裁剪相关样式 */
+.cropper-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cropper-wrapper {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.cropper-img {
+  display: block;
+  max-width: 100%;
+  height: 300px;
+}
+
+/* Override Cropper.js styles for better visibility */
+:deep(.cropper-view-box) {
+  outline: 1px solid #409eff;
+  outline-color: rgba(64, 158, 255, 0.75);
+}
+
+:deep(.cropper-line) {
+  background-color: #409eff;
+}
+
+:deep(.cropper-point) {
+  background-color: #409eff;
+  width: 8px;
+  height: 8px;
+  opacity: 0.75;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 300px;
+  border: 2px dashed #dcdfe6;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.upload-placeholder:hover {
+  border-color: #409eff;
+}
+
+.upload-placeholder .el-icon {
+  font-size: 48px;
+  color: #909399;
+  margin-bottom: 12px;
+}
+
+.upload-placeholder div {
+  color: #606266;
+  font-size: 14px;
+}
+
+.cropper-controls {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.cropper-tools {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.upload-tips {
+  margin: 0;
+  font-size: 12px;
+  color: #909399;
+  text-align: center;
+}
+
+.status-text {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #606266;
+}
+
+.success-text {
+  color: #67c23a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.success-text .el-icon {
+  font-size: 16px;
+}
+
+.temp-save-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.temp-save-indicator .el-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+}
+
+.temp-save-indicator .el-icon {
+  margin-right: 4px;
 }
 </style>
