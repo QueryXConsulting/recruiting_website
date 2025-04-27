@@ -73,7 +73,7 @@ public class OfferServiceImpl implements OfferService {
             vo.setJobPosition(tdJob.getJobPosition());
 
             TDCompanyInfo companyInfo = companyInfoMapper.selectOne(new LambdaQueryWrapper<TDCompanyInfo>()
-                    .select(TDCompanyInfo::getCompanyInfoName)
+                    .select(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName)
                     .eq(TDCompanyInfo::getCompanyInfoId, tdJob.getCompanyId()));
             vo.setCompanyId(companyInfo.getCompanyInfoId());
             vo.setCompanyInfoName(companyInfo.getCompanyInfoName());

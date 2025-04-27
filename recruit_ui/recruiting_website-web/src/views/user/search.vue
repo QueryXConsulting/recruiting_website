@@ -23,7 +23,6 @@ const natures = ref([]); // 工作性质列表
 function simpleThrottle(func, wait) {
   let timeout = null;
   return function (...args) {
-    ElMessage('请不用频繁操作，10秒后再尝试。');
     if (!timeout) {
       func.apply(this, args);
       timeout = setTimeout(() => {
@@ -41,14 +40,15 @@ onMounted(async () => {
   natures.value = await jobNature().then((r) => r.content);
   await nextTick();
   // 调整布局
-  const nav = document.querySelector('.nav-bar');
-  const searchBox = document.querySelector('.search-container');
-  searchBox.style.marginTop = `${nav.offsetHeight + 10}px`;
+  // const nav = document.querySelector('.nav-bar');
+  // const searchBox = document.querySelector('.search-container');
+  // searchBox.style.marginTop = `${nav.offsetHeight + 10}px`;
 });
 
 const condition = ref(useSearchStore().getConditions(searchType.value));
 // 搜索
 const handleSearch = simpleThrottle(async () => {
+  // const handleSearch = async () => {
   const regex = /[\u3000-\u303F|\uFF00-\uFFEF|~<>～]+/g;
   if (regex.test(inputVal.value)) {
     // 输入符合要求，继续执行搜索逻辑
@@ -74,7 +74,8 @@ const handleSearch = simpleThrottle(async () => {
   // 保存搜索条件
   useSearchStore().setConditions(searchType.value, o);
   useSearchStore().setType(searchType.value);
-}, 10000)
+}, 1000);
+// }
 
 // 城市筛选选项
 const cities = [
@@ -100,6 +101,20 @@ const handleSizeChange = (pageSize, type) => {
   searchObj.size = pageSize;
 }
 
+// 
+const companyName = ref(null);
+const handleCompanyJobs = (name) => {
+  companyName.value = `正在查看 ${name} 发布的职位`;
+}
+
+// 关闭查看公司发布职位列表
+const handleCloseCompanyJobs = () => {
+  companyName.value = null;
+  searchObj.companyId = null;
+  // 重置搜索条件
+  useSearchStore().resetCompanyId();
+  // handleSearch();
+}
 
 const handleCommand = (command) => {
   if (command === 'logout') {
@@ -138,7 +153,7 @@ const handleCommand = (command) => {
         <a href="/users/index" class="nav-item">首页</a>
         <a href="/users/search" class="nav-item active">校园招聘</a>
         <a href="#" class="nav-item">社会招聘</a>
-        <a href="/users/application" class="nav-item" v-if="userStore().token">应聘历史</a>
+        <a href="/users/application" class="nav-item" v-if="userStore().token">投递历史</a>
         <a href="/users/message" class="nav-item" v-if="userStore().token" style="padding-top: 15px;" alt="留言板">
           <el-icon>
             <component :is="Bell"></component>
@@ -238,13 +253,18 @@ const handleCommand = (command) => {
         </span>
 
       </p>
+      <p v-if="companyName" style="margin-top: 5px;width: 50%;">
+        <el-alert :title="companyName" type="info" show-icon @close="handleCloseCompanyJobs" />
+      </p>
     </section>
     <!-- 列表 -->
     <main style="padding: 0px 200px;">
       <JobList v-if="searchType === 'JOB'" @update:page-size="handleSizeChange($event, searchType)"
-        @update:current-page="handleCurrentChange($event, searchType)" :condition="condition"></JobList>
+        @click-company="handleCompanyJobs" @update:current-page="handleCurrentChange($event, searchType)"
+        :condition="condition"></JobList>
       <CompanyList v-else-if="searchType === 'COMPANY'" @update:page-size="handleSizeChange($event, searchType)"
-        @update:current-page="handleCurrentChange($event, searchType)" :condition="condition"></CompanyList>
+        @update:current-page="handleCurrentChange($event, searchType)" @click-company="handleCompanyJobs"
+        :condition="condition"></CompanyList>
     </main>
   </div>
 </template>
@@ -328,7 +348,7 @@ const handleCommand = (command) => {
 
 .search-container {
   display: flex;
-  margin: 10px;
+  margin: 90px 10px 10px 10px;
   border-radius: 15px;
   flex-direction: column;
   align-items: center;

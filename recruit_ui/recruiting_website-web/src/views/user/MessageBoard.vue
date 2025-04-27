@@ -11,7 +11,7 @@
           <a href="/users/index" class="nav-item">首页</a>
           <a href="/users/search" class="nav-item">校园招聘</a>
           <a href="#" class="nav-item">社会招聘</a>
-          <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
+          <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">投递历史</a>
           <a href="/users/message" class="nav-item active" v-if="userStore().role == '5'" style="padding-top: 15px;"
             alt="留言板">
             <el-icon>

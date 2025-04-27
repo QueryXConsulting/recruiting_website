@@ -48,5 +48,8 @@ public class JobVO {
     private String jobNature;
     // 是否投递
     private boolean jobIsDelivery = false;
+    // 简历投递id
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long resumeDeliveryId;
 
 }

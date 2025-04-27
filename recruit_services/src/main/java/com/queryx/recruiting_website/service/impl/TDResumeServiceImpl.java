@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,6 +62,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
     @Override
     public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long jobId, String resumeType, String resumeName, String resumeStatus) {
+        // 查询简历列表
         LambdaQueryWrapper<TDJobResume> jobResumeLambdaQueryWrapper = new LambdaQueryWrapper<>();
         jobResumeLambdaQueryWrapper.eq(TDJobResume::getJobId, jobId)
                 .eq(StringUtils.hasText(resumeType), TDJobResume::getResumeType, resumeType)
@@ -71,8 +73,10 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         if (tdJobResumes.getRecords().isEmpty()) {
             return null;
         }
+
         Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
 
+        // 查询面试数据
         LambdaQueryWrapper<TDInterview> tdInterviewLambdaQueryWrapper = new LambdaQueryWrapper<>();
         List<Long> userIds = tdJobResumes.getRecords().stream().map(TDJobResume::getUserId).toList();
         tdInterviewLambdaQueryWrapper.eq(TDInterview::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
@@ -80,19 +84,29 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                 .eq(TDInterview::getIsDeleted, Common.NOT_DELETE)
                 .in(TDInterview::getUserId, userIds);
 
-        Map<Long, String> interviewMap = interviewMapper.selectList(tdInterviewLambdaQueryWrapper)
-                .stream().collect(Collectors.toMap(TDInterview::getUserId, TDInterview::getInterviewStatus));
+        // 将面试数据转换为 Map<Long, List<String>>，以处理同一用户可能有多个面试状态的情况
+        Map<Long, List<String>> interviewMap = interviewMapper.selectList(tdInterviewLambdaQueryWrapper)
+                .stream()
+                .collect(Collectors.groupingBy(TDInterview::getUserId,
+                        Collectors.mapping(TDInterview::getInterviewStatus, Collectors.toList())));
+
+        // 转换简历列表并设置面试状态
         List<ResumeListVO> resumeListVOS = tdJobResumes.getRecords().stream().map(tdJobResume -> {
             ResumeListVO resumeListVO = new ResumeListVO();
             BeanUtils.copyProperties(tdJobResume, resumeListVO);
-            String InterviewStatus = interviewMap.get(tdJobResume.getUserId());
-            if (StringUtils.hasText(InterviewStatus)) {
-                resumeListVO.setInterviewStatus(InterviewStatus);
+
+            // 根据 userId 获取面试状态列表
+            List<String> interviewStatusList = interviewMap.getOrDefault(tdJobResume.getUserId(), Collections.emptyList());
+
+            // 如果有面试状态，则设置第一个或根据需求处理
+            if (!interviewStatusList.isEmpty()) {
+                resumeListVO.setInterviewStatus(interviewStatusList.get(0));
             }
+
             return resumeListVO;
         }).toList();
-        resumeListVOPage.setRecords(resumeListVOS);
 
+        resumeListVOPage.setRecords(resumeListVOS);
 
         return resumeListVOPage;
     }

@@ -9,7 +9,7 @@ import userStore from '@/store/user';
 import { iconMapping } from '@/utils/iconList';
 import { Bell } from '@element-plus/icons-vue';
 import { userLogout } from '@/api/company/companyApi';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 
 const hasMessage = ref(false); // 是否有未读消息
 
@@ -46,11 +46,19 @@ let jobName = null;// 岗位名称
 onMounted(async () => {
     const route = router.currentRoute.value;
     let response = null;
+    let _loading = null;
     try {
+        _loading = ElLoading.service({
+            lock: false,
+            text: '加载中……',
+            background: 'rgba(0, 0, 0, 0.7)',
+        })
         response = await jobInfo(route.query.jobId);
     } catch (error) {
         ElMessage.error('网络繁忙，请稍后再试');
         router.go(-1);
+    } finally {
+        _loading.close();
     }
     jobDetail.value = response.content;
     loading.value = false;
@@ -81,9 +89,11 @@ const submitDeliver = async () => {
     }
     // 准备数据
     const dto = {
+        jobResumeId: jobDetail.value.resumeDeliveryId,
         jobId: router.currentRoute.value.query.jobId,
         resumeId: radioModel.value.resumeId,
-        resumeType: radioModel.value.type
+        resumeType: radioModel.value.type,
+        resumeStatus: 0
     }
     // 提交简历投递
     await resumeDeliver(dto).then((res) => {
@@ -96,6 +106,24 @@ const submitDeliver = async () => {
         return;
     }
     await postMessage({ userId: companyId, content: `我向您发布的${jobName}岗位投递了简历，请注意查看。 ——此消息由系统自动发送，请勿回复。` });
+    // 弹窗跳转至投递历史页面
+    ElMessageBox.alert('恭喜您已投递成功!', '提示', {
+        confirmButtonText: '确定',
+        type:'success'
+    }).then(() => {
+        router.push('/users/application');
+    }).catch(() => { });
+};
+
+// 撤销投递处理函数
+const revokeDeliver = async () => {
+    const dto = {
+        jobResumeId: jobDetail.value.resumeDeliveryId,
+        resumeStatus: 7
+    }
+    await resumeDeliver(dto).then((res) => {
+        ElMessage.success(res.message);
+    });
     // 刷新页面
     window.location.reload();
 };
@@ -116,7 +144,7 @@ const submitDeliver = async () => {
                 <a href="/users/index" class="nav-item">首页</a>
                 <a href="/users/search" class="nav-item active">校园招聘</a>
                 <a href="#" class="nav-item">社会招聘</a>
-                <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
+                <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">投递历史</a>
                 <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;"
                     alt="留言板">
                     <el-icon>
@@ -193,8 +221,13 @@ const submitDeliver = async () => {
                     </li>
                 </ul>
 
-                <el-button :disabled="jobDetail.jobIsDelivery" type="danger" size="large" @click="handleResumeDeliver">
+                <!-- 投递按钮 -->
+                <el-button :disabled="jobDetail.jobIsDelivery" style="color: #fff;" color="#FF7427" size="large" @click="handleResumeDeliver">
                     {{ jobDetail.jobIsDelivery ? '已投递' : '立即投递' }}
+                </el-button>
+                <!-- 投递撤销按钮 -->
+                <el-button v-if="jobDetail.jobIsDelivery" style="color: #fff;" color="#FF7427" size="large" @click="revokeDeliver">
+                    撤销投递
                 </el-button>
 
             </el-main>
@@ -214,13 +247,6 @@ const submitDeliver = async () => {
                 <!-- 文件图标 -->
                 <span style="width: 30px;margin: 0 15px 0 9px;">
                     <img src="/public/resume.png" alt="简历图标">
-                    <!-- <el-image fit="fill" src="../../../public/resume.png">
-                        <template #error>
-                            <el-icon>
-                                <Picture />
-                            </el-icon>
-                        </template>
-                    </el-image> -->
                 </span>
                 <!-- 文件 -->
                 <span class="deliver-resume-other">
@@ -238,13 +264,7 @@ const submitDeliver = async () => {
                 </label>
                 <!-- 文件图标 -->
                 <span class="deliver-resume-icon">
-                    <el-image fit="fill" src="../../../public/pdfIcon.png">
-                        <template #error>
-                            <el-icon>
-                                <Picture />
-                            </el-icon>
-                        </template>
-                    </el-image>
+                    <img src="/public/pdfIcon.png" alt="简历图标">
                 </span>
                 <!-- 文件 -->
                 <span class="deliver-resume-other">
@@ -286,15 +306,16 @@ p {
 .job-info {
     width: 100%;
     padding: 10px;
+    height: 100%;
     border-radius: 10px;
     background: #fff;
-    margin: 85px 20px 0 20px;
+    margin: 90px 10vw 0 10vw;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .job-content {
     .job-content-title {
         &:before {
-            background: #c8152d;
+            background: #FF7427;
             content: "";
             display: inline-block;
             height: 14px;

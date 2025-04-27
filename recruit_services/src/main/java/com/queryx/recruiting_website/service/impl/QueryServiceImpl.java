@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.domain.*;
 import com.queryx.recruiting_website.domain.dto.SearchCompanyDTO;
-import com.queryx.recruiting_website.domain.dto.SearchDTO;
 import com.queryx.recruiting_website.domain.dto.SearchJobDTO;
 import com.queryx.recruiting_website.domain.vo.*;
 import com.queryx.recruiting_website.domain.vo.search.SearchCompanyVO;
@@ -62,11 +61,17 @@ public class QueryServiceImpl implements QueryService {
                 .eq(TDResume::getResumeId, id)
                 .eq(TDResume::getResumeStatus, Common.STATUS_ENABLE)
                 .eq(TDResume::getResumeReview, Common.REVIEW_OK));
+
         if (tdResume == null) {
             return null;
         }
         // 封装简历返回信息
         BeanUtils.copyProperties(tdResume, resumeVO);
+
+        LambdaQueryWrapper<TDUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(TDUser::getUserAvatar);
+        queryWrapper.eq(TDUser::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
+        resumeVO.setUserAvatar(Common.getImgURL() + userMapper.selectOne(queryWrapper).getUserAvatar());
 
         if (resumeVO.getResumeId() == null) {
             return null;
@@ -127,31 +132,39 @@ public class QueryServiceImpl implements QueryService {
         }
         final JobVO jobVO = new JobVO();
         BeanUtils.copyProperties(tdJob, jobVO);
-        // 查询该岗位是否已投递过简历
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // 判断用户是否登录
         if (authentication != null) {
+            // 查询该用户是否投递过该岗位
             LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.select(TDJobResume::getJobResumeId);
+            queryWrapper.select(TDJobResume::getJobResumeId, TDJobResume::getResumeStatus);
             queryWrapper.eq(TDJobResume::getJobId, id);
             queryWrapper.eq(TDJobResume::getUserId, SecurityUtils.getLoginUser().getTdUser().getUserId());
-            // 查询该用户是否投递过该岗位
-            jobVO.setJobIsDelivery(jobResumeMapper.selectCount(queryWrapper) > 0);
+            final List<TDJobResume> jobResumes = jobResumeMapper.selectList(queryWrapper);
+            // 设置投递状态 --> 如果没有查到记录（List为空），说明未投递。如果查到记录，且状态为7（撤销投递），则表示未投递。
+            jobVO.setJobIsDelivery(!(jobResumes.isEmpty() || "7".equals(jobResumes.getFirst().getResumeStatus())));
+            if (jobResumes.isEmpty()) {
+                jobVO.setResumeDeliveryId(null);
+            } else {
+                jobVO.setResumeDeliveryId(jobResumes.getFirst().getJobResumeId());
+            }
         } else {
             // 用户未登录，默认未投递
             jobVO.setJobIsDelivery(false);
         }
         // 更新岗位浏览量
-        jobInfoMapper.update(new LambdaUpdateWrapper<TDJob>().eq(TDJob::getJobId, id)
+        jobInfoMapper.update(new LambdaUpdateWrapper<TDJob>()
+                .eq(TDJob::getJobId, id)
                 .set(TDJob::getJobView, tdJob.getJobView() + 1));
         // 返回数据
         return jobVO;
     }
 
     @Override
-    @Cacheable(value = "jobList", key = "#jobDTO.getKeyword() + #jobDTO.getPage() + #jobDTO.getSize() + #jobDTO.getIsAsc() + #jobDTO.getEducation() + #jobDTO.getNature() + #jobDTO.getArea() + #jobDTO.getSalary()")
+//    @Cacheable(value = "jobList",
+//            key = "#jobDTO.getKeyword() + #jobDTO.getPage() + #jobDTO.getSize() + #jobDTO.getIsAsc() + #jobDTO.getEducation() + #jobDTO.getNature() + #jobDTO.getArea() + #jobDTO.getSalary() + #jobDTO.getCompanyId()")
     public Page<SearchJobVO> getJobList(SearchJobDTO jobDTO) {
-//    public Page<SearchJobVO> getJobList(String keyword, Integer page, Integer pageSize, boolean isAsc, String education, String nature) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDJob> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDJob::getJobReview, Common.REVIEW_OK);
@@ -176,14 +189,21 @@ public class QueryServiceImpl implements QueryService {
         queryWrapper.eq(jobDTO.getEducation() != null && !jobDTO.getEducation().isEmpty(), TDJob::getJobEducation, jobDTO.getEducation());
         queryWrapper.like(jobDTO.getArea() != null && !jobDTO.getArea().isEmpty(), TDJob::getJobArea, jobDTO.getArea());
         queryWrapper.eq(jobDTO.getSalary() != null && !jobDTO.getSalary().isEmpty(), TDJob::getJobSalary, jobDTO.getSalary());
+        queryWrapper.eq(jobDTO.getCompanyId() != null, TDJob::getCompanyId, jobDTO.getCompanyId());
         queryWrapper.orderBy(true, jobDTO.getIsAsc(), TDJob::getJobTime);
         // 构建分页对象
         Page<TDJob> jobPage = jobInfoMapper.selectPage(new Page<>(jobDTO.getPage(), jobDTO.getSize()), queryWrapper);
         if (jobPage == null) return null;
         Page<SearchJobVO> resPage = new Page<>(jobPage.getCurrent(), jobPage.getSize(), jobPage.getTotal());
         List<SearchJobVO> list = new ArrayList<>();
+        // 存储临时数据，避免重复查询数据库
+        Long companyId = null;// 用于记录当前公司id
+        String companyName = null;
         for (TDJob record : jobPage.getRecords()) {
-            String companyName = companyInfoMapper.selectById(record.getCompanyId()).getCompanyInfoName();
+            if (!record.getCompanyId().equals(companyId)) {
+                companyName = companyInfoMapper.selectById(record.getCompanyId()).getCompanyInfoName();
+                companyId = record.getCompanyId();
+            }
             SearchJobVO searchJobVO = new SearchJobVO();
             BeanUtils.copyProperties(record, searchJobVO);
             searchJobVO.setCompanyName(companyName);
@@ -196,7 +216,6 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @Cacheable(value = "companyList", key = "#companyDTO.getKeyword() + #companyDTO.getPage() + #companyDTO.getSize() + #companyDTO.getIsAsc()")
     public CommonResp<Page<SearchCompanyVO>> getCompanyList(SearchCompanyDTO companyDTO) {
-//    public CommonResp<Page<SearchCompanyVO>> getCompanyList(String keyword, Integer page, Integer pageSize, boolean isAsc) {
         // 构建SQL语句，查询招聘信息
         LambdaQueryWrapper<TDCompanyInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TDCompanyInfo::getCompanyInfoReview, Common.REVIEW_OK);

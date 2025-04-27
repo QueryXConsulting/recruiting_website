@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
@@ -46,24 +47,31 @@ public class DeliverServiceImpl implements DeliverService {
     @Autowired
     private TDCompanyInfoMapper companyInfoMapper;
 
-    public int insertDeliverResume(DeliverResumeDTO deliverResumeDTO) {
-        TDUser user = userMapper.selectById(SecurityUtils.getLoginUser().getTdUser().getUserId());
+    public boolean insertDeliverResume(DeliverResumeDTO deliverResumeDTO) {
+        final TDUser user = userMapper.selectById(SecurityUtils.getLoginUser().getTdUser().getUserId());
         // 装配数据
         final TDJobResume tdJobResume = new TDJobResume();
-        tdJobResume.setJobId(deliverResumeDTO.getJobId());
-        tdJobResume.setResumeId(deliverResumeDTO.getResumeId());
-        tdJobResume.setResumeType(deliverResumeDTO.getResumeType());
-        tdJobResume.setResumeName(user.getUserName());
-        tdJobResume.setResumeStatus(Common.DELIVER_RESUME_STATUS_DELIVERED);
-        tdJobResume.setUserId(user.getUserId());
-        tdJobResume.setDeliverDate(new Date());
+        tdJobResume.setJobResumeId(deliverResumeDTO.getJobResumeId());
+        if (deliverResumeDTO.getJobResumeId() == null || "7".equals(deliverResumeDTO.getResumeStatus())) {
+            // 新增记录
+            tdJobResume.setJobId(deliverResumeDTO.getJobId());
+            tdJobResume.setResumeId(deliverResumeDTO.getResumeId());
+            tdJobResume.setResumeType(deliverResumeDTO.getResumeType());
+            tdJobResume.setResumeName(user.getUserName());
+            tdJobResume.setUserId(user.getUserId());
+            tdJobResume.setDeliverDate(new Date());
+        }
+        tdJobResume.setResumeStatus(deliverResumeDTO.getResumeStatus());
         // 数据入库
-        final MybatisBatch<TDJobResume> batch = new MybatisBatch<>(sqlSessionFactory, List.of(tdJobResume));
-        final MybatisBatch.Method<TDJobResume> method = new MybatisBatch.Method<>(TDJobResumeMapper.class);
-        int resultCount = batch.execute(method.insert()).size();
+//        LambdaUpdateWrapper<TDJobResume> updateWrapper = new LambdaUpdateWrapper<>();
+//        updateWrapper
+        boolean result = jobResumeMapper.insertOrUpdate(tdJobResume);
+//        final MybatisBatch<TDJobResume> batch = new MybatisBatch<>(sqlSessionFactory, List.of(tdJobResume));
+//        final MybatisBatch.Method<TDJobResume> method = new MybatisBatch.Method<>(TDJobResumeMapper.class);
+//        int resultCount = batch.execute(method.insert()).size();
         user.setUserInterviews(user.getUserInterviews() + 1);
         userMapper.updateById(user);
-        return resultCount;
+        return result;
     }
 
     @Override
@@ -80,8 +88,8 @@ public class DeliverServiceImpl implements DeliverService {
         for (TDJobResume tdJobResume : tdJobResumePage.getRecords()) {
             JobResumeVO jobResumeVO = new JobResumeVO();
             BeanUtils.copyProperties(tdJobResume, jobResumeVO);
-            // 装配job信息
 
+            // 装配job信息
             TDJob tdJob = jobMapper.selectOne(new LambdaQueryWrapper<TDJob>()
                     .select(TDJob::getJobPosition, TDJob::getCompanyId)
                     .eq(TDJob::getJobId, tdJobResume.getJobId()));
@@ -91,7 +99,7 @@ public class DeliverServiceImpl implements DeliverService {
                     .select(TDCompanyInfo::getCompanyInfoName)
                     .eq(TDCompanyInfo::getCompanyInfoId, tdJob.getCompanyId()));
             jobResumeVO.setCompanyInfoName(companyInfo.getCompanyInfoName());
-            // 添加记录确定
+            // 添加记录
             jobResumeVOS.add(jobResumeVO);
         }
         jobResumeVOPage.setRecords(jobResumeVOS);

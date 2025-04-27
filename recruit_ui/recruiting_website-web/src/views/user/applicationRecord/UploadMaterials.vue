@@ -180,9 +180,9 @@ const handlePreview = (file) => {
     </div>
 
     <!-- 页面状态提示-错误 -->
-    <div v-if="!windowStatus" class="info-status">
+    <!-- <div v-if="!windowStatus" class="info-status">
         <el-result icon="error" title="错误！请先投递简历"></el-result>
-    </div>
+    </div> -->
 </template>
 
 <style lang="scss" scoped>

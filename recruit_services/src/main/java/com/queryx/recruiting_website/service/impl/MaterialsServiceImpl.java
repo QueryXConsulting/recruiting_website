@@ -56,54 +56,104 @@ public class MaterialsServiceImpl implements MaterialsService {
     private MessageBoardService messageBoardService;
 
     @Override
+    // TODO 材料上传状态查询: 逻辑待优化
     public CommonResp<Integer> queryProcessStatus() {
         // 获取用户id
         Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
-        // 查询
+        // 查询用户是否到达材料上传环节
         LambdaQueryWrapper<TDJobResume> jrQueryWrapper = new LambdaQueryWrapper<>();
         jrQueryWrapper.select(TDJobResume::getJobResumeId, TDJobResume::getResumeStatus);
         jrQueryWrapper.eq(TDJobResume::getUserId, userId);
+//        jrQueryWrapper.eq(TDJobResume::getResumeStatus, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+        jrQueryWrapper.and((wrapper) -> {
+            wrapper.gt(TDJobResume::getResumeStatus, Integer.parseInt(Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL));
+            wrapper.or();
+            wrapper.eq(TDJobResume::getResumeStatus, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+        });
         jrQueryWrapper.ne(TDJobResume::getResumeDelete, Common.DELIVER_RESUME_DELETE_SQUARE_PEG);
-        TDJobResume jobResume = jobResumeMapper.selectOne(jrQueryWrapper);
-        if (jobResume == null) {
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+        final List<TDJobResume> jobResumes = jobResumeMapper.selectList(jrQueryWrapper);
+        if (jobResumes == null || jobResumes.isEmpty()) {
+            return CommonResp.success(null);
         }
-        int resultStatus = Integer.parseInt(jobResume.getResumeStatus());
-        int step = Integer.parseInt(Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
-        // 状态大于该环节，说明已经材料上传审核通过
-        if (resultStatus > step) {
-            return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_PASSED, uploadPassed);
-        } else if (resultStatus == step) {
-            // 判断是否已经上传过材料
-            final MaterialDTO materialDTO = materialsMapper.selectOfferAndJobId(userId, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
-            LambdaQueryWrapper<TDMaterial> materialQueryWrapper = new LambdaQueryWrapper<>();
-            materialQueryWrapper.select(TDMaterial::getMaterialId, TDMaterial::getStatus);
-            materialQueryWrapper.eq(TDMaterial::getUserId, userId);
-            materialQueryWrapper.eq(TDMaterial::getOfferId, materialDTO.getOffersId());
-            materialQueryWrapper.eq(TDMaterial::getCompanyId, materialDTO.getCompanyId());
-            materialQueryWrapper.eq(TDMaterial::getJobId, materialDTO.getJobId());
-            TDMaterial material = materialsMapper.selectOne(materialQueryWrapper);
-            if (material == null) {
-                // 用户第一次上传材料
-                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
-            }
-            if (material.getMaterialId() == null || material.getStatus() == null) {
-                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
-            }
-            switch (material.getStatus()) {
-                case Common.MATERIAL_STATUS_WAIT_REVIEW: // 材料待审核，需要等待审核
-                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_SUCCESS, waitReview);
-                case Common.MATERIAL_STATUS_NOT_PASS: // 材料未通过审核，需要重新上传材料
-                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED, reload);
-                case Common.MATERIAL_STATUS_NOT_SUBMIT: // 用户第一次上传材料
+//        if (jobResumes == null) {
+//            return CommonResp.success(null);
+//        }
+        // 用户只能接受一个offer，所以这里只能有一个
+        for (TDJobResume jobResume : jobResumes) {
+            int resultStatus = Integer.parseInt(jobResume.getResumeStatus());
+            int step = Integer.parseInt(Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+//        // 状态大于该环节，说明已经材料上传审核通过
+            if (resultStatus > step) {
+                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_PASSED, uploadPassed);
+            } else if (resultStatus == step) {
+                // 判断是否已经上传过材料
+                final MaterialDTO materialDTO = materialsMapper.selectOfferAndJobId(userId, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+                LambdaQueryWrapper<TDMaterial> materialQueryWrapper = new LambdaQueryWrapper<>();
+                materialQueryWrapper.select(TDMaterial::getMaterialId, TDMaterial::getStatus);
+                materialQueryWrapper.eq(TDMaterial::getUserId, userId);
+                materialQueryWrapper.eq(TDMaterial::getOfferId, materialDTO.getOffersId());
+                materialQueryWrapper.eq(TDMaterial::getCompanyId, materialDTO.getCompanyId());
+                materialQueryWrapper.eq(TDMaterial::getJobId, materialDTO.getJobId());
+                TDMaterial material = materialsMapper.selectOne(materialQueryWrapper);
+                if (material == null) {
+                    // 用户第一次上传材料
                     return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
-                default:
-            }
+                }
+                if (material.getMaterialId() == null || material.getStatus() == null) {
+                    return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+                }
+                switch (material.getStatus()) {
+                    case Common.MATERIAL_STATUS_WAIT_REVIEW: // 材料待审核，需要等待审核
+                        return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_SUCCESS, waitReview);
+                    case Common.MATERIAL_STATUS_NOT_PASS: // 材料未通过审核，需要重新上传材料
+                        return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED, reload);
+                    case Common.MATERIAL_STATUS_NOT_SUBMIT: // 用户第一次上传材料
+                        return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
+                    default:
+                }
 
-        } else {
-            // 材料上传未开始
-            return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_NOT_BEGIN, uploadNotBegin);
+            } else {
+                // 材料上传未开始
+                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_NOT_BEGIN, uploadNotBegin);
+            }
         }
+//        final TDJobResume jobResume = jobResumes.getFirst();
+//        int resultStatus = Integer.parseInt(jobResume.getResumeStatus());
+//        int step = Integer.parseInt(Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+////        // 状态大于该环节，说明已经材料上传审核通过
+//        if (resultStatus > step) {
+//            return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_PASSED, uploadPassed);
+//        } else if (resultStatus == step) {
+//            // 判断是否已经上传过材料
+//            final MaterialDTO materialDTO = materialsMapper.selectOfferAndJobId(userId, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+//            LambdaQueryWrapper<TDMaterial> materialQueryWrapper = new LambdaQueryWrapper<>();
+//            materialQueryWrapper.select(TDMaterial::getMaterialId, TDMaterial::getStatus);
+//            materialQueryWrapper.eq(TDMaterial::getUserId, userId);
+//            materialQueryWrapper.eq(TDMaterial::getOfferId, materialDTO.getOffersId());
+//            materialQueryWrapper.eq(TDMaterial::getCompanyId, materialDTO.getCompanyId());
+//            materialQueryWrapper.eq(TDMaterial::getJobId, materialDTO.getJobId());
+//            TDMaterial material = materialsMapper.selectOne(materialQueryWrapper);
+//            if (material == null) {
+//                // 用户第一次上传材料
+//                return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
+//            }
+//            if (material.getMaterialId() == null || material.getStatus() == null) {
+//                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
+//            }
+//            switch (material.getStatus()) {
+//                case Common.MATERIAL_STATUS_WAIT_REVIEW: // 材料待审核，需要等待审核
+//                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_SUCCESS, waitReview);
+//                case Common.MATERIAL_STATUS_NOT_PASS: // 材料未通过审核，需要重新上传材料
+//                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_THE_UPLOAD_NOT_PASSED, reload);
+//                case Common.MATERIAL_STATUS_NOT_SUBMIT: // 用户第一次上传材料
+//                    return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOADING_MATERIAL, uploading);
+//                default:
+//            }
+//
+//        } else {
+//            // 材料上传未开始
+//            return new CommonResp<>(AppHttpCodeEnum.SUCCESS.getCode(), Common.MATERIAL_STATUS_UPLOAD_NOT_BEGIN, uploadNotBegin);
+//        }
         return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
     }
 
@@ -171,7 +221,7 @@ public class MaterialsServiceImpl implements MaterialsService {
                     log.info("删除文件成功：{}", filePath);
                 }
             }
-            return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            return CommonResp.fail(AppHttpCodeEnum.FILE_UPLOAD_FAIL, false);
         }
     }
 
