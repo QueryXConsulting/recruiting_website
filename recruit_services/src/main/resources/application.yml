@@ -1,5 +1,8 @@
+# 静态文件预览地址
+preview-file-ip: 47.109.146.152
+
 file:
-#  upload-path-resume: files/resume_files/ # TODO 文件上传路径 生产环境下需要修改
+  upload-path-resume: files/resume_files/ # TODO 文件上传路径 生产环境下需要修改
   upload-path-avatar: files/avatar_files/
   upload-path-offers: files/offer_files/
   upload-path-signature: files/signature_files/
@@ -7,7 +10,7 @@ file:
   upload-path-enterpriseFile: files/enterprise_files/
   upload-path-office: files/offer_files/
   upload-path-officeTemplate: files/offer_Template/
-  upload-path-resume: D:/maven/resume_files/ # TODO 文件上传路径 生产环境下需要修改
+#  upload-path-resume: D:/maven/resume_files/ # TODO 文件上传路径 生产环境下需要修改
 #  upload-path-avatar: D:/maven/avatar_files/
 #  upload-path-offers: D:/maven/offer_files/
 #  upload-path-signature: D:/maven/signature_files/
@@ -15,7 +18,7 @@ file:
 #  upload-path-enterpriseFile: D:/maven/enterprise_files/
 #  upload-path-office: D:/maven/offer_files/
 #  upload-path-officeTemplate: D:/maven/offer_Template/
-#pdf:
+
 #pdf:
   # TODO 使用yml配置路径爆错
 #  font-path: C:\\Windows\\Fonts\\STXIHEI.TTF
