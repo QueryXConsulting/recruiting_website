@@ -64,13 +64,13 @@
                     <template #default="scope">
                       <div class="status-timeline">
                         <div v-for="(status, index) in statusList" :key="status.value" class="timeline-item" :class="{
-                          'active': Number(scope.row.resumeStatus) >= Number(status.value),
-                          'current': scope.row.resumeStatus === status.value,
+                          'active': Number(scope.row.resumeStatus) >= Number(status.value) || scope.row.resumeStatus === '7',
+                          'current': scope.row.resumeStatus === status.value || (scope.row.resumeStatus === '7' && status.value === '1'),
                           'deleted': scope.row.resumeDelete === '0' && Number(scope.row.resumeStatus) >= Number(status.value)
                         }">
                           <div class="timeline-line"></div>
                           <div class="timeline-dot"></div>
-                          <div class="timeline-text">{{ status.label }}</div>
+                          <div class="timeline-text">{{ scope.row.resumeStatus === '7' && status.value === '1' ? '用户已撤销' : status.label }}</div>
                         </div>
                       </div>
                     </template>
@@ -78,7 +78,7 @@
                   <el-table-column label="操作" width="200" fixed="right" align="center">
                     <template #default="scope">
                       <div class="action-buttons">
-                        <el-button type="primary" link @click="viewResume(scope.row)">
+                        <el-button type="primary" link @click="viewResume(scope.row)" v-if="scope.row.resumeStatus !== '7'">
                           查看
                         </el-button>
                         <template v-if="scope.row.resumeStatus === '1' && scope.row.resumeDelete !== '0'">
@@ -95,7 +95,8 @@
                           </el-button>
                         </template>
                         <el-button type="danger" link @click="handleUnsuitable(scope.row)"
-                          v-if="scope.row.resumeDelete !== '0' & scope.row.resumeStatus !== '0' & scope.row.resumeStatus != '1'&scope.row.resumeStatus != '6'">
+                          v-if="scope.row.resumeDelete !== '0' && scope.row.resumeStatus !== '0' && scope.row.resumeStatus !== '1'
+                          && scope.row.resumeStatus !== '6' && scope.row.resumeStatus !== '7'">
                           不合适
                         </el-button>
                       </div>
@@ -116,7 +117,7 @@
                 <el-table-column label="简历名称" prop="resumeName" width="150" align="center" />
                 <el-table-column label="时间" prop="interviewDate" width="150" align="center" />
                 <el-table-column label="面试链接" prop="interviewUrl" width="160" align="center" />
-                <el-table-column label="地点" prop="interviewRegion" width="160" align="center"/>
+                <el-table-column label="地点" prop="interviewRegion" width="160" align="center" />
                 <el-table-column label="类型" prop="interviewType" width="90" align="center">
                   <template #default="scope">
                     <el-tag :type="scope.row.interviewType == '0' ? 'success' : 'primary'">
@@ -2146,6 +2147,29 @@ const interviewType = ref('')
   border-color: #409EFF;
 }
 
+/* Styling for cancelled resume status */
+.timeline-item.current[class*="timeline-item"] {
+  z-index: 3;
+}
+
+.timeline-item.active[class*="timeline-item"] {
+  z-index: 2;
+}
+
+/* When resume is cancelled (status 7), style the first item differently */
+.timeline-item.current .timeline-dot {
+  background-color: #409EFF;
+}
+
+.timeline-item.current:first-child .timeline-dot {
+  border-color: #F56C6C;
+  background-color: #F56C6C;
+}
+
+/* Ensure proper line connection for first item when it's current */
+.timeline-item.current:first-child .timeline-line {
+  background-color: #409EFF;
+}
 
 .tab-container {
   margin: 20px 0;

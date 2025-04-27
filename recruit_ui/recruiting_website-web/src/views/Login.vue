@@ -9,7 +9,7 @@
         </el-link>
       </div>
       <div class="login-form">
-        <img src="/public/logo.png" alt="问呗" class="logo-img" style="height: 50px; display: block; margin: 0 auto;">
+        <!-- <img src="/public/logo.png" alt="问呗" class="logo-img" style="height: 50px; display: block; margin: 0 auto;"> -->
         <el-form :model="loginForm" :rules="rules" ref="formRef" class="form-content">
           <el-form-item prop="username">
             <el-input v-model="loginForm.username" placeholder="请输入手机号或邮箱  " size="large" maxlength="20">
@@ -114,7 +114,7 @@ const handleLogin = async () => {
 
           if (store.role != '5' && store.role != null) {
             await store.getMenus()
-            router.push('/home')
+            router.push('/home/homePage')
             return
           }
           // 学生跳转

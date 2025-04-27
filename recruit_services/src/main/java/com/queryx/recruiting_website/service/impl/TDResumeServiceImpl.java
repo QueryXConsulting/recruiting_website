@@ -40,8 +40,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> implements TDResumeService {
 
-    @Resource
-    private TDJobMapper tdJobMapper;
+
     @Resource
     private TDJobResumeMapper tdJobResumeMapper;
     @Resource
@@ -62,7 +61,6 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
 
     @Override
     public Page<ResumeListVO> selectResumeList(Integer page, Integer size, Long jobId, String resumeType, String resumeName, String resumeStatus) {
-        // 查询简历列表
         LambdaQueryWrapper<TDJobResume> jobResumeLambdaQueryWrapper = new LambdaQueryWrapper<>();
         jobResumeLambdaQueryWrapper.eq(TDJobResume::getJobId, jobId)
                 .eq(StringUtils.hasText(resumeType), TDJobResume::getResumeType, resumeType)
@@ -73,10 +71,8 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
         if (tdJobResumes.getRecords().isEmpty()) {
             return null;
         }
-
         Page<ResumeListVO> resumeListVOPage = new Page<>(tdJobResumes.getCurrent(), tdJobResumes.getSize(), tdJobResumes.getTotal());
 
-        // 查询面试数据
         LambdaQueryWrapper<TDInterview> tdInterviewLambdaQueryWrapper = new LambdaQueryWrapper<>();
         List<Long> userIds = tdJobResumes.getRecords().stream().map(TDJobResume::getUserId).toList();
         tdInterviewLambdaQueryWrapper.eq(TDInterview::getCompanyId, SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId())
@@ -102,12 +98,9 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
             if (!interviewStatusList.isEmpty()) {
                 resumeListVO.setInterviewStatus(interviewStatusList.get(0));
             }
-
             return resumeListVO;
         }).toList();
-
         resumeListVOPage.setRecords(resumeListVOS);
-
         return resumeListVOPage;
     }
 
@@ -216,7 +209,7 @@ public class TDResumeServiceImpl extends ServiceImpl<TDResumeMapper, TDResume> i
                 .set(StringUtils.hasText(resumeStatus) && !resumeStatus.equals("7"), TDJobResume::getResumeStatus, resumeStatus)
                 .set(StringUtils.hasText(resumeDelete), TDJobResume::getResumeDelete, resumeDelete);
         tdJobResumeMapper.update(tdResumeLambdaUpdateWrapper);
-        if (Common.DELIVER_RESUME_DELETE_SQUARE_PEG.equals(resumeDelete)){
+        if (Common.DELIVER_RESUME_DELETE_SQUARE_PEG.equals(resumeDelete)) {
             Long userId = jobResumeService.getById(jobResumeId).getUserId();
             messageBoardService.sendMessage(userId, "对不起,经过仔细评估您不太合适。愿您早日找到心仪工作 —此消息来自系统自动发送");
         }

@@ -331,9 +331,9 @@ const hasMessage = ref(false); // 是否有未读消息
         <!-- 顶部导航栏 -->
         <nav class="nav-bar">
             <div class="logo">
-                <img src="/public/logo.png" alt="问呗" class="logo-img">
+                <!-- <img src="/public/logo.png" alt="问呗" class="logo-img">
                 <span class="divider">|</span>
-                <span class="recruit-text">招聘</span>
+                <span class="recruit-text">招聘</span> -->
             </div>
             <div class="nav-items">
                 <a href="/users/index" class="nav-item">首页</a>

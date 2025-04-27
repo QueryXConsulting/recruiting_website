@@ -39,6 +39,15 @@
     <div class="menu">
       <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#424242" text-color="#FFEA00"
         active-text-color="#FFFF00" :router="false" @select="handleSelect">
+
+        <!-- 添加首页菜单项 -->
+        <el-menu-item index="/home/homePage">
+          <el-icon>
+            <component :is="iconMapping['house']" />
+          </el-icon>
+          <span>首页</span>
+        </el-menu-item>
+
         <template v-for="menu in menus" :key="menu.menuId">
           <!-- 一级菜单 -->
           <el-sub-menu v-if="menu.children && menu.children.length" :index="'/' + menu.path"
