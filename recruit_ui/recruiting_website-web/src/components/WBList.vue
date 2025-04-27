@@ -29,10 +29,10 @@ const handleClick = (item) => {
     <div>
         <!-- 列表 -->
         <ul class="list">
-            <li @click="handleClick(item)" v-for="(item, index) in props.list" :key="index" class="item">
+            <li v-for="(item, index) in props.list" :key="index" class="item">
                     <slot name="item-prepend" v-bind="item"></slot>
                 <!-- </div> -->
-                <div class="item-left">
+                <div @click="handleClick(item)" class="item-left">
                     <slot v-bind="item"></slot>
                 </div>
                 <div class="item-right" v-bind="item">

@@ -37,10 +37,14 @@ export const useSearchStore = defineStore('search', {
         },
 
         setConditions(type, condition) {
-            return this.conditions[type] = condition;
+            this.conditions[type] = condition;
         },
         getConditions(type) {
             return this.conditions[type];
+        },
+        resetCompanyId() {
+            this.conditions.COMPANY.companyId = null;
+            delete this.conditions.JOB.companyId;
         },
         
         setResult(type, res) {

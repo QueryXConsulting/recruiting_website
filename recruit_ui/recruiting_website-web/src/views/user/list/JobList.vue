@@ -4,8 +4,7 @@ import WBList from '@/components/WBList.vue'
 import { jobList } from '@/api/user/UserApi'
 import { reactive, ref, watchEffect } from 'vue'
 import { useSearchStore, SearchCondition } from '@/store/searchStore'
-import { ElMessage } from 'element-plus';
-import { ElLoading } from 'element-plus';
+import { ElMessage, ElLoading } from 'element-plus';
 
 // 列表数据
 const props = defineProps({
@@ -17,10 +16,15 @@ const pagination = reactive({}); // 分页数据
 
 // 获取列表数据
 const getJobList = async (condition) => {
-    const data = await jobList(condition);
-    // const data = await jobList(condition.keyword, condition.page, condition.size, condition.isAsc, condition.education, condition.nature);
+    let loading = null;
     // 分页数据赋值
     try {
+        // loading = ElLoading.service({
+        //     lock: true,
+        //     text: '加载中……',
+        //     background: 'rgba(0, 0, 0, 0.7)',
+        // });
+        const data = await jobList(condition);
         pagination.current = data.content.current;
         pagination.pages = data.content.pages;
         pagination.size = data.content.size;
@@ -28,8 +32,10 @@ const getJobList = async (condition) => {
         // 列表数据赋值
         result.value = data.content.records;
         useSearchStore().setResult('JOB', data.content.records);
-    } catch (error) { 
-        ElMessage.warning('请输入关键字！');
+    } catch (error) {
+        ElMessage.warning('网络繁忙，请稍后再试！');
+    } finally {
+        loading?.close();
     }
 }
 // 监听搜索条件变化
@@ -39,21 +45,13 @@ watchEffect(() => {
 
 // 跳转到详情页
 const viewDetail = (val) => {
-    const loading = ElLoading.service({
-        lock: false,
-        text: '加载中……',
-        background: 'rgba(0, 0, 0, 0.7)',
-    })
-    router.push({ name: 'JobInfo', query: { jobId: val.jobId } }).then(() => {
-        loading.close();
-    }).catch(() => {
+    router.push({ name: 'JobInfo', query: { jobId: val.jobId } }).catch(() => {
         ElMessage.error('网络繁忙，请稍后再试！');
     });
 }
 
-
 /*====================== 分页相关 ======================*/
-const emits = defineEmits(['update:page-size', 'update:current-page', 'click', 'update:result']);
+const emits = defineEmits(['click-company', 'update:page-size', 'update:current-page', 'click', 'update:result']);
 // 页码改变
 const handleCurrentChange = (currentPage) => {
     emits('update:current-page', currentPage)
@@ -61,6 +59,12 @@ const handleCurrentChange = (currentPage) => {
 // 页码大小改变
 const handleSizeChange = (pageSize) => {
     emits('update:page-size', pageSize)
+}
+
+// 查询公司发布职位列表
+const handleJobList = (companyId, companyName) => {
+    props.condition.companyId = companyId;
+    emits('click-company', companyName);
 }
 
 
@@ -86,7 +90,7 @@ const handleSizeChange = (pageSize) => {
             </template>
             <template #item-right="item">
                 <p class="jobs-company">
-                    <a href="javascript:;">{{ item.companyName }}</a>
+                    <a href="javascript:void(0);" @click="handleJobList(item.companyId, item.companyName)">{{ item.companyName }}</a>
                 </p>
                 <p class="jobs-create_date">创建日期：{{ item.jobTime }}</p>
             </template>

@@ -94,6 +94,21 @@ const tableOperation = [
 ]
 let filteredOperation = tableOperation;
 
+// 面试结果过滤
+const getResultOptionsLabel = (val) => {
+    // 表格右侧操作栏根据面试结果过滤
+    if (val.interviewResult === "1") {
+        // 通过面试
+        filteredOperation = tableOperation.filter((item) => item.text === '接受');
+    } else if (val.interviewResult === "2") {
+        // 未通过面试
+        filteredOperation = tableOperation.filter((item) => item.text === '拒绝');
+    } else {
+        // 待面试
+        filteredOperation = tableOperation.filter((item) => item.text === '取消');
+    }
+    return getOptionLabel(resultOptions, val.interviewResult);
+}
 // 面试类型过滤
 const getTypeOptionsLabel = (val) => {
     // 表格右侧操作栏根据面试类型过滤
@@ -109,7 +124,7 @@ const getStatusOptionsLabel = (val) => {
     // 表格右侧操作栏根据面试状态过滤   
     if (val === "1") {
         // 接受面试
-        filteredOperation = tableOperation.filter((item) => item.text !== '拒绝' && item.text !== '接受');
+        filteredOperation = tableOperation.filter((item) => item.text !== '拒绝' && item.text !== '接受' );
     } else if (val === "0" || val === "3") {
         // 拒绝或反悔面试则不显示按钮
         filteredOperation = null;
