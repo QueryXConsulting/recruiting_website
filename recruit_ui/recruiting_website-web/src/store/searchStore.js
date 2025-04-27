@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 
 export class SearchCondition {
-    constructor(keyword = '', page = 1, size = 10, isAsc = false, education = null, nature = null) {
+    constructor(keyword = '', page = 1, size = 10, isAsc = false) {
         this.keyword = keyword; // 搜索关键字
         this.page = page; // 当前页
         this.size = size; // 每页显示条数
         this.isAsc = isAsc; // 排序方式
-        this.education = education; // 学历
-        this.nature = nature; // 性质
+        // this.education = education; // 学历
+        // this.nature = nature; // 性质
     }
 }
 
@@ -37,10 +37,14 @@ export const useSearchStore = defineStore('search', {
         },
 
         setConditions(type, condition) {
-            return this.conditions[type] = condition;
+            this.conditions[type] = condition;
         },
         getConditions(type) {
             return this.conditions[type];
+        },
+        resetCompanyId() {
+            this.conditions.COMPANY.companyId = null;
+            delete this.conditions.JOB.companyId;
         },
         
         setResult(type, res) {

@@ -58,7 +58,7 @@ const getColumnLabel = (val, prop, tag) => {
     } else {
         filteredBtnObj = btnObj;
     }
-    
+
     const op = filteredResponse(tag).find((item) => item.prop === prop).option
     if (!op) { return val[prop]; }
     return op.find((item) => item.value === val[prop]).label;
@@ -86,14 +86,14 @@ const debounce = (func, delay) => {
 // 处理表格右侧操作(形参列表：[按钮编号，行数据，行索引])
 // 注：按钮为循环生成，事件会多次触发，因此使用防抖函数处理
 const handleOperation = debounce((index, row, i) => {
-    switch (index) {
-        case 0: // 编辑
+    switch (i) {
+        case '编辑': // 编辑
             handleEdit(row);
             break;
-        case 1: // 详情查看
+        case '查看': // 详情查看
             handleInspect(row);
             break;
-        case 2: // 删除
+        case '删除': // 删除
             handleDelete(row);
             break;
         default:
@@ -159,6 +159,28 @@ const roleListRequest = async () => {
     adminRoleOptions = data.content;
 }
 
+// 新增表单验证规则
+const addRules = {
+    adminAvatar: [
+        { required: false, message: '请上传头像', trigger: 'change' }
+    ],
+    roleId: [
+        { required: true, message: '请选择角色', trigger: 'change' }
+    ],
+    adminName: [
+        { required: true, message: '请输入昵称', trigger: 'change' }
+    ],
+    adminUsername: [
+        { required: true, message: '请输入账号', trigger: 'change' }
+    ],
+    adminPassword: [
+        { required: true, min: 6, max: 20, message: '密码长度在6到20个字符之间', trigger: 'blur' }
+    ],
+    adminStatus: [
+        { required: true, message: '请选择状态', trigger: 'change' }
+    ],
+}
+
 // editinfo表单验证规则
 const editRules = {
     adminAvatar: [
@@ -186,6 +208,7 @@ const avatarUpload = ref(null);// 上传组件实例
 let avatarFile = null;// 头像文件对象
 const updateAvatar = (file) => {
     avatarFile = file.file;
+    console.log(avatarFile);
     const fileSize = avatarFile.size / 1024 / 1024;
     if (fileSize > 2) {
         ElMessage.error('头像图片大小不能超过2M');
@@ -283,8 +306,26 @@ const handleAddRequest = () => {
             return;
         }
         isShowDialogAdd.value = false;// 关闭弹窗
+        const loadAvatar = avatarFile;
+        editInfo.adminAvatar = null;
         adminAdd(editInfo).then(res => {
-            getListResult(searchObj);// 刷新用户列表
+            // 上传头像
+            if (loadAvatar) {
+                const data = new FormData();
+                data.append('adminId', res.content);
+                data.append('image', loadAvatar);
+                adminUpdateAvatar(data).then(() => {
+                    ElMessage.success('新增用户成功');
+                    resetEditInfo();
+                    addForm.value.resetFields();
+                    getListResult(searchObj);// 刷新用户列表
+                });
+            } else {
+                ElMessage.success('新增用户成功');
+                resetEditInfo();
+                addForm.value.resetFields();
+                getListResult(searchObj);// 刷新用户列表
+            }
         });
     });
 
@@ -375,7 +416,7 @@ const handleCurrentChange = debounce((val) => {
     <!-- 新增弹窗 -->
     <WBDialog v-model="isShowDialogAdd" title="新增用户" :draggable="true" @submit="handleAddRequest" @close="handleDialogClose"
         @cancel="handleDialogClose" @open="handleDialogOpen" width="40%">
-        <WBForm :model="editInfo" :rules="editRules" ref="addForm" :items="getColumnLabels('edit')">
+        <WBForm :model="editInfo" :rules="addRules" ref="addForm" :items="getColumnLabels('edit')">
             <template #default="scope">
                 <!-- 用户密码 -->
                 <el-input v-if="scope.key === 'adminPassword'" type="password" show-password v-model="editInfo[scope.key]"
@@ -391,6 +432,16 @@ const handleCurrentChange = debounce((val) => {
                     <el-option v-for="(val, index) in filteredStatusOptions" :key="index" :label="val.label"
                         :value="val.value" />
                 </el-select>
+                <!-- 头像上传 -->
+                <span v-else-if="scope.key === 'adminAvatar'" style="display: flex;align-items: center;">
+                    <el-avatar size="large" :src="editInfo[scope.key]">
+                    </el-avatar>
+                    <i style="width: 20px;"></i>
+                    <el-upload :show-file-list="false" :http-request="updateAvatar" ref="avatarUpload" :limit="1"
+                        accept="'image/*'">
+                        <el-button size="small" type="primary">点击上传</el-button>
+                    </el-upload>
+                </span>
                 <!-- 其他 -->
                 <el-input v-else v-model="editInfo[scope.key]" placeholder="请输入" />
             </template>

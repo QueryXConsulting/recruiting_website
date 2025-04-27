@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public CommonResp<UserLoginVO> insertUser(RegisterDTO registerDTO) {
         // 判断手机号或邮箱是否合法
-        boolean b = registerDTO.getUserPhone().matches(PHONE) && registerDTO.getUserEmail().matches(EMAIL);
+        final boolean b = registerDTO.getUserPhone().matches(PHONE) && registerDTO.getUserEmail().matches(EMAIL);
         if (!b) {
             return CommonResp.fail(AppHttpCodeEnum.PHONE_OR_EMAIL_ILLEGAL, null);
         }
@@ -100,9 +100,11 @@ public class UserServiceImpl implements UserService {
         // 有 -> 删除
         if (user.getUserAvatar() != null && !user.getUserAvatar().isEmpty()) {
             File oldFile = new File(uploadPathAvatar + user.getUserAvatar());
-            if (!(oldFile.exists() && oldFile.delete())) {
-                log.warn("头像删除失败，文件路径为：{}", oldFile.getAbsolutePath());
-                return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
+            if (oldFile.exists()) {
+                if (!oldFile.delete()) {
+                    log.warn("头像删除失败，文件路径为：{}", oldFile.getAbsolutePath());
+//                    return CommonResp.fail(AppHttpCodeEnum.AVATAR_DELETE_ERROR, null);
+                }
             }
         }
         String path;
@@ -118,12 +120,14 @@ public class UserServiceImpl implements UserService {
             }
             // 更新数据库
             path = "/" + Common.getLastPath(uploadPathAvatar, "/", "/" + newFileName);
+
             user.setUserAvatar(path);
             userMapper.updateById(user);
         } catch (Exception e) {
             log.error("头像上传失败，原因：", e);
             return CommonResp.fail(AppHttpCodeEnum.AVATAR_UPLOAD_ERROR, null);
         }
+        System.err.println("头像上传成功，路径为：" + Common.getImgURL() + path);
         return CommonResp.success(Common.getImgURL() + path);
     }
 

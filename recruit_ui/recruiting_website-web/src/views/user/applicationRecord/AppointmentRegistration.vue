@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus';
 const reservationStatus = ref(null);// 预约状态
 const reservationStatusMessage = ref(null);// 页面状态提示信息
 const reservationResult = reactive({});// 报到信息
-let date = null;
+const date = ref(null);
 
 // 0待发送  1已发送 2已接受 3拒绝
 const reservationStatusOptions = [
@@ -27,8 +27,8 @@ onMounted(async () => {
         ElMessage.error(result.message);
         return;
     }
-    date = new Date(result.content.hireDate);
-    reservationResult.date = date.toLocaleDateString();
+    date.value = new Date(result.content.hireDate);
+    reservationResult.date = date.value.toLocaleDateString();
     reservationResult.companyName = result.content.companyInfoName;
     reservationResult.positionName = result.content.position;
     reservationResult.jobArea = result.content.jobArea;
@@ -92,9 +92,9 @@ const updateStatus = async (status) => {
         <el-result icon="warning" :title="reservationStatusMessage"></el-result>
     </div>
     <!-- 页面状态提示-错误 -->
-    <div v-if="!reservationStatus" class="reservation-status">
+    <!-- <div v-if="!reservationStatus" class="reservation-status">
         <el-result icon="error" title="错误！请投递简历"></el-result>
-    </div>
+    </div> -->
 </template>
 
 <style lang="scss" scoped>
@@ -146,4 +146,9 @@ h3 {
     justify-content: center;
     align-items: center;
 }
+
+:deep(.el-calendar-table .current.is-selected) {
+    background-color: #f6a97fda;
+}
+
 </style>

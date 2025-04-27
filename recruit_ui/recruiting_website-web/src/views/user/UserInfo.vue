@@ -6,7 +6,7 @@ import { iconMapping } from '@/utils/iconList';
 import WBDialog from '@/components/WBDialog.vue';
 import { ref, reactive, onMounted, nextTick } from 'vue';
 import { userLogout } from '@/api/company/companyApi';
-import { Edit, Plus, Picture, Delete, Bell, Medal, Opportunity, Place, School } from '@element-plus/icons-vue';
+import { Edit, Plus, Delete, Bell } from '@element-plus/icons-vue';
 import {
     userInfo, attachmentList, uploadAttachment,
     resumeUpdate, resumeDelete, uploadAvatar
@@ -17,11 +17,11 @@ import {
 const formItems = reactive([
     { required: false, prop: 'resumeId', label: '简历ID', value: '' },
     { required: true, prop: 'resumeName', label: '姓名', value: '' },
+    { required: true, prop: 'resumePhone', label: '手机号', value: '' },
     { required: true, prop: 'resumeEmail', label: '邮箱', value: '' },
     { required: true, prop: 'resumeMajor', label: '专业', value: '' },
     { required: true, prop: 'resumeGender', label: '性别', value: '' },
     { required: true, prop: 'resumeJob', label: '意向职位', value: '' },
-    { required: true, prop: 'resumePhone', label: '手机号', value: '' },
     { required: true, prop: 'resumeBirth', label: '出生日期', value: '' },
     { required: true, prop: 'resumeEducation', label: '学历', value: '' },
     { required: true, prop: 'resumeSalary', label: '期望薪资', value: '' },
@@ -102,7 +102,6 @@ onMounted(async () => {
     const resp = await attachmentList();
 
     if (store.userInfo?.resumeId) {
-        console.log('用户简历带修改', store.userInfo);
         formData.value.resumeId = store.userInfo.resumeId;
     }
     if (typeof res === "undefined" || !res.hasOwnProperty('content')) {
@@ -110,7 +109,9 @@ onMounted(async () => {
         for (let i of requiredItems) {
             formData.value[i] = null;
         }
-
+        formData.value.resumeName = store.userInfo.userName;
+        formData.value.resumePhone = store.userInfo.userPhone;
+        formData.value.resumeEmail = store.userInfo.userEmail;
         return;
     }
     formData.value = res.content;
@@ -155,6 +156,10 @@ const editInfo = async () => {
         if (key === 'resumeId') continue;
         // 校验工资
         if (key === 'resumeSalary') {
+            if (salaryRange[0] === '面议') {
+                formData.value[key] = salaryRange.join('-');
+                continue;
+            }
             if ((salaryRange[0] === '' || !salaryRange[0]) || (salaryRange[1] === '' || !salaryRange[1])) {
                 ElMessage.error('请填写完整工资范围');
                 return;
@@ -185,10 +190,8 @@ const editInfo = async () => {
     }
     notEdit.value = true;
     await resumeUpdate(formData.value).then((res) => {
-        //console.log(res);
         // 使用 Object.assign
         store.userInfo = Object.assign({}, store.userInfo, { resumeId: res.content });
-
         ElMessage.success(res.message);
         // window.location.reload();
     });
@@ -234,13 +237,22 @@ const handleIntroductionEdit = async () => {
 const changeAvater = ref(false);// 头像更换状态
 const imgUrl = ref('');// 头像上传地址
 const newAvatar = ref(null);// 头像上传文件
+const imageType = ['jpg', 'jpeg', 'png'];// 允许上传图片类型
 // 头像上传预览
 const handlePreview = (image) => {
+    const file = image?.file;
+    if (file) {
+        const isImage = imageType.filter((type) => file.type.includes(type));
+        if (isImage.length === 0) {
+            ElMessage.error('您上传的图片不符合格式！');
+            return;
+        }
+    }
     const reader = new FileReader();
-    reader.readAsDataURL(image.file);
+    reader.readAsDataURL(file);
     reader.onload = (e) => {
         imgUrl.value = e.target.result;
-        newAvatar.value = image.file;
+        newAvatar.value = file;
     }
 }
 // 弹窗关闭
@@ -324,10 +336,10 @@ const hasMessage = ref(false); // 是否有未读消息
                 <span class="recruit-text">招聘</span>
             </div>
             <div class="nav-items">
-                <a href="#" class="nav-item">首页</a>
+                <a href="/users/index" class="nav-item">首页</a>
                 <a href="/users/search" class="nav-item">校园招聘</a>
                 <a href="#" class="nav-item">社会招聘</a>
-                <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">应聘历史</a>
+                <a href="/users/application" class="nav-item" v-if="userStore().role == '5'">投递历史</a>
                 <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;"
                     alt="留言板">
                     <el-icon>
@@ -401,11 +413,14 @@ const hasMessage = ref(false); // 是否有未读消息
                                 <!-- 性别 -->
                                 <el-radio-group v-if="index === 'resumeGender'" :disabled="notEdit" class="user-info-input"
                                     v-model="formData[index]" size="large">
-                                    <span style="margin: 0 40px 0 0;">
-                                        <el-radio-button label="男" value="男" style="" />
+                                    <span style="margin: 0 2.5vw 0 0;">
+                                        <el-radio-button label="男" value="男" />
                                     </span>
-                                    <span style="">
+                                    <span style="margin: 0 2.5vw 0 0;">
                                         <el-radio-button label="女" value="女" />
+                                    </span>
+                                    <span>
+                                        <el-radio-button label="其他" value="其他" />
                                     </span>
                                 </el-radio-group>
 
@@ -438,7 +453,8 @@ const hasMessage = ref(false); // 是否有未读消息
                                 <span v-else-if="index === 'resumeSalary'"
                                     style="display: flex;justify-content: space-between;">
                                     <el-select v-model="salaryRange[0]" placeholder="请选择" size="large" :disabled="notEdit"
-                                        class="user-info-input" :style="{ width: '100px' }">
+                                        class="user-info-input" :style="{ width: '100px' }"
+                                        @change="(val) => { if (val === '面议') { salaryRange[1] = '' } else { salaryRange[1] = val } }">
                                         <el-option v-for="(item, i) in salaryOptions" :key="i" :label="item.range"
                                             :value="item.range"></el-option>
                                     </el-select>
@@ -459,7 +475,6 @@ const hasMessage = ref(false); // 是否有未读消息
                                     <el-option label="3-5年" value="3-5年"></el-option>
                                     <el-option label="5-10年" value="5-10年"></el-option>
                                     <el-option label="10年以上" value="10年以上"></el-option>
-                                    <el-option label="经验不限" value="经验不限"></el-option>
                                 </el-select>
                                 <!-- 其他 -->
                                 <el-input v-else v-model="formData[index]" :readonly="notEdit" size="large"
@@ -478,7 +493,7 @@ const hasMessage = ref(false); // 是否有未读消息
                     <h3>
                         专业技能
                         <span v-show="!skillEdit" @click="skillEdit = true" class="user-info-other-edit-btn">
-                            <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
+                            <el-icon style="color: #FF7427;margin: 0 3px 0 0;">
                                 <Edit />
                             </el-icon>
                             编辑
@@ -500,7 +515,7 @@ const hasMessage = ref(false); // 是否有未读消息
                     <h3>
                         项目经历
                         <span v-show="!project" @click="project = true" class="user-info-other-edit-btn">
-                            <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
+                            <el-icon style="color: #FF7427;margin: 0 3px 0 0;">
                                 <Edit />
                             </el-icon>
                             编辑
@@ -522,7 +537,7 @@ const hasMessage = ref(false); // 是否有未读消息
                     <h3>
                         工作经历
                         <span v-show="!experience" @click="experience = true" class="user-info-other-edit-btn">
-                            <el-icon style="color: #00bebd;margin: 0 3px 0 0;">
+                            <el-icon style="color: #FF7427;margin: 0 3px 0 0;">
                                 <Edit />
                             </el-icon>
                             编辑
@@ -608,6 +623,7 @@ const hasMessage = ref(false); // 是否有未读消息
     <!-- 头像更换弹窗 -->
     <WBDialog v-model="changeAvater" @submit="sendUploadAvatar" @cancel="imgUrl = ''" @close="dialogClose" cancel-text="重选"
         title="更换头像">
+        <el-alert title="请上传.png/.jpg/.jpeg格式的图片" type="info" show-icon :closable="false" />
         <img v-if="imgUrl" :src="imgUrl" />
         <el-upload v-else class="avatar-uploader" :show-file-list="false" :http-request="handlePreview">
             <el-icon class="avatar-uploader-icon">
@@ -637,7 +653,7 @@ h3 {
         display: inline-block;
         width: 4px;
         height: 20px;
-        background: #00bebd;
+        background: #FF7427;
         border-radius: 3px;
         left: 0;
         top: 5px;
@@ -692,7 +708,6 @@ h3 {
 
     &>article {
         border-radius: 20px;
-        // padding: 20px;
         width: 23%;
         height: 100%;
         overflow: hidden;
@@ -804,7 +819,7 @@ h3 {
     position: absolute;
     right: 5px;
     top: -30px;
-    color: #00bebd;
+    color: #FF7427;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -849,7 +864,7 @@ h3 {
     align-items: center;
     float: right;
     font-size: 16px;
-    color: #00bebd;
+    color: #FF7427;
     cursor: pointer;
 }
 

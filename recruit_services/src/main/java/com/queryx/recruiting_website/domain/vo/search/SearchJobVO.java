@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -33,7 +34,7 @@ public class SearchJobVO extends SearchResultVO {
     // 工作经验
     private String jobExperience;
     // 岗位创建时间
-    private Date jobTime;
+    private LocalDateTime jobTime;
     // 工作性质
     private String jobNature;
 

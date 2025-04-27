@@ -40,11 +40,10 @@ public class DeliverController {
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CommonResp.class)))
     })
     @PostMapping("/resume")
-    public CommonResp<Integer> deliverResume(@RequestBody DeliverResumeDTO deliverResumeDTO) {
-        int count;
+    public CommonResp<Boolean> deliverResume(@RequestBody DeliverResumeDTO deliverResumeDTO) {
         try {
-            count = deliverService.insertDeliverResume(deliverResumeDTO);
-            if (count <= 0) {
+            boolean count = deliverService.insertDeliverResume(deliverResumeDTO);
+            if (!count) {
                 log.error("简历投递失败，简历id={}", deliverResumeDTO.getResumeId());
                 return CommonResp.fail(AppHttpCodeEnum.DELIVER_RESUME_FAIL, null);
             }
@@ -53,7 +52,7 @@ public class DeliverController {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
         log.info("简历投递成功");
-        return CommonResp.success(count);
+        return CommonResp.success(true);
     }
 
     /**

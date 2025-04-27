@@ -239,7 +239,7 @@ public class TDUserServiceImpl extends ServiceImpl<TDUserMapper, TDUser> impleme
         if (!save(tdUser)) {
             throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
         }
-        return null;
+        return tdUser.getUserId().toString();
     }
 
     @Override

@@ -3,7 +3,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import { offerFilePath, offerList, offerStatus, offerSignature, postMessage } from '@/api/user/UserApi';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const currentPage = ref(1);// 当前页
 const pageSize = ref(10);// 每页显示条数
@@ -80,7 +80,7 @@ const tableOperation = [
 ]
 let filteredOperation = tableOperation;
 const getStatusOptionsLabel = (value) => {
-  if (value === '1' || value == '2' || value == '3' || value == '6') {
+  if (value === '0' || value === '1' || value == '2' || value == '3' || value == '6') {
     filteredOperation = [];
   } else {
     filteredOperation = tableOperation;
@@ -172,7 +172,7 @@ const signatureSubmit = async () => {
     }
   }
   if (companyId && jobName) {
-    await postMessage({ userId: companyId, content: `您发布的${jobName}职位的offer已被接收，请您及时查看。 ——此消息由系统自动发送，请勿回复。` });
+    await postMessage({ userId: companyId, content: `我已接收您发布的${jobName}岗位的offer，请您及时查看。 ——此消息由系统自动发送，请勿回复。` });
     return;
   }
   ElMessage.error('未知错误，请联系管理员');
@@ -194,14 +194,23 @@ const handleOperationClick = async (btnIndex, row, text) => {
       }
       break;
     case '接受': // 接受
-      alert('接受这个offer之后，其他offer都会自动拒绝，请慎重选择！');
-      isShowSignature.value = true;
-      await nextTick();// 等待DOM加载完成
-      initCanvas(); // 初始化canvas
-      offerId = row.offerId;
-      // 初始化留言相关
-      jobName = tableData.value[row.$index].jobPosition;
-      companyId = tableData.value[row.$index].companyId;
+      // ElMessageBox.confirm(
+      //   '接受这个offer之后，其他offer都会自动拒绝，请慎重选择！',
+      //   '确认offer',
+      //   {
+      //     confirmButtonText: '确定',
+      //     cancelButtonText: '取消',
+      //     type: 'warning',
+      //   }
+      // ).then(async () => {
+        isShowSignature.value = true;
+        await nextTick();// 等待DOM加载完成
+        initCanvas(); // 初始化canvas
+        offerId = row.offerId;
+        // 初始化留言相关
+        jobName = row.jobPosition;
+        companyId = row.companyId;
+      // })
       break;
     default:
       break;
@@ -225,14 +234,13 @@ const handleCurrentChange = (page) => {
   <div>
     <WBTable :total="total" @update:currentPage="handleCurrentChange" @update:page-size="handleSizeChange"
       :table-columns="tableColumns" v-model:tableData="tableData" v-model:currentPage="currentPage"
-      @row-click="previewOffer" :has-operation="hasOperation" v-model:pageSize="pageSize" border
-      style="cursor: pointer;">
+      @row-click="previewOffer" :has-operation="hasOperation" v-model:pageSize="pageSize" border style="cursor: pointer;">
       <template #default="scope">
         <el-tag v-if="scope.prop === 'offersStatus'"
           :type="getTagType(statusOptions, tableData[scope.$index][scope.prop])">
           {{ getStatusOptionsLabel(tableData[scope.$index][scope.prop]) }}
         </el-tag>
-        <span v-else>{{ tableData[scope.$index][scope.prop] }}</span>
+        <span v-else>{{ tableData[scope.$index][scope.prop] ? tableData[scope.$index][scope.prop] : '-' }}</span>
       </template>
       <!-- 表格右侧操作栏 -->
       <template #operation="scope">

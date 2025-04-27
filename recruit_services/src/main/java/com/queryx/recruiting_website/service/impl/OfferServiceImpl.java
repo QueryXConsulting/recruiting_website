@@ -55,7 +55,7 @@ public class OfferServiceImpl implements OfferService {
         LambdaQueryWrapper<TDOffers> offerQueryWrapper = new LambdaQueryWrapper<>();
         offerQueryWrapper.eq(TDOffers::getUserId, user.getUserId());
         offerQueryWrapper.ne(TDOffers::getOffersStatus, Common.OFFER_STATUS_CANCEL);
-        offerQueryWrapper.ne(TDOffers::getOffersStatus, Common.OFFER_STATUS_WAIT);
+//        offerQueryWrapper.ne(TDOffers::getOffersStatus, Common.OFFER_STATUS_WAIT);
         Page<TDOffers> selectPage = offerMapper.selectPage(new Page<>(page, size), offerQueryWrapper);
         if (selectPage == null) {
             log.warn("查询offer失败, 用户id: {}", user.getUserId());
@@ -73,7 +73,7 @@ public class OfferServiceImpl implements OfferService {
             vo.setJobPosition(tdJob.getJobPosition());
 
             TDCompanyInfo companyInfo = companyInfoMapper.selectOne(new LambdaQueryWrapper<TDCompanyInfo>()
-                    .select(TDCompanyInfo::getCompanyInfoName)
+                    .select(TDCompanyInfo::getCompanyInfoId, TDCompanyInfo::getCompanyInfoName)
                     .eq(TDCompanyInfo::getCompanyInfoId, tdJob.getCompanyId()));
             vo.setCompanyId(companyInfo.getCompanyInfoId());
             vo.setCompanyInfoName(companyInfo.getCompanyInfoName());
@@ -180,14 +180,16 @@ public class OfferServiceImpl implements OfferService {
             file.transferTo(new File(signaturePath + newFileName).getAbsoluteFile());
         } catch (IOException e) {
             log.error("上传签名失败 offerId: {} ", offerId, e);
-            File file1 = new File(newFileName);
-            if (!(file1.exists() || file1.delete())) {
-                log.warn("删除临时文件失败，文件名: {}", newFileName);
+            File file1 = new File(signaturePath + newFileName);
+            if (file1.exists()) {
+                if (file1.delete()) {
+                    log.warn("删除临时文件失败，文件名: {}", newFileName);
+                }
             }
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
         }
         newFileName =  "/" + newFileName;
-        offers.setSignaturePath(Common.getLastPath(signaturePath, "/", newFileName));
+        offers.setSignaturePath(File.separator + Common.getLastPath(signaturePath, "/", newFileName));
         int ui = offerMapper.updateById(offers);
         if (ui <= 0) {
             log.warn("offerId: {} 更新签名失败", offerId);

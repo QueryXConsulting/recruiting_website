@@ -13,7 +13,7 @@ public interface DeliverService {
      * @param deliverResumeDTO 简历投递信息
      * @return 插入的行数
      */
-    int insertDeliverResume(DeliverResumeDTO deliverResumeDTO);
+    boolean insertDeliverResume(DeliverResumeDTO deliverResumeDTO);
 
     /**
      * 根据用户ID查询简历投递列表
