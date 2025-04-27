@@ -55,8 +55,7 @@ public class TDJob {
     private String jobContact;
 
 
-    @Schema(name = "发布时间", implementation =
-            LocalDateTime.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(name = "发布时间", implementation = LocalDateTime.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime jobTime;
 
     @Schema(name = "浏览量", implementation = Integer.class, requiredMode = Schema.RequiredMode.REQUIRED)

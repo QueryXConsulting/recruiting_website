@@ -94,11 +94,11 @@ createObject('label', formItems, (data) => {
 const isShowDialog = ref(false);// 详情弹窗是否显示
 
 // 表格点击事件
-const handleClick = async (row, _) => {
-    formData.value = row;
-    isShowDialog.value = true;
+// const handleClick = async (row, _) => {
+//     formData.value = row;
+//     isShowDialog.value = true;
 
-}
+// }
 
 
 // 一页条数变化时触发
@@ -113,7 +113,8 @@ const handleCurrentChange = (page) => {
 
 <template>
     <div>
-        <WBTable :total="total" @row-click="handleClick" @update:currentPage="handleCurrentChange"
+        <!--  @row-click="handleClick" -->
+        <WBTable :total="total" @update:currentPage="handleCurrentChange"
             @update:page-size="handleSizeChange" :table-columns="tableColumns" v-model:tableData="tableData"
             v-model:currentPage="currentPage" operation-width="620px" v-model:pageSize="pageSize" border>
             <template #default="scope">

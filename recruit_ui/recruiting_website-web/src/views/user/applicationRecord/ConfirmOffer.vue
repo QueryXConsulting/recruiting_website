@@ -80,7 +80,7 @@ const tableOperation = [
 ]
 let filteredOperation = tableOperation;
 const getStatusOptionsLabel = (value) => {
-  if (value === '1' || value == '2' || value == '3' || value == '6') {
+  if (value === '0' || value === '1' || value == '2' || value == '3' || value == '6') {
     filteredOperation = [];
   } else {
     filteredOperation = tableOperation;
@@ -194,25 +194,23 @@ const handleOperationClick = async (btnIndex, row, text) => {
       }
       break;
     case '接受': // 接受
-      ElMessageBox.confirm(
-        '接受这个offer之后，其他offer都会自动拒绝，请慎重选择！',
-        '确认offer',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-      ).then(async () => {
+      // ElMessageBox.confirm(
+      //   '接受这个offer之后，其他offer都会自动拒绝，请慎重选择！',
+      //   '确认offer',
+      //   {
+      //     confirmButtonText: '确定',
+      //     cancelButtonText: '取消',
+      //     type: 'warning',
+      //   }
+      // ).then(async () => {
         isShowSignature.value = true;
         await nextTick();// 等待DOM加载完成
         initCanvas(); // 初始化canvas
         offerId = row.offerId;
         // 初始化留言相关
-        console.log(row.jobPosition);
         jobName = row.jobPosition;
         companyId = row.companyId;
-      })
-
+      // })
       break;
     default:
       break;

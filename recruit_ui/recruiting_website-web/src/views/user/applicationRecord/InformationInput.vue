@@ -215,9 +215,9 @@ const resetForm = () => {
         <el-result icon="success" :title="windowStatusMessage"></el-result>
     </div>
     <!-- 页面状态提示-拒绝 -->
-    <div v-if="!windowStatus" class="info-status">
+    <!-- <div v-if="!windowStatus" class="info-status">
          <el-result icon="error" title="错误！请先投递简历"></el-result>
-    </div>
+    </div> -->
 </template>
 
 <style lang="scss" scoped>

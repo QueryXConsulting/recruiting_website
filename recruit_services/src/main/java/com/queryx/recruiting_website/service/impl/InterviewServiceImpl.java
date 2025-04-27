@@ -38,8 +38,8 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     private InterviewDateMapper interviewDateMapper;
     @Autowired
     private TDJobMapper jobInfoMapper;
-    @Resource
-    private TDJobMapper jobMapper;
+
+
     @Resource
     private TDResumeService tdResumeService;
     @Resource
@@ -203,6 +203,18 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
                 return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
             }
             interview.setInterviewDate(interviewDate);
+        } else if (Common.INTERVIEW_STATUS_REJECTED.equals(isAccept)) {
+            // 若面试被拒绝，则将流程状态标记为不合适
+            LambdaQueryWrapper<TDJobResume> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.select(TDJobResume::getJobResumeId, TDJobResume::getResumeStatus, TDJobResume::getResumeDelete);
+            queryWrapper.eq(TDJobResume::getUserId, interview.getUserId());
+            queryWrapper.eq(TDJobResume::getJobId, interview.getJobId());
+            TDJobResume jobResume = tdJobResumeMapper.selectOne(queryWrapper);
+            if (jobResume != null && jobResume.getJobResumeId() != null) {
+                jobResume.setResumeDelete(Common.DELIVER_RESUME_DELETE_SQUARE_PEG);
+                jobResume.setResumeStatus(Common.DELIVER_RESUME_STATUS_TO_BE_INTERVIEWED);
+                tdJobResumeMapper.updateById(jobResume);
+            }
         }
         return CommonResp.success(interviewMapper.updateById(interview) > 0);
     }

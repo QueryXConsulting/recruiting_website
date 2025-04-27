@@ -92,9 +92,9 @@ const updateStatus = async (status) => {
         <el-result icon="warning" :title="reservationStatusMessage"></el-result>
     </div>
     <!-- 页面状态提示-错误 -->
-    <div v-if="!reservationStatus" class="reservation-status">
+    <!-- <div v-if="!reservationStatus" class="reservation-status">
         <el-result icon="error" title="错误！请投递简历"></el-result>
-    </div>
+    </div> -->
 </template>
 
 <style lang="scss" scoped>

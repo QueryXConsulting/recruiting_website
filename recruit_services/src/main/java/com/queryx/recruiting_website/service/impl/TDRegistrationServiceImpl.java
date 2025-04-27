@@ -113,6 +113,8 @@ public class TDRegistrationServiceImpl extends ServiceImpl<TDRegistrationMapper,
         fieldValues.put("email", registration.getEmail()); // 邮箱地址
         if (registration.getHireDate() != null) {
             fieldValues.put("hireDate", registration.getHireDate().toString()); // 入职日期
+        }else {
+            fieldValues.put("hireDate", "暂未确定"); // 入职日期
         }
         fieldValues.put("position", registration.getPosition()); // 职位
         fieldValues.put("educationLevel", registration.getEducationLevel()); // 学历

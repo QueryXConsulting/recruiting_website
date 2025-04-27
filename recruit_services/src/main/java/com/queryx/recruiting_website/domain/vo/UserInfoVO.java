@@ -8,6 +8,8 @@ import java.util.List;
 public class UserInfoVO {
     private Long companyInfoId;
     private String userName;
+    private String userPhone;
+    private String userEmail;
     private String userRole;
     private String userAvatar;
     private Long resumeId;

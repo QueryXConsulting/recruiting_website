@@ -46,6 +46,7 @@ public class Common {
     public static final String INTERVIEW_ONLINE = "0";// 线上面试
     // 面试相关常量
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
+    public static final String INTERVIEW_STATUS_REJECTED = "0";// 拒绝面试
     // 材料相关常量
     public static final String MATERIAL_OTHER_STRING_SPLIT = "|";// other材料路径分隔符
     public static final String MATERIAL_STATUS_WAIT_REVIEW = "3";// 待审核
@@ -63,7 +64,7 @@ public class Common {
     public static final String REGISTRATION_REJECTED = "3";
 
 
-    @Value("${server.address}")
+    @Value("${preview-file-ip}")
     public void setIp(String serverIp) {
         Common.ip = serverIp;
     }
@@ -155,13 +156,13 @@ public class Common {
     public static final String RESUME_ATTACHMENTS = "1";
 
     public static String getImgURL() {
-        return "http://" + "47.109.146.152";
+        return "http://" + ip;
     }
 
 
     // 获取基础 URL
     public static String getBaseURL() {
-        return "http://" + "47.109.146.152";
+        return "http://" + ip;
     }
 
 

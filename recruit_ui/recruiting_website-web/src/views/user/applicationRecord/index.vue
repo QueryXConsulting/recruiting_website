@@ -13,6 +13,7 @@ import ConfirmOffer from './ConfirmOffer.vue';
 import UploadMaterials from './UploadMaterials.vue';
 import InformationInput from './InformationInput.vue';
 import AppointmentRegistration from './AppointmentRegistration.vue';
+import { materialStatus } from '@/api/user/UserApi';
 
 
 const hasMessage = ref(false); // 是否有未读消息
@@ -67,6 +68,21 @@ const activeName = useTabStore().getTabIndex; // tab 切换
 const clickTab = (pane, e) => {
     useTabStore().setTabIndex(pane.index);
 }
+
+
+const beforeLeave = async (to, from) => {
+    switch (to) {
+        case 5:
+            const res1 = await materialStatus();
+            if (res1 !== 1) return false;
+            break;
+        case 6:
+            const res2 = await materialStatus();
+            if (res2 !== 0) return false;
+            break;
+    }
+    return true;
+}
 </script>
 
 <template>
@@ -83,7 +99,7 @@ const clickTab = (pane, e) => {
                     <a href="/users/index" class="nav-item">首页</a>
                     <a href="/users/search" class="nav-item">校园招聘</a>
                     <a href="#" class="nav-item">社会招聘</a>
-                    <a href="/users/application" class="nav-item active" v-if="userStore().role == '5'">应聘历史</a>
+                    <a href="/users/application" class="nav-item active" v-if="userStore().role == '5'">投递历史</a>
                     <a href="/users/message" class="nav-item" v-if="userStore().role == '5'" style="padding-top: 15px;"
                         alt="留言板">
                         <el-icon>
@@ -130,8 +146,8 @@ const clickTab = (pane, e) => {
             </nav>
         </div>
 
-        <el-tabs v-model="activeName" @tab-click="clickTab" type="border-card">
-            <el-tab-pane name="0" label="应聘记录" lazy>
+        <el-tabs v-model="activeName" @tab-click="clickTab" :before-leave="beforeLeave" type="border-card">
+            <el-tab-pane name="0" label="投递记录" lazy>
                 <ApplicationRecord></ApplicationRecord>
             </el-tab-pane>
             <el-tab-pane name="1" label="预约面试" lazy>
@@ -143,9 +159,9 @@ const clickTab = (pane, e) => {
             <el-tab-pane name="3" label="上传材料" lazy>
                 <UploadMaterials></UploadMaterials>
             </el-tab-pane>
-            <el-tab-pane name="4" label="信息录入" lazy>
+            <!-- <el-tab-pane name="4" label="信息录入" lazy>
                 <InformationInput></InformationInput>
-            </el-tab-pane>
+            </el-tab-pane> -->
             <el-tab-pane name="5" label="预约报到" lazy>
                 <AppointmentRegistration></AppointmentRegistration>
             </el-tab-pane>

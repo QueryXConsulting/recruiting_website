@@ -115,7 +115,7 @@ const handleSubmit = async () => {
                 <el-button size="large" @click="handleSubmit" class="register-btn">注&emsp;册</el-button>
             </div>
             <!-- <br> -->
-            <el-link :underline="false" href="/auth/login" type="primary" class="link-text">去登录</el-link>
+            <el-link :underline="false" href="/auth/login" type="warning" class="link-text">去登录</el-link>
         </div>
     </div>
 </template>
@@ -155,7 +155,6 @@ const handleSubmit = async () => {
     width: 100%;
     height: 44px;
     font-size: 16px;
-    // margin-top: 10px;   
     border-radius: 6px;
     font-weight: 500;
     letter-spacing: 1px;
