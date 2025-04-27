@@ -72,7 +72,8 @@ const statusOptions = [
     { status: null, value: '3', label: 'offer发放' },
     { status: null, value: '4', label: '上传材料' },
     { status: null, value: '5', label: '录入信息' },
-    { status: null, value: '6', label: '预约报道' }
+    { status: null, value: '6', label: '预约报道' },
+    { status: null, value: '7', label: '用户已撤销简历' }
 ]
 
 // 面试类型选项
@@ -122,10 +123,11 @@ const handleCurrentChange = (page) => {
             </template>
             <!-- 表格右侧操作栏 -->
             <template #operation="scope">
-                <el-steps :process-status="scope.row.resumeDelete === '0' ? 'error' : 'success'" style="max-width: 600px"
+                <el-steps :process-status="scope.row.resumeDelete === '0' || scope.row.resumeStatus === '7' ? 'error' : 'success'" style="max-width: 600px"
                     :active="+scope.row.resumeStatus" finish-status="success" align-center>
-                    <el-step class="step-item" v-for="(item, index) in statusOptions" :description="item.label"
-                        :key="index">
+                    <el-step class="step-item" v-for="(item, index) in statusOptions" :description="
+                        scope.row.resumeStatus === '7' && index === 0 ? '用户已撤销简历' : item.label
+                    " :key="index" :status="scope.row.resumeStatus === '7' && index === 0 ? 'error' : ''">
                     </el-step>
                 </el-steps>
             </template>

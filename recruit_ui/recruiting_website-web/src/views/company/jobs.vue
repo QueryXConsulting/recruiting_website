@@ -150,7 +150,9 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="工作地区" prop="jobArea">
-              <el-input v-model="jobForm.jobArea" placeholder="请输入工作地区" />
+              <el-select v-model="jobForm.jobArea" placeholder="请选择工作地区" class="full-width">
+                <el-option v-for="city in cities" :label="city" :value="city" :key="city" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -244,6 +246,18 @@ const jobForm = ref({
   jobPositionDescribe: '',
   jobPersonNumber: undefined
 })
+
+const cities = [
+  '不限', '北京', '上海', '广州', '深圳', '杭州',
+  '南京', '武汉', '成都', '重庆', '西安',
+  '天津', '苏州', '长沙', '郑州', '青岛',
+  '厦门', '大连', '宁波', '济南', '合肥',
+  '昆明', '南宁', '福州', '贵阳', '哈尔滨',
+  '石家庄', '太原', '南昌', '长春', '兰州',
+  '海口', '乌鲁木齐', '西宁', '银川', '呼和浩特',
+  '拉萨', '沈阳', '成都', '无锡', '佛山',
+  '东莞', '珠海', '中山', '惠州', '南通'
+];
 
 // 表单验证规则
 const rules = {

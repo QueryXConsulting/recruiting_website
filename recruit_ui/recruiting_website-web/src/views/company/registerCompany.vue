@@ -3,8 +3,8 @@
     <!-- 导航栏 -->
     <nav class="nav-header">
       <div class="logo-container">
-        <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
-          class="logo">
+        <!-- <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
+          class="logo"> -->
         <span class="workspace-text">问呗</span>
       </div>
     </nav>

@@ -9,6 +9,21 @@
 
       <div class="company-content">
         <div class="alert-section">
+          <el-alert v-if="hasSubmitFailure" title="检测到上次提交失败" type="error"
+            :description="`失败原因: ${failureReason}，失败时间: ${failureTimestamp}。系统已为您缓存了上次的提交内容，您可以点击下方按钮恢复提交。`"
+            show-icon :closable="true" class="review-alert">
+            <template #default>
+              <div class="alert-actions">
+                <el-button size="small" type="primary" @click="recoverFailedSubmission">
+                  恢复上次提交
+                </el-button>
+                <el-button size="small" @click="hasSubmitFailure = false">
+                  清除提示
+                </el-button>
+              </div>
+            </template>
+          </el-alert>
+
           <el-alert v-if="companyData.companyInfoReview === '0'" title="企业信息正在审核中" type="warning"
             description="您的企业信息正在审核中，审核通过后即可正常使用所有功能。" show-icon :closable="false" class="review-alert" />
 
@@ -28,7 +43,7 @@
                 <el-icon>
                   <InfoFilled />
                 </el-icon>
-                <span>支持 jpg/png 格式，大小不超过2MB。修改后需重新提交审核</span>
+                <span>支持 jpg/png/jpeg 格式，大小不超过2MB。修改后需重新提交审核</span>
               </div>
             </div>
 
@@ -76,6 +91,11 @@
                   <el-tag :type="getReviewStatusType(companyData.enterpriseReview)">
                     {{ getReviewStatusText(companyData.enterpriseReview) }}
                   </el-tag>
+                  <el-button v-if="companyData.enterpriseReview !== null && companyData.enterpriseReview !== ''"
+                    type="primary" link size="small" @click="handleViewEnterpriseFiles" class="view-files-btn">
+                    <el-icon><Document /></el-icon>
+                    查看资质
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -138,6 +158,9 @@
               <el-button type="warning" @click="cancelReview" v-if="companyData.companyInfoReview === '0'">
                 撤销审核
               </el-button>
+              <el-button type="danger" @click="retrySubmit" v-if="hasSubmitFailure">
+                重试提交
+              </el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -196,13 +219,41 @@
             frameborder="0" class="pdf-preview-iframe"></iframe>
         </el-dialog>
 
-        <!-- 添加一个全局的临时保存状态提示 -->
+        <!-- 添加一个全局的上传失败状态提示 -->
+        <div v-if="hasSubmitFailure" class="submit-failure-indicator">
+          <el-tag type="danger">
+            <el-icon><Warning /></el-icon>
+            <span>上次提交失败 ({{ failureTimestamp }})</span>
+          </el-tag>
+        </div>
+
+        <!-- 保持现有的临时保存状态提示 -->
         <div v-if="hasTempFormSave" class="temp-save-indicator">
           <el-tag type="success">
             <el-icon><Check /></el-icon>
             <span>表单已临时保存 ({{ tempSavedData?.timestamp }})</span>
           </el-tag>
         </div>
+
+        <!-- 添加企业资质文件查看对话框 -->
+        <el-dialog v-model="enterpriseFilesVisible" title="企业资质文件" width="500px">
+          <div v-if="loadingEnterpriseFiles" class="loading-files">
+            <el-skeleton :rows="3" animated />
+          </div>
+          <div v-else-if="enterpriseFiles.length" class="pdf-list">
+            <div v-for="(file, index) in enterpriseFiles" :key="index" class="pdf-item" @click="previewEnterpriseFile(file)">
+              <div class="pdf-content">
+                <el-icon class="pdf-icon">
+                  <Document />
+                </el-icon>
+                <span class="pdf-name">{{ file.name }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-files">
+            <el-empty description="暂无资质文件" />
+          </div>
+        </el-dialog>
       </div>
     </el-card>
   </div>
@@ -213,9 +264,10 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { companyInfo as getCompanyInfoApi, companyInfoUpdate } from '@/api/company/companyApi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userStore from '@/store/user'
-import { Document, UploadFilled, Plus, Delete, InfoFilled, Check } from '@element-plus/icons-vue'
+import { Document, UploadFilled, Plus, Delete, InfoFilled, Check, Warning } from '@element-plus/icons-vue'
 import 'cropperjs/dist/cropper.css'
 import VueCropper from 'vue-cropperjs'
+import { companyEnterpriseFiles } from '@/api/admin/adminApi'
 
 const companyData = ref({
   companyInfoId: '',
@@ -258,6 +310,19 @@ const originalCompanyData = ref(null)
 const originalFileList = ref([])
 const originalLogoFile = ref(null)
 
+// 添加提交失败缓存相关变量
+const submitFailedFiles = ref([])
+const hasSubmitFailure = ref(false)
+const failureReason = ref('')
+const failureTimestamp = ref('')
+const retryCount = ref(0)
+const maxRetries = 3
+
+// 添加查看企业资质文件相关变量
+const enterpriseFilesVisible = ref(false)
+const enterpriseFiles = ref([])
+const loadingEnterpriseFiles = ref(false)
+
 const getReviewStatusType = (status) => {
   const statusMap = {
     'null': 'info',
@@ -287,7 +352,9 @@ const getCompanyInfo = async () => {
       companyData.value.companyInfoPassword = null
       userStore().userInfo.companyInfoReview = res.content.companyInfoReview
       userStore().userInfo.enterpriseReview = res.content.enterpriseReview
-
+      if (companyData.value.companyInfoReview == 0 && companyData.value.enterpriseReview == 0) {
+        ElMessage.warning('请先完善企业信息并提交资质文件，以便我们能够审核您的企业资质。')
+      }
       // 保存原始数据
       originalCompanyData.value = JSON.parse(JSON.stringify(res.content))
       originalCompanyData.value.companyInfoPassword = null
@@ -496,7 +563,7 @@ const validateEmail = () => {
   return true
 }
 
-// 修改提交表单函数
+// 修改提交表单函数，添加错误处理和缓存
 const submitForm = async () => {
   try {
     if (!validateEmail()) {
@@ -506,13 +573,26 @@ const submitForm = async () => {
     const formData = new FormData()
     formData.append('companyInfoId', companyData.value.companyInfoId)
 
+    // 缓存所有将要上传的文件
+    const filesToUpload = []
+
     if (logoFile.value) {
       formData.append('applyFiles', logoFile.value)
+      filesToUpload.push({
+        type: 'logo',
+        file: logoFile.value,
+        name: logoFile.value.name
+      })
     }
 
     if (companyData.value.enterpriseFile && companyData.value.enterpriseFile.length > 0) {
       companyData.value.enterpriseFile.forEach(file => {
         formData.append('enterpriseFile', file)
+        filesToUpload.push({
+          type: 'enterprise',
+          file: file,
+          name: file.name
+        })
       })
     } else if (companyData.value.enterpriseReview !== '1' && companyData.value.enterpriseFile == null) {
       ElMessage.warning('请上传资质文件')
@@ -524,7 +604,6 @@ const submitForm = async () => {
     }
 
     companyData.value.companyInfoReview = '0'
-
 
     const originalData = await getCompanyInfoApi(userStore().userInfo.companyInfoId)
     Object.keys(companyData.value).forEach(key => {
@@ -538,19 +617,105 @@ const submitForm = async () => {
       }
     })
 
-    await companyInfoUpdate(formData)
-    ElMessage.success('保存成功')
+    // 保存表单数据副本以便失败后恢复
+    const formDataBackup = {
+      formData: JSON.parse(JSON.stringify(companyData.value)),
+      files: filesToUpload
+    }
 
-    // 清除临时保存状态
-    hasTempFormSave.value = false
-    tempSavedData.value = null
+    try {
+      await companyInfoUpdate(formData)
+      ElMessage.success('保存成功')
 
-    // 重新获取数据，更新原始数据
-    await getCompanyInfo()
+      // 清除临时保存状态和失败缓存
+      hasTempFormSave.value = false
+      tempSavedData.value = null
+      hasSubmitFailure.value = false
+      submitFailedFiles.value = []
+      failureReason.value = ''
+      failureTimestamp.value = ''
+      retryCount.value = 0
+
+      // 重新获取数据，更新原始数据
+      await getCompanyInfo()
+    } catch (error) {
+      // 详细的错误处理
+      console.error('提交失败:', error)
+
+      // 保存失败信息
+      hasSubmitFailure.value = true
+      failureReason.value = error.message || '网络错误或服务器无响应'
+      failureTimestamp.value = new Date().toLocaleString()
+      submitFailedFiles.value = filesToUpload
+
+      // 显示详细错误提示
+      ElMessageBox.alert(
+        `提交失败，原因：${failureReason.value}。系统已缓存您的提交内容，您可以稍后再试。`,
+        '提交失败',
+        {
+          confirmButtonText: '确定',
+          type: 'error',
+          callback: () => {
+            // 如果文件较大，建议用户检查网络
+            if (getTotalFileSize(filesToUpload) > 5) { // 大于5MB
+              ElMessage.warning('您上传的文件较大，请确保网络连接稳定后再次尝试')
+            }
+          }
+        }
+      )
+    }
   } catch (error) {
-    console.error('保存失败:', error)
-    ElMessage.error(error.message || '保存失败')
+    console.error('表单处理失败:', error)
+    ElMessage.error('表单处理失败：' + (error.message || '未知错误'))
   }
+}
+
+// 计算文件总大小的辅助函数
+const getTotalFileSize = (files) => {
+  return files.reduce((total, file) => {
+    return total + (file.file.size / (1024 * 1024))
+  }, 0)
+}
+
+// 添加自动重试功能
+const retrySubmit = async () => {
+  if (retryCount.value >= maxRetries) {
+    ElMessage.error('已达到最大重试次数，请手动重试或联系管理员')
+    return
+  }
+
+  retryCount.value++
+  ElMessage.info(`正在进行第 ${retryCount.value} 次重试...`)
+
+  try {
+    await submitForm()
+  } catch (error) {
+    console.error('重试失败:', error)
+    ElMessage.error(`重试失败: ${error.message || '未知错误'}`)
+  }
+}
+
+// 添加恢复失败提交的功能
+const recoverFailedSubmission = () => {
+  if (!hasSubmitFailure.value || submitFailedFiles.value.length === 0) {
+    ElMessage.warning('没有需要恢复的提交')
+    return
+  }
+
+  ElMessageBox.confirm(
+    `是否恢复上次失败的提交？失败时间: ${failureTimestamp.value}`,
+    '恢复提交',
+    {
+      confirmButtonText: '恢复',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    // 这里可以直接调用submitForm，因为表单数据仍然保持原样
+    submitForm()
+  }).catch(() => {
+    // 用户取消恢复
+  })
 }
 
 const cancelReview = async () => {
@@ -573,20 +738,30 @@ const cancelReview = async () => {
     formData.append('companyInfoReview', '2')
     formData.append('enterpriseFile', '')
 
-    await companyInfoUpdate(formData)
-    ElMessage.success('已撤销审核状态')
-    fileList.value = []
-    companyData.value.enterpriseFile = []
-    await getCompanyInfo()
+    try {
+      await companyInfoUpdate(formData)
+      ElMessage.success('已撤销审核状态')
+      fileList.value = []
+      companyData.value.enterpriseFile = []
+      await getCompanyInfo()
+    } catch (error) {
+      // 详细的错误处理
+      console.error('撤销审核失败:', error)
+      ElMessageBox.alert(
+        `撤销审核失败，原因：${error.message || '网络错误或服务器无响应'}`,
+        '操作失败',
+        {
+          confirmButtonText: '确定',
+          type: 'error'
+        }
+      )
+    }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('撤销审核失败:', error)
-      ElMessage.error(error.message || '撤销审核失败')
+      console.error('撤销审核被取消:', error)
     }
   }
 }
-
-
 
 // 修改还原功能，恢复到修改前的原始数据
 const restoreTempForm = () => {
@@ -636,7 +811,6 @@ const restoreTempForm = () => {
   })
 }
 
-
 // 临时保存表单数据
 const saveTempForm = () => {
   // 先验证邮箱
@@ -685,11 +859,100 @@ const handleBeforeUnload = (e) => {
   }
 }
 
+// 修改企业资质文件查看方法，调用真实API
+const handleViewEnterpriseFiles = async () => {
+  if (!companyData.value.companyInfoId) {
+    ElMessage.warning('企业信息ID不存在')
+    return
+  }
+
+  enterpriseFilesVisible.value = true
+  loadingEnterpriseFiles.value = true
+  enterpriseFiles.value = []
+
+  try {
+    // 如果已经有fileList中的文件，可以直接使用
+    if (fileList.value.length > 0) {
+      enterpriseFiles.value = fileList.value.map(file => ({
+        name: file.name,
+        url: file.url || (file.raw ? URL.createObjectURL(file.raw) : ''),
+        size: file.size || (file.raw ? file.raw.size : 0),
+        isTemp: file.url ? false : true
+      })).filter(file => file.url)
+
+      if (enterpriseFiles.value.length > 0) {
+        loadingEnterpriseFiles.value = false
+        return
+      }
+    }
+
+    // 使用API获取企业资质文件
+    const response = await companyEnterpriseFiles(companyData.value.companyInfoId)
+
+    if (response && response.content && Object.keys(response.content).length > 0) {
+      enterpriseFiles.value = Object.entries(response.content).map(([name, content]) => {
+        if (!content) {
+          return null;
+        }
+
+        try {
+          // 处理后端返回的base64编码数据
+          const binaryString = atob(content);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          // 创建blob对象
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+
+          return {
+            name: decodeURIComponent(name),
+            url: url,
+            size: bytes.length
+          };
+        } catch (error) {
+          console.error('处理文件失败:', name, error);
+          return null;
+        }
+      }).filter(Boolean);
+
+      if (enterpriseFiles.value.length === 0) {
+        ElMessage.info('暂无资质文件或文件格式不正确');
+      }
+    } else {
+      ElMessage.info('暂无资质文件');
+    }
+  } catch (error) {
+    console.error('获取企业资质文件失败:', error);
+    ElMessage.error('获取企业资质文件失败: ' + (error.message || '未知错误'));
+  } finally {
+    loadingEnterpriseFiles.value = false;
+  }
+}
+
+// 预览企业资质文件
+const previewEnterpriseFile = (file) => {
+  currentFile.value = file;
+  previewUrl.value = file.url;
+  previewVisible.value = true;
+}
+
 onMounted(() => {
   getCompanyInfo()
 
   // 添加页面关闭提示
   window.addEventListener('beforeunload', handleBeforeUnload)
+
+  // 检查是否有上次失败的提交需要恢复
+  if (hasSubmitFailure.value && submitFailedFiles.value.length > 0) {
+    ElMessage({
+      message: '检测到上次有未成功的提交，您可以点击"恢复上次提交"按钮进行恢复',
+      type: 'warning',
+      duration: 5000
+    })
+  }
 })
 
 onBeforeUnmount(() => {
@@ -714,6 +977,13 @@ onBeforeUnmount(() => {
 
   // 移除页面关闭提示
   window.removeEventListener('beforeunload', handleBeforeUnload)
+
+  // 释放新增的资源
+  enterpriseFiles.value.forEach(file => {
+    if (file.url && file.url.startsWith('blob:')) {
+      URL.revokeObjectURL(file.url)
+    }
+  })
 })
 </script>
 
@@ -1303,5 +1573,53 @@ onBeforeUnmount(() => {
 
 .temp-save-indicator .el-icon {
   margin-right: 4px;
+}
+
+/* 添加新的样式 */
+.alert-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+}
+
+.submit-failure-indicator {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.submit-failure-indicator .el-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+}
+
+.submit-failure-indicator .el-icon {
+  margin-right: 4px;
+}
+
+/* 添加新的样式 */
+.view-files-btn {
+  margin-left: 12px;
+}
+
+.loading-files {
+  padding: 20px;
+}
+
+.no-files {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 120px;
+  color: #909399;
 }
 </style>

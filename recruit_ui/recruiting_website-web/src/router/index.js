@@ -82,6 +82,10 @@ const routes = [
         component: () => import('../views/company/jobResume.vue'),
       },
       {
+        path: 'homePage',
+        component: () => import('../views/homePage.vue'),
+      },
+      {
         path: 'resumeDetail',
         component: () => import('../views/company/resumeDetail.vue'),
       },
