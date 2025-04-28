@@ -181,9 +181,12 @@ const editInfo = async () => {
             ElMessage.error('请选择学历');
             return;
         }
+        if (key === 'resumeBirth' && value > new Date()) {
+            ElMessage.error('请选择正确的出生日期');
+            return;
+        }
         // 校验其他必填项
         if (!value) {
-            console.log('eeee', value, formData.value);
             ElMessage.error('请填写完整信息');
             return;
         }

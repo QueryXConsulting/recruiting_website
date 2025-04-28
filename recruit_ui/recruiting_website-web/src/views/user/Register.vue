@@ -3,11 +3,11 @@ import WBForm from "@/components/WBForm.vue";
 import { ref, reactive } from "vue";
 import { userRegister } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
-import { ArrowLeft } from '@element-plus/icons-vue';
+import { Cellphone, User, Message, Lock } from '@element-plus/icons-vue';
 import userStore from '@/store/user';
 import router from '@/router';
 
-// const router = useRouter();
+
 const store = userStore();
 // 表单根数据
 const formItems = reactive([
@@ -94,28 +94,60 @@ const handleSubmit = async () => {
     <div class="register-container">
 
         <div class="register-form">
-            <div class="back-arrow">
-                <el-link :underline="false" href="/" type="info">
-                    <el-icon size="large" class="arrow-icon">
-                        <ArrowLeft />
-                    </el-icon>
-                </el-link>
-            </div>
             <h2 class="register-title">注册</h2>
             <WBForm :model="formData" ref="refForm" :items="formDisplay" :rules="formRules">
-                <template #default="scope">
-                    <el-input v-if="scope.key === 'userPassword'" v-model="formData[scope.key]" type="password"
-                        show-password placeholder="请输入信息"></el-input>
-                    <el-input v-else v-model="formData[scope.key]" placeholder="请输入信息"></el-input>
+                <template #form-items>
+                    <!-- 姓名 -->
+                    <el-form-item prop="userName">
+                        <el-input v-model="formData.userName" type="text" placeholder="请输入您的姓名" size="large" maxlength="20">
+                            <template #prefix>
+                                <el-icon>
+                                    <User />
+                                </el-icon>
+                            </template>
+                        </el-input>
+                    </el-form-item>
+                    <!-- 手机号 -->
+                    <el-form-item prop="userPhone">
+                        <el-input v-model="formData.userPhone" type="tel" placeholder="请输入手机号" size="large" maxlength="20">
+                            <template #prefix>
+                                <el-icon class="input-icon">
+                                    <Cellphone />
+                                </el-icon>
+                            </template>
+                        </el-input>
+                    </el-form-item>
+                    <!-- 邮箱 -->
+                    <el-form-item prop="userEmail">
+                        <el-input v-model="formData.userEmail" type="email" placeholder="请输入邮箱" size="large" maxlength="20">
+                            <template #prefix>
+                                <el-icon>
+                                    <Message />
+                                </el-icon>
+                            </template>
+                        </el-input>
+                    </el-form-item>
+                    <!-- 密码 -->
+                    <el-form-item prop="userPassword">
+                        <el-input v-model="formData.userPassword" type="password" placeholder="请输入密码" size="large"
+                            maxlength="20">
+                            <template #prefix>
+                                <el-icon class="input-icon">
+                                    <Lock />
+                                </el-icon>
+                            </template>
+                        </el-input>
+                    </el-form-item>
                 </template>
             </WBForm>
-            <!-- <i style="height: 10px;">&nbsp;</i> -->
             <!-- 按钮 -->
-            <div style="display: flex; justify-content: center;">
+            <div style="display: flex; justify-content: center;margin-bottom: 30px;">
                 <el-button size="large" @click="handleSubmit" class="register-btn">注&emsp;册</el-button>
             </div>
-            <!-- <br> -->
-            <el-link :underline="false" href="/auth/login" type="warning" class="link-text">去登录</el-link>
+            <div style="display: flex; justify-content: space-between;">
+                <el-link :underline="false" href="/" type="warning" class="link-text">首页</el-link>
+                <el-link :underline="false" href="/auth/login" type="warning" class="link-text">登录</el-link>
+            </div>
         </div>
     </div>
 </template>
@@ -134,7 +166,7 @@ const handleSubmit = async () => {
 
 .register-form {
     max-width: 600px;
-    max-height: 500px;
+    max-height: 600px;
     margin: 0px auto 0px auto;
     padding: 60px;
     background-color: #fff;
@@ -164,5 +196,18 @@ const handleSubmit = async () => {
 .register-btn:hover {
     background-color: #FFEFD5;
     border-color: #FF8C00;
+}
+
+/* 注册表单 */
+:deep(.el-input__wrapper) {
+    background-color: #f5f7fa;
+    box-shadow: none !important;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+:deep(.el-input__wrapper:hover) {
+    border-color: #FF8C00;
+    background-color: #fff;
 }
 </style>

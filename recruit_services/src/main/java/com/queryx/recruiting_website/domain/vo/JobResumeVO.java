@@ -1,5 +1,7 @@
 package com.queryx.recruiting_website.domain.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,12 +14,19 @@ import java.util.Date;
 @Data
 public class JobResumeVO {
 
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(name = "投递ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
+    private Long jobResumeId;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "职位ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
     private Long jobId;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "简历ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
     private Long resumeId;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(name = "用户ID", requiredMode = Schema.RequiredMode.REQUIRED, implementation = Long.class)
     private Long userId;
 

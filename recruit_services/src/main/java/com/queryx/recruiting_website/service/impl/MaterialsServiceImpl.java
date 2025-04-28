@@ -161,6 +161,7 @@ public class MaterialsServiceImpl implements MaterialsService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CommonResp<Boolean> insertMaterials(Map<String, MultipartFile> files) {
+//    public CommonResp<Boolean> insertMaterials(Map<String, List<MultipartFile>> files) {
         ArrayList<String> targetList = new ArrayList<>();// 保存文件名
 
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
@@ -187,7 +188,39 @@ public class MaterialsServiceImpl implements MaterialsService {
         if (!folder.mkdirs()) { // 文件夹已存在
             log.warn("创建文件夹失败,{}文件夹已存在", folderName);
         }
+        Map<String, List<MultipartFile>> map1 = new HashMap<>();
         try {
+//            String key = null;
+//            for (Map.Entry<String, MultipartFile> file : files.entrySet()) {
+//                key = file.getKey().split("-")[0];
+//                if (map1.containsKey(key)) { // 存在key
+//                    map1.get(key).add(file.getValue());
+//                } else { // 不存在key
+//                    ArrayList<MultipartFile> multipartFiles = new ArrayList<>();
+//                    multipartFiles.add(file.getValue());
+//                    map1.put(key, multipartFiles);
+//                }
+//            }
+//            for (Map.Entry<String, List<MultipartFile>> entry : map1.entrySet()) {
+//                StringBuilder filePaths = new StringBuilder();
+//                for (MultipartFile file1 : entry.getValue()) {
+//                    String fileName = System.currentTimeMillis() + "_" + file1.getOriginalFilename();
+//                    File target = new File(folder.getAbsolutePath() + File.separator + fileName);
+//                    file1.transferTo(target.getAbsoluteFile());
+//                    if (!target.exists()) {
+//                        log.error("文件上传失败");
+//                        return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+//                    }
+//                    targetList.add(target.getAbsolutePath());
+//
+//                    filePaths.append(File.separator).append(folderName).append(fileName).append(Common.MATERIAL_OTHER_STRING_SPLIT);
+//                }
+//                // 保存文件路径
+//                Method method = material.getClass().getDeclaredMethod(entry.getKey(), String.class);
+//                method.setAccessible(true);
+//                method.invoke(material, filePaths.toString());
+//            }
+
             for (Map.Entry<String, MultipartFile> file : files.entrySet()) {
                 MultipartFile file1 = file.getValue();
                 String fileName = System.currentTimeMillis() + "_" + file1.getOriginalFilename();

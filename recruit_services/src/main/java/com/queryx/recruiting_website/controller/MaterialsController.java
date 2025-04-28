@@ -50,7 +50,8 @@ public class MaterialsController {
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    public CommonResp<Boolean> uploadMaterials(@RequestParam() Map<String, MultipartFile> files) {
+    public CommonResp<Boolean> uploadMaterials(@RequestParam Map<String, MultipartFile> files) {
+//    public CommonResp<Boolean> uploadMaterials(@RequestPart Map<String, List<MultipartFile>> files) {
         if (files == null || files.isEmpty()) {
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }

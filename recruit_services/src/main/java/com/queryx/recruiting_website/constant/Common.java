@@ -44,6 +44,7 @@ public class Common {
     public static final String DELIVER_RESUME_STATUS_OFFER = "3";// 不合适
     public static final String DELIVER_RESUME_STATUS_UPLOAD_MATERIAL = "4";// 上传资料中
     public static final String INTERVIEW_ONLINE = "0";// 线上面试
+    public static final String DELIVER_RESUME_STATUS_REVOKE = "7";// 撤销投递
     // 面试相关常量
     public static final String INTERVIEW_STATUS_BE_INTERVIEWED = "1";// 待面试
     public static final String INTERVIEW_STATUS_REJECTED = "0";// 拒绝面试
