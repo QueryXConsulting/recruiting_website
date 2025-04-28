@@ -8,7 +8,7 @@ public interface MaterialService extends IService<TDMaterial> {
 
     Object selectMaterial(Integer page, Integer size,Long jobId);
 
-    Object selectMaterialDetail(Long materialId);
+    Object selectMaterialDetail(Long materialId, Long offerId);
 
     Object updateMaterialStatus(Long materialId, String status);
 }

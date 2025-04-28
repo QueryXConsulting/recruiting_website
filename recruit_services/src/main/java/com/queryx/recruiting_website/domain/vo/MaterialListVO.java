@@ -15,6 +15,8 @@ public class MaterialListVO {
     private Long userId;
     @JsonSerialize(using = ToStringSerializer.class)
     private Long jobId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long offerId;
     private String userName;
     private Date sendTime;
     private String status;

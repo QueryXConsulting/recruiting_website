@@ -6,8 +6,8 @@
         <i class="arrow left"></i>
       </div>
       <div class="logo-container">
-        <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
-          class="google-logo">
+        <!-- <img style="cursor: pointer;" src="/public/logo.png" @click="router.push('/users/index');" alt="Google"
+          class="google-logo"> -->
         <span class="workspace-text">问呗</span>
       </div>
     </nav>

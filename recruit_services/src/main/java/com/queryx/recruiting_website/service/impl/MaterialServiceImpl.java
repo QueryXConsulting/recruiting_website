@@ -10,6 +10,7 @@ import com.queryx.recruiting_website.domain.vo.MaterialDetailVO;
 import com.queryx.recruiting_website.domain.vo.MaterialListVO;
 import com.queryx.recruiting_website.mapper.MaterialMapper;
 import com.queryx.recruiting_website.mapper.TDJobResumeMapper;
+import com.queryx.recruiting_website.mapper.TDOffersMapper;
 import com.queryx.recruiting_website.mapper.TDRegistrationMapper;
 import com.queryx.recruiting_website.service.*;
 import jakarta.annotation.Resource;
@@ -32,6 +33,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
     private TDRegistrationMapper registrationMapper;
     @Resource
     private TDOffersService offersService;
+
     @Resource
     private TDJobService jobService;
 
@@ -63,7 +65,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
     }
 
     @Override
-    public Object selectMaterialDetail(Long materialId) {
+    public Object selectMaterialDetail(Long materialId, Long offerId) {
 
         TDMaterial material = getById(materialId);
         MaterialDetailVO materialDetailVO = new MaterialDetailVO();
@@ -75,6 +77,10 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
                     .map(part -> Common.getBaseURL() + part)
                     .toList();
             materialDetailVO.setOther(otherList);
+        }
+        String signaturePath = offersService.getById(offerId).getSignaturePath();
+        if (StringUtils.hasText(signaturePath)) {
+            materialDetailVO.setSignaturePath(Common.getBaseURL() + signaturePath);
         }
         materialDetailVO.setDiploma(Common.getBaseURL() + materialDetailVO.getDiploma());
         materialDetailVO.setIdentityCard(Common.getBaseURL() + materialDetailVO.getIdentityCard());
@@ -108,7 +114,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
 
             LambdaUpdateWrapper<TDJobResume> tdJobResumeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
             tdJobResumeLambdaUpdateWrapper.eq(TDJobResume::getJobId, material.getJobId())
-                    .eq(TDJobResume::getUserId, material.getUserId()).set(TDJobResume::getResumeStatus, "5");
+                    .eq(TDJobResume::getUserId, material.getUserId()).set(TDJobResume::getResumeStatus, "6");
             jobResumeMapper.update(tdJobResumeLambdaUpdateWrapper);
             TDMaterial tdMaterial = getById(materialId);
 
