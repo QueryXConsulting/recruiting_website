@@ -52,7 +52,7 @@ public class DeliverServiceImpl implements DeliverService {
         // 装配数据
         final TDJobResume tdJobResume = new TDJobResume();
         tdJobResume.setJobResumeId(deliverResumeDTO.getJobResumeId());
-        if (deliverResumeDTO.getJobResumeId() == null || "7".equals(deliverResumeDTO.getResumeStatus())) {
+        if (deliverResumeDTO.getJobResumeId() == null || !Common.DELIVER_RESUME_STATUS_REVOKE.equals(deliverResumeDTO.getResumeStatus())) {
             // 新增记录
             tdJobResume.setJobId(deliverResumeDTO.getJobId());
             tdJobResume.setResumeId(deliverResumeDTO.getResumeId());
@@ -60,15 +60,14 @@ public class DeliverServiceImpl implements DeliverService {
             tdJobResume.setResumeName(user.getUserName());
             tdJobResume.setUserId(user.getUserId());
             tdJobResume.setDeliverDate(new Date());
+            tdJobResume.setResumeDelete("1");// 等于0表示不合适
         }
         tdJobResume.setResumeStatus(deliverResumeDTO.getResumeStatus());
+        if (Common.DELIVER_RESUME_STATUS_REVOKE.equals(deliverResumeDTO.getResumeStatus())) {
+            tdJobResume.setResumeDelete(Common.DELIVER_RESUME_DELETE_SQUARE_PEG);
+        }
         // 数据入库
-//        LambdaUpdateWrapper<TDJobResume> updateWrapper = new LambdaUpdateWrapper<>();
-//        updateWrapper
         boolean result = jobResumeMapper.insertOrUpdate(tdJobResume);
-//        final MybatisBatch<TDJobResume> batch = new MybatisBatch<>(sqlSessionFactory, List.of(tdJobResume));
-//        final MybatisBatch.Method<TDJobResume> method = new MybatisBatch.Method<>(TDJobResumeMapper.class);
-//        int resultCount = batch.execute(method.insert()).size();
         user.setUserInterviews(user.getUserInterviews() + 1);
         userMapper.updateById(user);
         return result;

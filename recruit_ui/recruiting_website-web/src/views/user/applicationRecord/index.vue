@@ -44,43 +44,106 @@ const useTabStore = defineStore('tab', {
     state: () => {
         return {
             tabIndex: '0',
+            tabName: '投递记录'
         }
     },
     actions: {
         setTabIndex(index) {
             this.tabIndex = index;
         },
+        setTabName(name) {
+            this.tabName = name;
+        }
     },
     getters: {
         getTabIndex() {
             return this.tabIndex;
         },
+        getTabName() {
+            return this.tabName;
+        }
     },
     persist: {
         key: 'tab',
         storage: sessionStorage,
-        paths: ['tabIndex'],
+        paths: ['tabIndex', 'tabName'],
     },
 });
 
 const activeName = useTabStore().getTabIndex; // tab 切换
+const activeLabel = ref(useTabStore().getTabName); // tab 名称
+// 投递流程对象
+const tabPanes = [
+    {
+        index: '0',
+        label: '投递记录',
+    },
+    {
+        index: '1',
+        label: '预约面试',
+    },
+    {
+        index: '2',
+        label: '确认offer',
+    },
+    {
+        index: '3',
+        label: '上传材料',
+    },
+    // {
+    //     index: '4',
+    //     label: '信息录入',
+    // },
+    {
+        index: '5',
+        label: '预约报到',
+    },
+];
 
-const clickTab = (pane, e) => {
-    useTabStore().setTabIndex(pane.index);
+// 节流函数
+function simpleThrottle(func, wait) {
+    let timeout = null;
+    return function (...args) {
+        if (!timeout) {
+            func.apply(this, args);
+            timeout = setTimeout(() => {
+                timeout = null;
+            }, wait);
+        }
+    };
 }
 
+const clickTab = (pane, e) => {
+    // if (beforeLeave(pane.index)) {
+    // }
+}
+
+const setActiveName = async (index, status) => {
+    const res = await materialStatus();
+    if (res.content === status) {
+        ElMessage.error('未到该环节，无法使用该功能，请返回！');
+        return false;
+    }
+    const name = tabPanes[index].label;
+    activeLabel.value = name;
+    useTabStore().setTabName(name);
+    useTabStore().setTabIndex(index);
+    return true;
+}
 
 const beforeLeave = async (to, from) => {
     switch (to) {
-        case 5:
-            const res1 = await materialStatus();
-            if (res1 !== 1) return false;
-            break;
-        case 6:
-            const res2 = await materialStatus();
-            if (res2 !== 0) return false;
-            break;
+        case '3':
+            return setActiveName(+to, -1);
+        case '5':
+            return setActiveName(+to, 1);
+        case '6':
+            return setActiveName(+to, 0);
     }
+    const name = tabPanes[+to].label;
+    activeLabel.value = name;
+    useTabStore().setTabName(name);
+    useTabStore().setTabIndex(+to);
     return true;
 }
 </script>
@@ -146,30 +209,47 @@ const beforeLeave = async (to, from) => {
             </nav>
         </div>
 
-        <el-tabs v-model="activeName" @tab-click="clickTab" :before-leave="beforeLeave" type="border-card">
-            <el-tab-pane name="0" label="投递记录" lazy>
-                <ApplicationRecord></ApplicationRecord>
-            </el-tab-pane>
-            <el-tab-pane name="1" label="预约面试" lazy>
-                <AppointmentInterview></AppointmentInterview>
-            </el-tab-pane>
-            <el-tab-pane name="2" label="确认offer" lazy>
-                <ConfirmOffer></ConfirmOffer>
-            </el-tab-pane>
-            <el-tab-pane name="3" label="上传材料" lazy>
-                <UploadMaterials></UploadMaterials>
-            </el-tab-pane>
-            <!-- <el-tab-pane name="4" label="信息录入" lazy>
+        <div class="tabs-container">
+            <h1>{{ activeLabel }}查看</h1>
+            <el-tabs v-model="activeName" @tab-click="clickTab" :before-leave="beforeLeave">
+                <el-tab-pane name="0" label="投递记录" lazy>
+                    <ApplicationRecord></ApplicationRecord>
+                </el-tab-pane>
+                <el-tab-pane name="1" label="预约面试" lazy>
+                    <AppointmentInterview></AppointmentInterview>
+                </el-tab-pane>
+                <el-tab-pane name="2" label="确认offer" lazy>
+                    <ConfirmOffer></ConfirmOffer>
+                </el-tab-pane>
+                <el-tab-pane name="3" label="上传材料" lazy>
+                    <UploadMaterials></UploadMaterials>
+                </el-tab-pane>
+                <!-- <el-tab-pane name="4" label="信息录入" lazy>
                 <InformationInput></InformationInput>
             </el-tab-pane> -->
-            <el-tab-pane name="5" label="预约报到" lazy>
-                <AppointmentRegistration></AppointmentRegistration>
-            </el-tab-pane>
-        </el-tabs>
+                <el-tab-pane name="5" label="预约报到" lazy>
+                    <AppointmentRegistration></AppointmentRegistration>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
+h1,
+h2,
+h3 {
+    font: none;
+    padding: 30px 0 10px 0;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.tabs-container {
+    padding: 15px;
+    background-color: #fff;
+}
+
 /* 头部导航栏 */
 .nav-bar {
     display: flex;

@@ -24,6 +24,7 @@ public interface MaterialsService {
      * @return 结果
      */
     CommonResp<Boolean> insertMaterials(Map<String, MultipartFile> file);
+//    CommonResp<Boolean> insertMaterials(Map<String, List<MultipartFile>> file);
 
 
     /**

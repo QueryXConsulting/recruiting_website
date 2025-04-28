@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import WBTable from '@/components/table/WBTable.vue';
 import WBDialog from '@/components/WBDialog.vue';
 import WBForm from '@/components/WBForm.vue';
-import { deliverList } from '@/api/user/UserApi';
+import { deliverList, resumeDeliver } from '@/api/user/UserApi';
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1);// 当前页
@@ -73,7 +73,7 @@ const statusOptions = [
     { status: null, value: '4', label: '上传材料' },
     { status: null, value: '5', label: '录入信息' },
     { status: null, value: '6', label: '预约报道' },
-    { status: null, value: '7', label: '用户已撤销简历' }
+    // { status: null, value: '7', label: '用户已撤销简历' }
 ]
 
 // 面试类型选项
@@ -101,6 +101,18 @@ const isShowDialog = ref(false);// 详情弹窗是否显示
 
 // }
 
+const revokeDeliver = async (row) => {
+    console.log(row);
+    const dto = {
+        jobResumeId: row.jobResumeId,
+        resumeStatus: 7
+    }
+    await resumeDeliver(dto).then((res) => {
+        ElMessage.success(res.message);
+    });
+    // 刷新页面
+    window.location.reload();
+}
 
 // 一页条数变化时触发
 const handleSizeChange = (size) => {
@@ -114,24 +126,49 @@ const handleCurrentChange = (page) => {
 
 <template>
     <div>
+        <el-table :data="tableData" border style="width: 100%">
+            <el-table-column prop="companyInfoName" label="公司名" />
+            <el-table-column prop="deliverDate" label="投递日期" />
+            <el-table-column prop="jobPosition" label="面试岗位" />
+            <el-table-column prop="" label="流程" width="610px">
+                <template #default="scope">
+                    <el-steps :process-status="scope.row.resumeDelete === '0' ? 'error' : 'finish'"
+                        style="max-width: 600px" :active="+scope.row.resumeStatus === 7 ? 0 : +scope.row.resumeStatus"
+                        finish-status="success" align-center>
+                        <el-step class="step-item" v-for="(item, index) in statusOptions" :description="item.label"
+                            :key="index">
+                        </el-step>
+                    </el-steps>
+                </template>
+            </el-table-column>
+            <el-table-column prop="operation" label="操作" width="115px">
+                <template #default="scope">
+                    <el-button v-if="scope.row.resumeDelete !== '0'" type="warning"
+                        @click="revokeDeliver(scope.row)">撤销投递</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <div class="table-footer">
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
+                :background="true" :total="total" @update:page-size="handleSizeChange"
+                @update:current-page="handleCurrentChange" :layout="'total, sizes, prev, pager, next, jumper'" />
+        </div>
         <!--  @row-click="handleClick" -->
-        <WBTable :total="total" @update:currentPage="handleCurrentChange"
-            @update:page-size="handleSizeChange" :table-columns="tableColumns" v-model:tableData="tableData"
-            v-model:currentPage="currentPage" operation-width="620px" v-model:pageSize="pageSize" border>
+        <!-- <WBTable :total="total" @update:currentPage="handleCurrentChange" @update:page-size="handleSizeChange"
+            :table-columns="tableColumns" v-model:tableData="tableData" v-model:currentPage="currentPage"
+            operation-width="620px" v-model:pageSize="pageSize" border>
             <template #default="scope">
                 <span>{{ tableData[scope.$index][scope.prop] }}</span>
             </template>
-            <!-- 表格右侧操作栏 -->
             <template #operation="scope">
-                <el-steps :process-status="scope.row.resumeDelete === '0' || scope.row.resumeStatus === '7' ? 'error' : 'success'" style="max-width: 600px"
+                <el-steps :process-status="scope.row.resumeDelete === '0' ? 'error' : 'success'" style="max-width: 600px"
                     :active="+scope.row.resumeStatus" finish-status="success" align-center>
-                    <el-step class="step-item" v-for="(item, index) in statusOptions" :description="
-                        scope.row.resumeStatus === '7' && index === 0 ? '用户已撤销简历' : item.label
-                    " :key="index" :status="scope.row.resumeStatus === '7' && index === 0 ? 'error' : ''">
+                    <el-step class="step-item" v-for="(item, index) in statusOptions" :description="item.label"
+                        :key="index">
                     </el-step>
                 </el-steps>
             </template>
-        </WBTable>
+        </WBTable> -->
 
         <!-- 面试时间选择窗口 -->
         <WBDialog v-model="isShowDialog" @submit="isShowDialog = false" @cancel="isShowDialog = false" title="详情信息"
@@ -154,6 +191,12 @@ const handleCurrentChange = (page) => {
 
 <style lang="scss" scoped>
 .form-detail {
+    display: flex;
+    justify-content: center;
+}
+
+.table-footer {
+    margin-top: 5vh;
     display: flex;
     justify-content: center;
 }
