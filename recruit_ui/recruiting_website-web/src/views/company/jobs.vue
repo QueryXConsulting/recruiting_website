@@ -168,6 +168,7 @@
                 <el-option label="本科" value="本科"></el-option>
                 <el-option label="硕士" value="硕士"></el-option>
                 <el-option label="博士" value="博士"></el-option>
+                <el-option label="不限" value="不限"></el-option>
               </el-select>
             </el-form-item>
           </el-col>

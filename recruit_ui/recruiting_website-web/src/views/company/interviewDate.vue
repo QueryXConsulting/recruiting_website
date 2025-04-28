@@ -1,7 +1,12 @@
 <template>
   <div class="interview-scheduler">
     <div class="scheduler-header">
-      <h2>面试时间安排</h2>
+      <div class="header-row">
+        <el-button @click="goBack" circle class="back-button">
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <h2>面试时间安排</h2>
+      </div>
       <div class="scheduler-tips">
         <el-alert title="温馨提示" type="info" :closable="false" description="请选择可用于面试的时间段，求职者将在这些时间段内选择合适的面试时间。一天可选择多个时间段" />
       </div>
@@ -101,9 +106,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Delete } from '@element-plus/icons-vue';
+import { Delete, ArrowLeft } from '@element-plus/icons-vue';
 import { addInterviewDate, selectInterviewDate, deleteInterviewDateById } from '@/api/company/companyApi';
 import userStore from '@/store/user';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const goBack = () => {
+  router.go(-1);
+};
 
 const currentDate = ref(new Date());
 const timeDialogVisible = ref(false);
@@ -206,8 +217,6 @@ const confirmTimeSelection = () => {
     timeSlots.value[dateStr] = [];
   }
 
-
-
   const interviewData = {
     companyId: userStore().userInfo.companyInfoId,
     interviewDateStart: start,
@@ -222,13 +231,11 @@ const confirmTimeSelection = () => {
     ElMessage.error('设置面试时间段失败');
   });
 
-
   timeDialogVisible.value = false;
   activeCollapse.value = [dateStr];
 };
 
 const removeTimeSlot = (interviewDateId, date, index) => {
-
   deleteInterviewDateById(interviewDateId).then(() => {
     timeSlots.value[date].splice(index, 1);
     if (timeSlots.value[date].length === 0) {
@@ -474,5 +481,33 @@ const isCurrentMonth = (date) => {
 :deep(.el-tag) {
   border-radius: 6px;
   padding: 0 10px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.header-row h2 {
+  margin-bottom: 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dcdfe6;
+  background-color: #fff;
+  transition: all 0.3s;
+  width: 36px;
+  height: 36px;
+}
+
+.back-button:hover {
+  background-color: #ecf5ff;
+  border-color: #c6e2ff;
+  color: #409EFF;
 }
 </style>

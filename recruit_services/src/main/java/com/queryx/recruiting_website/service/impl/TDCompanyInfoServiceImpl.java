@@ -7,12 +7,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDCompanyInfo;
+import com.queryx.recruiting_website.domain.TDInterviewDate;
+import com.queryx.recruiting_website.domain.TDMaterial;
 import com.queryx.recruiting_website.domain.TDUser;
 import com.queryx.recruiting_website.domain.dto.RegisterCompanyDto;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoDto;
 import com.queryx.recruiting_website.domain.vo.CompanyInfoVO;
+import com.queryx.recruiting_website.domain.vo.MaterialDetailStatusVO;
+import com.queryx.recruiting_website.domain.vo.MaterialDetailVO;
 import com.queryx.recruiting_website.exception.SystemException;
+import com.queryx.recruiting_website.mapper.MaterialMapper;
 import com.queryx.recruiting_website.mapper.TDCompanyInfoMapper;
+import com.queryx.recruiting_website.mapper.TDInterviewDateMapper;
 import com.queryx.recruiting_website.mapper.TDUserMapper;
 import com.queryx.recruiting_website.service.TDCompanyInfoService;
 import com.queryx.recruiting_website.utils.SecurityUtils;
@@ -39,7 +45,10 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
     private PasswordEncoder passwordEncoder;
     @Resource
     private TDUserMapper userMapper;
-
+    @Resource
+    private TDInterviewDateMapper tdInterviewDateMapper;
+    @Resource
+    private MaterialMapper materialMapper;
 
     @Override
     public CompanyInfoDto selectCompanyInfo(Long companyId) {
@@ -90,11 +99,8 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
             throw new RuntimeException(ex);
         }
 
-
         update(tdCompanyInfo, updateWrapper);
-
         return null;
-
 
     }
 
@@ -275,4 +281,45 @@ public class TDCompanyInfoServiceImpl extends ServiceImpl<TDCompanyInfoMapper, T
         userMapper.insert(tdUser);
         return null;
     }
+
+    @Override
+    public Object checkInterviewTime() {
+        Long companyInfoId = SecurityUtils.getLoginUser().getTdUser().getCompanyInfoId();
+        return tdInterviewDateMapper.exists(new LambdaUpdateWrapper<TDInterviewDate>()
+                .eq(TDInterviewDate::getCompanyId, companyInfoId).eq(TDInterviewDate::getIsDeleted, Common.NOT_DELETE));
+    }
+
+    @Override
+    public Object updateStuffs(Long materialId, Integer code, String status) {
+        LambdaUpdateWrapper<TDMaterial> materialLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        materialLambdaUpdateWrapper.eq(TDMaterial::getMaterialId, materialId);
+        if (code == 1) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getIdentityCardStatus, status);
+        } else if (code == 2) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getPhysicalExaminationStatus, status);
+        } else if (code == 3) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getDiplomaStatus, status);
+        } else if (code == 4) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getIdentificationPhotoStatus, status);
+        } else if (code == 5) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getBankCardStatus, status);
+        } else if (code == 6) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getQualificationCertificateStatus, status);
+        } else if (code == 7) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getResignCertificateStatus, status);
+        } else if (code == 8) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getSignatureStatus, status);
+        } else if (code == 9) {
+            materialLambdaUpdateWrapper.set(TDMaterial::getOtherStatus, status);
+        }
+        if (materialMapper.update(materialLambdaUpdateWrapper) < 0) {
+            throw new SystemException(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+        TDMaterial material = materialMapper.selectById(materialId);
+        MaterialDetailStatusVO materialDetailVO = new MaterialDetailStatusVO();
+        BeanUtils.copyProperties(material,materialDetailVO);
+        return materialDetailVO;
+    }
+
+
 }

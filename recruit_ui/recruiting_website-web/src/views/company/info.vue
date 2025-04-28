@@ -261,7 +261,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { companyInfo as getCompanyInfoApi, companyInfoUpdate } from '@/api/company/companyApi'
+import { companyInfo as getCompanyInfoApi, companyInfoUpdate, companyInfoEnterpriseFiles } from '@/api/company/companyApi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userStore from '@/store/user'
 import { Document, UploadFilled, Plus, Delete, InfoFilled, Check, Warning } from '@element-plus/icons-vue'
@@ -292,7 +292,7 @@ const logoFile = ref(null)
 
 // 裁剪相关变量
 const uploadDialog = ref(false)
-const uploadTips = ref('支持 jpg/png 格式，大小不超过2MB')
+const uploadTips = ref('支持 jpg/png/jpeg 格式，大小不超过2MB')
 const cropperImage = ref('')
 const cropperRef = ref(null)
 const fileRef = ref(null)
@@ -352,7 +352,7 @@ const getCompanyInfo = async () => {
       companyData.value.companyInfoPassword = null
       userStore().userInfo.companyInfoReview = res.content.companyInfoReview
       userStore().userInfo.enterpriseReview = res.content.enterpriseReview
-      if (companyData.value.companyInfoReview == 0 && companyData.value.enterpriseReview == 0) {
+      if (companyData.value.companyInfoReview == null && companyData.value.enterpriseReview == null) {
         ElMessage.warning('请先完善企业信息并提交资质文件，以便我们能够审核您的企业资质。')
       }
       // 保存原始数据
@@ -818,8 +818,7 @@ const saveTempForm = () => {
     return
   }
 
-  // 保存Logo图片
-  let logoBlob = null
+
   let logoUrl = null
 
   const saveData = async () => {
@@ -886,8 +885,8 @@ const handleViewEnterpriseFiles = async () => {
       }
     }
 
-    // 使用API获取企业资质文件
-    const response = await companyEnterpriseFiles(companyData.value.companyInfoId)
+
+    const response = await companyInfoEnterpriseFiles(companyData.value.companyInfoId)
 
     if (response && response.content && Object.keys(response.content).length > 0) {
       enterpriseFiles.value = Object.entries(response.content).map(([name, content]) => {

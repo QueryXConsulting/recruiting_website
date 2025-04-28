@@ -231,12 +231,12 @@ public class UserCompanyController {
     }
 
 
-    @PostMapping("/uploadWithThumbnail")
+    @PostMapping("/uploadOffer")
     @Operation(summary = "上传模板接口")
-    public CommonResp uploadWithThumbnail(
+    public CommonResp uploadOffer(
             @RequestParam("file") MultipartFile pdfFile,
-            @RequestParam("offerId") String offerId) throws IOException {
-        return CommonResp.success(conversionService.convertPdfToImage(pdfFile, offerId));
+            @RequestParam("offerId") String offerId)  {
+        return CommonResp.success(conversionService.uploadOffer(pdfFile, offerId));
     }
 
     @PutMapping("/updateOfferStatus/{offerId}/{status}/{jobId}")
@@ -253,8 +253,8 @@ public class UserCompanyController {
 
     @GetMapping("selectMaterialDetail")
     @Operation(summary = "查询材料")
-    public CommonResp selectMaterialDetail(Long materialId) {
-        return CommonResp.success(materialService.selectMaterialDetail(materialId));
+    public CommonResp selectMaterialDetail(Long materialId,Long offerId) {
+        return CommonResp.success(materialService.selectMaterialDetail(materialId,offerId));
     }
 
     @PutMapping("updateMaterialStatus")
@@ -279,6 +279,25 @@ public class UserCompanyController {
     @Operation(summary = "pdf填充下载")
     public CommonResp downloadPdf(Long id) throws IOException {
         return CommonResp.success(registrationService.downloadPdf(id));
+    }
+
+    @GetMapping ("/enterpriseFiles/{companyInfoId}")
+    @Operation(summary = "企业资质文件查看")
+    public CommonResp getEnterpriseFiles(@PathVariable(value = "companyInfoId") Long companyInfoId) throws IOException {
+        Map<String, byte[]> files = tdCompanyInfoService.getEnterpriseFiles(companyInfoId);
+        return CommonResp.success(files);
+    }
+
+    @GetMapping ("/checkInterviewTime")
+    @Operation(summary = "检查面试时间是否设置")
+    public CommonResp checkInterviewTime() {
+        return CommonResp.success(tdCompanyInfoService.checkInterviewTime());
+    }
+
+    @GetMapping ("/updateStuffs")
+    @Operation(summary = "材料检查状态修改")
+    public CommonResp updateStuffs(Long materialId,Integer code,String status) {
+        return CommonResp.success(tdCompanyInfoService.updateStuffs(materialId,code,status));
     }
 
 }

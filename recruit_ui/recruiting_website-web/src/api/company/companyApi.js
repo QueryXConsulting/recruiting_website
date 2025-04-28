@@ -34,13 +34,30 @@ const API = {
   COMPANY_UPDATE_MATERIAL_STATUS: '/api/company/updateMaterialStatus',
   COMPANY_SELECT_REGISTRATION: '/api/company/selectRegistration',
   COMPANY_UPDATE_REGISTRATION_STATUS: '/api/company/updateRegistrationStatus',
-  COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/uploadWithThumbnail',
+  COMPANY_UPLOAD_WITH_THUMBNAIL: '/api/company/uploadOffer',
   COMPANY_DOWNLOAD_PDF: '/api/company/downloadPdf',
   COMPANY_LAST_MESSAGE: '/api/company/lastMessage',
   COMPANY_GET_MESSAGE_DATA: '/api/company/getMessageData',
   COMPANY_POST_MESSAGE: '/api/company/sendMessage',
-
+  COMPANY_ENTERPRISEFILES: '/api/company/enterpriseFiles',
+  COMPANY_CHECK_INTERVIEW_DATE: '/api/company/checkInterviewTime',
+  COMPANY_STUFFS_STATUS: '/api/company/updateStuffs'
 }
+
+export const updateStuffs = (materialId, code, status) => request.get(API.COMPANY_STUFFS_STATUS, {
+  params: { materialId, code, status }
+})
+
+export const companyInfoEnterpriseFiles = (companyInfoId) =>
+  request({
+    url: `${API.COMPANY_ENTERPRISEFILES}/${companyInfoId}`,
+    method: 'get',
+    responseType: 'json',
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+
 
 export const companyInfo = (companyId) => request.get(`${API.COMPANY_INFO}/${companyId}`)
 
@@ -173,9 +190,9 @@ export const selectMaterial = (page, size,jobId) =>
     params: { page, size,jobId }
   })
 
-export const selectMaterialDetail = (materialId) =>
+export const selectMaterialDetail = (materialId,offerId) =>
   request.get(API.COMPANY_SELECT_MATERIAL_DETAIL, {
-    params: { materialId }
+    params: { materialId,offerId}
   })
 
 export const updateMaterialStatus = (materialId, status) =>
@@ -214,3 +231,6 @@ export function getMessageData(params) {
 }
 
 export const postMessage = (data) => request.post(API.COMPANY_POST_MESSAGE, data)
+
+export const checkInterviewDate = () =>
+  request.get(API.COMPANY_CHECK_INTERVIEW_DATE)
