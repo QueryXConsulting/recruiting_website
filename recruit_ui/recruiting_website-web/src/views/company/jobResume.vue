@@ -66,11 +66,13 @@
                         <div v-for="(status, index) in statusList" :key="status.value" class="timeline-item" :class="{
                           'active': Number(scope.row.resumeStatus) >= Number(status.value) || scope.row.resumeStatus === '7',
                           'current': scope.row.resumeStatus === status.value || (scope.row.resumeStatus === '7' && status.value === '1'),
-                          'deleted': scope.row.resumeDelete === '0' && Number(scope.row.resumeStatus) >= Number(status.value)
+                          'deleted': scope.row.resumeDelete === '0',
+                          'interview-accepted': scope.row.interviewStatus === '1'
                         }">
                           <div class="timeline-line"></div>
                           <div class="timeline-dot"></div>
-                          <div class="timeline-text">{{ scope.row.resumeStatus === '7' && status.value === '1' ? '用户已撤销' : status.label }}</div>
+                          <div class="timeline-text">{{ scope.row.resumeStatus === '7' && status.value === '1' ? '用户已撤销'
+                            : status.label }}</div>
                         </div>
                       </div>
                     </template>
@@ -78,7 +80,8 @@
                   <el-table-column label="操作" width="200" fixed="right" align="center">
                     <template #default="scope">
                       <div class="action-buttons">
-                        <el-button type="primary" link @click="viewResume(scope.row)" v-if="scope.row.resumeStatus !== '7'">
+                        <el-button type="primary" link @click="viewResume(scope.row)"
+                          v-if="scope.row.resumeStatus !== '7'">
                           查看
                         </el-button>
                         <template v-if="scope.row.resumeStatus === '1' && scope.row.resumeDelete !== '0'">
@@ -94,8 +97,7 @@
                             笔试邀约
                           </el-button>
                         </template>
-                        <el-button type="danger" link @click="handleUnsuitable(scope.row)"
-                          v-if="scope.row.resumeDelete !== '0' && scope.row.resumeStatus !== '0' && scope.row.resumeStatus !== '1'
+                        <el-button type="danger" link @click="handleUnsuitable(scope.row)" v-if="scope.row.resumeDelete !== '0' && scope.row.resumeStatus !== '0' && scope.row.resumeStatus !== '1'
                           && scope.row.resumeStatus !== '6' && scope.row.resumeStatus !== '7'">
                           不合适
                         </el-button>
@@ -125,7 +127,7 @@
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="结果" prop="interviewResult" width="120" align="center">
+                <el-table-column label="结果" prop="interviewResult" width="110" align="center">
                   <template #default="scope">
                     <el-tag
                       :type="scope.row.interviewResult == '1' ? 'success' : (scope.row.interviewResult == '2' ? 'danger' : 'info')">
@@ -133,7 +135,7 @@
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="状态" prop="interviewStatus" width="140" align="center">
+                <el-table-column label="状态" prop="interviewStatus" width="120" align="center">
                   <template #default="scope">
                     <el-tag
                       :type="scope.row.interviewStatus == '1' ? 'success' : (scope.row.interviewStatus == '0' ? 'danger' : (scope.row.interviewStatus == '3' ? 'warning' : 'info'))">
@@ -147,16 +149,19 @@
                     {{ scope.row.interviewTime }} 分钟
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="180" fixed="right" align="center">
+                <el-table-column label="操作" width="190" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
                       <el-button type="primary" link @click="editInterview(scope.row)"
-                        v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == '0'">
+                        v-if="(scope.row.interviewStatus == '1' || scope.row.interviewStatus == '2') && scope.row.interviewResult == 0">
                         修改
                       </el-button>
-
+                      <el-button type="success" link @click="setInterviewResult(scope.row)"
+                        v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == 0">
+                        面试结果
+                      </el-button>
                       <el-button type="danger" link @click="viewInterview(scope.row)"
-                        v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == '0'">
+                        v-if="(scope.row.interviewStatus == '1' || scope.row.interviewStatus == '2') && scope.row.interviewResult == 0">
                         取消
                       </el-button>
                     </div>
@@ -171,7 +176,7 @@
             </div>
           </el-tab-pane>
           <el-tab-pane label="offer发放" name="offer">
-            <el-alert title="提示: offer发送后，应聘者进行签字确认，方可生效。然后等待材料发送进行审核" type="info" :closable="false" show-icon
+            <el-alert title="提示: offer发送后，等待对方发送材料进行审核" type="info" :closable="false" show-icon
               style="margin-bottom: 15px;" />
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="offersList" border stripe class="custom-table" row-key="offerId">
@@ -258,7 +263,7 @@
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="信息录入" name="info">
+          <el-tab-pane label="信息录入" name="info" v-if="false">
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="registrationList" border stripe class="custom-table" row-key="id">
                 <el-table-column label="序号" type="index" width="60" align="center" />
@@ -404,13 +409,13 @@
               <el-option label="线下" :value="1" />
             </el-select>
           </el-form-item>
-          <el-form-item label="结果" prop="interviewResult">
+          <!-- <el-form-item label="结果" prop="interviewResult">
             <el-select v-model="editInterviewData.interviewResult" placeholder="请选择结果">
               <el-option label="待定" value="0" />
               <el-option label="通过" value="1" />
               <el-option label="未通过" value="2" />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="时长" prop="interviewTime">
             <el-select v-model="editInterviewData.interviewTime" placeholder="请选择时长">
               <el-option label="30分钟" :value="30" />
@@ -426,126 +431,10 @@
         </template>
       </el-dialog>
 
-      <!-- 修改上传offer对话框 -->
-      <el-dialog v-model="uploadOfferDialogVisible" title="上传offer" width="30%">
-        <div class="upload-options">
-          <el-button type="primary" @click="selectTemplate">
-            <el-icon>
-              <Document />
-            </el-icon>
-            选择模板
-          </el-button>
-          <el-upload class="upload-pdf" :data="{ offerId: currentOfferId }" :show-file-list="false"
-            :before-upload="beforeUpload" :on-success="handleUploadSuccess" :on-error="handleUploadError" accept=".pdf">
-            <template #default>
-              <el-button type="primary">
-                <el-icon>
-                  <Upload />
-                </el-icon>
-                上传模板
-              </el-button>
-            </template>
-            <template #tip>
-              <div class="el-upload__tip">
-                请上传.pdf文件
-              </div>
-            </template>
-          </el-upload>
-        </div>
-      </el-dialog>
 
-
-
-      <el-dialog v-model="pdfEditDialogVisible" title="offer信息填写" :fullscreen="false" width="85%"
-        :destroy-on-close="true" :close-on-click-modal="false" class="offer-dialog"
-        :style="{ marginLeft: '14%', marginTop: '10vh' }">
-        <div class="offer-edit-container">
-          <div class="offer-form-section">
-            <el-form :model="offerForm" ref="offerFormRef" label-width="120px" size="large">
-              <el-form-item label="公司名称" prop="companyName">
-                <el-input v-model="offerForm.companyName" placeholder="请输入公司名称" />
-              </el-form-item>
-              <el-form-item label="求职者名称" prop="userName">
-                <el-input v-model="offerForm.userName" placeholder="请输入求职者名称" />
-              </el-form-item>
-              <el-form-item label="工作时间" prop="workTime">
-                <el-input v-model="offerForm.workTime" placeholder="请输入工作时间" />
-              </el-form-item>
-              <el-form-item label="职位" prop="position">
-                <el-input v-model="offerForm.position" placeholder="请输入职位" />
-              </el-form-item>
-              <el-form-item label="薪资" prop="salary">
-                <el-input v-model="offerForm.salary" placeholder="请输入薪资" />
-              </el-form-item>
-              <el-form-item label="福利待遇" prop="welfare">
-                <el-input v-model="offerForm.welfare" placeholder="请输入福利待遇" />
-              </el-form-item>
-              <el-form-item label="工作地点" prop="workLocation">
-                <el-input v-model="offerForm.workLocation" placeholder="请输入工作地点" />
-              </el-form-item>
-              <el-form-item label="报道材料" prop="material">
-                <el-input type="textarea" v-model="offerForm.material" placeholder="请输入报道材料" :rows="6" />
-              </el-form-item>
-            </el-form>
-          </div>
-          <div class="offer-preview-section">
-            <div class="preview-header">
-              <span>模板预览</span>
-            </div>
-            <div class="preview-content">
-              <iframe v-if="selectedTemplateUrl" :src="selectedTemplateUrl + '#toolbar=0&view=FitH'" width="100%"
-                height="100%" frameborder="0"></iframe>
-              <div v-else class="no-preview">
-                <el-icon>
-                  <Document />
-                </el-icon>
-                <span>暂无预览</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <template #footer>
-          <el-button @click="pdfEditDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitOffer">发送</el-button>
-        </template>
-      </el-dialog>
-
-      <!-- 添加模板选择对话框 -->
-      <el-dialog v-model="templateDialogVisible" title="选择模板" width="70%">
-        <div class="template-list">
-          <el-row :gutter="20">
-            <el-col v-for="template in templateList" :key="template.id" :span="6">
-              <div class="template-item" @click="handleTemplateSelect(template)"
-                :class="{ 'active': selectedTemplate === template.id }">
-                <div class="template-preview">
-                  <el-image :src="template.thumbnail" fit="cover" :preview-src-list="[template.preview]"
-                    :initial-index="0" :preview-teleported="true" :zoom-rate="1.2" :close-on-press-escape="true"
-                    preview-teleported>
-                    <template #error>
-                      <div class="image-placeholder">
-                        <el-icon>
-                          <Document />
-                        </el-icon>
-                      </div>
-                    </template>
-                  </el-image>
-                </div>
-                <div class="template-info">
-                  <div class="template-name">{{ template.name }}</div>
-                  <div class="template-desc">{{ template.description }}</div>
-                </div>
-              </div>
-            </el-col>
-          </el-row>
-        </div>
-        <template #footer>
-          <el-button @click="templateDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="(confirmTemplate)" :disabled="!selectedTemplate">确定</el-button>
-        </template>
-      </el-dialog>
 
       <!-- 添加签名预览对话框 -->
-      <el-dialog v-model="signatureDialogVisible" title="签名预览" width="30%" center>
+      <!-- <el-dialog v-model="signatureDialogVisible" title="签名预览" width="30%" center>
         <div class="signature-container">
           <el-image :src="currentSignature" fit="contain" style="width: 100%;">
             <template #error>
@@ -564,83 +453,230 @@
             <el-button type="danger" @click="handleSignatureReject">打回</el-button>
           </div>
         </template>
-      </el-dialog>
+      </el-dialog> -->
 
       <!-- 添加材料预览对话框 -->
-      <el-dialog v-model="materialDialogVisible" title="材料预览" width="70%" center>
+      <el-dialog v-model="materialDialogVisible" title="材料预览" width="80%" center :destroy-on-close="true"
+        class="material-preview-dialog" :style="{ marginLeft: '15%' }">
         <div class="material-container">
           <el-descriptions :column="2" border>
             <el-descriptions-item label="身份证">
+              <div class="review-buttons"
+                v-if="currentMaterial.identityCard && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.identityCardStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 1, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 1, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.identityCard" :src="currentMaterial.identityCard" fit="contain"
-                  :preview-src-list="[currentMaterial.identityCard]" />
-                <span v-else>未上传</span>
+                  :preview-src-list="[currentMaterial.identityCard]" :initial-index="0" :preview-teleported="true"
+                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.identityCardStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.identityCardStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="体检报告">
+              <div class="review-buttons"
+                v-if="currentMaterial.physicalExamination && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.physicalExaminationStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 2, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 2, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <template v-if="currentMaterial.physicalExamination">
-                  <el-button type="primary" link @click="openPdfFile(currentMaterial.physicalExamination)">
-                    查看PDF
+                  <el-button type="primary" link @click="openPdfFile(currentMaterial.physicalExamination)"
+                    class="pdf-button">
+                    <el-icon class="mr-5">
+                      <Document />
+                    </el-icon>查看PDF
                   </el-button>
                 </template>
-                <span v-else>未上传</span>
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.physicalExaminationStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.physicalExaminationStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="学历证书">
+              <div class="review-buttons"
+                v-if="currentMaterial.diploma && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.diplomaStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 3, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 3, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.diploma" :src="currentMaterial.diploma" fit="contain"
-                  :preview-src-list="[currentMaterial.diploma]" />
-                <span v-else>未上传</span>
+                  :preview-src-list="[currentMaterial.diploma]" :initial-index="0" :preview-teleported="true"
+                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.diplomaStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.diplomaStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="证件照">
+              <div class="review-buttons"
+                v-if="currentMaterial.identificationPhoto && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.identificationPhotoStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 4, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 4, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.identificationPhoto" :src="currentMaterial.identificationPhoto"
-                  fit="contain" :preview-src-list="[currentMaterial.identificationPhoto]" />
-                <span v-else>未上传</span>
+                  fit="contain" :preview-src-list="[currentMaterial.identificationPhoto]" :initial-index="0"
+                  :preview-teleported="true" :z-index="3100" class="material-image"
+                  style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.identificationPhotoStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.identificationPhotoStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="银行卡">
+              <div class="review-buttons"
+                v-if="currentMaterial.bankCard && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.bankCardStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 5, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 5, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.bankCard" :src="currentMaterial.bankCard" fit="contain"
-                  :preview-src-list="[currentMaterial.bankCard]" />
-                <span v-else>未上传</span>
+                  :preview-src-list="[currentMaterial.bankCard]" :initial-index="0" :preview-teleported="true"
+                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.bankCardStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.bankCardStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="资格证">
+              <div class="review-buttons"
+                v-if="currentMaterial.qualificationCertificate && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.qualificationCertificateStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 6, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 6, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.qualificationCertificate"
                   :src="currentMaterial.qualificationCertificate" fit="contain"
-                  :preview-src-list="[currentMaterial.qualificationCertificate]" />
-                <span v-else>未上传</span>
+                  :preview-src-list="[currentMaterial.qualificationCertificate]" :initial-index="0"
+                  :preview-teleported="true" :z-index="3100" class="material-image"
+                  style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.qualificationCertificateStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.qualificationCertificateStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
             <el-descriptions-item label="离职证明">
+              <div class="review-buttons"
+                v-if="currentMaterial.resignCertificate && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.resignCertificateStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 7, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 7, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
                 <el-image v-if="currentMaterial.resignCertificate" :src="currentMaterial.resignCertificate"
-                  fit="contain" :preview-src-list="[currentMaterial.resignCertificate]" />
-                <span v-else>未上传</span>
+                  fit="contain" :preview-src-list="[currentMaterial.resignCertificate]" :initial-index="0"
+                  :preview-teleported="true" :z-index="3100" class="material-image"
+                  style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.resignCertificateStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.resignCertificateStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
-            <el-descriptions-item label="其他材料">
+            <!-- 新增 offer签字 项 -->
+            <el-descriptions-item label="offer签字">
+              <div class="review-buttons"
+                v-if="currentMaterial.signaturePath && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.signatureStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 8, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 8, '2')">拒绝</el-button>
+              </div>
               <div class="preview-item">
-                <template v-if="currentMaterial.other && currentMaterial.other.length > 0">
-                  <el-carousel height="150px" :autoplay="false" indicator-position="none"
-                    v-if="currentMaterial.other.length > 1" class="material-carousel">
+                <el-image v-if="currentMaterial.signaturePath" :src="currentMaterial.signaturePath" fit="contain"
+                  :preview-src-list="[currentMaterial.signaturePath]" :initial-index="0" :preview-teleported="true"
+                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.signatureStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.signatureStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
+              </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="其他材料" :span="2">
+              <div class="review-buttons"
+                v-if="currentMaterial.other && currentMaterial.other.length > 0 && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.otherStatus == '3'">
+                <el-button type="success" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 9, '1')">通过</el-button>
+                <el-button type="danger" size="small"
+                  @click="reviewMaterial(currentMaterial.materialId, 9, '2')">拒绝</el-button>
+              </div>
+              <div class="preview-item other-materials">
+                <template
+                  v-if="currentMaterial.other && currentMaterial.other.length > 0 && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.otherStatus == '3'">
+                  <el-image v-if="currentMaterial.other.length === 1" :src="currentMaterial.other[0]" fit="contain"
+                    :preview-src-list="currentMaterial.other" :preview-teleported="true" class="material-image"
+                    style="width: 240px; height: 160px;" />
+                  <el-carousel v-else height="200px" :autoplay="false" indicator-position="outside"
+                    class="material-carousel">
                     <el-carousel-item v-for="(url, index) in currentMaterial.other" :key="index">
                       <el-image :src="url" fit="contain" :preview-src-list="currentMaterial.other"
-                        :initial-index="index" :preview-teleported="true" class="material-image" />
+                        :initial-index="index" :preview-teleported="true" :z-index="3100" class="material-image"
+                        style="width: 240px; height: 160px;" />
                     </el-carousel-item>
                   </el-carousel>
-                  <el-image v-else :src="currentMaterial.other[0]" fit="contain"
-                    :preview-src-list="currentMaterial.other" :preview-teleported="true" class="material-image" />
                 </template>
-                <span v-else>未上传</span>
+                <span v-else class="no-material">未上传</span>
+              </div>
+              <div v-if="currentMaterial.otherStatus === '1'" class="material-status">
+                <el-tag type="success">已通过</el-tag>
+              </div>
+              <div v-if="currentMaterial.otherStatus === '2'" class="material-status">
+                <el-tag type="danger">未通过</el-tag>
               </div>
             </el-descriptions-item>
           </el-descriptions>
         </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="materialDialogVisible = false">关闭</el-button>
+          </span>
+        </template>
       </el-dialog>
 
       <!-- 修改入职信息详情对话框 -->
@@ -718,6 +754,41 @@
           </span>
         </template>
       </el-dialog>
+
+      <!-- 上传offer对话框 -->
+      <el-dialog v-model="uploadOfferDialogVisible" title="上传offer" width="30%">
+        <div class="upload-container">
+          <div class="upload-area">
+            <input ref="fileInputRef" type="file" accept=".pdf" style="display: none;" @change="handleFileChange" />
+            <el-button type="primary" @click="triggerFileUpload" class="upload-button">
+              <el-icon>
+                <Upload />
+              </el-icon>
+              选择PDF文件
+            </el-button>
+            <div class="el-upload__tip">
+              请上传.pdf格式的offer文件
+            </div>
+          </div>
+        </div>
+      </el-dialog>
+
+      <!-- 面试结果设置对话框 -->
+      <el-dialog v-model="resultDialogVisible" title="设置面试结果" width="20%">
+        <el-form :model="resultInterviewData" label-width="80px">
+          <el-form-item label="结果" prop="interviewResult">
+            <el-select v-model="resultInterviewData.interviewResult" placeholder="请选择结果">
+              <el-option label="待定" value="0" />
+              <el-option label="通过" value="1" />
+              <el-option label="未通过" value="2" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <template v-slot:footer>
+          <el-button type="primary" @click="submitInterviewResult">保存</el-button>
+          <el-button @click="resultDialogVisible = false">取消</el-button>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -725,12 +796,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Calendar, Document, Upload, Picture } from '@element-plus/icons-vue'
+import { Calendar, Document, Upload } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf, postMessage, sendOffer } from '@/api/company/companyApi'
-
-
-
+import { companyResumeList, selectResume, updateResumeStatus, sendInvitationData, selectInterviewList, updateInterviewList, selectOffersList, selectOfferTemplate, updateOfferStatus, selectMaterial, selectMaterialDetail, updateMaterialStatus, selectRegistration, updateRegistrationStatus, uploadWithThumbnail, downloadRegistrationPdf, postMessage, sendOffer, checkInterviewDate, updateStuffs } from '@/api/company/companyApi'
 
 
 const currentOfferId = ref(null)
@@ -771,7 +839,7 @@ const statusList = [
   { label: '待面试', value: '2' },
   { label: 'offer确认', value: '3' },
   { label: '上传材料', value: '4' },
-  { label: '录入信息', value: '5' },
+  // { label: '录入信息', value: '5' },
   { label: '预约报道', value: '6' }
 ]
 
@@ -900,6 +968,30 @@ const getResumeList = async () => {
   }
 }
 
+const reviewMaterial = async (materialId, code, status) => {
+  try {
+    const res = await updateStuffs(materialId, code, status)
+    if (res.code === 200) {
+      ElMessage.success('审核材料修改成功')
+      // 只更新 status 相关字段，保留 currentMaterial 其他内容
+      Object.assign(currentMaterial.value, {
+        identityCardStatus: res.content.identityCardStatus,
+        physicalExaminationStatus: res.content.physicalExaminationStatus,
+        identificationPhotoStatus: res.content.identificationPhotoStatus,
+        diplomaStatus: res.content.diplomaStatus,
+        bankCardStatus: res.content.bankCardStatus,
+        qualificationCertificateStatus: res.content.qualificationCertificateStatus,
+        resignCertificateStatus: res.content.resignCertificateStatus,
+        otherStatus: res.content.otherStatus,
+        signatureStatus: res.content.signatureStatus
+      })
+    } else {
+      ElMessage.error('审核材料修改失败')
+    }
+  } catch (error) {
+    console.error('审核材料修改失败')
+  }
+}
 
 const getInterviewList = async () => {
   try {
@@ -1010,8 +1102,16 @@ const handleStatusChange = async (resumeStatus, row) => {
   }
 }
 
-const sendInvitation = (row, type) => {
+const sendInvitation = async (row) => {
+  let result = await checkInterviewDate()
 
+  if (!result.content) {
+    ElMessage.error('请设置面试时间')
+    router.push({
+      path: '/home/interviewTime'
+    })
+    return
+  }
   interviewData.value = {
     resumeId: row.resumeId,
     resumeType: row.resumeType,
@@ -1113,10 +1213,7 @@ const typeMapping = {
   '0': '线上',
   '1': '线下'
 };
-const resultMapping = {
-  '1': '通过',
-  '2': '未通过'
-};
+
 const submitEditInterview = async () => {
   try {
     const result = await updateInterviewList(editInterviewData.value);
@@ -1170,12 +1267,6 @@ const viewOffer = (row) => {
     currentOfferId.value = row.offerId
     currentUserId.value = row.userId
     uploadOfferDialogVisible.value = true
-  } else if (row.offersStatus === '1') {
-    currentOfferId.value = row.offerId
-    currentUserId.value = row.userId
-
-    currentSignature.value = row.signaturePath
-    signatureDialogVisible.value = true
   } else if (row.offersFilePath) {
     openPdfFile(row.offersFilePath)
   }
@@ -1218,93 +1309,38 @@ const cancelOffer = async (row) => {
 
 
 const templateDialogVisible = ref(false)
-const selectedTemplate = ref(null)
-const templateList = ref([])
-
-
-const handleTemplateSelect = (template) => {
-  selectedTemplate.value = template.id
-}
-
-
-const getTemplateList = async () => {
-  try {
-    const res = await selectOfferTemplate()
-    if (res.code === 200) {
-      templateList.value = res.content.map(template => ({
-        id: template.offerTemplatesId,
-        name: template.templateName,
-        fileUrl: template.templateFilePath,
-        thumbnail: template.templateImg,
-        preview: template.templateImg
-      }))
-    } else {
-      ElMessage.error(res.msg || '获取模板列表失败')
-    }
-  } catch (error) {
-    console.error('获取模板列表失败:', error)
-    ElMessage.error('获取模板列表失败')
-  }
-}
-
-const selectTemplate = () => {
-  getTemplateList()
-  uploadOfferDialogVisible.value = false
-  templateDialogVisible.value = true
-}
-
-
-const confirmTemplate = async () => {
-  const template = templateList.value.find(t => t.id === selectedTemplate.value)
-  if (!template) {
-    ElMessage.error('请选择模板')
-    return
-  }
-
-  templateDialogVisible.value = false
-  selectedTemplateUrl.value = template.fileUrl
-  pdfEditDialogVisible.value = true
-}
-
-
-
-
-
-
 const signatureDialogVisible = ref(false)
-const currentSignature = ref('')
 
 
-const handleSignatureConfirm = async () => {
-  try {
-    await handleOfferStatus(currentOfferId.value, "6", jobId, currentUserId.value)
-    signatureDialogVisible.value = false
-    ElMessage.success('已通过')
-    getOffersList()
-  } catch (error) {
-    ElMessage.error('操作失败')
-  }
-}
 
-const handleSignatureReject = async () => {
-  try {
+// 注释未使用的函数
+// const handleSignatureConfirm = async () => {
+//   try {
+//     await handleOfferStatus(currentOfferId.value, "6", jobId, currentUserId.value)
+//     signatureDialogVisible.value = false
+//     ElMessage.success('已通过')
+//     getOffersList()
+//   } catch (error) {
+//     ElMessage.error('操作失败')
+//   }
+// }
 
-    const result = await handleOfferStatus(currentOfferId.value, '5', jobId)
-
-
-    signatureDialogVisible.value = false
-    postMessage({
-      userId: currentUserId.value,
-      content: "您的签名有误,请重新签字 —此消息来自系统自动发送"
-    })
-    ElMessage.success('已打回')
-    getOffersList()
-
-
-  } catch (error) {
-    ElMessage.error('操作失败')
-  }
-}
+// const handleSignatureReject = async () => {
+//   try {
+//
+//     const result = await handleOfferStatus(currentOfferId.value, '5', jobId)
+//
+//
+//     signatureDialogVisible.value = false
+//
+//     ElMessage.success('已拒绝')
+//     getOffersList()
+//
+//
+//   } catch (error) {
+//     ElMessage.error('操作失败')
+//   }
+// }
 
 const materialList = ref([])
 const materialTotal = ref(0)
@@ -1352,6 +1388,7 @@ const getMaterialList = async () => {
 // 添加新的响应式变量
 const materialDialogVisible = ref(false)
 const currentMaterial = ref({
+  materialId: '',
   identityCard: '',
   physicalExamination: '',
   diploma: '',
@@ -1359,16 +1396,27 @@ const currentMaterial = ref({
   bankCard: '',
   qualificationCertificate: '',
   resignCertificate: '',
-  other: []
+  signaturePath: '',
+  other: [],
+  status: '',
+  identityCardStatus: '',
+  physicalExaminationStatus: '',
+  diplomaStatus: '',
+  identificationPhotoStatus: '',
+  bankCardStatus: '',
+  qualificationCertificateStatus: '',
+  resignCertificateStatus: '',
+  otherStatus: '',
+  signatureStatus: ''
 })
 
 // 修改查看材料方法
 const viewMaterial = async (row) => {
   try {
-    const res = await selectMaterialDetail(row.materialId)
+    const res = await selectMaterialDetail(row.materialId, row.offerId)
     if (res.code === 200) {
-      // 直接使用后端返回的数组
       currentMaterial.value = {
+        materialId: res.content.materialId,
         identityCard: res.content.identityCard,
         physicalExamination: res.content.physicalExamination,
         diploma: res.content.diploma,
@@ -1376,7 +1424,18 @@ const viewMaterial = async (row) => {
         bankCard: res.content.bankCard,
         qualificationCertificate: res.content.qualificationCertificate,
         resignCertificate: res.content.resignCertificate,
-        other: Array.isArray(res.content.other) ? res.content.other : []
+        signaturePath: res.content.signaturePath || '',
+        other: Array.isArray(res.content.other) ? res.content.other : [],
+        status: res.content.status,
+        identityCardStatus: res.content.identityCardStatus,
+        physicalExaminationStatus: res.content.physicalExaminationStatus,
+        diplomaStatus: res.content.diplomaStatus,
+        identificationPhotoStatus: res.content.identificationPhotoStatus,
+        bankCardStatus: res.content.bankCardStatus,
+        qualificationCertificateStatus: res.content.qualificationCertificateStatus,
+        resignCertificateStatus: res.content.resignCertificateStatus,
+        otherStatus: res.content.otherStatus,
+        signatureStatus: res.content.signatureStatus
       }
       materialDialogVisible.value = true
     } else {
@@ -1602,6 +1661,7 @@ onBeforeUnmount(() => {
   signatureDialogVisible.value = false
   materialDialogVisible.value = false
   registrationDialogVisible.value = false
+  resultDialogVisible.value = false
 })
 
 // 处理入职信息通过
@@ -1803,35 +1863,31 @@ const downloadRegistrationFile = async (row) => {
   }
 }
 
-// 添加新的响应式变量
-const offerForm = ref({
-  companyName: '',
-  userName: '',
-  workTime: '',
-  position: '',
-  salary: '',
-  welfare: '',
-  workLocation: '',
-  material: ''
-})
-const offerFormRef = ref(null)
+
 const selectedTemplateUrl = ref('')
 
-// 添加提交offer方法
-const submitOffer = async () => {
-  if (!offerFormRef.value) return
+
+// 添加文件输入引用
+const fileInputRef = ref(null)
+
+// 触发文件选择对话框
+const triggerFileUpload = () => {
+  fileInputRef.value.click()
+}
+
+// 处理文件选择变更
+const handleFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
 
   try {
-    await offerFormRef.value.validate()
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('offerId', currentOfferId.value)
 
+    const result = await uploadWithThumbnail(formData)
 
-    const offerData = {
-      ...offerForm.value,
-      offerId: currentOfferId.value,
-      templatePath: selectedTemplateUrl.value
-    }
-    let resule = await sendOffer(offerData)
-    if (resule.code === 200) {
+    if (result.code === 200) {
       // 发送消息
       postMessage({
         userId: currentUserId.value,
@@ -1841,32 +1897,67 @@ const submitOffer = async () => {
       // 更新offer状态
       handleOfferStatus(currentOfferId.value, '4', jobId)
       ElMessage.success('offer发送成功')
+      ElMessage.success('上传成功')
       getOffersList()
+      uploadOfferDialogVisible.value = false
+    } else {
+      ElMessage.error(result.msg || '上传失败')
     }
-    pdfEditDialogVisible.value = false
   } catch (error) {
-    console.error('提交offer失败:', error)
-    ElMessage.error('提交失败，请检查表单')
+    console.error('上传失败:', error)
+    ElMessage.error('上传失败')
+  } finally {
+    event.target.value = ''
   }
 }
 
-const handleUploadError = (error) => {
-  console.error('上传失败:', error)
-  ElMessage.error('文件上传失败')
+// ... existing code ...
+
+const resultInterviewData = ref({
+  interviewResult: ''
+})
+
+const resultDialogVisible = ref(false)
+
+const setInterviewResult = (row) => {
+  // 保存当前面试记录到editInterviewData用于提交
+  editInterviewData.value = {
+    interviewId: row.interviewId,
+    interviewDate: row.interviewDate,
+    interviewRegion: row.interviewRegion,
+    interviewType: row.interviewType,
+    interviewTime: row.interviewTime,
+    interviewStatus: row.interviewStatus,
+    jobResumeId: row.jobResumeId,
+    userId: row.userId,
+    jobId: row.jobId
+  }
+
+  // 初始化面试结果数据
+  resultInterviewData.value.interviewResult = row.interviewResult || '0'
+
+  // 打开对话框
+  resultDialogVisible.value = true
 }
 
-const handleUploadSuccess = (response) => {
-  if (response.code === 200) {
-    ElMessage.success('文件上传成功')
-    getOffersList()
-    uploadOfferDialogVisible.value = false
-  } else {
-    ElMessage.error(response.msg || '上传失败')
+const submitInterviewResult = async () => {
+  try {
+    const result = await updateInterviewList({
+      ...editInterviewData.value,
+      interviewResult: resultInterviewData.value.interviewResult
+    })
+    if (result.code === 200) {
+      ElMessage.success('面试结果设置成功')
+      resultDialogVisible.value = false
+      getInterviewList()
+    } else {
+      ElMessage.error('面试结果设置失败')
+    }
+  } catch (error) {
+    console.error('设置面试结果失败:', error)
+    ElMessage.error('设置面试结果失败')
   }
 }
-
-
-const interviewType = ref('')
 
 </script>
 
@@ -2026,15 +2117,19 @@ const interviewType = ref('')
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 4px;
+  /* Reduce gap from 12px to 4px */
 }
 
 :deep(.action-buttons .el-button) {
-  padding: 4px 8px;
+  padding: 2px 6px;
+  /* Reduce padding from 4px 8px to 2px 6px */
   height: 24px;
   line-height: 16px;
   font-size: 13px;
   border-radius: 4px;
+  margin: 0;
+  /* Add margin: 0 to remove any default margins */
   transition: all 0.3s ease;
 }
 
@@ -2362,27 +2457,47 @@ const interviewType = ref('')
 
 .material-container {
   padding: 20px;
+  overflow: auto;
 }
 
 .preview-item {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 200px;
-  height: 150px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  width: 100%;
+  height: 180px;
   margin: 0 auto;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-item:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.preview-item.other-materials {
+  height: 220px;
+  width: 100%;
 }
 
 .material-image {
-  width: 100%;
-  height: 100%;
+  width: 240px;
+  height: 160px;
   object-fit: contain;
   border-radius: 4px;
   background-color: #fff;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.material-image:hover {
+  transform: scale(1.05);
 }
 
 .material-carousel {
@@ -2399,21 +2514,55 @@ const interviewType = ref('')
   justify-content: center;
   align-items: center;
   background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+}
+
+:deep(.el-carousel__item .material-image) {
+  width: 240px;
+  height: 160px;
+  object-fit: contain;
 }
 
 :deep(.el-carousel__arrow) {
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  background-color: rgba(0, 0, 0, 0.3);
+  width: 32px;
+  height: 32px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
 
-  &--left {
-    left: -5px;
-  }
+:deep(.el-carousel__arrow:hover) {
+  background-color: rgba(0, 0, 0, 0.7);
+}
 
-  &--right {
-    right: -5px;
-  }
+:deep(.el-carousel__arrow--left) {
+  left: 10px;
+}
+
+:deep(.el-carousel__arrow--right) {
+  right: 10px;
+}
+
+:deep(.el-carousel__indicators) {
+  bottom: 8px;
+}
+
+:deep(.el-carousel__indicator) {
+  padding: 6px;
+}
+
+:deep(.el-carousel__button) {
+  width: 8px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+}
+
+:deep(.el-carousel__indicator.is-active .el-carousel__button) {
+  background-color: white;
 }
 
 .other-materials-container {
@@ -2707,5 +2856,170 @@ const interviewType = ref('')
 
 :deep(.el-overlay) {
   z-index: 2999 !important;
+}
+
+.upload-container {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-area {
+  text-align: center;
+}
+
+.upload-button {
+  margin-bottom: 15px;
+  height: 50px;
+  font-size: 16px;
+}
+
+.el-upload__tip {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 10px;
+}
+
+.material-preview-dialog :deep(.el-dialog) {
+  min-width: 800px;
+}
+
+.material-preview-dialog :deep(.el-dialog__body) {
+  padding: 20px;
+  height: calc(100vh - 180px);
+}
+
+/* 确保图片预览遮罩层始终在最上层 */
+:deep(.el-image-viewer__mask),
+:deep(.el-image-viewer__wrapper) {
+  z-index: 3150 !important;
+}
+
+.material-preview-dialog :deep(.el-descriptions) {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.material-preview-dialog :deep(.el-descriptions__label) {
+  width: 120px;
+  padding: 16px 20px !important;
+  background-color: #f7f8fa;
+  font-weight: 500;
+  color: #606266;
+  border-right: 1px solid #ebeef5;
+}
+
+.material-preview-dialog :deep(.el-descriptions__content) {
+  padding: 8px !important;
+  color: #303133;
+}
+
+.material-preview-dialog :deep(.el-descriptions__table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.material-preview-dialog :deep(.el-descriptions__cell) {
+  border: 1px solid #ebeef5;
+}
+
+.preview-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 180px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-item:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.preview-item.other-materials {
+  height: 220px;
+  width: 100%;
+}
+
+.material-image {
+  width: 240px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.material-image:hover {
+  transform: scale(1.05);
+}
+
+.no-material {
+  color: #909399;
+  font-size: 14px;
+}
+
+.pdf-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.timeline-item.interview-accepted.current:first-child .timeline-dot {
+  border-color: #409EFF;
+  background-color: #409EFF;
+}
+
+/* Override for interview-accepted when resumeDelete is 0 */
+.timeline-item.deleted.current.interview-accepted .timeline-dot {
+  border-color: #F56C6C !important;
+  background-color: #F56C6C !important;
+}
+
+.review-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.result-dialog {
+  margin-top: 20px;
+}
+
+.result-dialog .el-form-item {
+  margin-bottom: 20px;
+}
+
+.result-dialog .el-form-item label {
+  font-weight: bold;
+}
+
+.result-dialog .el-input {
+  width: 100%;
+}
+
+.result-dialog .el-button {
+  margin-top: 20px;
+}
+
+.material-status {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
 }
 </style>

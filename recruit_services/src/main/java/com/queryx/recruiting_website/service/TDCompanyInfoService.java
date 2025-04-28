@@ -25,5 +25,10 @@ public interface TDCompanyInfoService extends IService<TDCompanyInfo> {
     Map<String, byte[]> getEnterpriseFiles(Long companyId) throws IOException;
 
     Object registerCompany(RegisterCompanyDto registerCompanyDto);
+
+    Object checkInterviewTime();
+
+
+    Object updateStuffs(Long materialId, Integer code, String status);
 }
 

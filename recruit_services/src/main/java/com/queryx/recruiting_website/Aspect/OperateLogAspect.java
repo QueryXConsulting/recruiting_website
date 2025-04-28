@@ -56,7 +56,7 @@ public class OperateLogAspect {
         String params = Arrays.toString(args);
 
         OperateLog operateLog = new OperateLog();
-//        operateLog.setOperateUser(String.valueOf(SecurityUtils.getLoginAdmin().getTdAdmin().getAdminId()));
+        operateLog.setOperateUser(String.valueOf(SecurityUtils.getLoginAdmin().getTdAdmin().getAdminId()));
         operateLog.setOperateName(operation.summary());
         operateLog.setMethodName(requestUrl);
         operateLog.setParams(params);

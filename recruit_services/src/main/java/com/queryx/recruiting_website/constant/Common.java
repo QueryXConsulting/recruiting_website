@@ -80,7 +80,7 @@ public class Common {
         Common.enterpriseFilePath = enterpriseFilePath;
     }
 
-    @Value("${file.upload-path-office}")
+    @Value("${file.upload-path-offers}")
     public void setOfficeFilePath(String officeFilePath) {
         Common.officeFilePath = officeFilePath;
     }
@@ -125,7 +125,7 @@ public class Common {
     public static final String JOB_STATUS_ENABLE_NOT_OK = "0";
 
     // 文件类型
-    public static final List<String> FILE_TYPE = Arrays.asList("pdf", "png", "jpg");
+    public static final List<String> FILE_TYPE = Arrays.asList("pdf", "png", "jpg","jpeg");
     public static final Long COMPANY_USER = 4L;
 
 
