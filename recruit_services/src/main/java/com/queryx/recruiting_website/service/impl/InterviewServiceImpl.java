@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
@@ -106,22 +107,30 @@ public class InterviewServiceImpl extends ServiceImpl<InterviewMapper, TDIntervi
     public Object updateInterview(UpdateInterviewDto updateInterviewDto) {
         TDInterview tdInterview = new TDInterview();
         BeanUtils.copyProperties(updateInterviewDto, tdInterview);
-
+        TDOffers tdOffers = new TDOffers();
         if (tdInterview.getInterviewResult() != null && tdInterview.getInterviewResult().equals("1")) {
-            tdResumeService.updateResumeStatus("3", tdInterview.getJobResumeId(), null);
-            TDOffers tdOffers = new TDOffers();
+            // 修改状态
+            tdResumeService.updateResumeStatus("3", tdInterview.getJobResumeId(), "1");
             tdOffers.setUserId(updateInterviewDto.getUserId());
             tdOffers.setJobId(updateInterviewDto.getJobId());
+            tdOffers.setOffersStatus(Common.OFFER_STATUS_SEND);
             tdInterview.setInterviewDate(new Date());
             offersMapper.insert(tdOffers);
             tdInterview.setJobId(null);
             tdInterview.setUserId(null);
-            messageBoardService.sendMessage(updateInterviewDto.getUserId(), "恭喜您通过面试 -此消息来自系统自动发送");
-        } else if (tdInterview.getInterviewStatus().equals("3")) {
+            messageBoardService.sendMessage(updateInterviewDto.getUserId(), "恭喜您通过面试,offer已发送请及时查收 -此消息来自系统自动发送");
+        } else if (Common.DELIVER_RESUME_STATUS_OFFER.equals(tdInterview.getInterviewStatus())) {
             BeanUtils.copyProperties(updateInterviewDto, tdInterview);
+            LambdaUpdateWrapper<TDJobResume> set = new LambdaUpdateWrapper<TDJobResume>().eq(TDJobResume::getJobResumeId, updateInterviewDto.getJobResumeId())
+                    .set(TDJobResume::getResumeDelete, Common.DELIVER_RESUME_DELETE_SQUARE_PEG);
+            tdJobResumeMapper.update(set);
         }
 
         update(tdInterview, new LambdaQueryWrapper<TDInterview>().eq(TDInterview::getInterviewId, updateInterviewDto.getInterviewId()));
+        // offer和预约面试的流程合到一起面试通过后返回offerId
+        if (tdOffers.getOfferId() != null) {
+            return tdOffers.getOfferId();
+        }
         return null;
     }
 

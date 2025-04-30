@@ -33,7 +33,7 @@
       <el-table :data="userList" style="width: 100%" v-loading="loading" :border="false" stripe highlight-current-row
         class="custom-table">
         <el-table-column type="index" label="序号" width="80" align="center" />
-        <el-table-column prop="userName" label="用户名" align="center" />
+        <el-table-column prop="userName" label="姓名" align="center" />
         <el-table-column prop="userAvatar" label="头像" align="center">
           <template #default="scope">
             <el-avatar :size="40" :src="scope.row.userAvatar">
@@ -88,7 +88,7 @@
     <!-- 编辑用户对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form ref="userFormRef" :model="userForm" :rules="rules" label-width="100px">
-        <el-form-item label="用户名" prop="userName">
+        <el-form-item label="姓名" prop="userName">
           <el-input v-model="userForm.userName" />
         </el-form-item>
         <!-- <el-form-item label="邮箱" prop="userEmail">

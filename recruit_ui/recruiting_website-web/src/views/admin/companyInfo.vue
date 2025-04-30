@@ -93,6 +93,11 @@
             <el-form-item label="密码" prop="companyInfoPassword">
               <el-input v-model="form.companyInfoPassword" type="password" placeholder="请输入密码" show-password />
             </el-form-item>
+            <el-form-item label="公司规模" prop="companySize">
+              <el-select v-model="form.companySize" placeholder="请选择公司规模" class="full-width">
+                <el-option v-for="size in companySizes" :key="size" :label="size" :value="size" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="公司LOGO">
               <el-upload class="logo-uploader" action="" :show-file-list="false" ref="uploadRef" :multiple="false"
                 :auto-upload="false" :on-change="handleLogoChange" :before-upload="beforeLogoUpload"
@@ -189,6 +194,11 @@ const queryParams = reactive({
 const total = ref(0)
 const tableData = ref([])
 
+
+// 公司规模选项
+const companySizes = ref([
+  '1-10人', '11-50人', '51-200人', '201-500人', '501-1000人', '1000人以上'
+])
 // 查询列表数据
 const handleQuery = async () => {
   try {
