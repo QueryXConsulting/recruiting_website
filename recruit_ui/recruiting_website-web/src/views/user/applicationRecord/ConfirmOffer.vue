@@ -160,7 +160,7 @@ const signatureSubmit = async () => {
   const formData = new FormData();
   const imgName = Date.now() + '.' + mimeType.split('/')[1];
   formData.append('image', blob, imgName);
-  const _res = await offerSignature(offerId, formData);
+  const _res = await offerSignature(offerId, formData, true);
   if (_res) {
     isShowSignature.value = false;
     if (_res.code !== 200) {
@@ -291,7 +291,7 @@ const handleCurrentChange = (page) => {
 .signature-canvas {
   width: 100%;
   height: 100%;
-  border: 2px solid #269eeeef;
+  border: 2px solid #FF7427;
   border-radius: 10px;
 }
 </style>

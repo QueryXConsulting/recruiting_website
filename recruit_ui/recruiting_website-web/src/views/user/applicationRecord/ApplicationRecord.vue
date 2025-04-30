@@ -68,11 +68,12 @@ const getOptionLabel = (options, value) => {
 const statusOptions = [
     { status: null, value: '0', label: '已投递' },
     { status: null, value: '1', label: '已查看' },
-    { status: null, value: '2', label: '待面试' },
-    { status: null, value: '3', label: 'offer发放' },
-    { status: null, value: '4', label: '上传材料' },
-    { status: null, value: '5', label: '录入信息' },
-    { status: null, value: '6', label: '预约报道' },
+    { status: null, value: '2', label: '待测试' },
+    { status: null, value: '3', label: '待面试' },
+    { status: null, value: '4', label: 'offer发放' },
+    { status: null, value: '5', label: '上传材料' },
+    { status: null, value: '6', label: '录入信息' },
+    { status: null, value: '7', label: '预约报道' },
     // { status: null, value: '7', label: '用户已撤销简历' }
 ]
 

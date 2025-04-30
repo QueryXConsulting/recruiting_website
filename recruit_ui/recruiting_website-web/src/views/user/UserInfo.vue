@@ -57,8 +57,8 @@ const educationOptions = [
     { label: '博士' },
     { label: '硕士' },
     { label: '本科' },
-    { label: '专科' },
-    { label: '大学以下' },
+    { label: '大专' },
+    { label: '高中' },
 ];
 // 工资选项
 const salaryOptions = [ // { range: "--请选择--" },
@@ -193,10 +193,9 @@ const editInfo = async () => {
     }
     notEdit.value = true;
     await resumeUpdate(formData.value).then((res) => {
-        // 使用 Object.assign
+        // 在store中追加简历ID
         store.userInfo = Object.assign({}, store.userInfo, { resumeId: res.content });
         ElMessage.success(res.message);
-        // window.location.reload();
     });
 }
 
@@ -626,7 +625,7 @@ const hasMessage = ref(false); // 是否有未读消息
     <!-- 头像更换弹窗 -->
     <WBDialog v-model="changeAvater" @submit="sendUploadAvatar" @cancel="imgUrl = ''" @close="dialogClose" cancel-text="重选"
         title="更换头像">
-        <el-alert title="请上传.png/.jpg/.jpeg格式的图片" type="info" show-icon :closable="false" />
+        <el-alert title="请上传png/jpg/jpeg格式的图片" type="info" show-icon :closable="false" />
         <img v-if="imgUrl" :src="imgUrl" />
         <el-upload v-else class="avatar-uploader" :show-file-list="false" :http-request="handlePreview">
             <el-icon class="avatar-uploader-icon">

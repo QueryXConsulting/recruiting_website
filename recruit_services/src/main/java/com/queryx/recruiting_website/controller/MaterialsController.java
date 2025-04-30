@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.controller;
 
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
+import com.queryx.recruiting_website.domain.vo.MaterialStatusVO;
 import com.queryx.recruiting_website.service.MaterialsService;
 import com.queryx.recruiting_website.utils.CommonResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,25 +38,25 @@ public class MaterialsController {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    public CommonResp<Integer> getProcessStatus() {
+    public CommonResp<MaterialStatusVO> getProcessStatus() {
         return materialsService.queryProcessStatus();
     }
 
 
     @PostMapping("/upload")
     @Operation(summary = "材料上传", parameters = {
-            @Parameter(name = "files", description = "所有上传文件", schema = @Schema(implementation = Map.class), required = true),
+            @Parameter(name = "", description = "所有上传文件", schema = @Schema(implementation = Map.class), required = true),
+            @Parameter(name = "isResetUpload", description = "是否是重新上传", schema = @Schema(implementation = Boolean.class), required = true),
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "512", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
-    public CommonResp<Boolean> uploadMaterials(@RequestParam Map<String, MultipartFile> files) {
-//    public CommonResp<Boolean> uploadMaterials(@RequestPart Map<String, List<MultipartFile>> files) {
+    public CommonResp<Boolean> uploadMaterials(@RequestParam Map<String, MultipartFile> files, @RequestParam("isResetUpload") Boolean isResetUpload) {
         if (files == null || files.isEmpty()) {
             return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
         }
-        return materialsService.insertMaterials(files);
+        return materialsService.insertMaterials(files, isResetUpload);
     }
 
 

@@ -36,6 +36,7 @@ public class Common {
     public static final String OFFER_STATUS_ACCEPT = "1";// 接受
     public static final String OFFER_STATUS_REJECT = "2";// 拒绝
     public static final String OFFER_STATUS_CANCEL = "3";// 撤销
+    public static final String OFFER_STATUS_PASS = "6";// 通过
     // 简历投递表(job_resume)相关常量
     public static final String DELIVER_RESUME_STATUS_DELIVERED = "0";// 已投递
     public static final String DELIVER_RESUME_STATUS_VIEWED = "1";// 已查看

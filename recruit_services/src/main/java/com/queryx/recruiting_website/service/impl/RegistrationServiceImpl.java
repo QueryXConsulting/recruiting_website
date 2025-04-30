@@ -4,6 +4,7 @@ import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
 import com.queryx.recruiting_website.domain.TDJob;
 import com.queryx.recruiting_website.domain.TDRegistration;
+import com.queryx.recruiting_website.domain.dao.RegistrationDAO;
 import com.queryx.recruiting_website.domain.dto.RegistrationDTO;
 import com.queryx.recruiting_website.domain.vo.RegistrationStatusVO;
 import com.queryx.recruiting_website.domain.vo.InfoInputVO;
@@ -49,8 +50,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     public CommonResp<RegistrationStatusVO> queryRegistrationStatus() {
         final Long userId = SecurityUtils.getLoginUser().getTdUser().getUserId();
         // 查询信息录入状态
-        TDRegistration status = registrationMapper.selectRegistrationStatus(userId);
-        if (status == null || status.getId() == null || status.getRegistrationStatus() == null) {
+        RegistrationDAO status = registrationMapper.selectRegistrationStatus(userId);
+        if (status == null || status.getId() == null || status.getStatus() == null) {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, null);
         }
         RegistrationStatusVO statusVO = new RegistrationStatusVO();
@@ -83,7 +84,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         TDRegistration registration = new TDRegistration();
         BeanUtils.copyProperties(registrationDTO, registration);
         registration.setId(registrationId);
-        registration.setRegistrationStatus(Common.INPUT_STATUS_SEND);
+//        registration.setRegistrationStatus(Common.INPUT_STATUS_SEND);
         int updatedCount = registrationMapper.updateById(registration);
         if (updatedCount < 1) {
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
