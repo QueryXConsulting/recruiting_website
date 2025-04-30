@@ -280,6 +280,7 @@ const cancelTime = () => {
                     :type="getTagType(resultOptions, tableData[scope.$index][scope.prop])">
                     {{ getOptionLabel(resultOptions, tableData[scope.$index][scope.prop]) }}
                 </el-tag>
+                <!-- <span v-else-if="scope.prop === 'interviewDate'">{{ tableData[scope.$index][scope.prop] ? tableData[scope.$index][scope.prop] : '待确定' }}</span> -->
                 <el-tag v-else-if="scope.prop === 'interviewStatus'"
                     :type="getTagType(statusOptions, tableData[scope.$index][scope.prop])">
                     {{ getStatusOptionsLabel(tableData[scope.$index][scope.prop]) }}

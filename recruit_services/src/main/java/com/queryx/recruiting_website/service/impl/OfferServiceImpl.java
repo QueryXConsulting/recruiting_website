@@ -1,6 +1,7 @@
 package com.queryx.recruiting_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.queryx.recruiting_website.constant.AppHttpCodeEnum;
 import com.queryx.recruiting_website.constant.Common;
@@ -104,7 +105,6 @@ public class OfferServiceImpl implements OfferService {
         if (Common.OFFER_STATUS_REJECT.equals(status)) {
             boolean SYSTEM_ERROR = rejectOffer(offer);
             if (!SYSTEM_ERROR) return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
-            // TODO 拒绝其他offer：待测试
         } else if (Common.OFFER_STATUS_ACCEPT.equals(status)) {
             // 同意一个offer后，其他offer状态改为拒绝
             if (offersList == null) {
@@ -149,7 +149,7 @@ public class OfferServiceImpl implements OfferService {
 
 
     @Override
-    public CommonResp<String> getOfferFilePath(Long offerId){
+    public CommonResp<String> getOfferFilePath(Long offerId) {
         String offersFilePath = offerMapper.selectById(offerId).getOffersFilePath();
         if (offersFilePath == null) {
             log.warn("offerId: {} 对应的文件不存在", offerId);
@@ -160,7 +160,7 @@ public class OfferServiceImpl implements OfferService {
 
 
     @Override
-    public CommonResp<Boolean> updateSignature(Long offerId, MultipartFile file) {
+    public CommonResp<Boolean> updateSignature(Long offerId, MultipartFile file, Boolean isOffer) {
         TDOffers offers = offerMapper.selectById(offerId);
         if (offers == null) {
             log.warn("offer不存在，offerId: {}", offerId);
@@ -169,9 +169,11 @@ public class OfferServiceImpl implements OfferService {
         if (offers.getSignaturePath() != null) {
             String folderPath = Common.getSplitPath(signaturePath, "/") + offers.getSignaturePath();
             File file1 = new File(folderPath);
-            if (!(file1.exists() && file1.delete())) {
-                log.warn("删除旧的签名失败，offerId: {}, 文件路径: {}", offerId, folderPath);
-                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            if (file1.exists()) {
+                if (file1.delete()) {
+                    log.warn("删除旧的签名失败，offerId: {}, 文件路径: {}", offerId, folderPath);
+                }
+//                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
             }
         }
         String newFileName = System.currentTimeMillis() + file.getOriginalFilename();
@@ -188,8 +190,20 @@ public class OfferServiceImpl implements OfferService {
             }
             return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
         }
-        newFileName =  "/" + newFileName;
+        newFileName = "/" + newFileName;
         offers.setSignaturePath(File.separator + Common.getLastPath(signaturePath, "/", newFileName));
+        if (isOffer) {
+            offers.setOffersStatus(Common.OFFER_STATUS_PASS);
+            LambdaUpdateWrapper<TDJobResume> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(TDJobResume::getJobId, offers.getJobId());
+            updateWrapper.eq(TDJobResume::getUserId, offers.getUserId());
+            updateWrapper.set(TDJobResume::getResumeStatus, Common.DELIVER_RESUME_STATUS_UPLOAD_MATERIAL);
+            int ui2 = jobResumeMapper.update(null, updateWrapper);
+            if (ui2 <= 0) {
+                log.warn("offerId: {} 更新job_resume状态失败", offerId);
+                return CommonResp.fail(AppHttpCodeEnum.SYSTEM_ERROR, false);
+            }
+        }
         int ui = offerMapper.updateById(offers);
         if (ui <= 0) {
             log.warn("offerId: {} 更新签名失败", offerId);

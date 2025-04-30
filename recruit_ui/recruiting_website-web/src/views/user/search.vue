@@ -38,17 +38,11 @@ onMounted(async () => {
   isAsc.value = searchObj.isAsc;
   inputVal.value = searchObj.keyword;
   natures.value = await jobNature().then((r) => r.content);
-  await nextTick();
-  // 调整布局
-  // const nav = document.querySelector('.nav-bar');
-  // const searchBox = document.querySelector('.search-container');
-  // searchBox.style.marginTop = `${nav.offsetHeight + 10}px`;
 });
 
 const condition = ref(useSearchStore().getConditions(searchType.value));
 // 搜索
 const handleSearch = simpleThrottle(async () => {
-  // const handleSearch = async () => {
   const regex = /[\u3000-\u303F|\uFF00-\uFFEF|~<>～]+/g;
   if (regex.test(inputVal.value)) {
     // 输入符合要求，继续执行搜索逻辑
@@ -75,7 +69,6 @@ const handleSearch = simpleThrottle(async () => {
   useSearchStore().setConditions(searchType.value, o);
   useSearchStore().setType(searchType.value);
 }, 1000);
-// }
 
 // 城市筛选选项
 const cities = [
@@ -113,7 +106,6 @@ const handleCloseCompanyJobs = () => {
   searchObj.companyId = null;
   // 重置搜索条件
   useSearchStore().resetCompanyId();
-  // handleSearch();
 }
 
 const handleCommand = (command) => {
@@ -226,7 +218,7 @@ const handleCommand = (command) => {
             <el-option label="硕士" value="硕士" />
             <el-option label="本科" value="本科" />
             <el-option label="大专" value="大专" />
-            <el-option label="大学以下" value="大学以下" />
+            <el-option label="高中" value="高中" />
           </el-select>
           <!-- 工作性质 -->
           <el-select v-if="searchType === 'JOB'" v-model="searchObj.nature" placeholder="工作性质" style="width: 100px;">

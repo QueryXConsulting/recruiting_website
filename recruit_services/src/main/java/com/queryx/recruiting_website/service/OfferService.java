@@ -42,7 +42,8 @@ public interface OfferService {
      *
      * @param offerId offerId
      * @param file    签名图片文件
+     * @param isOffer 是否是offer
      * @return offer文件路径
      */
-    CommonResp<Boolean> updateSignature(Long offerId, MultipartFile file);
+    CommonResp<Boolean> updateSignature(Long offerId, MultipartFile file, Boolean isOffer);
 }

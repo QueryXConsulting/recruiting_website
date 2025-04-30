@@ -3,6 +3,7 @@ package com.queryx.recruiting_website.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import com.queryx.recruiting_website.domain.TDRegistration;
+import com.queryx.recruiting_website.domain.dao.RegistrationDAO;
 import com.queryx.recruiting_website.domain.vo.ReservationRegistrationVO;
 
 /**
@@ -17,7 +18,7 @@ public interface TDRegistrationMapper extends BaseMapper<TDRegistration> {
      * @param userId 用户id
      * @return 员工入职信息
      */
-    TDRegistration selectRegistrationStatus(Long userId);
+    RegistrationDAO selectRegistrationStatus(Long userId);
 
 
     /**

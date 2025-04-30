@@ -76,6 +76,7 @@ public class OfferController {
     @Operation(summary = "签名图片上传", parameters = {
             @Parameter(name = "offerId", description = "offerId", schema = @Schema(implementation = Long.class), required = true),
             @Parameter(name = "image", description = "签名图片", schema = @Schema(implementation = MultipartFile.class), required = true),
+            @Parameter(name = "isOffer", description = "是否是offer", schema = @Schema(implementation = Boolean.class), required = true),
     }, responses = {
             @ApiResponse(responseCode = "200", description = "上传成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
             @ApiResponse(responseCode = "482", description = "缺少参数", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class))),
@@ -83,8 +84,8 @@ public class OfferController {
             @ApiResponse(responseCode = "500", description = "系统错误", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResp.class)))
     })
     @PutMapping("/signature")
-    public CommonResp<Boolean> updateSignature(@RequestParam("offerId") Long offerId, @RequestParam("image") MultipartFile file) {
-        if (offerId == null || file == null) return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
-        return offerService.updateSignature(offerId, file);
+    public CommonResp<Boolean> updateSignature(@RequestParam("offerId") Long offerId, @RequestParam("image") MultipartFile file, @RequestParam("isOffer") Boolean isOffer) {
+        if (offerId == null || file == null || isOffer == null) return CommonResp.fail(AppHttpCodeEnum.MISSING_PARAMETERS, null);
+        return offerService.updateSignature(offerId, file, isOffer);
     }
 }

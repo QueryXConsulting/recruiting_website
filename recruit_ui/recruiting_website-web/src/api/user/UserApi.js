@@ -77,7 +77,7 @@ export const deliverList = (page, pageSize) => request.get(API.DELIVER_LIST_URL,
 export const offerList = (page, size) => request.get(API.OFFER_LIST_URL, { params: { page: page, size: size } })
 export const offerStatus = (id, status) => request.put(API.OFFER_STATUS_URL, null, { params: { offerId: id, status: status } })
 export const offerFilePath = (id) => request.get(API.OFFER_FILE_PATH_URL, { params: { offerId: id } })
-export const offerSignature = (id, img) => request.put(API.OFFER_SIGNATURE_URL, img, { params: { offerId: id } })
+export const offerSignature = (id, img, is) => request.put(API.OFFER_SIGNATURE_URL, img, { params: { offerId: id, isOffer: is } })
 // 入职材料相关
 export const materialStatus = () => request.get(API.MATERIAL_STATUS_URL)
 export const materialUpload = (file) => request.post(API.UPLOAD_MATERIAL_URL, file)

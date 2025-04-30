@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import router from '@/router';
 import { defineStore } from 'pinia';
 import userStore from '@/store/user';
@@ -10,10 +10,11 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import ApplicationRecord from './ApplicationRecord.vue';
 import AppointmentInterview from './AppointmentInterview.vue';
 import ConfirmOffer from './ConfirmOffer.vue';
+import Questionnaires from './Questionnaires.vue';
 import UploadMaterials from './UploadMaterials.vue';
 import InformationInput from './InformationInput.vue';
 import AppointmentRegistration from './AppointmentRegistration.vue';
-import { materialStatus } from '@/api/user/UserApi';
+import { materialStatus, registrationStatus } from '@/api/user/UserApi';
 
 
 const hasMessage = ref(false); // 是否有未读消息
@@ -40,38 +41,41 @@ const handleCommand = (command) => {
     }
 }
 
-const useTabStore = defineStore('tab', {
-    state: () => {
-        return {
-            tabIndex: '0',
-            tabName: '投递记录'
-        }
-    },
-    actions: {
-        setTabIndex(index) {
-            this.tabIndex = index;
-        },
-        setTabName(name) {
-            this.tabName = name;
-        }
-    },
-    getters: {
-        getTabIndex() {
-            return this.tabIndex;
-        },
-        getTabName() {
-            return this.tabName;
-        }
-    },
-    persist: {
-        key: 'tab',
-        storage: sessionStorage,
-        paths: ['tabIndex', 'tabName'],
-    },
-});
+// const useTabStore = defineStore('tab', {
+//     state: () => {
+//         return {
+//             tabIndex: '0',
+//             tabName: '投递记录'
+//         }
+//     },
+//     actions: {
+//         setTabIndex(index) {
+//             this.tabIndex = index;
+//         },
+//         setTabName(name) {
+//             this.tabName = name;
+//         }
+//     },
+//     getters: {
+//         getTabIndex() {
+//             return this.tabIndex;
+//         },
+//         getTabName() {
+//             return this.tabName;
+//         }
+//     },
+//     persist: {
+//         key: 'tab',
+//         storage: sessionStorage,
+//         paths: ['tabIndex', 'tabName'],
+//     },
+// });
 
-const activeName = useTabStore().getTabIndex; // tab 切换
-const activeLabel = ref(useTabStore().getTabName); // tab 名称
+const activeName = ref('0'); // tab 切换
+const activeLabel = ref('投递记录'); // tab 名称
+const isDisabled1 = ref(false); // 上传材料按钮是否禁用
+const isDisabled2 = ref(false); // 信息录入按钮是否禁用
+const isDisabled3 = ref(false); // 预约报到按钮是否禁用
 // 投递流程对象
 const tabPanes = [
     {
@@ -100,52 +104,58 @@ const tabPanes = [
     },
 ];
 
-// 节流函数
-function simpleThrottle(func, wait) {
-    let timeout = null;
-    return function (...args) {
-        if (!timeout) {
-            func.apply(this, args);
-            timeout = setTimeout(() => {
-                timeout = null;
-            }, wait);
-        }
-    };
-}
 
 const clickTab = (pane, e) => {
-    // if (beforeLeave(pane.index)) {
-    // }
+    // useTabStore().setTabIndex(pane.index);
+    // useTabStore().setTabName(pane.props.label);
+    activeLabel.value = pane.props.label;
 }
 
-const setActiveName = async (index, status) => {
-    const res = await materialStatus();
-    if (res.content === status) {
-        ElMessage.error('未到该环节，无法使用该功能，请返回！');
-        return false;
-    }
-    const name = tabPanes[index].label;
-    activeLabel.value = name;
-    useTabStore().setTabName(name);
-    useTabStore().setTabIndex(index);
-    return true;
-}
+// const setActiveName = async (index, status) => {
+//     const res = await materialStatus();
+//     if (res.content === status) {
+//         ElMessage.error('未到该环节，无法使用该功能，请返回！');
+//         return false;
+//     }
+//     const name = tabPanes[index].label;
+//     useTabStore().setTabIndex(index);
+//     return true;
+// }
 
-const beforeLeave = async (to, from) => {
-    switch (to) {
-        case '3':
-            return setActiveName(+to, -1);
-        case '5':
-            return setActiveName(+to, 1);
-        case '6':
-            return setActiveName(+to, 0);
-    }
-    const name = tabPanes[+to].label;
-    activeLabel.value = name;
-    useTabStore().setTabName(name);
-    useTabStore().setTabIndex(+to);
-    return true;
-}
+// const beforeLeave = async (to, from) => {
+//     switch (to) {
+//         case '3':
+//             return setActiveName(+to, -1);
+//         case '5':
+//             return setActiveName(+to, 1);
+//         case '6':
+//             return setActiveName(+to, 0);
+//     }
+//     const name = tabPanes[+to].label;
+//     activeLabel.value = name;
+//     useTabStore().setTabName(name);
+//     useTabStore().setTabIndex(+to);
+//     return true;
+// }
+
+onMounted(() => {
+    materialStatus().then((res) => {
+        if (Number.isNaN(+res.content.status) || Number(res.content.status) === -1) {
+            isDisabled1.value = true;
+        } else {
+            isDisabled1.value = false;
+        }
+    });
+    registrationStatus().then((res) => {
+        if (res?.content || Object.keys(res.content).length > 0) {
+            isDisabled2.value = false;
+            isDisabled3.value = false;
+        } else {
+            isDisabled2.value = true;
+            isDisabled3.value = true;
+        }
+    });
+});
 </script>
 
 <template>
@@ -210,24 +220,28 @@ const beforeLeave = async (to, from) => {
         </div>
 
         <div class="tabs-container">
-            <h1>{{ activeLabel }}查看</h1>
-            <el-tabs v-model="activeName" @tab-click="clickTab" :before-leave="beforeLeave">
+            <h1>{{ activeLabel }}</h1>
+            <!-- :before-leave="beforeLeave"  -->
+            <el-tabs v-model="activeName" @tab-click="clickTab">
                 <el-tab-pane name="0" label="投递记录" lazy>
                     <ApplicationRecord></ApplicationRecord>
                 </el-tab-pane>
-                <el-tab-pane name="1" label="预约面试" lazy>
+                <el-tab-pane name="1" label="问卷调查" lazy>
+                    <Questionnaires></Questionnaires>
+                </el-tab-pane>
+                <el-tab-pane name="2" label="预约面试" lazy>
                     <AppointmentInterview></AppointmentInterview>
                 </el-tab-pane>
-                <el-tab-pane name="2" label="确认offer" lazy>
+                <el-tab-pane name="3" label="确认offer" lazy>
                     <ConfirmOffer></ConfirmOffer>
                 </el-tab-pane>
-                <el-tab-pane name="3" label="上传材料" lazy>
+                <el-tab-pane name="4" label="上传材料" :disabled="isDisabled1" lazy>
                     <UploadMaterials></UploadMaterials>
                 </el-tab-pane>
-                <!-- <el-tab-pane name="4" label="信息录入" lazy>
-                <InformationInput></InformationInput>
-            </el-tab-pane> -->
-                <el-tab-pane name="5" label="预约报到" lazy>
+                <el-tab-pane name="5" label="信息录入" :disabled="isDisabled2" lazy>
+                    <InformationInput></InformationInput>
+                </el-tab-pane>
+                <el-tab-pane name="6" label="预约报到" :disabled="isDisabled3" lazy>
                     <AppointmentRegistration></AppointmentRegistration>
                 </el-tab-pane>
             </el-tabs>

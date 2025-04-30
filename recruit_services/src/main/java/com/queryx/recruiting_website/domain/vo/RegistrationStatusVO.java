@@ -9,7 +9,9 @@ import lombok.Data;
 @Data
 public class RegistrationStatusVO {
     // 信息录入状态
-    private String registrationStatus;
+//    private String registrationStatus;
+    // 材料审核状态
+    private String status;
     // 预约状态
     private String reservationStatus;
 }

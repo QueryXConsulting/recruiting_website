@@ -20,7 +20,7 @@ const whiteList = [
 const routes = [
   {
     path: '/',
-    redirect: '/users/index'
+    redirect: '/users/index',
   },
   {
     path: '/404',
@@ -101,8 +101,8 @@ const routes = [
         path: 'interviewRoom',
         component: () => import('../views/company/interviewRoom.vue'),
         meta: {
-          hideNavbar: true
-        }
+          hideNavbar: true,
+        },
       },
     ],
   },
