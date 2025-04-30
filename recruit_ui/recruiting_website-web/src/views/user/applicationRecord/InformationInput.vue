@@ -37,7 +37,7 @@ const maxDate = new Date(new Date().setFullYear(new Date().getFullYear())).toISO
 
 onMounted(async () => {
     const res1 = await registrationStatus();
-    const resultStatus = +res1.content.registrationStatus;
+    const resultStatus = +res1.content.status;
     windowStatus.value = resultStatus;
     windowStatusMessage.value = windowStatusOptions.find(item => item.status === resultStatus)?.description || '';
     if (windowStatus.value === 0 || windowStatus.value === 3) {
@@ -88,7 +88,7 @@ const submitForm = async () => {
 
     // 提交成功后，更新页面状态
     const res = await registrationStatus();
-    const resultStatus = +res.content.registrationStatus;
+    const resultStatus = +res.content.status;
     // 更新页面状态
     windowStatus.value = resultStatus;
     // 页面状态提示信息
@@ -107,15 +107,16 @@ const resetForm = () => {
 </script>
 
 <template>
-    <div v-if="windowStatus === 3 || windowStatus === 0">
+    <div v-if="windowStatus === 1 || windowStatus === 0">
+    <!-- <div v-if="windowStatus === 3 || windowStatus === 0"> -->
         <main class="form-container">
             <h1 class="form-title">个人信息录入</h1>
             <el-alert v-if="windowStatus === 3" title="信息为通过审核，请重新提交" type="warning" center show-icon  />
-            <el-row justify="center">
+            <!-- <el-row justify="center">
                 <el-col :span="12" class="form-subtitle">
                     职位：{{ position }}
                 </el-col>
-            </el-row>
+            </el-row> -->
             <!-- 表单主体 -->
             <form class="form-section">
                 <el-row>
@@ -207,9 +208,9 @@ const resetForm = () => {
     </div>
 
     <!-- 页面状态提示-待审核 -->
-    <div v-if="windowStatus === 1" class="info-status">
+    <!-- <div v-if="windowStatus === 1" class="info-status">
         <el-result icon="warning" :title="windowStatusMessage"></el-result>
-    </div>
+    </div> -->
     <!-- 页面状态提示-通过 -->
     <div v-if="windowStatus === 2" class="info-status">
         <el-result icon="success" :title="windowStatusMessage"></el-result>
@@ -240,13 +241,13 @@ const resetForm = () => {
     padding: 5px;
 
     .form-section {
-        border: 1px solid #E6A23C;
+        border: 1px solid #000;
     }
 
     .form-item {
         height: 60px;
         display: flex;
-        border: 2px solid #E6A23C;
+        border: 2px solid #000;
         align-items: center;
 
         label {
@@ -263,7 +264,7 @@ const resetForm = () => {
             height: 100%;
             border: none;
             font-size: 20px;
-            border-left: 2px solid #E6A23C;
+            border-left: 2px solid #000;
             padding: 0 10px;
 
         }

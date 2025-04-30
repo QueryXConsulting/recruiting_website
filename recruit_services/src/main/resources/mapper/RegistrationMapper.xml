@@ -4,13 +4,12 @@
 <mapper namespace="com.queryx.recruiting_website.mapper.TDRegistrationMapper">
 
     <!--  查询状态  -->
-    <select id="selectRegistrationStatus" resultType="com.queryx.recruiting_website.domain.TDRegistration">
-        SELECT r.id, r.registration_status, r.reservation_status
+    <select id="selectRegistrationStatus" resultType="com.queryx.recruiting_website.domain.dao.RegistrationDAO">
+        SELECT r.id, r.registration_status, m.status, r.reservation_status
         FROM t_d_registration r
-        JOIN t_d_offers o ON r.offer_id = o.offers_id AND r.job_id = o.job_id
-        JOIN t_d_job_resume j ON o.job_id = j.job_id AND o.user_id = j.user_id
+        JOIN t_d_material m ON r.offer_id = m.offer_id AND r.job_id = m.job_id
         <if test="userId != null">
-            WHERE j.user_id = #{userId};
+            WHERE m.user_id = #{userId};
         </if>
     </select>
 

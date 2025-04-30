@@ -11,6 +11,7 @@ import { Bell } from '@element-plus/icons-vue';
 import { userLogout } from '@/api/company/companyApi';
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 
+
 const hasMessage = ref(false); // 是否有未读消息
 
 const handleCommand = (command) => {
@@ -74,6 +75,10 @@ const radioModel = ref({});// 简历投递弹窗选择项
 const resumeType = { online: 0, attachment: 1 };// 简历类型常量
 // 简历投递按钮点击事件
 const handleResumeDeliver = async () => {
+    if (!userStore().userInfo.resumeId) {
+        ElMessage.warning('请先完善个人信息');
+        return;
+    }
     // 请求所有简历
     const response = await resumeAll();
     attachmentResume.value = response.content.attachmentsResumes;
@@ -222,7 +227,7 @@ const revokeDeliver = async () => {
                 </ul>
 
                 <!-- 投递按钮 -->
-                <el-button :disabled="jobDetail.jobIsDelivery" style="color: #fff;" color="#FF7427" size="large" @click="handleResumeDeliver">
+                <el-button :disabled="!userStore().userInfo || jobDetail.jobIsDelivery" style="color: #fff;" color="#FF7427" size="large" @click="handleResumeDeliver">
                     {{ jobDetail.jobIsDelivery ? '已投递' : '立即投递' }}
                 </el-button>
                 <!-- 投递撤销按钮 -->
