@@ -232,10 +232,11 @@ public class UserCompanyController {
 
 
     @PostMapping("/uploadOffer")
-    @Operation(summary = "上传模板接口")
+    @Operation(summary = "上传offer文件")
     public CommonResp uploadOffer(
             @RequestParam("file") MultipartFile pdfFile,
-            @RequestParam("offerId") String offerId)  {
+            @RequestParam("offerId") String offerId
+    )  {
         return CommonResp.success(conversionService.uploadOffer(pdfFile, offerId));
     }
 

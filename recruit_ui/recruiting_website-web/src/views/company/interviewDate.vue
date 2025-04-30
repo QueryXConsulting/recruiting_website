@@ -3,12 +3,15 @@
     <div class="scheduler-header">
       <div class="header-row">
         <el-button @click="goBack" circle class="back-button">
-          <el-icon><ArrowLeft /></el-icon>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
         </el-button>
         <h2>面试时间安排</h2>
       </div>
       <div class="scheduler-tips">
-        <el-alert title="温馨提示" type="info" :closable="false" description="请选择可用于面试的时间段，求职者将在这些时间段内选择合适的面试时间。一天可选择多个时间段" />
+        <el-alert title="温馨提示" type="info" :closable="false"
+          description="请选择可用于面试的时间段，求职者将在这些时间段内选择合适的面试时间。一天可选择多个时间段" />
       </div>
     </div>
 
@@ -109,8 +112,8 @@ import { ElMessage } from 'element-plus';
 import { Delete, ArrowLeft } from '@element-plus/icons-vue';
 import { addInterviewDate, selectInterviewDate, deleteInterviewDateById } from '@/api/company/companyApi';
 import userStore from '@/store/user';
-import { useRouter } from 'vue-router';
-
+import { useRoute, useRouter } from 'vue-router';
+const route = useRoute();
 const router = useRouter();
 const goBack = () => {
   router.go(-1);
@@ -134,7 +137,7 @@ const groupedTimeSlots = computed(() => {
 const interviewDates = ref([]);
 
 const fetchInterviewDates = async () => {
-  try {
+
     const response = await selectInterviewDate();
     interviewDates.value = response.content.map(date => ({
       id: date.interviewDateId,
@@ -156,9 +159,7 @@ const fetchInterviewDates = async () => {
         id: date.id
       });
     });
-  } catch (error) {
-    ElMessage.error('获取面试时间失败');
-  }
+
 };
 
 onMounted(() => {
@@ -227,12 +228,15 @@ const confirmTimeSelection = () => {
     timeSlots.value = {};
     await fetchInterviewDates();
     ElMessage.success('面试时间段设置成功');
-  }).catch(() => {
-    ElMessage.error('设置面试时间段失败');
-  });
+  })
 
   timeDialogVisible.value = false;
   activeCollapse.value = [dateStr];
+
+  if (route.query.skip == 0) {
+    router.go(-1)
+    return
+  }
 };
 
 const removeTimeSlot = (interviewDateId, date, index) => {

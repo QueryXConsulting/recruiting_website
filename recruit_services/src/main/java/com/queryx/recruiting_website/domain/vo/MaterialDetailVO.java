@@ -10,7 +10,7 @@ public class MaterialDetailVO {
 
     private Long materialId;
 
-    private String identityCard;
+    private  List<String> identityCard;
 
 
     private String physicalExamination;
@@ -22,7 +22,7 @@ public class MaterialDetailVO {
     private String identificationPhoto;
 
 
-    private String bankCard;
+    private  List<String> bankCard;
 
 
     private String qualificationCertificate;

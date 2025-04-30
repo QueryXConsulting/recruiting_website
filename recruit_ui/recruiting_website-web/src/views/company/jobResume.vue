@@ -3,7 +3,7 @@
     <el-card class="resume-card">
       <template #header>
         <div class="card-header">
-          <h2>{{ title }}</h2>
+          <h2>简历查看</h2>
           <el-button v-if="activeTab === 'interview'" type="primary" @click="router.push({
             path: '/home/interviewTime',
           })">
@@ -64,10 +64,9 @@
                     <template #default="scope">
                       <div class="status-timeline">
                         <div v-for="(status, index) in statusList" :key="status.value" class="timeline-item" :class="{
-                          'active': Number(scope.row.resumeStatus) >= Number(status.value) || scope.row.resumeStatus === '7',
+                          'active': Number(scope.row.resumeStatus) >= Number(status.value),
                           'current': scope.row.resumeStatus === status.value || (scope.row.resumeStatus === '7' && status.value === '1'),
                           'deleted': scope.row.resumeDelete === '0',
-                          'interview-accepted': scope.row.interviewStatus === '1'
                         }">
                           <div class="timeline-line"></div>
                           <div class="timeline-dot"></div>
@@ -97,10 +96,10 @@
                             笔试邀约
                           </el-button>
                         </template>
-                        <el-button type="danger" link @click="handleUnsuitable(scope.row)" v-if="scope.row.resumeDelete !== '0' && scope.row.resumeStatus !== '0' && scope.row.resumeStatus !== '1'
+                        <!-- <el-button type="danger" link @click="handleUnsuitable(scope.row)" v-if="scope.row.resumeDelete !== '0' && scope.row.resumeStatus !== '0' && scope.row.resumeStatus !== '1'
                           && scope.row.resumeStatus !== '6' && scope.row.resumeStatus !== '7'">
                           不合适
-                        </el-button>
+                        </el-button> -->
                       </div>
                     </template>
                   </el-table-column>
@@ -114,6 +113,8 @@
             </div>
           </el-tab-pane>
           <el-tab-pane label="预约面试" name="interview">
+            <el-alert title="提示: 面试通过后发放offer，对方接受后请等待应聘者上传材料" type="info" :closable="false" show-icon
+              style="margin-bottom: 15px;" />
             <div class="interview-header">
               <el-table :data="interviewList" border stripe class="custom-table" row-key="interviewId">
                 <el-table-column label="简历名称" prop="resumeName" width="150" align="center" />
@@ -160,10 +161,6 @@
                         v-if="scope.row.interviewStatus == '1' && scope.row.interviewResult == 0">
                         面试结果
                       </el-button>
-                      <el-button type="danger" link @click="viewInterview(scope.row)"
-                        v-if="(scope.row.interviewStatus == '1' || scope.row.interviewStatus == '2') && scope.row.interviewResult == 0">
-                        取消
-                      </el-button>
                     </div>
                   </template>
                 </el-table-column>
@@ -175,8 +172,8 @@
                 @sizeChange="handleInterviewSizeChange" @currentChange="handleInterviewPageChange" />
             </div>
           </el-tab-pane>
-          <el-tab-pane label="offer发放" name="offer">
-            <el-alert title="提示: offer发送后，等待对方发送材料进行审核" type="info" :closable="false" show-icon
+          <el-tab-pane label="offer发放" name="offer" v-if="false">
+            <el-alert title="提示: offer发送后，对方接受后，等待对方发送材料进行审核" type="info" :closable="false" show-icon
               style="margin-bottom: 15px;" />
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="offersList" border stripe class="custom-table" row-key="offerId">
@@ -311,7 +308,7 @@
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="报到预约" name="checkin">
+          <el-tab-pane label="报道预约" name="checkin">
             <div class="table-section" style="min-width: 830px; max-width: 100%;">
               <el-table :data="checkinList" border stripe class="custom-table" row-key="id">
                 <el-table-column label="序号" type="index" width="80" align="center" />
@@ -331,6 +328,11 @@
                 <el-table-column label="操作" width="180" fixed="right" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
+
+                      <el-button type="primary" link  @click="viewRegistration(scope.row)">
+                        查看
+                      </el-button>
+
                       <el-button type="primary" link v-if="scope.row.reservationStatus === '0'"
                         @click="openCheckinDialog(scope.row)">
                         设置
@@ -395,7 +397,8 @@
       </el-dialog>
 
       <!-- 添加修改对话框 -->
-      <el-dialog v-model="editInterviewDialogVisible" title="修改面试信息" width="20%">
+      <el-dialog v-model="editInterviewDialogVisible" title="修改面试信息" width="20%" :destroy-on-close="true"
+        :close-on-click-modal="false">
         <el-form :model="editInterviewData" ref="editInterviewForm">
           <el-form-item label="时间" prop="interviewDate">
             <el-date-picker v-model="editInterviewData.interviewDate" type="datetime" placeholder="选择时间" />
@@ -427,7 +430,11 @@
         </el-form>
         <template v-slot:footer>
           <el-button type="primary" @click="submitEditInterview">保存</el-button>
-          <el-button @click="editInterviewDialogVisible = false">取消</el-button>
+          <el-button @click="editInterviewDialogVisible = false">关闭</el-button>
+          <el-button type="danger" @click="cancelInterview"
+            v-if="editInterviewData.interviewStatus == '1' || editInterviewData.interviewStatus == '2'">
+            取消面试
+          </el-button>
         </template>
       </el-dialog>
 
@@ -462,16 +469,18 @@
           <el-descriptions :column="2" border>
             <el-descriptions-item label="身份证">
               <div class="review-buttons"
-                v-if="currentMaterial.identityCard && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.identityCardStatus == '3'">
+                v-if="identityCardList.length && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.identityCardStatus == '3'">
                 <el-button type="success" size="small"
                   @click="reviewMaterial(currentMaterial.materialId, 1, '1')">通过</el-button>
                 <el-button type="danger" size="small"
                   @click="reviewMaterial(currentMaterial.materialId, 1, '2')">拒绝</el-button>
               </div>
               <div class="preview-item">
-                <el-image v-if="currentMaterial.identityCard" :src="currentMaterial.identityCard" fit="contain"
-                  :preview-src-list="[currentMaterial.identityCard]" :initial-index="0" :preview-teleported="true"
-                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <template v-if="identityCardList.length > 0">
+                  <el-image v-for="(url, idx) in identityCardList" :key="idx" :src="url" fit="contain"
+                    :preview-src-list="identityCardList" :initial-index="idx" :preview-teleported="true"
+                    :z-index="3100" class="material-image" style="width: 240px; height: 160px; margin: 0 10px;" />
+                </template>
                 <span v-else class="no-material">未上传</span>
               </div>
               <div v-if="currentMaterial.identityCardStatus === '1'" class="material-status">
@@ -552,16 +561,18 @@
             </el-descriptions-item>
             <el-descriptions-item label="银行卡">
               <div class="review-buttons"
-                v-if="currentMaterial.bankCard && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.bankCardStatus == '3'">
+                v-if="bankCardList.length && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.bankCardStatus == '3'">
                 <el-button type="success" size="small"
                   @click="reviewMaterial(currentMaterial.materialId, 5, '1')">通过</el-button>
                 <el-button type="danger" size="small"
                   @click="reviewMaterial(currentMaterial.materialId, 5, '2')">拒绝</el-button>
               </div>
               <div class="preview-item">
-                <el-image v-if="currentMaterial.bankCard" :src="currentMaterial.bankCard" fit="contain"
-                  :preview-src-list="[currentMaterial.bankCard]" :initial-index="0" :preview-teleported="true"
-                  :z-index="3100" class="material-image" style="width: 240px; height: 160px;" />
+                <template v-if="bankCardList.length > 0">
+                  <el-image v-for="(url, idx) in bankCardList" :key="idx" :src="url" fit="contain"
+                    :preview-src-list="bankCardList" :initial-index="idx" :preview-teleported="true"
+                    :z-index="3100" class="material-image" style="width: 240px; height: 160px; margin: 0 10px;" />
+                </template>
                 <span v-else class="no-material">未上传</span>
               </div>
               <div v-if="currentMaterial.bankCardStatus === '1'" class="material-status">
@@ -647,19 +658,10 @@
                   @click="reviewMaterial(currentMaterial.materialId, 9, '2')">拒绝</el-button>
               </div>
               <div class="preview-item other-materials">
-                <template
-                  v-if="currentMaterial.other && currentMaterial.other.length > 0 && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.otherStatus == '3'">
-                  <el-image v-if="currentMaterial.other.length === 1" :src="currentMaterial.other[0]" fit="contain"
-                    :preview-src-list="currentMaterial.other" :preview-teleported="true" class="material-image"
-                    style="width: 240px; height: 160px;" />
-                  <el-carousel v-else height="200px" :autoplay="false" indicator-position="outside"
-                    class="material-carousel">
-                    <el-carousel-item v-for="(url, index) in currentMaterial.other" :key="index">
-                      <el-image :src="url" fit="contain" :preview-src-list="currentMaterial.other"
-                        :initial-index="index" :preview-teleported="true" :z-index="3100" class="material-image"
-                        style="width: 240px; height: 160px;" />
-                    </el-carousel-item>
-                  </el-carousel>
+                <template v-if="currentMaterial.other && currentMaterial.other.length > 0">
+                  <el-image v-for="(url, idx) in currentMaterial.other" :key="idx" :src="url" fit="contain"
+                    :preview-src-list="currentMaterial.other" :initial-index="idx" :preview-teleported="true"
+                    :z-index="3100" class="material-image" style="width: 240px; height: 160px; margin: 0 10px;" />
                 </template>
                 <span v-else class="no-material">未上传</span>
               </div>
@@ -711,11 +713,11 @@
             <el-descriptions-item label="职位" class="info-item">
               <span class="info-content">{{ currentRegistration.position || '未填写' }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="状态" class="info-item">
+            <!-- <el-descriptions-item label="状态" class="info-item">
               <el-tag :type="getRegistrationStatusType(currentRegistration.registrationStatus)">
                 {{ getRegistrationStatusText(currentRegistration.registrationStatus) }}
               </el-tag>
-            </el-descriptions-item>
+            </el-descriptions-item> -->
 
 
             <el-descriptions-item label="学历" class="info-item">
@@ -794,7 +796,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, Document, Upload } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -973,7 +975,6 @@ const reviewMaterial = async (materialId, code, status) => {
     const res = await updateStuffs(materialId, code, status)
     if (res.code === 200) {
       ElMessage.success('审核材料修改成功')
-      // 只更新 status 相关字段，保留 currentMaterial 其他内容
       Object.assign(currentMaterial.value, {
         identityCardStatus: res.content.identityCardStatus,
         physicalExaminationStatus: res.content.physicalExaminationStatus,
@@ -1108,7 +1109,10 @@ const sendInvitation = async (row) => {
   if (!result.content) {
     ElMessage.error('请设置面试时间')
     router.push({
-      path: '/home/interviewTime'
+      path: '/home/interviewTime',
+      query: {
+        skip: 0
+      }
     })
     return
   }
@@ -1166,38 +1170,13 @@ const handleInterviewTypeChange = (value) => {
   interviewData.value.interviewType = value;
 }
 
-const viewInterview = async (row) => {
 
-  editInterviewData.value = {
-    interviewId: row.interviewId,
-    interviewDate: row.interviewDate,
-    interviewRegion: row.interviewRegion,
-    interviewType: row.interviewType,
-    interviewResult: row.interviewResult,
-    interviewTime: row.interviewTime,
-    interviewStatus: 3,
-    jobResumeId: row.jobResumeId,
-    userId: row.userId,
-    jobId: row.jobId
-  }
-
-
-
-  let result = await updateInterviewList(editInterviewData.value)
-  if (result.code === 200) {
-    ElMessage.success('撤销成功')
-    getInterviewList()
-  } else {
-    ElMessage.error('撤销失败')
-  }
-}
 
 const editInterview = async (row) => {
   editInterviewData.value = {
     interviewId: row.interviewId,
     interviewDate: row.interviewDate,
     interviewRegion: row.interviewRegion,
-
     interviewResult: row.interviewResult,
     interviewTime: row.interviewTime,
     interviewStatus: row.interviewStatus,
@@ -1312,36 +1291,7 @@ const templateDialogVisible = ref(false)
 const signatureDialogVisible = ref(false)
 
 
-
-// 注释未使用的函数
-// const handleSignatureConfirm = async () => {
-//   try {
-//     await handleOfferStatus(currentOfferId.value, "6", jobId, currentUserId.value)
-//     signatureDialogVisible.value = false
-//     ElMessage.success('已通过')
-//     getOffersList()
-//   } catch (error) {
-//     ElMessage.error('操作失败')
-//   }
-// }
-
-// const handleSignatureReject = async () => {
-//   try {
-//
-//     const result = await handleOfferStatus(currentOfferId.value, '5', jobId)
-//
-//
-//     signatureDialogVisible.value = false
-//
-//     ElMessage.success('已拒绝')
-//     getOffersList()
-//
-//
-//   } catch (error) {
-//     ElMessage.error('操作失败')
-//   }
-// }
-
+const offerId = ref('')
 const materialList = ref([])
 const materialTotal = ref(0)
 const materialPageNum = ref(1)
@@ -1710,32 +1660,6 @@ const handleRegistrationReject = async (row) => {
   }
 }
 
-const beforeUpload = async (file) => {
-  try {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('offerId', currentOfferId.value)
-
-    const result = await uploadWithThumbnail(formData)
-
-    if (result.code === 200) {
-      ElMessage.success('上传成功')
-      getOffersList()
-      uploadOfferDialogVisible.value = false
-      return false // 阻止默认上传行为
-    } else {
-      ElMessage.error(result.msg || '上传失败')
-      return false
-    }
-  } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
-    return false
-  }
-}
-
-
-
 
 const getCheckinStatusType = (status) => {
   const statusMap = {
@@ -1883,8 +1807,8 @@ const handleFileChange = async (event) => {
   try {
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('offerId', currentOfferId.value)
-
+    // formData.append('offerId', currentOfferId.value)
+    formData.append('offerId', offerId.value)
     const result = await uploadWithThumbnail(formData)
 
     if (result.code === 200) {
@@ -1949,6 +1873,10 @@ const submitInterviewResult = async () => {
     if (result.code === 200) {
       ElMessage.success('面试结果设置成功')
       resultDialogVisible.value = false
+      if (resultInterviewData.value.interviewResult == '1') {
+        uploadOfferDialogVisible.value = true
+        offerId.value = result.content
+      }
       getInterviewList()
     } else {
       ElMessage.error('面试结果设置失败')
@@ -1958,6 +1886,35 @@ const submitInterviewResult = async () => {
     ElMessage.error('设置面试结果失败')
   }
 }
+
+const cancelInterview = async () => {
+  try {
+    await ElMessageBox.confirm('确认取消该面试吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+    const cancelData = {
+      ...editInterviewData.value,
+      interviewStatus: 3
+    };
+    const result = await updateInterviewList(cancelData);
+    if (result.code === 200) {
+      ElMessage.success('面试已取消');
+      editInterviewDialogVisible.value = false;
+      getInterviewList();
+    } else {
+      ElMessage.error('取消失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('取消失败');
+    }
+  }
+};
+
+const identityCardList = computed(() => currentMaterial.value.identityCard || []);
+const bankCardList = computed(() => currentMaterial.value.bankCard || []);
 
 </script>
 
@@ -2118,18 +2075,15 @@ const submitInterviewResult = async () => {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  /* Reduce gap from 12px to 4px */
 }
 
 :deep(.action-buttons .el-button) {
   padding: 2px 6px;
-  /* Reduce padding from 4px 8px to 2px 6px */
   height: 24px;
   line-height: 16px;
   font-size: 13px;
   border-radius: 4px;
   margin: 0;
-  /* Add margin: 0 to remove any default margins */
   transition: all 0.3s ease;
 }
 
@@ -2228,8 +2182,8 @@ const submitInterviewResult = async () => {
 }
 
 .timeline-item.deleted.current .timeline-dot {
-  border-color: #F56C6C;
-  background-color: #F56C6C;
+  border-color: #F56C6C !important;
+  background-color: #F56C6C !important;
 }
 
 .timeline-item.deleted .timeline-text {
@@ -2242,7 +2196,6 @@ const submitInterviewResult = async () => {
   border-color: #409EFF;
 }
 
-/* Styling for cancelled resume status */
 .timeline-item.current[class*="timeline-item"] {
   z-index: 3;
 }
@@ -2251,17 +2204,17 @@ const submitInterviewResult = async () => {
   z-index: 2;
 }
 
-/* When resume is cancelled (status 7), style the first item differently */
+
 .timeline-item.current .timeline-dot {
   background-color: #409EFF;
 }
 
 .timeline-item.current:first-child .timeline-dot {
-  border-color: #F56C6C;
-  background-color: #F56C6C;
+  border-color: #409EFF;
+  background-color: #409EFF;
 }
 
-/* Ensure proper line connection for first item when it's current */
+
 .timeline-item.current:first-child .timeline-line {
   background-color: #409EFF;
 }
@@ -2465,7 +2418,7 @@ const submitInterviewResult = async () => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 180px;
+  height: 360px; /* 原来是180px，改大一倍或更大 */
   margin: 0 auto;
   background-color: #fff;
   border-radius: 4px;
@@ -2486,8 +2439,8 @@ const submitInterviewResult = async () => {
 }
 
 .material-image {
-  width: 240px;
-  height: 160px;
+  width: 480px;   /* 原来是240px，改大一倍或更大 */
+  height: 320px;  /* 原来是160px，改大一倍或更大 */
   object-fit: contain;
   border-radius: 4px;
   background-color: #fff;

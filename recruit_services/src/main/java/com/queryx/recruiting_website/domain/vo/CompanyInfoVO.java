@@ -58,5 +58,8 @@ public class CompanyInfoVO {
     @Schema(name = "公司资质审核", description = "0代表待审核,1代表审核通过,2打回修改", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private String enterpriseReview;
 
+    @Schema(name = "公司规模", implementation = String.class, requiredMode = Schema.RequiredMode.REQUIRED)
+    private String companySize;
+
 }
 
