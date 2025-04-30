@@ -172,6 +172,7 @@
                 @sizeChange="handleInterviewSizeChange" @currentChange="handleInterviewPageChange" />
             </div>
           </el-tab-pane>
+
           <el-tab-pane label="offer发放" name="offer" v-if="false">
             <el-alert title="提示: offer发送后，对方接受后，等待对方发送材料进行审核" type="info" :closable="false" show-icon
               style="margin-bottom: 15px;" />
@@ -430,6 +431,7 @@
         </el-form>
         <template v-slot:footer>
           <el-button type="primary" @click="submitEditInterview">保存</el-button>
+
           <el-button @click="editInterviewDialogVisible = false">关闭</el-button>
           <el-button type="danger" @click="cancelInterview"
             v-if="editInterviewData.interviewStatus == '1' || editInterviewData.interviewStatus == '2'">
@@ -469,6 +471,7 @@
           <el-descriptions :column="2" border>
             <el-descriptions-item label="身份证">
               <div class="review-buttons"
+
                 v-if="identityCardList.length && currentMaterial.status != '1' && currentMaterial.status != '2' && currentMaterial.identityCardStatus == '3'">
                 <el-button type="success" size="small"
                   @click="reviewMaterial(currentMaterial.materialId, 1, '1')">通过</el-button>
@@ -1291,7 +1294,9 @@ const templateDialogVisible = ref(false)
 const signatureDialogVisible = ref(false)
 
 
+
 const offerId = ref('')
+
 const materialList = ref([])
 const materialTotal = ref(0)
 const materialPageNum = ref(1)
@@ -1810,7 +1815,6 @@ const handleFileChange = async (event) => {
     // formData.append('offerId', currentOfferId.value)
     formData.append('offerId', offerId.value)
     const result = await uploadWithThumbnail(formData)
-
     if (result.code === 200) {
       // 发送消息
       postMessage({
@@ -1836,7 +1840,6 @@ const handleFileChange = async (event) => {
 }
 
 // ... existing code ...
-
 const resultInterviewData = ref({
   interviewResult: ''
 })
@@ -1885,7 +1888,6 @@ const submitInterviewResult = async () => {
     console.error('设置面试结果失败:', error)
     ElMessage.error('设置面试结果失败')
   }
-}
 
 const cancelInterview = async () => {
   try {
@@ -1915,6 +1917,7 @@ const cancelInterview = async () => {
 
 const identityCardList = computed(() => currentMaterial.value.identityCard || []);
 const bankCardList = computed(() => currentMaterial.value.bankCard || []);
+
 
 </script>
 
@@ -2075,15 +2078,19 @@ const bankCardList = computed(() => currentMaterial.value.bankCard || []);
   align-items: center;
   justify-content: center;
   gap: 4px;
+
 }
 
 :deep(.action-buttons .el-button) {
   padding: 2px 6px;
+
+
   height: 24px;
   line-height: 16px;
   font-size: 13px;
   border-radius: 4px;
   margin: 0;
+
   transition: all 0.3s ease;
 }
 
@@ -2418,7 +2425,9 @@ const bankCardList = computed(() => currentMaterial.value.bankCard || []);
   justify-content: center;
   align-items: center;
   width: 100%;
+
   height: 360px; /* 原来是180px，改大一倍或更大 */
+
   margin: 0 auto;
   background-color: #fff;
   border-radius: 4px;
@@ -2439,8 +2448,10 @@ const bankCardList = computed(() => currentMaterial.value.bankCard || []);
 }
 
 .material-image {
+
   width: 480px;   /* 原来是240px，改大一倍或更大 */
   height: 320px;  /* 原来是160px，改大一倍或更大 */
+
   object-fit: contain;
   border-radius: 4px;
   background-color: #fff;

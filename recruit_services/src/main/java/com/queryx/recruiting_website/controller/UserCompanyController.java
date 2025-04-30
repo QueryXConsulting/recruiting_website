@@ -232,6 +232,7 @@ public class UserCompanyController {
 
 
     @PostMapping("/uploadOffer")
+
     @Operation(summary = "上传offer文件")
     public CommonResp uploadOffer(
             @RequestParam("file") MultipartFile pdfFile,
