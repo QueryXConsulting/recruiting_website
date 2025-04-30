@@ -70,7 +70,11 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
         TDMaterial material = getById(materialId);
         MaterialDetailVO materialDetailVO = new MaterialDetailVO();
         BeanUtils.copyProperties(material, materialDetailVO);
-        materialDetailVO.setBankCard(Common.getBaseURL() + materialDetailVO.getBankCard());
+        // 取出多个文件路径并拼接
+        List<String> bankList = Arrays.stream(material.getBankCard().split("\\|"))
+                .map(part -> Common.getBaseURL() + part)
+                .toList();
+        materialDetailVO.setBankCard(bankList);
         // 取出多个文件路径并拼接
         if (StringUtils.hasText(material.getOther())) {
             List<String> otherList = Arrays.stream(material.getOther().split("\\|"))
@@ -83,7 +87,10 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, TDMaterial>
             materialDetailVO.setSignaturePath(Common.getBaseURL() + signaturePath);
         }
         materialDetailVO.setDiploma(Common.getBaseURL() + materialDetailVO.getDiploma());
-        materialDetailVO.setIdentityCard(Common.getBaseURL() + materialDetailVO.getIdentityCard());
+        List<String> identityCards = Arrays.stream(material.getIdentityCard().split("\\|"))
+                .map(part -> Common.getBaseURL() + part)
+                .toList();
+        materialDetailVO.setIdentityCard(identityCards);
         materialDetailVO.setIdentificationPhoto(Common.getBaseURL() + materialDetailVO.getIdentificationPhoto());
         materialDetailVO.setPhysicalExamination(Common.getBaseURL() + materialDetailVO.getPhysicalExamination());
         if (StringUtils.hasText(materialDetailVO.getQualificationCertificate())) {

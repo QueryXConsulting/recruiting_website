@@ -12,7 +12,7 @@
     >
       <template #extra>
         <el-button
-          type="primary"
+          style="background-color: #FF7427; color: white;"
           @click="$router.push('/users/index')"
         >
           回到首页
